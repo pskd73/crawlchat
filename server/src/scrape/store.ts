@@ -1,10 +1,3 @@
-import mongoose, {
-  model,
-  Document,
-  Schema,
-  type InferRawDocType,
-  Model,
-} from "mongoose";
 import { OrderedSet } from "./ordered-set";
 import type { ScrapeStore } from "./crawl";
 import {
@@ -16,57 +9,6 @@ import faiss from "faiss-node";
 
 const storeCache = new Map<string, ScrapeStore>();
 const indexCache = new Map<string, faiss.IndexFlatL2>();
-
-type ScrapeStatus = "pending" | "scraping" | "done" | "error";
-
-interface SchemaDocument extends Document {
-  url: String;
-  createdAt: Date;
-  updatedAt: Date;
-  status: ScrapeStatus;
-}
-const ScrapeSchema = new Schema({
-  url: { type: String, required: true },
-  createdAt: { type: Date, required: true },
-  updatedAt: { type: Date, required: true },
-  status: { type: String, required: true },
-});
-const Scrape = model("Scrape", ScrapeSchema);
-
-export async function getScrapeByUrl(url: string) {
-  return await Scrape.findOne({ url });
-}
-
-export async function getScrapeById(id: string) {
-  return await Scrape.findById(id);
-}
-
-export async function createScrape(url: string) {
-  const result = await Scrape.create({
-    url,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    urls: [],
-    status: "pending",
-  });
-
-  return result.toObject();
-}
-
-export async function updateScrape(
-  scrapeId: string,
-  {
-    status,
-  }: {
-    status?: ScrapeStatus;
-  }
-) {
-  const update: Partial<SchemaDocument> = {};
-  if (status) {
-    update.status = status;
-  }
-  await Scrape.findByIdAndUpdate(scrapeId, update);
-}
 
 export async function saveStore(scrapeId: string, store: ScrapeStore) {
   const client = new S3Client({ region: "us-east-1" });

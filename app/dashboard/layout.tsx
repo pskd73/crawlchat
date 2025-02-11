@@ -12,6 +12,7 @@ import {
 } from "~/components/ui/drawer";
 import { useRef, useState } from "react";
 import { TbMenu } from "react-icons/tb";
+import { prisma } from "~/prisma";
 
 export function meta() {
   return [
@@ -24,7 +25,13 @@ export function meta() {
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request, { redirectTo: "/login" });
 
-  return { user: user! };
+  const threads = await prisma.thread.findMany({
+    where: {
+      userId: user!.id,
+    },
+  });
+
+  return { user: user!, threads };
 }
 
 const drawerWidth = 260;
@@ -36,8 +43,13 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
 
   return (
     <AppContext.Provider value={app}>
-      <Group align="start" gap={0} w="full">
-        <SideMenu width={drawerWidth} user={user} fixed={true} />
+      <Group align="start" gap={0} w="full" minH="100dvh">
+        <SideMenu
+          width={drawerWidth}
+          user={user}
+          fixed={true}
+          threads={loaderData.threads}
+        />
 
         <DrawerRoot
           open={app.menuOpen}
@@ -52,6 +64,7 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
               user={user}
               fixed={false}
               contentRef={contentRef}
+              threads={loaderData.threads}
             />
           </DrawerContent>
         </DrawerRoot>

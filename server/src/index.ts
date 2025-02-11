@@ -11,17 +11,12 @@ import OpenAI from "openai";
 import { askLLM, makeContext } from "./llm";
 import { Stream } from "openai/streaming";
 import mongoose from "mongoose";
-import {
-  createScrape,
-  getScrapeByUrl,
-  loadIndex,
-  loadStore,
-  saveIndex,
-  saveStore,
-  updateScrape,
-} from "./scrape/store";
+import { loadIndex, loadStore, saveIndex, saveStore } from "./scrape/store";
 import { makeIndex } from "./vector";
-import { addMessage, createThread, getThread } from "./thread/store";
+import { addMessage } from "./thread/store";
+import { prisma } from "./prisma";
+
+const userId = "6790c3cc84f4e51db33779c5";
 
 const app: Express = express();
 const expressWs = ws(app);
@@ -67,14 +62,19 @@ app.get("/", function (req: Request, res: Response) {
 app.post("/scrape", async function (req: Request, res: Response) {
   const url = req.body.url;
 
-  const existingScrape = await getScrapeByUrl(url);
-  if (existingScrape) {
+  if (
+    await prisma.scrape.findFirst({
+      where: { url, userId },
+    })
+  ) {
     res.status(212).json({ message: "already-scraped" });
     return;
   }
 
   (async function () {
-    const scrape = await createScrape(url);
+    const scrape = await prisma.scrape.create({
+      data: { url, status: "pending", userId },
+    });
 
     const store: ScrapeStore = {
       urls: {},
@@ -82,8 +82,9 @@ app.post("/scrape", async function (req: Request, res: Response) {
     };
     store.urlSet.add(url);
 
-    await updateScrape(scrape._id.toString(), {
-      status: "scraping",
+    await prisma.scrape.update({
+      where: { id: scrape.id },
+      data: { status: "scraping" },
     });
 
     await scrapeLoop(store, req.body.url, {
@@ -95,13 +96,14 @@ app.post("/scrape", async function (req: Request, res: Response) {
       },
     });
 
-    await saveStore(scrape._id.toString(), store);
+    await saveStore(scrape.id, store);
 
     const index = await makeIndex(store);
-    await saveIndex(scrape._id.toString(), index);
+    await saveIndex(scrape.id, index);
 
-    await updateScrape(scrape._id.toString(), {
-      status: "done",
+    await prisma.scrape.update({
+      where: { id: scrape.id },
+      data: { status: "done" },
     });
 
     broadcast(makeMessage("saved", { url }));
@@ -115,48 +117,46 @@ expressWs.app.ws("/", function (ws, req) {
     const message = JSON.parse(msg.toString());
 
     if (message.type === "create-thread") {
-      const thread = await createThread({ url: message.data.url });
+      const scrape = await prisma.scrape.findFirstOrThrow({
+        where: { url: message.data.url, userId },
+      });
+
+      const thread = await prisma.thread.create({
+        data: { userId, scrapeId: scrape.id, messages: [] },
+      });
       ws.send(makeMessage("thread-created", { threadId: thread.id }));
     }
 
     if (message.type === "ask-llm") {
       const threadId = message.data.threadId;
-      const thread = await getThread(threadId);
-      if (!thread || !thread.url) {
-        ws.send(makeMessage("error", { message: "Thread not found" }));
-        return;
-      }
+      const thread = await prisma.thread.findFirstOrThrow({
+        where: { id: threadId },
+      });
 
-      const scrape = await getScrapeByUrl(thread.url);
-      if (!scrape) {
-        ws.send(makeMessage("error", { message: "Scrape not found" }));
-        return;
-      }
+      const scrape = await prisma.scrape.findFirstOrThrow({
+        where: { id: thread.scrapeId },
+      });
 
-      const store = await loadStore(scrape._id.toString());
-      const index = await loadIndex(scrape._id.toString());
+      addMessage(threadId, { role: "user", content: message.data.query });
+
+      const store = await loadStore(scrape.id);
+      const index = await loadIndex(scrape.id);
       if (!store || !index) {
         ws.send(makeMessage("error", { message: "Store or index not found" }));
         return;
       }
 
-      const response = await askLLM(message.data.query, thread.messages, {
-        url: thread.url,
-        context: await makeContext(message.data.query, index, store),
-      });
+      const response = await askLLM(
+        message.data.query,
+        thread.messages as any,
+        {
+          url: scrape.url,
+          context: await makeContext(message.data.query, index, store),
+        }
+      );
       const { content, role } = await streamLLMResponse(ws as any, response);
       addMessage(threadId, { role, content } as any);
       ws.send(makeMessage("llm-chunk", { end: true, content, role }));
-    }
-
-    if (message.type === "sync-thread") {
-      const threadId = message.data.threadId;
-      const thread = await getThread(threadId);
-      if (!thread) {
-        ws.send(makeMessage("error", { message: "Thread not found" }));
-        return;
-      }
-      ws.send(makeMessage("sync-thread", { thread }));
     }
   });
 });

@@ -14,60 +14,40 @@ model User {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  buddies         Buddy[]
+  scrapes         Scrape[]
+  threads         Thread[]
 }
 
-enum FormItemType {
-  boolean
-  string
-  integer
-  number
+enum ScrapeStatus {
+  pending
+  scraping
+  done
+  error
 }
 
-type FormItem {
-  key String
-  type FormItemType
-  description String
-  required Boolean
-  useConfirm Boolean?
-  title String?
-}
-
-enum PopoverType {
-  popover
-  arrow
-}
-
-model Buddy {
+model Scrape {
   id              String   @id @default(auto()) @map("_id") @db.ObjectId
   userId          String   @db.ObjectId
-  name            String
-  prompt          String
 
-  elAgentId       String?
-
+  url             String
+  status          ScrapeStatus
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
-  formItems       FormItem[]
-  firstMessage    String
-  voiceId         String
-  popoverText     String?
-  popoverType     PopoverType?
-  language        String?
 
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  submissions     Submission[]
+  threads         Thread[]
 }
 
-model Submission {
+model Thread {
   id              String   @id @default(auto()) @map("_id") @db.ObjectId
-  buddyId         String   @db.ObjectId
   userId          String   @db.ObjectId
+  scrapeId        String   @db.ObjectId
 
-  data            Json
+  messages        Json[]
 
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  buddy           Buddy    @relation(fields: [buddyId], references: [id], onDelete: Cascade)
+  scrape          Scrape   @relation(fields: [scrapeId], references: [id], onDelete: Cascade)
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

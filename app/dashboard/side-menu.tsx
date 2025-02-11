@@ -2,17 +2,12 @@ import {
   Group,
   Heading,
   IconButton,
+  Separator,
   Spinner,
   Stack,
   Text,
 } from "@chakra-ui/react";
-import {
-  TbChevronRight,
-  TbForms,
-  TbHome,
-  TbLogout,
-  TbRobotFace,
-} from "react-icons/tb";
+import { TbChevronRight, TbLogout, TbMessage, TbWorld } from "react-icons/tb";
 import { Link, NavLink } from "react-router";
 import { Avatar } from "~/components/ui/avatar";
 import {
@@ -21,26 +16,53 @@ import {
   MenuRoot,
   MenuTrigger,
 } from "~/components/ui/menu";
-import { RiChatVoiceAiFill } from "react-icons/ri";
-import type { User } from "@prisma/client";
-import { useRef } from "react";
+import type { Thread, User } from "@prisma/client";
+import { getThreadName } from "~/thread-util";
 
 const links = [
-  { label: "Home", to: "/dashboard/home", icon: <TbHome /> },
-  { label: "Buddies", to: "/dashboard/buddies", icon: <TbRobotFace /> },
-  { label: "Submissions", to: "/dashboard/submissions", icon: <TbForms /> },
+  { label: "New website", to: "/app", icon: <TbWorld /> },
+  { label: "New thread", to: "/threads/new", icon: <TbMessage /> },
 ];
+
+function SideMenuItem({
+  link,
+}: {
+  link: { label: string; to: string; icon: React.ReactNode };
+}) {
+  return (
+    <NavLink to={link.to}>
+      {({ isPending, isActive }) => (
+        <Group
+          px={3}
+          py={2}
+          w="full"
+          bg={isActive ? "brand.fg" : undefined}
+          color={isActive ? "brand.contrast" : undefined}
+          borderRadius={"md"}
+          transition={"all 100ms ease"}
+          _hover={{ bg: !isActive ? "brand.gray.100" : undefined }}
+        >
+          {link.icon}
+          <Text>{link.label}</Text>
+          {isPending && <Spinner size="xs" />}
+        </Group>
+      )}
+    </NavLink>
+  );
+}
 
 export function SideMenu({
   fixed,
   width,
   user,
   contentRef,
+  threads,
 }: {
   fixed: boolean;
   width: number;
   user: User;
   contentRef?: React.RefObject<HTMLDivElement | null>;
+  threads: Thread[];
 }) {
   return (
     <Stack
@@ -65,33 +87,30 @@ export function SideMenu({
             color="brand.fg"
             asChild
           >
-            <Link to="/dashboard/home">
-              <RiChatVoiceAiFill />
-              VocalForm
-            </Link>
+            <Link to="/home">Talk</Link>
           </Heading>
         </Stack>
 
         <Stack gap={1} w="full" px={3}>
           {links.map((link, index) => (
-            <NavLink to={link.to} key={index}>
-              {({ isPending, isActive }) => (
-                <Group
-                  px={3}
-                  py={2}
-                  w="full"
-                  bg={isActive ? "brand.fg" : undefined}
-                  color={isActive ? "brand.contrast" : undefined}
-                  borderRadius={"md"}
-                  transition={"all 100ms ease"}
-                  _hover={{ bg: !isActive ? "brand.gray.100" : undefined }}
-                >
-                  {link.icon}
-                  <Text>{link.label}</Text>
-                  {isPending && <Spinner size="xs" />}
-                </Group>
-              )}
-            </NavLink>
+            <SideMenuItem key={index} link={link} />
+          ))}
+        </Stack>
+
+        <Stack px={3}>
+          <Separator />
+        </Stack>
+
+        <Stack gap={1} w="full" px={3}>
+          {threads.map((thread, index) => (
+            <SideMenuItem
+              key={index}
+              link={{
+                label: getThreadName(thread),
+                to: `/threads/${thread.id}`,
+                icon: <TbMessage />,
+              }}
+            />
           ))}
         </Stack>
       </Stack>

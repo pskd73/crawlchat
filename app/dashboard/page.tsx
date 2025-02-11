@@ -1,168 +1,106 @@
-import { useEffect, useRef, useState } from "react";
-import { Page } from "~/components/page";
-import { Heading, HStack, Icon, Stack, SimpleGrid } from "@chakra-ui/react";
+import { Group, Heading, Input, Stack, Text } from "@chakra-ui/react";
+import { useEffect, useRef } from "react";
+import { useState } from "react";
 import type { Route } from "./+types/page";
-import { getAuthUser } from "~/auth/middleware";
-import { prisma } from "~/prisma";
-import {
-  TbCalendar,
-  TbCalendarWeek,
-  TbClock,
-  TbForms,
-  TbHome,
-  TbNumbers,
-  TbUpload,
-} from "react-icons/tb";
-import { StatLabel, StatRoot, StatValueText } from "~/components/ui/stat";
-import { LineChart, Line, XAxis, Tooltip } from "recharts";
-import moment from "moment";
+import { TbCheck, TbCircleCheckFilled } from "react-icons/tb";
+import { Link, redirect, useFetcher } from "react-router";
+import { Button } from "~/components/ui/button";
 
-export async function loader({ request }: Route.LoaderArgs) {
-  const user = await getAuthUser(request);
-  const buddies = await prisma.buddy.findMany({
-    where: { userId: user!.id },
-  });
-
-  const oneWeekAgo = new Date();
-  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-
-  const submissions = await prisma.submission.findMany({
-    where: {
-      userId: user!.id,
-      createdAt: {
-        gte: oneWeekAgo,
-      },
-    },
-    orderBy: {
-      createdAt: "asc",
-    },
-  });
-
-  // Group submissions by day
-  const submissionsByDay = submissions.reduce((acc, submission) => {
-    const date = submission.createdAt.toISOString().split("T")[0];
-    if (!acc[date]) {
-      acc[date] = 0;
-    }
-    acc[date]++;
-    return acc;
-  }, {} as Record<string, number>);
-
-  // Fill in missing days with 0 submissions
-  const chartData = [];
-  for (let i = 0; i < 7; i++) {
-    const date = new Date();
-    date.setDate(date.getDate() - i);
-    const dateStr = date.toISOString().split("T")[0];
-    chartData.unshift({
-      date: dateStr,
-      submissions: submissionsByDay[dateStr] || 0,
-    });
-  }
-
-  const submissionsToday = submissions.filter(
-    (submission) =>
-      submission.createdAt.toISOString().split("T")[0] ===
-      new Date().toISOString().split("T")[0]
-  ).length;
-  const submissionsTotal = await prisma.submission.count({
-    where: {
-      userId: user!.id,
-    },
-  });
-  const lastSubmission = submissions[submissions.length - 1];
-
+export async function loader() {
   return {
-    buddies,
-    chartData,
-    submissionsToday,
-    submissionsTotal,
-    lastSubmission,
+    serverHost: process.env.SERVER_WS_URL,
   };
 }
 
-function StatCard({
-  title,
-  icon,
-  value,
-}: {
-  title: string;
-  icon: React.ReactNode;
-  value: string;
-}) {
-  return (
-    <StatRoot w="full" borderWidth="1px" p="4" rounded="md">
-      <HStack justify="space-between">
-        <StatLabel>{title}</StatLabel>
-        <Icon color="fg.muted">{icon}</Icon>
-      </HStack>
-      <StatValueText>{value}</StatValueText>
-    </StatRoot>
-  );
+export function meta() {
+  return [
+    {
+      title: "LLM Ready",
+      description: "Make your website ready for LLMs",
+    },
+  ];
 }
 
-export default function DashboardPage({ loaderData }: Route.ComponentProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [chartWidth, setChartWidth] = useState(0);
+export async function clientAction({ request }: { request: Request }) {
+  const formData = await request.formData();
+  const url = formData.get("url");
+
+  const response = await fetch("http://localhost:3000/scrape", {
+    method: "POST",
+    body: JSON.stringify({ url }),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (response.status === 212) {
+    throw redirect(`/chat?url=${url}`);
+  }
+}
+
+export default function LandingPage({
+  loaderData,
+  actionData,
+}: Route.ComponentProps) {
+  const socket = useRef<WebSocket>(null);
+  const [scrapingUrl, setScrapingUrl] = useState<string>();
+  const [stage, setStage] = useState<"idle" | "scraping" | "scraped" | "saved">(
+    "idle"
+  );
+  const scrapeFetcher = useFetcher();
 
   useEffect(() => {
-    if (!containerRef.current) return;
-    setChartWidth(containerRef.current.clientWidth);
+    socket.current = new WebSocket("ws://localhost:3000");
+    socket.current.onmessage = (event) => {
+      const message = JSON.parse(event.data);
+      if (message.type === "scrape-pre") {
+        setScrapingUrl(message.data.url);
+        setStage("scraping");
+      } else if (message.type === "scrape-complete") {
+        setStage("scraped");
+      } else if (message.type === "saved") {
+        setStage("saved");
+      }
+    };
   }, []);
 
-  return (
-    <Page title="Home" icon={<TbHome />}>
-      <Stack w="full" h="full" ref={containerRef} gap={8}>
-        <Stack>
-          <Heading display="flex" alignItems="center" gap={2}>
-            <TbNumbers />
-            Stats
-          </Heading>
-          <SimpleGrid columns={[1, 1, 3]} gap={4}>
-            <StatCard
-              title="Submissions today"
-              icon={<TbForms />}
-              value={loaderData.submissionsToday.toString()}
-            />
-            <StatCard
-              title="Submissions total"
-              icon={<TbForms />}
-              value={loaderData.submissionsTotal.toString()}
-            />
-            <StatCard
-              title="Last submission"
-              icon={<TbForms />}
-              value={loaderData.lastSubmission
-                ? moment(loaderData.lastSubmission.createdAt).format(
-                    "HH:mm A, MMM Do"
-                  )
-                : "N/A"}
-            />
-          </SimpleGrid>
-        </Stack>
+  const loading =
+    scrapeFetcher.state !== "idle" || ["scraping", "scraped"].includes(stage);
 
-        <Stack css={{ "--color": "colors.brand.fg" }}>
-          <Heading display="flex" alignItems="center" gap={2}>
-            <TbCalendarWeek />
-            Submissions last 7 days
-          </Heading>
-          <LineChart
-            width={chartWidth}
-            height={250}
-            data={loaderData.chartData}
-            margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-          >
-            <Tooltip />
-            <XAxis dataKey="date" />
-            <Line
-              type="monotone"
-              dataKey="submissions"
-              stroke="var(--color)"
-              strokeWidth={4}
-            />
-          </LineChart>
+  return (
+    <Stack alignItems={"center"} justifyContent={"center"} height={"100dvh"}>
+      <Stack w={"400px"}>
+        <scrapeFetcher.Form method="post">
+          <Stack>
+            <Heading>Chat with any website!</Heading>
+            <Group w="full">
+              <Input
+                placeholder="https://example.com"
+                flex={1}
+                name="url"
+                disabled={loading}
+              />
+              <Button type="submit" loading={loading}>
+                Scrape
+                <TbCheck />
+              </Button>
+            </Group>
+          </Stack>
+        </scrapeFetcher.Form>
+
+        <Stack fontSize={"sm"}>
+          {stage === "scraping" && <Text truncate>Scraping {scrapingUrl}</Text>}
+          {scrapingUrl && stage === "scraped" && <Text>Scraping complete</Text>}
+          {scrapingUrl && stage === "saved" && (
+            <Group gap={1}>
+              <Text>Done</Text>
+              <Text color={"brand.fg"}>
+                <TbCircleCheckFilled />
+              </Text>
+            </Group>
+          )}
         </Stack>
       </Stack>
-    </Page>
+    </Stack>
   );
 }
