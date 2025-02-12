@@ -7,6 +7,7 @@ export type LinkResult = {
   index: number;
   content: string;
   metaTags: { key: string; value: string }[];
+  distance: number;
 };
 
 export async function extractMarkdownText(content: string): Promise<string> {
@@ -62,10 +63,11 @@ export async function getLinks(
   result: faiss.SearchResult
 ): Promise<LinkResult[]> {
   const urls = store.urlSet.values();
-  return result.labels.map((label) => ({
+  return result.labels.map((label, index) => ({
     url: urls[label],
     index: label,
     content: store.urls[urls[label]]?.markdown ?? "",
     metaTags: store.urls[urls[label]]?.metaTags ?? [],
-  }));
+    distance: result.distances[index]
+  })).sort((a, b) => a.distance - b.distance);
 }

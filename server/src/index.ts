@@ -4,7 +4,7 @@ dotenv.config();
 import express from "express";
 import type { Express, Request, Response } from "express";
 import ws from "express-ws";
-import { scrapeLoop, type ScrapeStore } from "./scrape/crawl";
+import { scrape, scrapeLoop, type ScrapeStore } from "./scrape/crawl";
 import { OrderedSet } from "./scrape/ordered-set";
 import cors from "cors";
 import OpenAI from "openai";
@@ -56,6 +56,16 @@ async function streamLLMResponse(
 
 app.get("/", function (req: Request, res: Response) {
   res.json({ message: "ok" });
+});
+
+app.get("/test", async function (req: Request, res: Response) {
+  const store: ScrapeStore = {
+    urls: {},
+    urlSet: new OrderedSet(),
+  };
+  store.urlSet.add("https://elevenlabs.io/docs");
+  await scrapeLoop(store, "https://elevenlabs.io/docs", {limit: 100});
+  res.json(store);
 });
 
 app.post("/scrape", async function (req: Request, res: Response) {
@@ -157,14 +167,10 @@ expressWs.app.ws("/", function (ws, req) {
       }
 
       const context = await makeContext(message.data.query, index, store);
-      const response = await askLLM(
-        message.data.query,
-        thread.messages,
-        {
-          url: scrape.url,
-          context: context?.content,
-        }
-      );
+      const response = await askLLM(message.data.query, thread.messages, {
+        url: scrape.url,
+        context: context?.content,
+      });
       if (context?.links) {
         ws.send(
           makeMessage("links", {

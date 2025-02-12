@@ -86,7 +86,7 @@ export async function scrapeWithLinks(
 
     const linkUrl = new URL(link.href, url);
 
-    if (baseUrl !== linkUrl.origin) continue;
+    if (!linkUrl.href.startsWith(baseUrl)) continue;
 
     let linkUrlStr = linkUrl.toString();
     linkUrlStr = linkUrlStr.split("#")[0];
