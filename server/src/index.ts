@@ -20,8 +20,7 @@ import {
 } from "./scrape/pinecone";
 import { joinRoom, broadcast } from "./socket-room";
 import { getRoomIds } from "./socket-room";
-
-const userId = "6790c3cc84f4e51db33779c5";
+import { authenticate, verifyToken } from "./jwt";
 
 const app: Express = express();
 const expressWs = ws(app);
@@ -35,7 +34,7 @@ function makeMessage(type: string, data: any) {
 }
 
 async function streamLLMResponse(
-  ws: WebSocket,
+  ws: any,
   response: Stream<OpenAI.Chat.Completions.ChatCompletionChunk>
 ) {
   let content = "";
@@ -68,7 +67,8 @@ app.get("/test", async function (req: Request, res: Response) {
   res.json({ message: "ok" });
 });
 
-app.post("/scrape", async function (req: Request, res: Response) {
+app.post("/scrape", authenticate, async function (req: Request, res: Response) {
+  const userId = req.user!.id;
   const url = req.body.url;
 
   const existingScrape = await prisma.scrape.findFirst({
@@ -164,82 +164,114 @@ app.post("/scrape", async function (req: Request, res: Response) {
   res.json({ message: "ok" });
 });
 
-expressWs.app.ws("/", function (ws, req) {
-  ws.on("message", async function (msg) {
-    const message = JSON.parse(msg.toString());
+expressWs.app.ws("/", (ws: any, req) => {
+  let userId: string | null = null;
 
-    if (message.type === "join-room") {
-      getRoomIds(message.data).forEach((roomId) => joinRoom(roomId, ws as any));
-    }
+  ws.on("message", async (msg: Buffer | string) => {
+    try {
+      const message = JSON.parse(msg.toString());
 
-    if (message.type === "create-thread") {
-      const scrape = await prisma.scrape.findFirstOrThrow({
-        where: { url: message.data.url, userId },
-      });
+      if (message.type === "auth") {
+        const authHeader = message.data.headers.Authorization;
+        if (!authHeader?.startsWith("Bearer ")) {
+          ws.send(makeMessage("error", { message: "Unauthorized" }));
+          ws.close();
+          return;
+        }
 
-      const thread = await prisma.thread.create({
-        data: { userId, scrapeId: scrape.id, messages: [] },
-      });
-      ws.send(makeMessage("thread-created", { threadId: thread.id }));
-    }
+        const token = authHeader.split(" ")[1];
+        const user = verifyToken(token);
+        userId = user.userId;
+        return;
+      }
 
-    if (message.type === "ask-llm") {
-      const threadId = message.data.threadId;
-      const thread = await prisma.thread.findFirstOrThrow({
-        where: { id: threadId },
-      });
+      // Check authentication for all other messages
+      if (!userId) {
+        ws.send(makeMessage("error", { message: "Not authenticated" }));
+        ws.close();
+        return;
+      }
 
-      const scrape = await prisma.scrape.findFirstOrThrow({
-        where: { id: thread.scrapeId },
-      });
+      if (message.type === "join-room") {
+        getRoomIds({ userId }).forEach((roomId) => joinRoom(roomId, ws));
+      }
 
-      addMessage(threadId, {
-        llmMessage: { role: "user", content: message.data.query },
-        links: [],
-      });
+      if (message.type === "create-thread") {
+        const scrape = await prisma.scrape.findFirstOrThrow({
+          where: { url: message.data.url, userId },
+        });
 
-      const result = await search(
-        userId,
-        scrape.id,
-        await makeEmbedding(message.data.query)
-      );
-      const matches = result.matches.map((match) => ({
-        content: match.metadata!.content as string,
-        url: match.metadata!.url as string,
-      }));
-      const context = {
-        content: matches.map((match) => match.content).join("\n\n"),
-        links: getUniqueLinks(matches).map((match) => ({
-          url: match.url,
-          metaTags: [],
-        })),
-      };
+        const thread = await prisma.thread.create({
+          data: { userId, scrapeId: scrape.id, messages: [] },
+        });
+        ws.send(makeMessage("thread-created", { threadId: thread.id }));
+      }
 
-      const response = await askLLM(message.data.query, thread.messages, {
-        url: scrape.url,
-        context: context?.content,
-      });
-      if (context?.links) {
+      if (message.type === "ask-llm") {
+        const threadId = message.data.threadId;
+        const thread = await prisma.thread.findFirstOrThrow({
+          where: { id: threadId, userId },
+        });
+
+        const scrape = await prisma.scrape.findFirstOrThrow({
+          where: { id: thread.scrapeId },
+        });
+
+        addMessage(threadId, {
+          llmMessage: { role: "user", content: message.data.query },
+          links: [],
+        });
+
+        const result = await search(
+          userId,
+          scrape.id,
+          await makeEmbedding(message.data.query)
+        );
+        const matches = result.matches.map((match) => ({
+          content: match.metadata!.content as string,
+          url: match.metadata!.url as string,
+        }));
+        const context = {
+          content: matches.map((match) => match.content).join("\n\n"),
+          links: getUniqueLinks(matches).map((match) => ({
+            url: match.url,
+            metaTags: [],
+          })),
+        };
+
+        const response = await askLLM(message.data.query, thread.messages, {
+          url: scrape.url,
+          context: context?.content,
+        });
+        if (context?.links) {
+          ws.send(
+            makeMessage("links", {
+              links: context.links,
+            })
+          );
+        }
+        const { content, role } = await streamLLMResponse(ws, response);
+        addMessage(threadId, {
+          llmMessage: { role, content },
+          links: context?.links,
+        });
         ws.send(
-          makeMessage("links", {
-            links: context.links,
+          makeMessage("llm-chunk", {
+            end: true,
+            content,
+            role,
+            links: context?.links,
           })
         );
       }
-      const { content, role } = await streamLLMResponse(ws as any, response);
-      addMessage(threadId, {
-        llmMessage: { role, content },
-        links: context?.links,
-      });
-      ws.send(
-        makeMessage("llm-chunk", {
-          end: true,
-          content,
-          role,
-          links: context?.links,
-        })
-      );
+    } catch (error) {
+      ws.send(makeMessage("error", { message: "Authentication failed" }));
+      ws.close();
     }
+  });
+
+  ws.on("close", () => {
+    userId = null;
   });
 });
 

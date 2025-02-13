@@ -30,6 +30,7 @@
     "express": "^4.21.2",
     "express-ws": "^5.0.2",
     "faiss-node": "^0.5.1",
+    "jsonwebtoken": "^9.0.2",
     "openai": "^4.83.0",
     "prisma": "^6.2.1",
     "remark": "^15.0.1",

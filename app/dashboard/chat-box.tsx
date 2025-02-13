@@ -82,10 +82,12 @@ function UserMessage({ content }: { content: string }) {
 
 export default function ChatBox({
   thread,
+  token,
   deleting,
   onDelete,
 }: {
   thread: Thread;
+  token: string;
   deleting: boolean;
   onDelete: () => void;
 }) {
@@ -109,6 +111,15 @@ export default function ChatBox({
 
   useEffect(() => {
     socket.current = new WebSocket("ws://localhost:3000");
+    socket.current.onopen = () => {
+      socket.current!.send(
+        makeMessage("auth", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+      );
+    };
     socket.current.onmessage = (event) => {
       const message = JSON.parse(event.data);
       if (message.type === "llm-chunk") {
@@ -130,7 +141,13 @@ export default function ChatBox({
         scrollToBottom();
       }
     };
-  }, []);
+
+    return () => {
+      if (socket.current) {
+        socket.current.close();
+      }
+    };
+  }, [token]);
 
   useEffect(() => {
     if (deleteActive) {

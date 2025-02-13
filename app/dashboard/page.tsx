@@ -37,6 +37,7 @@ import {
 } from "~/components/ui/select";
 import { ScrapeCard } from "~/scrapes/card";
 import { Page } from "~/components/page";
+import { createToken } from "~/jwt";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -64,6 +65,7 @@ export function meta() {
 }
 
 export async function action({ request }: { request: Request }) {
+  const user = await getAuthUser(request);
   const formData = await request.formData();
 
   if (request.method === "POST") {
@@ -76,6 +78,7 @@ export async function action({ request }: { request: Request }) {
       body: JSON.stringify({ url, maxLinks, skipRegex }),
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${createToken(user!.id)}`,
       },
     });
 
