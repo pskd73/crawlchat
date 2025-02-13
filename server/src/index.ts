@@ -12,7 +12,12 @@ import { askLLM } from "./llm";
 import { Stream } from "openai/streaming";
 import { addMessage } from "./thread/store";
 import { prisma } from "./prisma";
-import { chunkText, makeEmbedding, saveEmbedding, search } from "./scrape/pinecone";
+import {
+  chunkText,
+  makeEmbedding,
+  saveEmbedding,
+  search,
+} from "./scrape/pinecone";
 const userId = "6790c3cc84f4e51db33779c5";
 
 const app: Express = express();
@@ -50,6 +55,12 @@ async function streamLLMResponse(
     }
   }
   return { content, role };
+}
+
+function getUniqueLinks(links: { url: string }[]) {
+  return links.filter(
+    (link, index, self) => self.findIndex((t) => t.url === link.url) === index
+  );
 }
 
 app.get("/", function (req: Request, res: Response) {
@@ -105,12 +116,20 @@ app.post("/scrape", async function (req: Request, res: Response) {
       },
       afterScrape: async (url, markdown) => {
         const chunks = await chunkText(markdown);
-        for (const chunk of chunks) {
-          await saveEmbedding(userId, scrape.id, await makeEmbedding(chunk), {
-            content: chunk,
-            url,
-          });
-        }
+
+        const batchSize = 20;
+        for (let i = 0; i < chunks.length; i += batchSize) {
+          const batch = chunks.slice(i, i + batchSize);
+          const embeddings = []
+          for (const chunk of batch) {
+            const embedding = await makeEmbedding(chunk);
+            embeddings.push({
+              embedding,
+              metadata: { content: chunk, url },
+            });
+          }
+          await saveEmbedding(userId, scrape.id, embeddings);
+        }        
       },
     });
 
@@ -166,7 +185,7 @@ expressWs.app.ws("/", function (ws, req) {
       }));
       const context = {
         content: matches.map((match) => match.content).join("\n\n"),
-        links: matches.map((match) => ({
+        links: getUniqueLinks(matches).map((match) => ({
           url: match.url,
           metaTags: [],
         })),
