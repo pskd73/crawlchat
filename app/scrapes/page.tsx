@@ -1,4 +1,4 @@
-import { GridItem, Group, SimpleGrid, Text } from "@chakra-ui/react";
+import { GridItem, SimpleGrid } from "@chakra-ui/react";
 import { Stack } from "@chakra-ui/react";
 import { TbFolder } from "react-icons/tb";
 import { Page } from "~/components/page";
@@ -7,6 +7,7 @@ import { getAuthUser } from "~/auth/middleware";
 import { prisma } from "~/prisma";
 import { ScrapeCard } from "./card";
 import { useFetcher } from "react-router";
+import { createToken } from "~/jwt";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -25,9 +26,18 @@ export async function loader({ request }: Route.LoaderArgs) {
 }
 
 export async function action({ request }: { request: Request }) {
+  const user = await getAuthUser(request);
   const formData = await request.formData();
 
   if (request.method === "DELETE") {
+    await fetch(`${process.env.VITE_SERVER_URL}/scrape`, {
+      method: "DELETE",
+      body: JSON.stringify({ scrapeId: formData.get("id") }),
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${createToken(user!.id)}`,
+      },
+    });
     const id = formData.get("id");
     await prisma.scrape.delete({
       where: { id: id as string },

@@ -14,6 +14,7 @@ import { addMessage } from "./thread/store";
 import { prisma } from "./prisma";
 import {
   chunkText,
+  deleteScrape,
   makeEmbedding,
   saveEmbedding,
   search,
@@ -163,6 +164,17 @@ app.post("/scrape", authenticate, async function (req: Request, res: Response) {
 
   res.json({ message: "ok" });
 });
+
+app.delete(
+  "/scrape",
+  authenticate,
+  async function (req: Request, res: Response) {
+    const userId = req.user!.id;
+    const scrapeId = req.body.scrapeId;
+    await deleteScrape(userId, scrapeId);
+    res.json({ message: "ok" });
+  }
+);
 
 expressWs.app.ws("/", (ws: any, req) => {
   let userId: string | null = null;

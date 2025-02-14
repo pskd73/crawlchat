@@ -120,3 +120,8 @@ export async function search(
     includeMetadata: true,
   });
 }
+
+export async function deleteScrape(userId: string, scrapeId: string) {
+  const index = pc.index(makeIndexName(userId));
+  await index.namespace(makeNamespaceName(scrapeId)).deleteAll();
+}
