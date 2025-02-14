@@ -232,7 +232,14 @@ export default function LandingPage({
           <Stack fontSize={"sm"}>
             <Group justifyContent={"space-between"}>
               {stage === "scraping" && (
-                <Text truncate>Scraping {scraping?.url}</Text>
+                <>
+                  <Text truncate display={["none", "block"]}>
+                    Scraping {scraping?.url}
+                  </Text>
+                  <Text truncate display={["block", "none"]}>
+                    Scraping...
+                  </Text>
+                </>
               )}
               {scraping?.url && stage === "scraped" && (
                 <Text>Scraping complete</Text>

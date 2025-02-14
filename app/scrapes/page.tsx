@@ -56,7 +56,7 @@ export default function ScrapesPage({ loaderData }: Route.ComponentProps) {
   return (
     <Page title="Collections" icon={<TbFolder />}>
       <Stack maxW={"1000px"}>
-        <SimpleGrid columns={5} gap={4}>
+        <SimpleGrid columns={[1, 2, 3, 4, 5]} gap={4}>
           {loaderData.scrapes.map((scrape) => (
             <GridItem key={scrape.id}>
               <ScrapeCard
