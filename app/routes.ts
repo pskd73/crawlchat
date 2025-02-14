@@ -9,7 +9,6 @@ import {
 export default [
   ...prefix("login", [
     index("auth/login.tsx"),
-    route("email-sent", "auth/email-sent.tsx"),
     route("verify", "auth/verify.ts"),
   ]),
 

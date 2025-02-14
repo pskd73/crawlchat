@@ -69,8 +69,15 @@ export async function chunkText(
 }
 
 export async function createIndex(userId: string) {
+  const indexName = makeIndexName(userId);
+  const indexes = await pc.listIndexes();
+
+  if (indexes.indexes?.some((index) => index.name === indexName)) {
+    return;
+  }
+
   await pc.createIndex({
-    name: makeIndexName(userId),
+    name: indexName,
     dimension: 384,
     metric: "cosine",
     spec: {

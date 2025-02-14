@@ -14,6 +14,7 @@ import { addMessage } from "./thread/store";
 import { prisma } from "./prisma";
 import {
   chunkText,
+  createIndex,
   deleteScrape,
   makeEmbedding,
   saveEmbedding,
@@ -67,6 +68,16 @@ app.get("/", function (req: Request, res: Response) {
 app.get("/test", async function (req: Request, res: Response) {
   res.json({ message: "ok" });
 });
+
+app.get(
+  "/create-index",
+  authenticate,
+  async function (req: Request, res: Response) {
+    const userId = req.user!.id;
+    await createIndex(userId);
+    res.json({ message: "ok" });
+  }
+);
 
 app.post("/scrape", authenticate, async function (req: Request, res: Response) {
   const userId = req.user!.id;

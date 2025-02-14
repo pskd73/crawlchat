@@ -48,7 +48,7 @@ export async function action({ request }: Route.ActionArgs) {
 
 export default function LoginPage() {
   const fetcher = useFetcher();
-  const { mailSent, buddy } = useLoaderData();
+  const { mailSent } = useLoaderData();
   const emailRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
