@@ -45,8 +45,8 @@ function AssistantMessage({
   links: ScrapeLink[];
 }) {
   return (
-    <Stack maxW="75%">
-      <Prose size="lg">
+    <Stack maxW="800px">
+      <Prose size="lg" maxW="full">
         <Markdown>{content}</Markdown>
       </Prose>
       <SimpleGrid columns={[1, 2, 3]} gap={2}>
