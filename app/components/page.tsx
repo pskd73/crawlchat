@@ -1,5 +1,5 @@
 import { Box, Group, Heading, IconButton, Stack, Text } from "@chakra-ui/react";
-import { useContext } from "react";
+import { useContext, useEffect, useRef } from "react";
 import { TbMenu } from "react-icons/tb";
 import { AppContext } from "~/dashboard/context";
 
@@ -14,7 +14,19 @@ export function Page({
   children?: React.ReactNode;
   right?: React.ReactNode;
 }) {
-  const { menuOpen, setMenuOpen } = useContext(AppContext);
+  const { menuOpen, setMenuOpen, setContainerWidth } = useContext(AppContext);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (containerRef.current) {
+        setContainerWidth(containerRef.current.clientWidth);
+      }
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   return (
     <Stack h="full" gap={0}>
@@ -24,6 +36,10 @@ export function Page({
         borderColor={"brand.outline"}
         h={"60px"}
         justify="center"
+        position="sticky"
+        top={0}
+        bg="white"
+        zIndex={1}
       >
         <Group justify="space-between">
           <Group>
@@ -43,7 +59,7 @@ export function Page({
           {right}
         </Group>
       </Stack>
-      <Box p={4} h="full">
+      <Box p={4} h="full" ref={containerRef}>
         {children}
       </Box>
     </Stack>

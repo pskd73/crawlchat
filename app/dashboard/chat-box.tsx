@@ -46,8 +46,13 @@ function AssistantMessage({
   content: string;
   links: ScrapeLink[];
 }) {
+  const { containerWidth } = useContext(AppContext);
+
   return (
-    <Stack maxW="800px">
+    <Stack
+      w={containerWidth ? containerWidth * 0.8 : 200}
+      opacity={containerWidth ? 1 : 0}
+    >
       <Prose size="lg" maxW="full">
         <Markdown>{content}</Markdown>
       </Prose>
@@ -88,7 +93,7 @@ export default function ChatBox({
   token: string;
   patchFetcher: FetcherWithComponents<{ responseType: ResponseType }>;
 }) {
-  const { setThreadTitle } = useContext(AppContext);
+  const { setThreadTitle, containerWidth } = useContext(AppContext);
   const socket = useRef<WebSocket>(null);
   const [content, setContent] = useState("");
   const [query, setQuery] = useState("");
@@ -103,7 +108,7 @@ export default function ChatBox({
   useEffect(() => {
     positionPromptBox();
     scrollToBottom(true);
-  }, [messages]);
+  }, [messages, containerWidth]);
 
   useEffect(() => {
     socket.current = new WebSocket(import.meta.env.VITE_SERVER_WS_URL);
