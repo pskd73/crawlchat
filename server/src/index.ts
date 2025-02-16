@@ -24,6 +24,8 @@ import { joinRoom, broadcast } from "./socket-room";
 import { getRoomIds } from "./socket-room";
 import { authenticate, verifyToken } from "./jwt";
 import fs from "fs/promises";
+import { Prisma } from "@prisma/client";
+import { getMetaTitle } from "./scrape/parse";
 
 const app: Express = express();
 const expressWs = ws(app);
@@ -168,13 +170,18 @@ app.post("/scrape", authenticate, async function (req: Request, res: Response) {
           await saveEmbedding(userId, scrape.id, embeddings);
         }
 
+        const update: Prisma.ScrapeUpdateInput = {
+          urls: Object.keys(store.urls)
+            .filter(Boolean)
+            .map((url) => ({ url })),
+        };
+        if (url === scrape.url && store.urls[url]?.metaTags) {
+          update.metaTags = store.urls[url].metaTags;
+        }
+
         await prisma.scrape.update({
           where: { id: scrape.id },
-          data: {
-            urls: Object.keys(store.urls)
-              .filter(Boolean)
-              .map((url) => ({ url })),
-          },
+          data: update,
         });
 
         roomIds.forEach((roomId) =>

@@ -1,12 +1,11 @@
+import { MetaTag } from "@prisma/client";
 import { OrderedSet } from "./ordered-set";
 import { parseHtml } from "./parse";
 
 export type ScrapeStore = {
   urls: Record<
     string,
-    | { metaTags: { key: string; value: string }[]; text: string }
-    | undefined
-    | null
+    { metaTags: MetaTag[]; text: string } | undefined | null
   >;
   urlSet: OrderedSet<string>;
 };

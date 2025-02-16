@@ -26,6 +26,7 @@
     "@aws-sdk/client-s3": "^3.744.0",
     "@huggingface/transformers": "^3.3.3",
     "@pinecone-database/pinecone": "^4.1.0",
+    "@prisma/client": "^6.2.1",
     "cheerio": "^1.0.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",

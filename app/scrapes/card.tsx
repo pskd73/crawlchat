@@ -1,14 +1,15 @@
 import { TbTrash } from "react-icons/tb";
 import { TbCheck } from "react-icons/tb";
-import { Badge, IconButton } from "@chakra-ui/react";
+import { Badge, Box, IconButton, Image } from "@chakra-ui/react";
 import { TbMessage } from "react-icons/tb";
 import { Group, Text } from "@chakra-ui/react";
 import { Stack } from "@chakra-ui/react";
 import type { Scrape } from "@prisma/client";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { TbWorld } from "react-icons/tb";
 import { Link } from "react-router";
 import moment from "moment";
+import { getScrapeTitle } from "./util";
 
 export function ScrapeCard({
   scrape,
@@ -20,6 +21,22 @@ export function ScrapeCard({
   deleting?: boolean;
 }) {
   const [deleteActive, setDeleteActive] = useState(false);
+  const [faviconUrl, setFaviconUrl] = useState<string>();
+
+  useEffect(() => {
+    const fetchFaviconUrl = async () => {
+      try {
+        const url = new URL(scrape.url);
+        const faviconUrl = url.origin + "/favicon.ico";
+        const response = await fetch(faviconUrl);
+        if (!response.ok) return;
+        setFaviconUrl(faviconUrl);
+      } catch {
+        setFaviconUrl(undefined);
+      }
+    };
+    fetchFaviconUrl();
+  }, [scrape.url]);
 
   useEffect(() => {
     if (deleteActive) {
@@ -42,9 +59,14 @@ export function ScrapeCard({
   return (
     <Stack bg="brand.gray.100" p={4} rounded={"lg"} h="full" className="group">
       <Group h={"30px"}>
-        <Text fontSize={"30px"} _groupHover={{ display: "none" }}>
-          <TbWorld />
-        </Text>
+        <Group _groupHover={{ display: "none" }}>
+          {faviconUrl && <Image src={faviconUrl} w={"30px"} h={"30px"} />}
+          {!faviconUrl && (
+            <Text fontSize={"30px"}>
+              <TbWorld />
+            </Text>
+          )}
+        </Group>
         <Group h="full" display={"none"} _groupHover={{ display: "flex" }}>
           <IconButton size={"xs"} asChild>
             <Link to={`/threads/new?id=${scrape.id}`}>
@@ -65,7 +87,7 @@ export function ScrapeCard({
       </Group>
 
       <Text fontSize={"sm"} lineClamp={2}>
-        {scrape.url}
+        {getScrapeTitle(scrape)}
       </Text>
       <Group fontSize={"xs"}>
         <Text opacity={0.5}>{moment(scrape.createdAt).fromNow()}</Text>

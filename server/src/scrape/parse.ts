@@ -1,6 +1,7 @@
 import * as cheerio from "cheerio";
 import TurndownService from "turndown";
 import { removeConsecutiveLinks, markdownToText } from "./markdown";
+import type { MetaTag } from "@prisma/client";
 
 const EXCLUDE_NON_MAIN_TAGS = [
   "header",
@@ -77,7 +78,7 @@ export function parseHtml(html: string) {
     .toArray()
     .filter((link) => link.href);
 
-  const metaTags: { key: string; value: string }[] = $("meta")
+  const metaTags: MetaTag[] = $("meta")
     .map((_, meta) => ({
       key: $(meta).attr("name") ?? $(meta).attr("property") ?? "",
       value: $(meta).attr("content") ?? "",
@@ -117,4 +118,8 @@ export function parseHtml(html: string) {
     metaTags,
     text: markdownToText(markdown),
   };
+}
+
+export function getMetaTitle(metaTags: MetaTag[]) {
+  return metaTags.find((metaTag) => metaTag.key === "og:title")?.value;
 }

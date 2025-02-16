@@ -30,6 +30,11 @@ enum ScrapeStatus {
   error
 }
 
+type MetaTag {
+  key String
+  value String
+}
+
 model Scrape {
   id              String   @id @default(auto()) @map("_id") @db.ObjectId
   userId          String   @db.ObjectId
@@ -39,14 +44,10 @@ model Scrape {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
   urls            ScrapeLink[]
+  metaTags        MetaTag[]
 
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   threads         Thread[]
-}
-
-type MetaTag {
-  key String
-  value String
 }
 
 type ScrapeLink {
