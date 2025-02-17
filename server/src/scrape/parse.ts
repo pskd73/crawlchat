@@ -57,7 +57,10 @@ const EXCLUDE_NON_MAIN_TAGS = [
 
 function cleanHtml($: cheerio.CheerioAPI) {
   for (const tag of EXCLUDE_NON_MAIN_TAGS) {
-    $(tag).remove();
+    const elem = $(tag);
+    if (elem.is("html") === false && elem.is("body") === false) {
+      elem.remove();
+    }
   }
 
   $("a").each((_, a) => {

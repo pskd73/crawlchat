@@ -68,26 +68,16 @@ app.get("/", function (req: Request, res: Response) {
 });
 
 app.get("/test", async function (req: Request, res: Response) {
-  // const result = await search(
-  //   "6790c3cc84f4e51db33779c5",
-  //   "67b09ed1857e093b09ca7ace",
-  //   await makeEmbedding("How to setup google auth?")
-  // );
+  const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY!,
+  });
+  const embedding = await openai.embeddings.create({
+    model: "text-embedding-3-small",
+    input: "Hello, world!",
+    encoding_format: "float",
+  });
 
-  // const result = await scrape(
-  //   "https://www.hindustantimes.com/entertainment/tv/ranveer-allahbadia-s-new-note-my-remark-was-insensitive-101739630398181.html"
-  // );
-  // const result = await scrape(
-  //   "https://docs.firecrawl.dev/features/crawl"
-  // );
-
-  const result = await scrape(
-    "https://www.chakra-ui.com/docs/components/empty-state"
-  );
-
-  await fs.writeFile("test.md", result.markdown);
-
-  res.json({ result });
+  res.json({ embedding });
 });
 
 app.post("/scrape", authenticate, async function (req: Request, res: Response) {
@@ -321,6 +311,7 @@ expressWs.app.ws("/", (ws: any, req) => {
         );
       }
     } catch (error) {
+      console.error(error);
       ws.send(makeMessage("error", { message: "Authentication failed" }));
       ws.close();
     }

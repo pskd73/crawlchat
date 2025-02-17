@@ -36,11 +36,6 @@ export async function askLLM(
         content: options?.systemPrompt ?? "You are a helpful assistant.",
       },
       {
-        role: "system",
-        content:
-          "Use markdown tables whenever you want to represent a structured tabular information.",
-      },
-      {
         role: "user",
         content: `${query}\n\nContext:\n${options?.context ?? ""}`,
       },
