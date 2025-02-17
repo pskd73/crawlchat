@@ -52,6 +52,7 @@ model Scrape {
 
 type ScrapeLink {
   url             String
+  title           String?
 }
 
 type Message {

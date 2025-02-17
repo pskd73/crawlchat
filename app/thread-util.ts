@@ -10,5 +10,5 @@ export function getThreadName(messages: Message[], maxLength = 500) {
 }
 
 export function getLinkTitle(link: ScrapeLink) {
-  return link.url;
+  return link.title ?? link.url;
 }

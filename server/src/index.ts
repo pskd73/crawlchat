@@ -24,6 +24,7 @@ import { getRoomIds } from "./socket-room";
 import { authenticate, verifyToken } from "./jwt";
 import fs from "fs/promises";
 import { Prisma } from "@prisma/client";
+import { getMetaTitle } from "./scrape/parse";
 
 const app: Express = express();
 const expressWs = ws(app);
@@ -161,7 +162,10 @@ app.post("/scrape", authenticate, async function (req: Request, res: Response) {
         const update: Prisma.ScrapeUpdateInput = {
           urls: Object.keys(store.urls)
             .filter(Boolean)
-            .map((url) => ({ url })),
+            .map((url) => ({
+              url,
+              title: getMetaTitle(store.urls[url]?.metaTags ?? []),
+            })),
         };
         if (url === scrape.url && store.urls[url]?.metaTags) {
           update.metaTags = store.urls[url].metaTags;
@@ -189,9 +193,6 @@ app.post("/scrape", authenticate, async function (req: Request, res: Response) {
       where: { id: scrape.id },
       data: {
         status: "done",
-        urls: Object.keys(store.urls)
-          .filter(Boolean)
-          .map((url) => ({ url })),
       },
     });
 
@@ -301,16 +302,21 @@ expressWs.app.ws("/", (ws: any, req) => {
           );
         }
         const { content, role } = await streamLLMResponse(ws, response);
+
+        const linksWithTitle = context?.links.map((link) => ({
+          ...link,
+          title: scrape.urls.find((url) => url.url === link.url)?.title ?? null,
+        }));
         addMessage(threadId, {
           llmMessage: { role, content },
-          links: context?.links,
+          links: linksWithTitle,
         });
         ws.send(
           makeMessage("llm-chunk", {
             end: true,
             content,
             role,
-            links: context?.links,
+            links: linksWithTitle,
           })
         );
       }

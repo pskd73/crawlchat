@@ -24,17 +24,19 @@ import type { ResponseType } from "@prisma/client";
 import remarkGfm from "remark-gfm";
 
 function LinkCard({ link }: { link: ScrapeLink }) {
+  const title = useMemo(() => getLinkTitle(link), [link]);
+
   return (
-    <Stack bg="brand.gray.100" p={3} rounded={"md"} h="full">
-      <Link
-        href={link.url}
-        key={link.url}
-        fontSize={"xs"}
-        lineClamp={2}
-        target="_blank"
-        lineHeight={1.4}
-      >
-        {getLinkTitle(link)}
+    <Stack bg="brand.gray.100" p={3} rounded={"md"} h="full" gap={0}>
+      <Text lineClamp={1} fontSize={"sm"}>
+        {title}
+      </Text>
+      <Link href={link.url} key={link.url} target="_blank" lineHeight={1.4}>
+        {link.url !== title && (
+          <Text fontSize={"xs"} opacity={0.5} truncate>
+            {link.url}
+          </Text>
+        )}
       </Link>
     </Stack>
   );
