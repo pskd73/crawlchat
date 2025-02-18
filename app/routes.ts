@@ -20,6 +20,7 @@ export default [
     route("threads/new", "dashboard/thread-new.tsx"),
     route("threads/:id", "dashboard/thread.tsx"),
     route("collections", "scrapes/page.tsx"),
+    route("collections/:id", "scrapes/scrape-page.tsx"),
     route("settings", "dashboard/settings.tsx"),
   ]),
 ] satisfies RouteConfig;

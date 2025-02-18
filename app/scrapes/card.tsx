@@ -1,6 +1,6 @@
 import { TbTrash } from "react-icons/tb";
 import { TbCheck } from "react-icons/tb";
-import { Badge, Box, IconButton, Image } from "@chakra-ui/react";
+import { Badge, Link as ChakraLink, IconButton, Image } from "@chakra-ui/react";
 import { TbMessage } from "react-icons/tb";
 import { Group, Text } from "@chakra-ui/react";
 import { Stack } from "@chakra-ui/react";
@@ -89,7 +89,9 @@ export function ScrapeCard({
       </Group>
 
       <Text fontSize={"sm"} lineClamp={2}>
-        {getScrapeTitle(scrape)}
+        <ChakraLink asChild>
+          <Link to={`/collections/${scrape.id}`}>{getScrapeTitle(scrape)}</Link>
+        </ChakraLink>
       </Text>
       <Group fontSize={"xs"}>
         <Text opacity={0.5}>{moment(scrape.createdAt).fromNow()}</Text>
