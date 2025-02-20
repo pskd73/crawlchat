@@ -67,7 +67,7 @@ export default function ScrapeWidget({ loaderData }: Route.ComponentProps) {
       />
       <Group
         justifyContent={"center"}
-        opacity={0.2}
+        opacity={0.4}
         _hover={{ opacity: 1 }}
         transition={"opacity 100ms ease"}
       >
