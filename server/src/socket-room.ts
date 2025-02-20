@@ -28,17 +28,17 @@ export function broadcast(roomId: string, message: string) {
 }
 
 export function getRoomIds({
-  userId,
+  userKey,
   scrapeId,
   threadId,
 }: {
-  userId?: string;
+  userKey?: string;
   scrapeId?: string;
   threadId?: string;
 }) {
   const roomIds: string[] = [];
-  if (userId) {
-    roomIds.push(`user-${userId}`);
+  if (userKey) {
+    roomIds.push(`user-${userKey}`);
   }
   if (scrapeId) {
     roomIds.push(`scrape-${scrapeId}`);

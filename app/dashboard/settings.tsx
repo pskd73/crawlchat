@@ -37,7 +37,7 @@ export async function action({ request }: Route.ActionArgs) {
   return Response.json({ success: true });
 }
 
-function SettingsSection({
+export function SettingsSection({
   children,
   fetcher,
   title,
@@ -49,24 +49,27 @@ function SettingsSection({
   description?: string;
 }) {
   return (
-    <Stack
-      border={"1px solid"}
-      borderColor={"brand.outline"}
-      borderRadius={"md"}
-      overflow={"hidden"}
-    >
-      <fetcher.Form method="post">
-        <Stack p={4}>
-          {title && <Heading size={"sm"}>{title}</Heading>}
-          {description && (
-            <Text opacity={0.5} fontSize={"sm"}>
-              {description}
-            </Text>
-          )}
+    <fetcher.Form method="post">
+      <Stack
+        border={"1px solid"}
+        borderColor={"brand.outline"}
+        borderRadius={"md"}
+        overflow={"hidden"}
+      >
+        <Stack p={4} gap={4}>
+          <Stack>
+            {title && <Heading size={"md"}>{title}</Heading>}
+            {description && (
+              <Text opacity={0.5} fontSize={"sm"}>
+                {description}
+              </Text>
+            )}
+          </Stack>
           {children}
         </Stack>
         <Group
           p={4}
+          py={3}
           borderTop={"1px solid"}
           borderColor={"brand.outline"}
           bg="brand.gray.100"
@@ -79,8 +82,8 @@ function SettingsSection({
             <TbCheck />
           </Button>
         </Group>
-      </fetcher.Form>
-    </Stack>
+      </Stack>
+    </fetcher.Form>
   );
 }
 

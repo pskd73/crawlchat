@@ -6,7 +6,6 @@ import type { MetaTag } from "@prisma/client";
 import * as turndownPluginGfm from "turndown-plugin-gfm";
 
 const EXCLUDE_NON_MAIN_TAGS = [
-  "header",
   "footer",
   "nav",
   "aside",
@@ -64,12 +63,29 @@ function cleanHtml($: cheerio.CheerioAPI) {
       elem.remove();
     }
   }
+}
 
+function cleanA($: cheerio.CheerioAPI) {
   $("a").each((_, a) => {
+    const href = $(a).attr("href");
+    if (href?.includes("?")) {
+      $(a).attr("href", href.split("?")[0]);
+    }
     if ($(a).text().trim().length === 0) {
       $(a).remove();
     }
+    if ($(a).attr("href")?.startsWith("#")) {
+      $(a).remove();
+    }
+    if (!$(a).attr("href")) {
+      $(a).remove();
+    }
   });
+}
+
+function cleanScriptStyles($: cheerio.CheerioAPI) {
+  $("script").remove();
+  $("style").remove();
 }
 
 export type ParseLink = {
@@ -112,7 +128,11 @@ export function parseHtml(html: string): ParseOutput {
 
   $("meta").remove();
 
-  cleanHtml($);
+  if ($("main").length === 0) {
+    cleanHtml($);
+  }
+  cleanA($);
+  cleanScriptStyles($);
 
   const turndownService = new TurndownService();
   turndownService.use(turndownPluginGfm.gfm);
@@ -127,6 +147,19 @@ export function parseHtml(html: string): ParseOutput {
         content.trim().replace(/\n/g, "") +
         "\n\n"
       );
+    },
+  });
+  turndownService.addRule("table-cell", {
+    filter: ["td"],
+    replacement: function (content, node) {
+      const isFirstCell =
+        node.parentElement &&
+        Array.from(node.parentElement.children).indexOf(node as Element) === 0;
+      const cleanedContent = content.replace(/\n/g, " ");
+      if (isFirstCell) {
+        return `| ${cleanedContent} |`;
+      }
+      return ` ${cleanedContent} |`;
     },
   });
 

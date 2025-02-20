@@ -24,7 +24,10 @@ export async function loader({ params, request }: Route.LoaderArgs) {
     throw redirect("/app");
   }
   const token = createToken(user.id);
-  return { thread, token };
+  const scrape = await prisma.scrape.findUnique({
+    where: { id: thread.scrapeId },
+  });
+  return { thread, token, scrape };
 }
 
 export async function action({ params, request }: Route.ActionArgs) {
@@ -52,7 +55,6 @@ export async function action({ params, request }: Route.ActionArgs) {
 
 export default function ThreadPage({ loaderData }: Route.ComponentProps) {
   const deleteFetcher = useFetcher();
-  const patchFetcher = useFetcher<{ responseType: ResponseType }>();
   const { threadTitle } = useContext(AppContext);
   const [deleteActive, setDeleteActive] = useState(false);
 
@@ -99,12 +101,12 @@ export default function ThreadPage({ loaderData }: Route.ComponentProps) {
         </IconButton>
       }
     >
-      <Stack>
+      <Stack h="full">
         <ChatBox
-          token={loaderData.token}
+          userToken={loaderData.token}
           thread={loaderData.thread}
+          scrape={loaderData.scrape!}
           key={loaderData.thread.id}
-          patchFetcher={patchFetcher}
         />
       </Stack>
     </Page>

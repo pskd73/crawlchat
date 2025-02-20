@@ -86,11 +86,23 @@ export async function action({ request }: { request: Request }) {
     const maxLinks = formData.get("maxLinks");
     const skipRegex = formData.get("skipRegex");
 
+    if (!url) {
+      return { error: "URL is required" };
+    }
+
+    const scrape = await prisma.scrape.create({
+      data: {
+        url: url as string,
+        userId: user!.id,
+        status: "pending",
+      },
+    });
+
     const token = createToken(user!.id);
 
     const response = await fetch(`${process.env.VITE_SERVER_URL}/scrape`, {
       method: "POST",
-      body: JSON.stringify({ url, maxLinks, skipRegex }),
+      body: JSON.stringify({ maxLinks, skipRegex, scrapeId: scrape.id }),
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
@@ -143,6 +155,11 @@ export default function LandingPage({
     };
     socket.current.onmessage = (event) => {
       const message = JSON.parse(event.data);
+
+      if (message.type === "scrape-start") {
+        setStage("scraping");
+      }
+
       if (message.type === "scrape-pre") {
         setScraping({
           url: message.data.url,

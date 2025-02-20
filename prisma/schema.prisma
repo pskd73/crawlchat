@@ -45,6 +45,7 @@ model Scrape {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
   title           String?
+  chatPrompt      String?
 
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   threads         Thread[]
@@ -70,17 +71,19 @@ enum ResponseType {
 
 model Thread {
   id              String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId          String   @db.ObjectId
   scrapeId        String   @db.ObjectId
 
   messages        Message[]
   responseType    ResponseType?
 
+  userId          String?   @db.ObjectId
+
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+  openedAt        DateTime?
 
   scrape          Scrape   @relation(fields: [scrapeId], references: [id], onDelete: Cascade)
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user            User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model ScrapeItem {
@@ -98,4 +101,6 @@ model ScrapeItem {
 
   scrape          Scrape   @relation(fields: [scrapeId], references: [id], onDelete: Cascade)
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([scrapeId, url])
 }

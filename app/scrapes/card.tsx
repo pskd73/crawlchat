@@ -90,7 +90,9 @@ export function ScrapeCard({
 
       <Text fontSize={"sm"} lineClamp={2}>
         <ChakraLink asChild>
-          <Link to={`/collections/${scrape.id}`}>{getScrapeTitle(scrape)}</Link>
+          <Link to={`/collections/${scrape.id}/settings`}>
+            {getScrapeTitle(scrape)}
+          </Link>
         </ChakraLink>
       </Text>
       <Group fontSize={"xs"}>

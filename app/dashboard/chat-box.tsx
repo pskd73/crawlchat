@@ -1,43 +1,185 @@
 import {
   Box,
-  GridItem,
+  Center,
+  ClipboardRoot,
   Group,
+  Heading,
   IconButton,
   Input,
   Link,
-  SimpleGrid,
+  Skeleton,
 } from "@chakra-ui/react";
 import { Stack, Text } from "@chakra-ui/react";
-import type { Message, ScrapeLink, Thread } from "@prisma/client";
-import { useContext, useEffect, useMemo, useRef, useState } from "react";
-import { TbSend } from "react-icons/tb";
+import type { Scrape, Thread } from "@prisma/client";
+import { useEffect, useState } from "react";
+import { TbArrowUp, TbChevronRight, TbMessage } from "react-icons/tb";
 import Markdown from "react-markdown";
 import { Prose } from "~/components/ui/prose";
-import { getLinkTitle, getThreadName } from "~/thread-util";
-import { sleep } from "~/util";
-import { AppContext } from "./context";
-import { Button } from "~/components/ui/button";
-import { makeMessage } from "./socket-util";
-import { toaster } from "~/components/ui/toaster";
-import type { FetcherWithComponents } from "react-router";
-import type { ResponseType } from "@prisma/client";
 import remarkGfm from "remark-gfm";
+import { ClipboardIconButton } from "~/components/ui/clipboard";
+import hljs from "highlight.js";
+import { useScrapeChat, type AskStage } from "~/widget/use-chat";
+import "highlight.js/styles/vs.css";
 
-function LinkCard({ link }: { link: ScrapeLink }) {
-  const title = useMemo(() => getLinkTitle(link), [link]);
+function ChatInput({
+  onAsk,
+  stage,
+}: {
+  onAsk: (query: string) => void;
+  stage: AskStage;
+}) {
+  const [query, setQuery] = useState("");
+
+  function handleAsk() {
+    onAsk(query);
+    setQuery("");
+  }
+
+  function getPlaceholder() {
+    switch (stage) {
+      case "asked":
+        return "😇 Thinking...";
+      case "answering":
+        return "🤓 Answering...";
+    }
+    return "Ask your question";
+  }
+
+  const disabled = stage !== "idle";
 
   return (
-    <Stack bg="brand.gray.100" p={3} rounded={"md"} h="full" gap={0}>
-      <Text lineClamp={1} fontSize={"sm"}>
-        {title}
+    <Group
+      h="60px"
+      borderTop={"1px solid"}
+      borderColor={"brand.outline"}
+      justify={"space-between"}
+      p={4}
+    >
+      <Group flex={1}>
+        <Input
+          placeholder={getPlaceholder()}
+          size={"xl"}
+          p={0}
+          outline={"none"}
+          border="none"
+          fontSize={"lg"}
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              handleAsk();
+            }
+          }}
+          disabled={disabled}
+        />
+      </Group>
+      <Group>
+        <IconButton
+          rounded={"full"}
+          onClick={handleAsk}
+          size={"xs"}
+          disabled={disabled}
+        >
+          <TbArrowUp />
+        </IconButton>
+      </Group>
+    </Group>
+  );
+}
+
+function SourceLink({ link }: { link: { url: string; title: string | null } }) {
+  return (
+    <Link
+      borderBottom={"1px solid"}
+      borderColor={"brand.outline"}
+      _last={{ borderBottom: "none" }}
+      _hover={{
+        bg: "brand.gray.100",
+      }}
+      transition={"background-color 100ms ease-in-out"}
+      variant={"plain"}
+      href={link.url}
+      target="_blank"
+      textDecoration={"none"}
+      outline={"none"}
+    >
+      <Stack px={4} py={3} w="full">
+        <Group justify={"space-between"} w="full">
+          <Stack gap={0}>
+            <Text fontSize={"xs"} lineClamp={1}>
+              {link.title}
+            </Text>
+            <Text fontSize={"xs"} opacity={0.5} lineClamp={1}>
+              {link.url}
+            </Text>
+          </Stack>
+          <Box>
+            <TbChevronRight />
+          </Box>
+        </Group>
+      </Stack>
+    </Link>
+  );
+}
+
+function MessageContent({ content }: { content: string }) {
+  return (
+    <Prose maxW="full">
+      <Markdown
+        remarkPlugins={[remarkGfm]}
+        components={{
+          code: ({ node, ...props }) => {
+            const { children, className, ...rest } = props;
+
+            if (!className) {
+              return <code {...rest}>{children}</code>;
+            }
+
+            const language = className?.replace("language-", "");
+            const code = children as string;
+
+            const highlighted = hljs.highlight(code ?? "", {
+              language: language ?? "javascript",
+            }).value;
+
+            return (
+              <Box position={"relative"} className="group">
+                <Box dangerouslySetInnerHTML={{ __html: highlighted }} />
+                <Box
+                  position={"absolute"}
+                  top={0}
+                  right={0}
+                  opacity={0}
+                  _groupHover={{ opacity: 1 }}
+                  transition={"opacity 100ms ease-in-out"}
+                >
+                  <ClipboardRoot value={code}>
+                    <ClipboardIconButton />
+                  </ClipboardRoot>
+                </Box>
+              </Box>
+            );
+          },
+        }}
+      >
+        {content}
+      </Markdown>
+    </Prose>
+  );
+}
+
+function UserMessage({ content }: { content: string }) {
+  return (
+    <Stack
+      borderTop={"1px solid"}
+      borderColor={"brand.outline"}
+      className="user-message"
+      p={4}
+      pb={0}
+    >
+      <Text fontSize={"2xl"} fontWeight={"bolder"} opacity={0.8}>
+        {content}
       </Text>
-      <Link href={link.url} key={link.url} target="_blank" lineHeight={1.4}>
-        {link.url !== title && (
-          <Text fontSize={"xs"} opacity={0.5} truncate>
-            {link.url}
-          </Text>
-        )}
-      </Link>
     </Stack>
   );
 }
@@ -47,371 +189,126 @@ function AssistantMessage({
   links,
 }: {
   content: string;
-  links: ScrapeLink[];
+  links: { url: string; title: string | null }[];
 }) {
-  const { containerWidth } = useContext(AppContext);
-
   return (
-    <Stack
-      w={containerWidth ? containerWidth * 0.8 : 200}
-      opacity={containerWidth ? 1 : 0}
-    >
-      <Prose size="lg" maxW="full">
-        <Markdown remarkPlugins={[remarkGfm]}>{content}</Markdown>
-      </Prose>
-      <SimpleGrid columns={[1, 2, 3]} gap={2}>
-        {links.map((link, index) => (
-          <GridItem key={index}>
-            <LinkCard link={link} />
-          </GridItem>
-        ))}
-      </SimpleGrid>
-    </Stack>
-  );
-}
-
-function UserMessage({ content }: { content: string }) {
-  return (
-    <Stack w="full" alignItems="flex-end">
-      <Stack
-        bg="brand.outline"
-        p={4}
-        rounded={"xl"}
-        maxW="500px"
-        w="fit-content"
-        roundedBottomRight={0}
-      >
-        <Text>{content}</Text>
+    <Stack>
+      <Stack p={4} pt={0}>
+        <MessageContent content={content} />
       </Stack>
+      {links.length > 0 && (
+        <Stack borderTop="1px solid" borderColor={"brand.outline"} gap={0}>
+          {links.map((link, index) => (
+            <SourceLink key={index} link={link} />
+          ))}
+        </Stack>
+      )}
     </Stack>
   );
 }
 
-export default function ChatBox({
+function NoMessages({ scrape }: { scrape: Scrape }) {
+  return (
+    <Stack p={4} justify={"center"} align={"center"} h="full" gap={4}>
+      <Text opacity={0.5}>
+        <TbMessage size={"60px"} />
+      </Text>
+      <Heading size={"2xl"}>{scrape.title}</Heading>
+    </Stack>
+  );
+}
+
+function LoadingMessage() {
+  return (
+    <Stack p={4}>
+      <Skeleton h={"20px"} w={"100%"} />
+      <Skeleton h={"20px"} w={"100%"} />
+      <Skeleton h={"20px"} w={"60%"} />
+    </Stack>
+  );
+}
+
+export default function ScrapeWidget({
   thread,
-  token,
-  patchFetcher,
+  scrape,
+  userToken,
 }: {
   thread: Thread;
-  token: string;
-  patchFetcher: FetcherWithComponents<{ responseType: ResponseType }>;
+  scrape: Scrape;
+  userToken: string;
 }) {
-  const { setThreadTitle, containerWidth } = useContext(AppContext);
-  const socket = useRef<WebSocket>(null);
-  const [content, setContent] = useState("");
-  const [query, setQuery] = useState("");
-  const [messages, setMessages] = useState<Message[]>(thread.messages);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const promptBoxRef = useRef<HTMLDivElement>(null);
-  const selectionPopoverRef = useRef<HTMLDivElement>(null);
-  const [selectedText, setSelectedText] = useState("");
+  const chat = useScrapeChat({
+    token: userToken,
+    scrapeId: scrape.id,
+    defaultMessages: thread.messages,
+    threadId: thread.id,
+  });
 
-  const title = useMemo(() => getThreadName(messages), [messages]);
-
-  useEffect(() => {
-    positionPromptBox();
-    scrollToBottom(true);
-  }, [messages, containerWidth]);
-
-  useEffect(() => {
-    socket.current = new WebSocket(import.meta.env.VITE_SERVER_WS_URL);
-    socket.current.onopen = () => {
-      socket.current!.send(
-        makeMessage("join-room", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-      );
-    };
-    socket.current.onmessage = (event) => {
-      const message = JSON.parse(event.data);
-      if (message.type === "llm-chunk") {
-        if (message.data.end) {
-          setMessages((prev) => [
-            ...prev,
-            {
-              llmMessage: {
-                role: message.data.role,
-                content: message.data.content,
-              },
-              links: message.data.links ?? [],
-            },
-          ]);
-          setContent("");
-          return;
-        }
-        setContent((prev) => prev + message.data.content);
-        scrollToBottom();
-      }
-
-      if (message.type === "error") {
-        toaster.error({
-          title: "Failed to connect",
-          description: message.data.message,
-        });
-      }
-    };
-
-    return () => {
-      if (socket.current) {
-        socket.current.close();
-      }
-    };
-  }, [token]);
-
-  useEffect(() => {
-    setThreadTitle((titles) => ({
-      ...titles,
-      [thread.id]: title,
-    }));
-  }, [title]);
-
-  useEffect(() => {
-    function handleMouseUp() {
-      const selection = window.getSelection();
-      if (!selection || selection.toString().trim().length === 0) {
-        if (selectionPopoverRef.current) {
-          selectionPopoverRef.current.style.display = "none";
-        }
-        setSelectedText("");
-        return;
-      }
-
-      const range = selection.getRangeAt(0);
-      const rect = range.getBoundingClientRect();
-
-      const selectedText = selection.toString().trim();
-      setSelectedText(selectedText);
-      if (selectionPopoverRef.current) {
-        selectionPopoverRef.current.style.display = "block";
-        const popoverRect = selectionPopoverRef.current.getBoundingClientRect();
-
-        selectionPopoverRef.current.style.left = `${
-          rect.left + rect.width / 2 - popoverRect.width / 2
-        }px`;
-        selectionPopoverRef.current.style.top = `${
-          rect.top - popoverRect.height - 6
-        }px`;
-      }
-    }
-
-    function handleScroll() {
-      if (selectionPopoverRef.current) {
-        selectionPopoverRef.current.style.display = "none";
-      }
-      setSelectedText("");
-    }
-
-    document.addEventListener("mouseup", handleMouseUp);
-    document.addEventListener("scroll", handleScroll);
-    return () => {
-      document.removeEventListener("mouseup", handleMouseUp);
-      document.removeEventListener("scroll", handleScroll);
-    };
+  useEffect(function () {
+    chat.connect();
+    return () => chat.disconnect();
   }, []);
 
+  useEffect(
+    function () {
+      scroll();
+    },
+    [chat.messages]
+  );
+
   async function handleAsk(query: string) {
-    if (query.length === 0) return;
-
-    socket.current!.send(
-      makeMessage("ask-llm", { threadId: thread.id, query })
-    );
-    setMessages((prev) => [
-      ...prev,
-      { llmMessage: { role: "user", content: query }, links: [] },
-    ]);
-    setQuery("");
-    await sleep(0);
-    scrollToBottom();
+    chat.ask(query);
+    await scroll();
   }
 
-  function positionPromptBox() {
-    if (!containerRef.current) return;
-    if (!promptBoxRef.current) return;
-
-    const padding = 16;
-
-    const rect = containerRef.current.getBoundingClientRect();
-    promptBoxRef.current.style.left = `${rect.left - padding}px`;
-    promptBoxRef.current.style.width = `${rect.width + padding * 2}px`;
-    promptBoxRef.current.style.opacity = "1";
-  }
-
-  function scrollToBottom(force = false) {
-    const height = document.body.scrollHeight;
-
-    const scrollY = window.scrollY + window.innerHeight;
-    const delta = height - scrollY;
-    if (delta > 100 && !force) return;
-
-    window.scrollTo({
-      top: height,
-      behavior: "smooth",
-    });
-  }
-
-  function allMessages() {
-    const allMessages = [
-      ...messages,
-      ...(content
-        ? [{ llmMessage: { role: "assistant", content }, links: [] }]
-        : []),
-    ];
-    return allMessages.map((message) => ({
-      role: (message.llmMessage as any).role,
-      content: (message.llmMessage as any).content,
-      links: message.links,
-    }));
-  }
-
-  function handleAskSelectedText(prefix: string) {
-    if (selectedText.length === 0) return;
-    handleAsk(`${prefix} ${selectedText}`);
-    setSelectedText("");
-    if (selectionPopoverRef.current) {
-      selectionPopoverRef.current.style.display = "none";
+  async function scroll() {
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    const message = document.querySelectorAll(`.user-message`);
+    if (message) {
+      message[message.length - 1].scrollIntoView({ behavior: "smooth" });
     }
   }
 
-  const responseType =
-    patchFetcher.formData?.get("responseType") ?? thread.responseType ?? "long";
+  const messages = chat.allMessages();
 
   return (
-    <Stack w={"full"} h="full" ref={containerRef}>
-      <Stack flex={1} pb={"140px"} gap={8}>
-        {allMessages().map((message, index) => (
-          <Stack key={index}>
-            {message.role === "assistant" ? (
-              <AssistantMessage
-                content={message.content}
-                links={message.links}
-              />
-            ) : (
-              <UserMessage content={message.content} />
-            )}
-          </Stack>
-        ))}
-      </Stack>
-
+    <Center h="full">
       <Stack
-        position={"fixed"}
-        bottom={0}
-        left={0}
-        w="full"
-        zIndex={1}
-        ref={promptBoxRef}
-        p={4}
-        bg="brand.white"
-        opacity={0}
-        borderTop={"1px solid"}
+        border="1px solid"
         borderColor={"brand.outline"}
-      >
-        <Group w="full">
-          <Input
-            placeholder="Ask your query"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                handleAsk(query);
-              }
-            }}
-          />
-          <IconButton
-            onClick={() => handleAsk(query)}
-            disabled={query.length === 0}
-            colorPalette={"brand"}
-          >
-            <TbSend />
-          </IconButton>
-        </Group>
-        <Group>
-          <patchFetcher.Form method="patch">
-            <Group attached>
-              <Button
-                variant={responseType === "long" ? "solid" : "outline"}
-                size="xs"
-                type="submit"
-                name="responseType"
-                value="long"
-              >
-                Long
-              </Button>
-              <Button
-                variant={responseType === "brief" ? "solid" : "outline"}
-                size="xs"
-                type="submit"
-                name="responseType"
-                value="brief"
-              >
-                Brief
-              </Button>
-              <Button
-                variant={responseType === "short" ? "solid" : "outline"}
-                size="xs"
-                type="submit"
-                name="responseType"
-                value="short"
-              >
-                Short
-              </Button>
-              <Button
-                variant={responseType === "points" ? "solid" : "outline"}
-                size="xs"
-                type="submit"
-                name="responseType"
-                value="points"
-              >
-                Points
-              </Button>
-            </Group>
-          </patchFetcher.Form>
-        </Group>
-      </Stack>
-
-      <Box
-        position={"fixed"}
-        top={0}
-        left={0}
-        ref={selectionPopoverRef}
-        p={1}
-        rounded={"md"}
+        rounded={"xl"}
+        boxShadow={"rgba(100, 100, 111, 0.2) 0px 7px 29px 0px"}
         bg="brand.white"
-        shadow={"md"}
-        display={"none"}
+        w={"full"}
+        maxW={"500px"}
+        h="full"
+        maxH={"500px"}
+        overflow={"hidden"}
+        gap={0}
       >
-        <Group attached>
-          <Button
-            variant={"outline"}
-            size="xs"
-            onClick={() => handleAskSelectedText("What is")}
-          >
-            What?
-          </Button>
-          <Button
-            variant={"outline"}
-            size="xs"
-            onClick={() => handleAskSelectedText("Why is")}
-          >
-            Why?
-          </Button>
-          <Button
-            variant={"outline"}
-            size="xs"
-            onClick={() => handleAskSelectedText("How is")}
-          >
-            How?
-          </Button>
-          <Button
-            variant={"outline"}
-            size="xs"
-            onClick={() => handleAskSelectedText("When is")}
-          >
-            When?
-          </Button>
-        </Group>
-      </Box>
-    </Stack>
+        <Stack flex="1" overflow={"auto"} gap={0}>
+          {messages.length === 0 && <NoMessages scrape={scrape} />}
+          {messages.map((message, index) => (
+            <Stack key={index}>
+              {message.role === "user" ? (
+                <UserMessage content={message.content} />
+              ) : (
+                <AssistantMessage
+                  content={message.content}
+                  links={message.links}
+                />
+              )}
+              {chat.askStage === "asked" && index === messages.length - 1 && (
+                <LoadingMessage />
+              )}
+              {chat.askStage !== "idle" && index === messages.length - 1 && (
+                <Box h="500px" w="full" />
+              )}
+            </Stack>
+          ))}
+        </Stack>
+        <ChatInput onAsk={handleAsk} stage={chat.askStage} />
+      </Stack>
+    </Center>
   );
 }

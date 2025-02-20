@@ -6,7 +6,8 @@ type SessionData = {
   magicLink: string;
   email: string;
   user: User;
-  __flash_error__: string
+  chatSessionKey: string;
+  __flash_error__: string;
 };
 
 type SessionFlashData = {

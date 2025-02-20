@@ -8,7 +8,7 @@ import { scrape, scrapeLoop, type ScrapeStore } from "./scrape/crawl";
 import { OrderedSet } from "./scrape/ordered-set";
 import cors from "cors";
 import OpenAI from "openai";
-import { askLLM, getSystemPrompt } from "./llm";
+import { askLLM } from "./llm";
 import { Stream } from "openai/streaming";
 import { addMessage } from "./thread/store";
 import { prisma } from "./prisma";
@@ -23,6 +23,7 @@ import { getRoomIds } from "./socket-room";
 import { authenticate, verifyToken } from "./jwt";
 import fs from "fs/promises";
 import { getMetaTitle } from "./scrape/parse";
+import { splitMarkdown } from "./scrape/markdown-splitter";
 
 const app: Express = express();
 const expressWs = ws(app);
@@ -66,54 +67,69 @@ app.get("/", function (req: Request, res: Response) {
 });
 
 app.get("/test", async function (req: Request, res: Response) {
-  const content = await scrape(
-    "https://docs.voyageai.com/docs/pricing"
-  );
-  await fs.writeFile("test.md", content.parseOutput.html ?? "");
-  res.json({ message: "ok" });
+  // const url = "https://www.remotion.dev/docs/google-fonts/get-available-fonts"
+  const url = "https://www.chakra-ui.com/docs/components/table";
+  const content = await scrape(url);
+  await fs.writeFile("test.md", content.parseOutput.markdown);
+  const chunks = await splitMarkdown(content.parseOutput.markdown);
+  for (let i = 0; i < chunks.length; i++) {
+    await fs.writeFile(`test-${i}.md`, chunks[i]);
+  }
+  res.json({ message: "ok", chunks });
 });
 
 app.post("/scrape", authenticate, async function (req: Request, res: Response) {
   const userId = req.user!.id;
   const url = req.body.url;
+  const scrapeId = req.body.scrapeId!;
 
-  const existingScrape = await prisma.scrape.findFirst({
-    where: { url, userId },
+  const scraping = await prisma.scrape.count({
+    where: {
+      userId,
+      status: "scraping",
+    },
   });
-  if (existingScrape) {
-    res
-      .status(212)
-      .json({ message: "already-scraped", scrapeId: existingScrape.id });
+
+  if (scraping > 0) {
+    console.log("Too many scrapes", userId, scraping);
+    res.json({ message: "Too many scrapes" });
     return;
   }
 
+  const scrape = await prisma.scrape.findFirstOrThrow({
+    where: { id: scrapeId, userId },
+  });
+
   (async function () {
-    const scrape = await prisma.scrape.create({
-      data: { url, status: "pending", userId },
+    getRoomIds({ userKey: userId }).map((roomId) =>
+      broadcast(roomId, makeMessage("scrape-complete", { scrapeId }))
+    );
+    await prisma.scrape.update({
+      where: { id: scrape.id },
+      data: { status: "scraping" },
     });
 
     const store: ScrapeStore = {
       urls: {},
       urlSet: new OrderedSet(),
     };
-    store.urlSet.add(url);
+    store.urlSet.add(url ?? scrape.url);
 
-    await prisma.scrape.update({
-      where: { id: scrape.id },
-      data: { status: "scraping" },
-    });
-
-    await scrapeLoop(store, req.body.url, {
-      limit: req.body.maxLinks ? parseInt(req.body.maxLinks) : undefined,
+    await scrapeLoop(store, req.body.url ?? scrape.url, {
+      limit: req.body.maxLinks
+        ? parseInt(req.body.maxLinks)
+        : url
+        ? 1
+        : undefined,
       skipRegex: req.body.skipRegex
         ? req.body.skipRegex
             .split(",")
             .map((regex: string) => new RegExp(regex))
         : undefined,
       onComplete: async () => {
-        const roomIds = getRoomIds({ userId });
+        const roomIds = getRoomIds({ userKey: userId });
         roomIds.forEach((roomId) =>
-          broadcast(roomId, makeMessage("scrape-complete", { url }))
+          broadcast(roomId, makeMessage("scrape-complete", { scrapeId }))
         );
       },
       afterScrape: async (url, { markdown }) => {
@@ -121,18 +137,22 @@ app.post("/scrape", authenticate, async function (req: Request, res: Response) {
         const maxLinks = req.body.maxLinks
           ? parseInt(req.body.maxLinks)
           : undefined;
+        const actualRemainingUrlCount = store.urlSet.size() - scrapedUrlCount;
         const remainingUrlCount = maxLinks
-          ? maxLinks - scrapedUrlCount
-          : store.urlSet.size() - scrapedUrlCount;
-        const roomIds = getRoomIds({ userId });
+          ? Math.min(maxLinks, actualRemainingUrlCount)
+          : actualRemainingUrlCount;
+        const roomIds = getRoomIds({ userKey: userId });
 
-        const embedding = await makeEmbedding(markdown);
-        await saveEmbedding(userId, scrape.id, [
-          {
-            embedding,
-            metadata: { content: markdown, url },
-          },
-        ]);
+        const chunks = await splitMarkdown(markdown);
+        for (const chunk of chunks) {
+          const embedding = await makeEmbedding(chunk);
+          await saveEmbedding(userId, scrape.id, [
+            {
+              embedding,
+              metadata: { content: chunk, url },
+            },
+          ]);
+        }
 
         if (scrape.url === url) {
           await prisma.scrape.update({
@@ -141,8 +161,14 @@ app.post("/scrape", authenticate, async function (req: Request, res: Response) {
           });
         }
 
-        await prisma.scrapeItem.create({
-          data: {
+        await prisma.scrapeItem.upsert({
+          where: { scrapeId_url: { scrapeId: scrape.id, url } },
+          update: {
+            markdown,
+            title: getMetaTitle(store.urls[url]?.metaTags ?? []),
+            metaTags: store.urls[url]?.metaTags,
+          },
+          create: {
             userId,
             scrapeId: scrape.id,
             url,
@@ -172,9 +198,9 @@ app.post("/scrape", authenticate, async function (req: Request, res: Response) {
       },
     });
 
-    const roomIds = getRoomIds({ userId });
+    const roomIds = getRoomIds({ userKey: userId });
     roomIds.forEach((roomId) =>
-      broadcast(roomId, makeMessage("saved", { url }))
+      broadcast(roomId, makeMessage("saved", { scrapeId }))
     );
   })();
 
@@ -195,7 +221,7 @@ app.delete(
 );
 
 expressWs.app.ws("/", (ws: any, req) => {
-  let userId: string | null = null;
+  let userKey: string | null = null;
 
   ws.on("message", async (msg: Buffer | string) => {
     try {
@@ -211,33 +237,23 @@ expressWs.app.ws("/", (ws: any, req) => {
 
         const token = authHeader.split(" ")[1];
         const user = verifyToken(token);
-        userId = user.userId;
-        getRoomIds({ userId }).forEach((roomId) => joinRoom(roomId, ws));
+        userKey = user.userId;
+        getRoomIds({ userKey: userKey! }).forEach((roomId) =>
+          joinRoom(roomId, ws)
+        );
         return;
       }
 
-      // Check authentication for all other messages
-      if (!userId) {
+      if (!userKey) {
         ws.send(makeMessage("error", { message: "Not authenticated" }));
         ws.close();
         return;
       }
 
-      if (message.type === "create-thread") {
-        const scrape = await prisma.scrape.findFirstOrThrow({
-          where: { url: message.data.url, userId },
-        });
-
-        const thread = await prisma.thread.create({
-          data: { userId, scrapeId: scrape.id, messages: [] },
-        });
-        ws.send(makeMessage("thread-created", { threadId: thread.id }));
-      }
-
       if (message.type === "ask-llm") {
         const threadId = message.data.threadId;
         const thread = await prisma.thread.findFirstOrThrow({
-          where: { id: threadId, userId },
+          where: { id: threadId },
         });
 
         const scrape = await prisma.scrape.findFirstOrThrow({
@@ -250,7 +266,7 @@ expressWs.app.ws("/", (ws: any, req) => {
         });
 
         const result = await search(
-          userId,
+          scrape.userId,
           scrape.id,
           await makeEmbedding(message.data.query)
         );
@@ -268,7 +284,7 @@ expressWs.app.ws("/", (ws: any, req) => {
         const response = await askLLM(message.data.query, thread.messages, {
           url: scrape.url,
           context: context?.content,
-          systemPrompt: getSystemPrompt(thread.responseType ?? "long"),
+          systemPrompt: scrape.chatPrompt ?? undefined,
         });
         if (context?.links) {
           ws.send(
@@ -309,7 +325,7 @@ expressWs.app.ws("/", (ws: any, req) => {
   });
 
   ws.on("close", () => {
-    userId = null;
+    userKey = null;
   });
 });
 
