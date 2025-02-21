@@ -24,7 +24,6 @@ import { authenticate, verifyToken } from "./jwt";
 import fs from "fs/promises";
 import { getMetaTitle } from "./scrape/parse";
 import { splitMarkdown } from "./scrape/markdown-splitter";
-import { handlePostMessage, handleSse } from "./mcp";
 
 const app: Express = express();
 const expressWs = ws(app);
@@ -332,12 +331,20 @@ expressWs.app.ws("/", (ws: any, req) => {
   });
 });
 
-app.get("/sse/:scrapeId", async (req, res) => {
-  await handleSse(res, req.params.scrapeId);
-});
+app.get("/mcp/:scrapeId", async (req, res) => {
+  const scrape = await prisma.scrape.findFirstOrThrow({
+    where: { id: req.params.scrapeId },
+  });
 
-app.post("/sse/message/:transportId", async (req, res) => {
-  return await handlePostMessage(req, res, req.params.transportId);
+  const query = req.query.query as string;
+
+  const result = await search(
+    scrape.userId,
+    scrape.id,
+    await makeEmbedding(query)
+  );
+
+  res.json(result.matches.map((match) => match.metadata));
 });
 
 app.listen(port, async () => {
