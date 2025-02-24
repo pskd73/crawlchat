@@ -21,7 +21,7 @@ export function MarkdownProse({ children }: PropsWithChildren) {
             }
 
             let language = className?.replace("language-", "");
-            if (language === "env") {
+            if (!hljs.listLanguages().includes(language)) {
               language = "bash";
             }
             const code = children as string;

@@ -233,7 +233,7 @@ export default function ScrapeWidget({
     await new Promise((resolve) => setTimeout(resolve, 0));
     const message = document.querySelectorAll(`.user-message`);
     if (message) {
-      message[message.length - 1].scrollIntoView({ behavior: "smooth" });
+      message[message.length - 1]?.scrollIntoView({ behavior: "smooth" });
     }
   }
 
