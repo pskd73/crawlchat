@@ -26,7 +26,7 @@ export default function ScrapeEmbed({ loaderData }: Route.ComponentProps) {
           <Code>head</Code> tag of your page.
         </Text>
         <pre>
-          <Code>{`<script src="https://crawlchat.app/embed.js" id="${loaderData.scrape?.id}"></script>`}</Code>
+          <Code>{`<script src="https://crawlchat.app/embed.js" id="crawlchat-script" data-id="${loaderData.scrape?.id}"></script>`}</Code>
         </pre>
       </Stack>
 
