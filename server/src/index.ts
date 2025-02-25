@@ -103,7 +103,7 @@ app.post("/scrape", authenticate, async function (req: Request, res: Response) {
   (async function () {
     function getLimit() {
       if (userId === process.env.OPEN_USER_ID) {
-        return 5;
+        return 25;
       }
       if (req.body.maxLinks) {
         return parseInt(req.body.maxLinks);

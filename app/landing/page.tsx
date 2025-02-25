@@ -7,7 +7,6 @@ import {
   TbBook,
   TbFileText,
   TbCode,
-  TbAlertCircle,
   TbMessage,
   TbCircleCheck,
   TbMarkdown,
@@ -15,14 +14,9 @@ import {
   TbLoader2,
 } from "react-icons/tb";
 import { Button } from "~/components/ui/button";
-import "./tailwind.css";
 import { Link } from "@chakra-ui/react";
-import { createToken } from "~/jwt";
-import type { Route } from "./+types/page";
-import { useEffect, useState } from "react";
-import { prisma } from "~/prisma";
-import { useScrape } from "~/dashboard/use-scrape";
-import { useFetcher } from "react-router";
+import { useOpenScrape } from "./use-open-scrape";
+import "./tailwind.css";
 
 export function meta() {
   return [
@@ -31,81 +25,6 @@ export function meta() {
       description: "Chat with Any Website using AI",
     },
   ];
-}
-
-export async function action({ request }: Route.ActionArgs) {
-  const formData = await request.formData();
-  const type = formData.get("type");
-
-  if (type === "scrape") {
-    const url = formData.get("url");
-    const roomId = formData.get("roomId");
-
-    if (!url) {
-      return { error: "URL is required" };
-    }
-    if (!roomId) {
-      return { error: "Room ID is required" };
-    }
-
-    const lastMinute = new Date(Date.now() - 60 * 1000);
-
-    const scrapes = await prisma.scrape.findMany({
-      where: {
-        userId: process.env.OPEN_USER_ID!,
-        createdAt: {
-          gt: lastMinute,
-        },
-      },
-    });
-
-    if (scrapes.length >= 5) {
-      console.log("Too many scrapes");
-      return { error: "Too many scrapes" };
-    }
-
-    const scrape = await prisma.scrape.create({
-      data: {
-        userId: process.env.OPEN_USER_ID!,
-        url: url as string,
-        status: "pending",
-      },
-    });
-
-    await fetch(`${process.env.VITE_SERVER_URL}/scrape`, {
-      method: "POST",
-      body: JSON.stringify({
-        scrapeId: scrape.id,
-        userId: scrape.userId,
-        url,
-        maxLinks: 1,
-        roomId: `user-${roomId}`,
-        includeMarkdown: true,
-      }),
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${createToken(process.env.OPEN_USER_ID!)}`,
-      },
-    });
-
-    return { token: createToken(roomId as string), scrapeId: scrape.id };
-  }
-
-  if (type === "llm.txt") {
-    const scrapeId = formData.get("scrapeId");
-    const res = await fetch(
-      `${process.env.VITE_SERVER_URL}/llm.txt?scrapeId=${scrapeId}`,
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${createToken(process.env.OPEN_USER_ID!)}`,
-        },
-      }
-    );
-    const { text } = await res.json();
-
-    return { llmTxt: text };
-  }
 }
 
 function ScrapeButton({
@@ -136,11 +55,17 @@ function ScrapeButton({
 }
 
 export default function Index() {
-  const { connect, scraping, stage } = useScrape();
-  const scrapeFetcher = useFetcher();
-  const llmTxtFetcher = useFetcher();
-  const [roomId, setRoomId] = useState<string>("");
-  const [mpcCmd, setMpcCmd] = useState<string>("");
+  const {
+    scrapeFetcher,
+    scraping,
+    stage,
+    roomId,
+    mpcCmd,
+    disable,
+    openChat,
+    downloadLlmTxt,
+    copyMcpCmd,
+  } = useOpenScrape();
 
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
@@ -148,69 +73,6 @@ export default function Index() {
       element.scrollIntoView({ behavior: "smooth" });
     }
   };
-
-  useEffect(() => {
-    const getRandomRoomId = () => {
-      return Math.random().toString(36).substring(2, 15);
-    };
-    if (!localStorage.getItem("roomId")) {
-      localStorage.setItem("roomId", getRandomRoomId());
-    }
-    setRoomId(localStorage.getItem("roomId")!);
-  }, []);
-
-  useEffect(() => {
-    if (scrapeFetcher.data?.token) {
-      connect(scrapeFetcher.data.token);
-    }
-  }, [scrapeFetcher.data?.token]);
-
-  useEffect(() => {
-    if (llmTxtFetcher.data?.llmTxt) {
-      downloadTxt(llmTxtFetcher.data.llmTxt, "llm.txt");
-    }
-  }, [llmTxtFetcher.data?.llmTxt]);
-
-  function downloadTxt(text: string, filename: string) {
-    const blob = new Blob([text], {
-      type: "text/markdown",
-    });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    window.URL.revokeObjectURL(url);
-    document.body.removeChild(a);
-  }
-
-  function handleChat() {
-    window.open(`/w/${scrapeFetcher.data?.scrapeId}`, "_blank");
-  }
-
-  function handleLlmTxt() {
-    if (scraping?.markdown) {
-      llmTxtFetcher.submit(
-        { type: "llm.txt", scrapeId: scrapeFetcher.data?.scrapeId },
-        { method: "post" }
-      );
-    }
-  }
-
-  function handleMCP() {
-    if (scraping?.url) {
-      const scrapedUrl = new URL(scraping.url);
-
-      const cmd = `npx crawl-chat-mcp --id=${
-        scrapeFetcher.data?.scrapeId
-      } --name=search_${scrapedUrl.hostname.replaceAll(/[\/\.]/g, "_")}`;
-      setMpcCmd(cmd);
-      navigator.clipboard.writeText(cmd);
-    }
-  }
-
-  const disable = scrapeFetcher.data && !scrapeFetcher.data.error;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
@@ -257,19 +119,23 @@ export default function Index() {
             Make your content LLM ready!
           </h1>
           <p className="text-xl text-gray-600 mb-10 max-w-2xl mx-auto">
-            Don't fall behind by just providing the content to your customers.
-            Make it easily accessible to them by making your content or
-            documents LLM ready.
+            Give URL and it will scrape all the content and turns them
+            embeddings for RAG. You can share chat links or embed it on your
+            website. Or use API to query the content.
           </p>
 
           <div className="flex flex-col items-center gap-2 max-w-xl mx-auto">
             <div className="w-full md:h-16 flex flex-col justify-center items-center">
               {stage === "idle" && (
-                <scrapeFetcher.Form className="w-full" method="post">
+                <scrapeFetcher.Form
+                  className="w-full"
+                  method="post"
+                  action="/open-scrape"
+                >
                   <div className="flex flex-col items-start w-full">
                     <div className="flex flex-col md:flex-row gap-2 w-full">
-                      <input type="hidden" name="type" value="scrape" />
-                      <input name="roomId" type="hidden" value={roomId} />
+                      <input type="hidden" name="intent" value="scrape" />
+                      <input type="hidden" name="roomId" value={roomId} />
                       <input
                         name="url"
                         type="url"
@@ -315,19 +181,19 @@ export default function Index() {
 
             <div className="flex gap-2 w-full">
               <ScrapeButton
-                onClick={handleChat}
+                onClick={openChat}
                 icon={<TbMessage />}
                 text="Chat"
                 disabled={stage !== "saved"}
               />
               <ScrapeButton
-                onClick={handleLlmTxt}
+                onClick={downloadLlmTxt}
                 icon={<TbMarkdown />}
                 text="LLM.txt"
                 disabled={stage !== "saved"}
               />
               <ScrapeButton
-                onClick={handleMCP}
+                onClick={copyMcpCmd}
                 icon={<TbRobotFace />}
                 text="MCP"
                 disabled={stage !== "saved"}
@@ -599,6 +465,14 @@ export default function Index() {
 
       {/* Footer */}
       <footer className="py-12 px-4 border-t border-gray-100">
+        <div className="container mx-auto text-center text-gray-600 flex gap-4 justify-center mb-4">
+          <div className="hover:underline">
+            <Link href="/llm-txt">LLM.txt Generator</Link>
+          </div>
+          <div className="hover:underline">
+            <Link href="/login">Login</Link>
+          </div>
+        </div>
         <div className="container mx-auto text-center text-gray-600">
           <p>&copy; 2025 CrawlChat. All rights reserved.</p>
         </div>
