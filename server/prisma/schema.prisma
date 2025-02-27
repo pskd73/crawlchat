@@ -70,8 +70,11 @@ type ScrapeLink {
 }
 
 type Message {
+  uuid            String
   llmMessage      Json
   links           ScrapeLink[]
+  createdAt       DateTime? @default(now())
+  pinnedAt        DateTime?
 }
 
 enum ResponseType {
@@ -96,6 +99,8 @@ model Thread {
 
   scrape          Scrape   @relation(fields: [scrapeId], references: [id], onDelete: Cascade)
   user            User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([messages.uuid])
 }
 
 type Embedding {

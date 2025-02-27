@@ -43,10 +43,10 @@ export async function action({ request, params }: Route.ActionArgs) {
   if (!scrape) {
     throw new Response("Not found", { status: 404 });
   }
-  
+
   const formData = await request.formData();
   const size = formData.get("size");
-  
+
   if (size) {
     await prisma.scrape.update({
       where: {
@@ -84,7 +84,13 @@ export default function ScrapeEmbed({ loaderData }: Route.ComponentProps) {
           <Code>head</Code> tag of your page.
         </Text>
         <pre>
-          <Code>{`<script src="https://crawlchat.app/embed.js" id="crawlchat-script" data-id="${loaderData.scrape?.id}"></script>`}</Code>
+          <Code
+            as="pre"
+            whiteSpace="pre-wrap"
+            wordBreak="break-word"
+            overflowX="auto"
+            p={4}
+          >{`<script src="https://crawlchat.app/embed.js" id="crawlchat-script" data-id="${loaderData.scrape?.id}"></script>`}</Code>
         </pre>
       </Stack>
 

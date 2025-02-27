@@ -1,5 +1,5 @@
 import type { Message } from "@prisma/client";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { toaster } from "~/components/ui/toaster";
 import { AppContext } from "~/dashboard/context";
 import { makeMessage } from "~/dashboard/socket-util";
@@ -24,6 +24,30 @@ export function useScrapeChat({
   const [content, setContent] = useState("");
   const [askStage, setAskStage] = useState<AskStage>("idle");
 
+  const allMessages = useMemo(() => {
+    const allMessages = [
+      ...messages,
+      ...(content
+        ? [
+            {
+              llmMessage: { role: "assistant", content },
+              links: [],
+              pinnedAt: null,
+              uuid: "new-answer",
+              createdAt: new Date(),
+            },
+          ]
+        : []),
+    ];
+    return allMessages.map((message) => ({
+      role: (message.llmMessage as any).role,
+      content: (message.llmMessage as any).content,
+      links: message.links,
+      pinned: message.pinnedAt !== null,
+      uuid: message.uuid,
+    }));
+  }, [messages, content]);
+
   useEffect(() => {
     if (setThreadTitle) {
       const title = getThreadName(messages);
@@ -46,6 +70,8 @@ export function useScrapeChat({
         handleLlmChunk(message.data);
       } else if (message.type === "error") {
         handleError(message.data.message);
+      } else if (message.type === "query-message") {
+        handleQueryMessage(message.data);
       }
     };
   }
@@ -60,16 +86,37 @@ export function useScrapeChat({
     );
   }
 
+  function handleQueryMessage({ uuid }: { uuid: string }) {
+    setMessages((prev) => {
+      const queryIndex = prev.findIndex(
+        (message) => message.uuid === "new-query"
+      );
+      if (queryIndex === -1) {
+        return prev;
+      }
+      return [
+        ...prev.slice(0, queryIndex),
+        {
+          ...prev[queryIndex],
+          uuid,
+        },
+        ...prev.slice(queryIndex + 1),
+      ];
+    });
+  }
+
   function handleLlmChunk({
     end,
     role,
     content,
     links,
+    uuid,
   }: {
     end?: boolean;
     role: string;
     content: string;
     links?: { url: string; title: string }[];
+    uuid: string;
   }) {
     if (end) {
       setMessages((prev) => [
@@ -80,6 +127,9 @@ export function useScrapeChat({
             content,
           },
           links: links ?? [],
+          pinnedAt: null,
+          uuid,
+          createdAt: new Date(),
         },
       ]);
       setContent("");
@@ -108,24 +158,54 @@ export function useScrapeChat({
     const messagesCount = messages.length;
     setMessages((prev) => [
       ...prev,
-      { llmMessage: { role: "user", content: query }, links: [] },
+      {
+        llmMessage: { role: "user", content: query },
+        links: [],
+        pinnedAt: null,
+        uuid: "new-query",
+        createdAt: new Date(),
+      },
     ]);
     setAskStage("asked");
     return messagesCount + 1;
   }
 
-  function allMessages() {
-    const allMessages = [
-      ...messages,
-      ...(content
-        ? [{ llmMessage: { role: "assistant", content }, links: [] }]
-        : []),
-    ];
-    return allMessages.map((message) => ({
-      role: (message.llmMessage as any).role,
-      content: (message.llmMessage as any).content,
-      links: message.links,
-    }));
+  function pinMessage(uuid: string) {
+    setMessages((prev) => {
+      const index = prev.findIndex((message) => message.uuid === uuid);
+      if (index === -1) {
+        return prev;
+      }
+      return [
+        ...prev.slice(0, index),
+        { ...prev[index], pinnedAt: new Date() },
+        ...prev.slice(index + 1),
+      ];
+    });
+  }
+
+  function unpinMessage(uuid: string) {
+    setMessages((prev) => {
+      const index = prev.findIndex((message) => message.uuid === uuid);
+      if (index === -1) {
+        return prev;
+      }
+      return [
+        ...prev.slice(0, index),
+        { ...prev[index], pinnedAt: null },
+        ...prev.slice(index + 1),
+      ];
+    });
+  }
+
+  function erase() {
+    setMessages([]);
+  }
+
+  function deleteMessage(uuids: string[]) {
+    setMessages((prev) =>
+      prev.filter((message) => !uuids.includes(message.uuid))
+    );
   }
 
   return {
@@ -138,5 +218,9 @@ export function useScrapeChat({
     ask,
     allMessages,
     askStage,
+    pinMessage,
+    unpinMessage,
+    erase,
+    deleteMessage,
   };
 }

@@ -1,4 +1,5 @@
 import {
+  Badge,
   Box,
   Center,
   Group,
@@ -10,12 +11,26 @@ import {
   Skeleton,
 } from "@chakra-ui/react";
 import { Stack, Text } from "@chakra-ui/react";
-import type { Scrape, Thread } from "@prisma/client";
-import { useEffect, useRef, useState } from "react";
-import { TbArrowUp, TbChevronRight, TbMessage } from "react-icons/tb";
+import type { Message, Scrape, Thread } from "@prisma/client";
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  TbArrowUp,
+  TbChevronRight,
+  TbEraser,
+  TbMessage,
+  TbPin,
+  TbTrash,
+} from "react-icons/tb";
 import { useScrapeChat, type AskStage } from "~/widget/use-chat";
 import { MarkdownProse } from "~/widget/markdown-prose";
 import { InputGroup } from "~/components/ui/input-group";
+import { Tooltip } from "~/components/ui/tooltip";
+import {
+  MenuContent,
+  MenuItem,
+  MenuRoot,
+  MenuTrigger,
+} from "~/components/ui/menu";
 
 function ChatInput({
   onAsk,
@@ -78,11 +93,7 @@ function ChatInput({
       p={4}
     >
       <Group flex={1}>
-        <InputGroup
-          flex="1"
-          startElement={<TbMessage size={"20px"} />}
-          endElement={<Kbd>⏎</Kbd>}
-        >
+        <InputGroup flex="1" endElement={<Kbd>⏎</Kbd>}>
           <Input
             ref={inputRef}
             placeholder={getPlaceholder()}
@@ -170,14 +181,40 @@ function UserMessage({ content }: { content: string }) {
 function AssistantMessage({
   content,
   links,
+  pinned,
+  onPin,
+  onUnpin,
+  onDelete,
 }: {
   content: string;
   links: { url: string; title: string | null }[];
+  pinned: boolean;
+  onPin: () => void;
+  onUnpin: () => void;
+  onDelete: () => void;
 }) {
   return (
     <Stack>
-      <Stack p={4} pt={0}>
+      <Stack px={4} gap={0}>
         <MarkdownProse>{content}</MarkdownProse>
+        <Group>
+          <IconButton
+            size={"xs"}
+            rounded={"full"}
+            variant={pinned ? "solid" : "subtle"}
+            onClick={pinned ? onUnpin : onPin}
+          >
+            <TbPin />
+          </IconButton>
+          <IconButton
+            size={"xs"}
+            rounded={"full"}
+            variant={"subtle"}
+            onClick={onDelete}
+          >
+            <TbTrash />
+          </IconButton>
+        </Group>
       </Stack>
       {links.length > 0 && (
         <Stack borderTop="1px solid" borderColor={"brand.outline"} gap={0}>
@@ -213,16 +250,134 @@ function LoadingMessage() {
   );
 }
 
+function Toolbar({
+  messages,
+  onErase,
+  onPinSelect,
+}: {
+  messages: Message[];
+  onErase: () => void;
+  onPinSelect: (uuid: string) => void;
+}) {
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const pinnedCount = useMemo(() => {
+    return messages.filter((message) => message.pinnedAt).length;
+  }, [messages]);
+
+  useEffect(
+    function () {
+      if (!confirmDelete) {
+        return;
+      }
+
+      const timeout = setTimeout(() => setConfirmDelete(false), 3000);
+      return () => clearTimeout(timeout);
+    },
+    [confirmDelete]
+  );
+
+  function handleDelete() {
+    if (!confirmDelete) {
+      setConfirmDelete(true);
+      return;
+    }
+    onErase();
+  }
+
+  function handlePinSelect(uuid: string) {
+    onPinSelect(uuid);
+  }
+
+  return (
+    <Group
+      h="60px"
+      borderBottom={"1px solid"}
+      borderColor={"brand.outline"}
+      p={4}
+      w={"full"}
+      justify={"space-between"}
+    >
+      <Group w="full">
+        <Group></Group>
+      </Group>
+      <Group>
+        {pinnedCount > 0 && (
+          <MenuRoot
+            positioning={{ placement: "bottom-end" }}
+            onSelect={(e) => handlePinSelect(e.value)}
+          >
+            <MenuTrigger asChild>
+              <IconButton
+                size={"xs"}
+                rounded={"full"}
+                variant={"subtle"}
+                position={"relative"}
+              >
+                <TbPin />
+                <Badge
+                  ml="1"
+                  colorScheme="red"
+                  variant="solid"
+                  borderRadius="full"
+                  position={"absolute"}
+                  top={-1}
+                  right={-1}
+                  size={"xs"}
+                >
+                  {pinnedCount}
+                </Badge>
+              </IconButton>
+            </MenuTrigger>
+            <MenuContent>
+              {messages
+                .filter((m) => m.pinnedAt)
+                .map((message) => (
+                  <MenuItem value={message.uuid}>
+                    {(message.llmMessage as any)?.content}
+                  </MenuItem>
+                ))}
+            </MenuContent>
+          </MenuRoot>
+        )}
+
+        <Tooltip
+          content={confirmDelete ? "Are you sure?" : "Clear chat"}
+          open={confirmDelete}
+          showArrow
+        >
+          <IconButton
+            size={"xs"}
+            rounded={"full"}
+            variant={confirmDelete ? "solid" : "subtle"}
+            colorPalette={confirmDelete ? "red" : undefined}
+            onClick={handleDelete}
+          >
+            <TbEraser />
+          </IconButton>
+        </Tooltip>
+      </Group>
+    </Group>
+  );
+}
+
 export default function ScrapeWidget({
   thread,
   scrape,
   userToken,
   onBgClick,
+  onPin,
+  onUnpin,
+  onErase,
+  onDelete,
 }: {
   thread: Thread;
   scrape: Scrape;
   userToken: string;
   onBgClick?: () => void;
+  onPin: (uuid: string) => void;
+  onUnpin: (uuid: string) => void;
+  onErase: () => void;
+  onDelete: (uuids: string[]) => void;
 }) {
   const chat = useScrapeChat({
     token: userToken,
@@ -236,12 +391,9 @@ export default function ScrapeWidget({
     return () => chat.disconnect();
   }, []);
 
-  useEffect(
-    function () {
-      scroll();
-    },
-    [chat.messages]
-  );
+  useEffect(function () {
+    scroll();
+  }, []);
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -270,9 +422,9 @@ export default function ScrapeWidget({
     await scroll();
   }
 
-  async function scroll() {
+  async function scroll(selector = ".user-message") {
     await new Promise((resolve) => setTimeout(resolve, 100));
-    const message = document.querySelectorAll(`.user-message`);
+    const message = document.querySelectorAll(selector);
     if (message) {
       message[message.length - 1]?.scrollIntoView({ behavior: "smooth" });
     }
@@ -295,7 +447,30 @@ export default function ScrapeWidget({
     }
   }
 
-  const messages = chat.allMessages();
+  function handlePin(uuid: string) {
+    onPin(uuid);
+    chat.pinMessage(uuid);
+  }
+
+  function handleUnpin(uuid: string) {
+    onUnpin(uuid);
+    chat.unpinMessage(uuid);
+  }
+
+  function handleErase() {
+    onErase();
+    chat.erase();
+  }
+
+  function handlePinSelect(uuid: string) {
+    scroll(`#message-${uuid}`);
+  }
+
+  function handleDelete(uuids: string[]) {
+    onDelete(uuids);
+    chat.deleteMessage(uuids);
+  }
+
   const { width, height } = getSize();
 
   return (
@@ -313,24 +488,38 @@ export default function ScrapeWidget({
         overflow={"hidden"}
         gap={0}
       >
+        <Toolbar
+          messages={chat.messages}
+          onErase={handleErase}
+          onPinSelect={handlePinSelect}
+        />
         <Stack flex="1" overflow={"auto"} gap={0}>
-          {messages.length === 0 && <NoMessages scrape={scrape} />}
-          {messages.map((message, index) => (
-            <Stack key={index}>
+          {chat.allMessages.length === 0 && <NoMessages scrape={scrape} />}
+          {chat.allMessages.map((message, index) => (
+            <Stack key={index} id={`message-${message.uuid}`}>
               {message.role === "user" ? (
                 <UserMessage content={message.content} />
               ) : (
                 <AssistantMessage
                   content={message.content}
                   links={message.links}
+                  pinned={chat.allMessages[index - 1]?.pinned}
+                  onPin={() => handlePin(chat.allMessages[index - 1]?.uuid)}
+                  onUnpin={() => handleUnpin(chat.allMessages[index - 1]?.uuid)}
+                  onDelete={() =>
+                    handleDelete([
+                      chat.allMessages[index - 1]?.uuid,
+                      message.uuid,
+                    ])
+                  }
                 />
               )}
-              {chat.askStage === "asked" && index === messages.length - 1 && (
-                <LoadingMessage />
-              )}
-              {chat.askStage !== "idle" && index === messages.length - 1 && (
-                <Box h={"2000px"} w="full" />
-              )}
+              {chat.askStage === "asked" &&
+                index === chat.allMessages.length - 1 && <LoadingMessage />}
+              {chat.askStage !== "idle" &&
+                index === chat.allMessages.length - 1 && (
+                  <Box h={"2000px"} w="full" />
+                )}
             </Stack>
           ))}
         </Stack>

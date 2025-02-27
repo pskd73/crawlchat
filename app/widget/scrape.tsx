@@ -5,8 +5,9 @@ import { createToken } from "~/jwt";
 import "highlight.js/styles/vs.css";
 import ChatBox from "~/dashboard/chat-box";
 import { commitSession, getSession } from "~/session";
-import { data, redirect } from "react-router";
-import { useEffect } from "react";
+import { data, redirect, useFetcher } from "react-router";
+import { useEffect, useState } from "react";
+import type { Thread } from "@prisma/client";
 
 export async function loader({ params, request }: Route.LoaderArgs) {
   const scrape = await prisma.scrape.findUnique({
@@ -33,9 +34,14 @@ export async function loader({ params, request }: Route.LoaderArgs) {
 
   const userToken = await createToken(chatSessionKeys[scrape.id]);
 
-  const thread = await prisma.thread.update({
+  const thread = await prisma.thread.upsert({
     where: { id: chatSessionKeys[scrape.id] },
-    data: {
+    update: {
+      openedAt: new Date(),
+    },
+    create: {
+      id: chatSessionKeys[scrape.id],
+      scrapeId: scrape.id,
       openedAt: new Date(),
     },
   });
@@ -62,7 +68,82 @@ export function meta({ data }: Route.MetaArgs) {
   ];
 }
 
+export async function action({ request, params }: Route.ActionArgs) {
+  const formData = await request.formData();
+  const intent = formData.get("intent");
+
+  const session = await getSession(request.headers.get("cookie"));
+  const chatSessionKeys = session.get("chatSessionKeys") ?? {};
+  const threadId = chatSessionKeys[params.id];
+
+  if (!threadId) {
+    throw redirect("/");
+  }
+
+  if (intent === "pin") {
+    const uuid = formData.get("uuid") as string;
+    console.log({ uuid });
+
+    await prisma.thread.update({
+      where: { id: threadId },
+      data: {
+        messages: {
+          updateMany: {
+            where: { uuid },
+            data: { pinnedAt: new Date() },
+          },
+        },
+      },
+    });
+  }
+
+  if (intent === "unpin") {
+    const uuid = formData.get("uuid") as string;
+
+    await prisma.thread.update({
+      where: { id: threadId },
+      data: {
+        messages: {
+          updateMany: {
+            where: { uuid },
+            data: { pinnedAt: null },
+          },
+        },
+      },
+    });
+  }
+
+  if (intent === "erase") {
+    await prisma.thread.update({
+      where: { id: threadId },
+      data: {
+        messages: [],
+      },
+    });
+  }
+
+  if (intent === "delete") {
+    const uuids = (formData.get("uuids") as string).split(",");
+
+    await prisma.thread.update({
+      where: { id: threadId },
+      data: {
+        messages: {
+          deleteMany: {
+            where: { uuid: { in: uuids } },
+          },
+        },
+      },
+    });
+  }
+}
+
 export default function ScrapeWidget({ loaderData }: Route.ComponentProps) {
+  const pinFetcher = useFetcher();
+  const unpinFetcher = useFetcher();
+  const eraseFetcher = useFetcher();
+  const deleteFetcher = useFetcher();
+
   useEffect(() => {
     if (loaderData.embed) {
       document.documentElement.style.background = "transparent";
@@ -73,6 +154,22 @@ export default function ScrapeWidget({ loaderData }: Route.ComponentProps) {
     if (loaderData.embed) {
       window.parent.postMessage("close", "*");
     }
+  }
+
+  function handlePin(uuid: string) {
+    pinFetcher.submit({ intent: "pin", uuid }, { method: "post" });
+  }
+
+  function handleUnpin(uuid: string) {
+    unpinFetcher.submit({ intent: "unpin", uuid }, { method: "post" });
+  }
+
+  function handleErase() {
+    eraseFetcher.submit({ intent: "erase" }, { method: "post" });
+  }
+
+  function handleDelete(uuids: string[]) {
+    deleteFetcher.submit({ intent: "delete", uuids }, { method: "post" });
   }
 
   return (
@@ -86,6 +183,10 @@ export default function ScrapeWidget({ loaderData }: Route.ComponentProps) {
         userToken={loaderData.userToken}
         key={loaderData.thread.id}
         onBgClick={handleClose}
+        onPin={handlePin}
+        onUnpin={handleUnpin}
+        onErase={handleErase}
+        onDelete={handleDelete}
       />
     </Stack>
   );

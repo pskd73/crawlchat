@@ -1,5 +1,4 @@
-import { Badge, Link as ChakraLink, IconButton, Image } from "@chakra-ui/react";
-import { TbMessage } from "react-icons/tb";
+import { Badge, Link as ChakraLink, Image } from "@chakra-ui/react";
 import { Group, Text } from "@chakra-ui/react";
 import { Stack } from "@chakra-ui/react";
 import type { Scrape } from "@prisma/client";
@@ -52,13 +51,6 @@ export function ScrapeCard({
               <TbWorld />
             </Text>
           )}
-        </Group>
-        <Group h="full" display={"none"} _groupHover={{ display: "flex" }}>
-          <IconButton size={"xs"} asChild>
-            <Link to={`/threads/new?id=${scrape.id}`}>
-              <TbMessage />
-            </Link>
-          </IconButton>
         </Group>
       </Group>
 

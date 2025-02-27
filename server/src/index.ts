@@ -319,10 +319,14 @@ expressWs.app.ws("/", (ws: any, req) => {
         });
 
         const newQueryMessage = {
+          uuid: uuidv4(),
           llmMessage: { role: "user", content: message.data.query },
           links: [],
+          createdAt: new Date(),
+          pinnedAt: null,
         };
         addMessage(threadId, newQueryMessage);
+        ws.send(makeMessage("query-message", newQueryMessage));
 
         const queryAgent = new QueryPlannerAgent();
         const { query } = await queryAgent.run([
@@ -367,16 +371,22 @@ expressWs.app.ws("/", (ws: any, req) => {
             linksWithTitle.push({ ...link, title: item.title });
           }
         }
-        addMessage(threadId, {
+
+        const newAnswerMessage = {
+          uuid: uuidv4(),
           llmMessage: { role, content },
           links: linksWithTitle,
-        });
+          createdAt: new Date(),
+          pinnedAt: null,
+        };
+        addMessage(threadId, newAnswerMessage);
         ws.send(
           makeMessage("llm-chunk", {
             end: true,
             content,
             role,
             links: linksWithTitle,
+            uuid: newAnswerMessage.uuid,
           })
         );
       }

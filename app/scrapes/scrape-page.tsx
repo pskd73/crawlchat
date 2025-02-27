@@ -23,7 +23,6 @@ import {
   TbWorld,
   TbRobotFace,
   TbCode,
-  TbMessage,
 } from "react-icons/tb";
 import moment from "moment";
 import { Link, Outlet, redirect, useFetcher, useNavigate } from "react-router";
@@ -138,11 +137,6 @@ export default function ScrapePage({ loaderData }: Route.ComponentProps) {
               )}
             </IconButton>
           </Tooltip>
-          <IconButton asChild variant={"subtle"}>
-            <Link to={`/threads/new?id=${loaderData.scrape.id}`}>
-              <TbMessage />
-            </Link>
-          </IconButton>
           <IconButton variant={"subtle"} onClick={copyUrl}>
             <TbLink />
           </IconButton>

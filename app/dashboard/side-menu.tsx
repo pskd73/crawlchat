@@ -68,13 +68,11 @@ export function SideMenu({
   width,
   user,
   contentRef,
-  threads,
 }: {
   fixed: boolean;
   width: number;
   user: User;
   contentRef?: React.RefObject<HTMLDivElement | null>;
-  threads: Thread[];
 }) {
   const { threadTitle } = useContext(AppContext);
 
@@ -110,23 +108,6 @@ export function SideMenu({
         <Stack gap={1} w="full" px={3}>
           {links.map((link, index) => (
             <SideMenuItem key={index} link={link} />
-          ))}
-        </Stack>
-
-        <Stack px={3}>
-          <Separator />
-        </Stack>
-
-        <Stack gap={1} w="full" px={3} overflowY="auto">
-          {threads.slice(0, 6).map((thread, index) => (
-            <SideMenuItem
-              key={index}
-              link={{
-                label: threadTitle[thread.id] ?? getThreadName(thread.messages),
-                to: `/threads/${thread.id}`,
-                icon: <TbMessage size={16} />,
-              }}
-            />
           ))}
         </Stack>
       </Stack>
