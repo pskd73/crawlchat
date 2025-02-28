@@ -33,6 +33,8 @@ import {
 import { makeLLMTxt } from "./llm-txt";
 import { v4 as uuidv4 } from "uuid";
 import { Message, MessageSourceLink } from "@prisma/client";
+import { RecordMetadata } from "@pinecone-database/pinecone";
+import { QueryResponse } from "@pinecone-database/pinecone";
 
 const app: Express = express();
 const expressWs = ws(app);
@@ -65,10 +67,60 @@ async function streamLLMResponse(
   return { content, role };
 }
 
-function getUniqueLinks(links: { url: string }[]) {
-  return links.filter(
-    (link, index, self) => self.findIndex((t) => t.url === link.url) === index
-  );
+async function betterSearch(
+  query: string,
+  scrapeId: string,
+  messages: Message[]
+): Promise<QueryResponse<RecordMetadata>> {
+  const queryAgent = new QueryPlannerAgent();
+  const triedQueries: string[] = [query];
+  let bestResult: [number, QueryResponse<RecordMetadata> | null] = [0, null];
+
+  for (let i = 0; i < 4; i++) {
+    const result = await search(scrapeId, await makeEmbedding(query));
+
+    const maxScore = result.matches.reduce((max, match) => {
+      return Math.max(max, match.score ?? 0);
+    }, 0);
+
+    const avgScore =
+      result.matches.reduce((sum, match) => {
+        return sum + (match.score ?? 0);
+      }, 0) / result.matches.length;
+
+    if (avgScore > 0.3 && maxScore > 0.3) {
+      return result;
+    }
+
+    if (maxScore > bestResult[0]) {
+      bestResult = [maxScore, result];
+    }
+
+    console.log({ query, maxScore, avgScore });
+    const triedQueryMessages: Message[] = triedQueries.map((query) => ({
+      llmMessage: {
+        role: "user",
+        content: `Tried query: ${query} but got a low score. Please try again.`,
+      },
+      uuid: uuidv4(),
+      createdAt: new Date(),
+      pinnedAt: null,
+      links: [],
+    }));
+    const queryResult = await queryAgent.run([
+      ...messages,
+      ...triedQueryMessages,
+    ]);
+
+    query = queryResult.query;
+    triedQueries.push(query);
+  }
+
+  if (!bestResult[1]) {
+    throw new Error("bestResult is null. Should never happen.");
+  }
+
+  return bestResult[1];
 }
 
 app.get("/", function (req: Request, res: Response) {
@@ -329,15 +381,11 @@ expressWs.app.ws("/", (ws: any, req) => {
         addMessage(threadId, newQueryMessage);
         ws.send(makeMessage("query-message", newQueryMessage));
 
-        const queryAgent = new QueryPlannerAgent();
-        const { query } = await queryAgent.run([
-          ...thread.messages,
-          newQueryMessage,
-        ]);
-
-        console.log({ query });
-
-        const result = await search(scrape.id, await makeEmbedding(query));
+        const result = await betterSearch(
+          message.data.query,
+          scrape.id,
+          thread.messages
+        );
         const matches = result.matches.map((match) => ({
           content: match.metadata!.content as string,
           url: match.metadata!.url as string,
