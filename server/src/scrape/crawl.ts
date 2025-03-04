@@ -56,8 +56,10 @@ export async function scrape(
 ): Promise<ScrapeResult> {
   const { dynamicFallbackContentLength = 100 } = options ?? {};
   let text = await scrapeFetch(url);
+  const parsedText = parseHtml(text, options);
   let error = undefined;
-  if (text.length <= dynamicFallbackContentLength) {
+
+  if (parsedText.text.length <= dynamicFallbackContentLength) {
     try {
       text = await scrapePw(url);
     } catch (e: any) {

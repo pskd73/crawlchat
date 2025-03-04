@@ -7,7 +7,7 @@ import { z } from "zod";
 import { prisma } from "./prisma";
 import { makeIndexer } from "./indexer/factory";
 import { ContextCheckerAgent, RAGAgent } from "./llm/rag-agent";
-import { scrapeFetch } from "./scrape/crawl";
+import { scrape, scrapeFetch } from "./scrape/crawl";
 import { parseHtml } from "./scrape/parse";
 import { Pinecone } from "@pinecone-database/pinecone";
 
@@ -46,9 +46,8 @@ async function main() {
 }
 
 async function parse() {
-  const html = await scrapeFetch("https://docs.pinecone.io/models/overview");
-  const parsed = parseHtml(html);
-  console.log(parsed.markdown);
+  const result = await scrape("https://help.testable.org/kb/guide/en/general-6tXndMyG9s/Steps/728753");
+  console.log(result.parseOutput.markdown);
 }
 
 async function search() {
@@ -112,5 +111,4 @@ async function search() {
 }
 
 console.log("Starting...");
-// main();
-search();
+parse();
