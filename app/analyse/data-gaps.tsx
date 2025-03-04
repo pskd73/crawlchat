@@ -103,6 +103,11 @@ export default function AnalysePage({ loaderData }: Route.ComponentProps) {
   return (
     <Page title="Data gaps" icon={<TbFileX />}>
       <Stack>
+        <Text mb={4} opacity={0.5}>
+          These are the questions to which the AI did provide poor responses. It
+          can be either the data is not clear in the documents or the data is
+          missing completely.
+        </Text>
         <Group>
           <StatCard
             label="Poor responses Today"
