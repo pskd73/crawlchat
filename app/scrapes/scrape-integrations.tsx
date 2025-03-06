@@ -1,11 +1,19 @@
-import { Group, Input, Stack, Text, IconButton, List } from "@chakra-ui/react";
+import {
+  Group,
+  Input,
+  Stack,
+  Text,
+  IconButton,
+  List,
+  Box,
+} from "@chakra-ui/react";
 import { useFetcher } from "react-router";
 import { SettingsSection } from "~/dashboard/settings";
 import type { Route } from "./+types/scrape-integrations";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "~/prisma";
 import { getAuthUser } from "~/auth/middleware";
-import { TbInfoCircle } from "react-icons/tb";
+import { TbArrowRight, TbBrandDiscord, TbInfoCircle } from "react-icons/tb";
 import {
   PopoverArrow,
   PopoverBody,
@@ -14,6 +22,7 @@ import {
   PopoverTitle,
   PopoverTrigger,
 } from "~/components/ui/popover";
+import { Button } from "~/components/ui/button";
 
 export async function loader({ params, request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -55,6 +64,15 @@ export default function ScrapeIntegrations({
   const discordServerIdFetcher = useFetcher();
   return (
     <Stack>
+      <Box>
+        <Button asChild variant={"outline"}>
+          <a href="https://discord.com/oauth2/authorize?client_id=1346845279692918804">
+            <TbBrandDiscord />
+            Install Discord App
+            <TbArrowRight />
+          </a>
+        </Button>
+      </Box>
       <SettingsSection
         title={
           <Group>
