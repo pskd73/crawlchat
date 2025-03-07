@@ -9,11 +9,14 @@ import {
   Box,
   SimpleGrid,
   GridItem,
-  Image,
+  Highlight,
+  Center,
+  List,
 } from "@chakra-ui/react";
 import type { PropsWithChildren } from "react";
 import {
   TbArrowRight,
+  TbBrandDiscord,
   TbCheck,
   TbCircleCheck,
   TbCode,
@@ -28,7 +31,6 @@ import {
 import { Link } from "react-router";
 import { Button } from "~/components/ui/button";
 import { useOpenScrape } from "./use-open-scrape";
-import { Tooltip } from "~/components/ui/tooltip";
 import { Toaster } from "~/components/ui/toaster";
 
 const maxW = "1200px";
@@ -60,8 +62,9 @@ export function LogoText() {
       gradientTo={"brand.300"}
       bgClip="text"
       color={"transparent"}
+      asChild
     >
-      CrawlChat
+      <Link to="/">CrawlChat</Link>
     </Text>
   );
 }
@@ -376,59 +379,45 @@ function HowItWorks() {
 function UseCases() {
   const useCases = [
     {
-      icon: <TbMessage />,
-      title: "Embed chat",
+      icon: <TbCode />,
+      title: "Embed Ask AI",
+      titleHighlight: "Ask AI",
       description:
         "It is quite common to have a heavy documentation or content for your service. It quickly gets complicated to create a chat bot that learns from all your content and answers users queries. CrawlChat takes care of it and let's you embed the chatbot with few clicks!",
-      integrations: [
-        {
-          image: "/icons/openai.webp",
-          tooltip: "Chat is powered by OpenAI",
-        },
-        {
-          image: "/icons/claude.png",
-          tooltip: "Chat is powered by Claude",
-        },
+      points: [
+        { text: "Show sources" },
+        { text: "Embed or share URLs", highlight: ["Embed", "URLs"] },
+        { text: "No hallucinations" },
       ],
-      integrationTag: "Integrated with",
-    },
-    {
-      icon: <TbCode />,
-      title: "API",
-      description:
-        "Want to use your content in other apps? CrawlChat provides APIs using which you can query the conentent and integrate it in your own apps. Rest all is taken care by CrawlChat!",
-      integrations: [
-        {
-          image: "/icons/rest.png",
-          tooltip: "Integrate with REST API",
-        },
-        {
-          image: "/icons/websocket.png",
-          tooltip: "Integrate with WebSocket",
-        },
-      ],
-      integrationTag: "Integrate with",
+      link: "/use-case/embed",
     },
     {
       icon: <TbRobotFace />,
-      title: "MCP Server",
+      title: "Data on MCP server",
+      titleHighlight: "MCP server",
       description:
         "Model Context Protocol (MCP) has been very well adopted by the LLM systems already. It is a way to connect external systems to the LLMs which are generic in nature and don't know much about your services and content. CrawlChat let's you get MCP server for your content without any extra effort!",
-      integrations: [
+      points: [
+        { text: "No extra setup" },
         {
-          image: "/icons/cursor.png",
-          tooltip: "Works with Cursor",
-        },
-        {
-          image: "/icons/windsurf.png",
-          tooltip: "Works with Windsurf",
-        },
-        {
-          image: "/icons/claude.png",
-          tooltip: "Works with Claude",
+          text: "Perfect for Cursor, Windsurf & Claude",
+          highlight: ["Cursor", "Windsurf", "Claude"],
         },
       ],
-      integrationTag: "Works with",
+      link: "/use-case/mcp",
+    },
+    {
+      icon: <TbBrandDiscord />,
+      title: "Connect Discord bot",
+      titleHighlight: "Discord bot",
+      description:
+        "Running a community on Discord and want to use AI to answer questions and learn from the conversations? CrawlChat Bot lets you automate query resolutions on your server with ease!",
+      points: [
+        { text: "Just tag @crawlchat", highlight: ["@crawlchat"] },
+        { text: "Answers repeated questions", highlight: ["Answers"] },
+        { text: "Learns from the conversations", highlight: ["Learns"] },
+      ],
+      link: "/use-case/discord-bot",
     },
   ];
 
@@ -437,61 +426,90 @@ function UseCases() {
       <Container>
         <Stack alignItems={"center"} w="full" gap={6}>
           <LandingHeading>Use cases</LandingHeading>
-          <Stack w={"full"} gap={10}>
-            {useCases.map((useCase) => (
-              <Stack
-                key={useCase.title}
-                bg="brand.subtle"
-                w="full"
-                p={10}
-                rounded={"xl"}
-                position={"relative"}
-                pr={[undefined, 60]}
-                overflow={"hidden"}
-              >
-                <Text
-                  as="h3"
-                  fontSize={"3xl"}
-                  fontWeight={"medium"}
-                  lineHeight={1}
+
+          <SimpleGrid columns={[1, 1, 3]} gap={6} w={"full"}>
+            {useCases.map((useCase, i) => (
+              <GridItem key={i}>
+                <Stack
+                  bg="brand.gray.50"
+                  p={8}
+                  rounded={"lg"}
+                  borderTop={"6px solid"}
+                  borderColor="brand.emphasized"
+                  gap={8}
+                  shadow={"xs"}
+                  _hover={{
+                    shadow: "md",
+                  }}
+                  transition={"all 0.2s ease-in-out"}
+                  h="full"
                 >
-                  {useCase.title}
-                </Text>
-                <Text opacity={0.6} fontSize={"lg"}>
-                  {useCase.description}
-                </Text>
-                {useCase.integrations && (
-                  <Stack mt={4}>
-                    <Text fontSize={"xs"} opacity={0.5}>
-                      {useCase.integrationTag ?? "Powered by"}
-                    </Text>
-                    <Group gap={4}>
-                      {useCase.integrations?.map((integration, key) => (
-                        <Tooltip
-                          key={key}
-                          content={integration.tooltip}
-                          showArrow
-                        >
-                          <Image src={integration.image} w={10} h={10} />
-                        </Tooltip>
-                      ))}
-                    </Group>
-                  </Stack>
-                )}
-                <Box
-                  position={"absolute"}
-                  top={0}
-                  right={0}
-                  fontSize={"200px"}
-                  transform={"rotate(10deg)"}
-                  opacity={[0, 0.2]}
-                  color="brand.fg"
-                >
-                  {useCase.icon}
-                </Box>
-              </Stack>
+                  <Center
+                    w={"60px"}
+                    h={"60px"}
+                    bgGradient={"to-b"}
+                    gradientFrom={"brand.subtle"}
+                    gradientTo={"brand.muted"}
+                    rounded={"2xl"}
+                    mb={4}
+                    fontSize={"30px"}
+                  >
+                    {useCase.icon}
+                  </Center>
+                  <Heading size={"2xl"} color="brand.fg">
+                    <Highlight
+                      query={useCase.titleHighlight}
+                      styles={{
+                        bg: "brand.fg",
+                        color: "brand.white",
+                        px: 1,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      {useCase.title}
+                    </Highlight>
+                  </Heading>
+                  <Text>{useCase.description}</Text>
+                  <List.Root gap="2" variant="plain" align="center">
+                    {useCase.points.map((point, i) => (
+                      <List.Item key={i} alignItems={"flex-start"}>
+                        <List.Indicator asChild color="brand.fg">
+                          <TbCircleCheck />
+                        </List.Indicator>
+                        <Text>
+                          <Highlight
+                            query={point.highlight ?? []}
+                            styles={{
+                              px: 1,
+                              mx: 1,
+                              bg: "brand.muted",
+                              display: "inline",
+                            }}
+                          >
+                            {point.text}
+                          </Highlight>
+                        </Text>
+                      </List.Item>
+                    ))}
+                  </List.Root>
+
+                  <Group>
+                    <Button
+                      colorPalette={"brand"}
+                      size={"xl"}
+                      variant={"outline"}
+                      asChild
+                    >
+                      <Link to={useCase.link}>
+                        Learn more
+                        <TbArrowRight />
+                      </Link>
+                    </Button>
+                  </Group>
+                </Stack>
+              </GridItem>
             ))}
-          </Stack>
+          </SimpleGrid>
         </Stack>
       </Container>
     </Stack>
@@ -594,7 +612,7 @@ function PriceBox({
   );
 }
 
-function Pricing() {
+export function Pricing() {
   return (
     <Stack w={"full"} px={8} py={12} id="pricing">
       <Container>
