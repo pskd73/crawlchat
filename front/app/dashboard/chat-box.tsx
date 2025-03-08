@@ -11,12 +11,7 @@ import {
   Skeleton,
 } from "@chakra-ui/react";
 import { Stack, Text } from "@chakra-ui/react";
-import type {
-  Message,
-  MessageSourceLink,
-  Scrape,
-  Thread,
-} from "@prisma/client";
+import type { Message, MessageSourceLink, Scrape, Thread } from "libs/prisma";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   TbArrowUp,
