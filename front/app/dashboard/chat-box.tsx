@@ -1,7 +1,9 @@
 import {
   Badge,
   Box,
+  Button,
   Center,
+  Flex,
   Group,
   Heading,
   IconButton,
@@ -139,7 +141,6 @@ function SourceLink({ link }: { link: MessageSourceLink }) {
     <Link
       borderBottom={"1px solid"}
       borderColor={"brand.outline"}
-      _last={{ borderBottom: "none" }}
       _hover={{
         bg: "brand.gray.100",
       }}
@@ -200,11 +201,22 @@ function AssistantMessage({
   onUnpin: () => void;
   onDelete: () => void;
 }) {
-  const uniqueLinks = useMemo(() => {
-    return links.filter(
+  const [more, setMore] = useState(false);
+  const [uniqueLinks, moreLinks, hasMore] = useMemo(() => {
+    let updatedLinks = links.filter(
       (link, index, self) => index === self.findIndex((t) => t.url === link.url)
     );
-  }, [links]);
+    updatedLinks.sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
+
+    const minLinks = 2;
+    const linksToShow = more ? updatedLinks.length : minLinks;
+
+    return [
+      updatedLinks.slice(0, linksToShow),
+      updatedLinks.slice(linksToShow),
+      updatedLinks.length > minLinks,
+    ];
+  }, [links, more]);
 
   return (
     <Stack>
@@ -230,10 +242,24 @@ function AssistantMessage({
         </Group>
       </Stack>
       {uniqueLinks.length > 0 && (
-        <Stack borderTop="1px solid" borderColor={"brand.outline"} gap={0}>
-          {uniqueLinks.map((link, index) => (
-            <SourceLink key={index} link={link} />
-          ))}
+        <Stack gap={0}>
+          <Stack borderTop="1px solid" borderColor={"brand.outline"} gap={0}>
+            {uniqueLinks.map((link, index) => (
+              <SourceLink key={index} link={link} />
+            ))}
+          </Stack>
+
+          {hasMore && (
+            <Flex px={4} py={2}>
+              <Button
+                variant={"subtle"}
+                size={"xs"}
+                onClick={() => setMore(!more)}
+              >
+                {more ? "Show less" : "+" + moreLinks.length + " more"}
+              </Button>
+            </Flex>
+          )}
         </Stack>
       )}
     </Stack>
