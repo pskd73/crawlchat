@@ -42,8 +42,14 @@ enum WidgetSize {
   full_screen
 }
 
+type WidgetQuestion {
+  text String
+}
+
 type WidgetConfig {
   size WidgetSize
+  questions WidgetQuestion[]
+  welcomeMessage String?
 }
 
 model Scrape {

@@ -21,6 +21,7 @@ import {
   TbChevronRight,
   TbChevronUp,
   TbEraser,
+  TbHelp,
   TbMessage,
   TbPin,
   TbTrash,
@@ -270,15 +271,71 @@ function AssistantMessage({
   );
 }
 
-function NoMessages({ scrape }: { scrape: Scrape }) {
+function NoMessages({
+  scrape,
+  onQuestionClick,
+}: {
+  scrape: Scrape;
+  onQuestionClick: (question: string) => void;
+}) {
+  const shouldShowDefaultTitle = !scrape.widgetConfig?.welcomeMessage;
   return (
-    <Stack p={4} justify={"center"} align={"center"} h="full" gap={4}>
-      <Text opacity={0.5}>
-        <TbMessage size={"60px"} />
-      </Text>
-      <Heading size={"2xl"} px={4} textAlign={"center"}>
-        {scrape.title}
-      </Heading>
+    <Stack
+      p={4}
+      justify={"center"}
+      align={"center"}
+      h="full"
+      gap={4}
+    >
+      {shouldShowDefaultTitle && (
+        <Stack align={"center"} mb={8}>
+          <Text opacity={0.5}>
+            <TbMessage size={"60px"} />
+          </Text>
+          <Heading size={"2xl"} px={4} textAlign={"center"}>
+            {scrape.title}
+          </Heading>
+        </Stack>
+      )}
+
+      {scrape.widgetConfig?.welcomeMessage && (
+        <Stack w="full" maxW={"400px"}>
+          <MarkdownProse>{scrape.widgetConfig?.welcomeMessage}</MarkdownProse>
+        </Stack>
+      )}
+
+      {scrape.widgetConfig?.questions && (
+        <Stack w="full" maxW={"400px"}>
+          <Heading size={"xs"} opacity={0.5}>
+            QUICK QUESTIONS
+          </Heading>
+          <Stack w="full">
+            {scrape.widgetConfig?.questions.map((question, i) => (
+              <Group
+                key={i}
+                border={"1px solid"}
+                borderColor={"brand.outline"}
+                rounded={"md"}
+                p={2}
+                px={3}
+                w="full"
+                _hover={{
+                  bg: "brand.gray.100",
+                }}
+                transition={"background-color 200ms ease-in-out"}
+                cursor={"pointer"}
+                alignItems={"flex-start"}
+                onClick={() => onQuestionClick(question.text)}
+              >
+                <Box mt={1}>
+                  <TbHelp />
+                </Box>
+                <Text>{question.text}</Text>
+              </Group>
+            ))}
+          </Stack>
+        </Stack>
+      )}
     </Stack>
   );
 }
@@ -545,7 +602,12 @@ export default function ScrapeWidget({
           onPinSelect={handlePinSelect}
         />
         <Stack flex="1" overflow={"auto"} gap={0}>
-          {chat.allMessages.length === 0 && <NoMessages scrape={scrape} />}
+          {chat.allMessages.length === 0 && (
+            <NoMessages
+              scrape={scrape}
+              onQuestionClick={handleAsk}
+            />
+          )}
           {chat.allMessages.map((message, index) => (
             <Stack key={index} id={`message-${message.uuid}`}>
               {message.role === "user" ? (

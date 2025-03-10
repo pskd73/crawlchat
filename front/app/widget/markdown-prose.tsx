@@ -3,7 +3,7 @@ import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import hljs from "highlight.js";
 import "highlight.js/styles/vs.css";
-import { Box } from "@chakra-ui/react";
+import { Box, Image } from "@chakra-ui/react";
 import { ClipboardIconButton, ClipboardRoot } from "~/components/ui/clipboard";
 import type { PropsWithChildren } from "react";
 
@@ -47,6 +47,10 @@ export function MarkdownProse({ children }: PropsWithChildren) {
                 </Box>
               </Box>
             );
+          },
+          img: ({ node, ...props }) => {
+            const { src, alt, ...rest } = props;
+            return <Image src={src} alt={alt} boxShadow={"none"} {...rest} />;
           },
         }}
       >

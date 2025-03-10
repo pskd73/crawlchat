@@ -1,9 +1,14 @@
 import {
+  Box,
   Code,
   createListCollection,
+  Group,
   Heading,
+  IconButton,
+  Input,
   Stack,
   Text,
+  Textarea,
 } from "@chakra-ui/react";
 import { prisma } from "~/prisma";
 import type { Route } from "./+types/scrape-embed";
@@ -17,7 +22,16 @@ import {
   SelectTrigger,
   SelectValueText,
 } from "~/components/ui/select";
-import type { WidgetSize } from "libs/prisma";
+import type {
+  Prisma,
+  WidgetConfig,
+  WidgetQuestion,
+  WidgetSize,
+} from "libs/prisma";
+import { Button } from "~/components/ui/button";
+import { TbPlus, TbTrash } from "react-icons/tb";
+import { useEffect, useState } from "react";
+import { InputGroup } from "~/components/ui/input-group";
 
 export async function loader({ params, request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -46,19 +60,35 @@ export async function action({ request, params }: Route.ActionArgs) {
 
   const formData = await request.formData();
   const size = formData.get("size");
+  const questions = formData.getAll("questions");
+  const welcomeMessage = formData.get("welcomeMessage");
+
+  const update: WidgetConfig = scrape.widgetConfig ?? {
+    size: "small",
+    questions: [],
+    welcomeMessage: null,
+  };
 
   if (size) {
-    await prisma.scrape.update({
-      where: {
-        id: scrape.id,
-      },
-      data: {
-        widgetConfig: {
-          size: size as WidgetSize,
-        },
-      },
-    });
+    update.size = size as WidgetSize;
   }
+
+  if (formData.has("from-questions")) {
+    update.questions = questions.map((text) => ({ text: text as string }));
+  }
+
+  if (welcomeMessage !== null && welcomeMessage !== undefined) {
+    update.welcomeMessage = welcomeMessage as string;
+  }
+
+  await prisma.scrape.update({
+    where: {
+      id: scrape.id,
+    },
+    data: {
+      widgetConfig: update,
+    },
+  });
 
   return null;
 }
@@ -73,6 +103,24 @@ const sizes = createListCollection({
 
 export default function ScrapeEmbed({ loaderData }: Route.ComponentProps) {
   const sizeFetcher = useFetcher();
+  const questionsFetcher = useFetcher();
+  const welcomeMessageFetcher = useFetcher();
+
+  const [questions, setQuestions] = useState<WidgetQuestion[]>(
+    loaderData.scrape?.widgetConfig?.questions ?? []
+  );
+
+  useEffect(() => {
+    setQuestions(loaderData.scrape?.widgetConfig?.questions ?? []);
+  }, [loaderData.scrape?.widgetConfig?.questions]);
+
+  function addQuestion() {
+    setQuestions([...questions, { text: "" }]);
+  }
+
+  function removeQuestion(index: number) {
+    setQuestions(questions.filter((_, i) => i !== index));
+  }
 
   return (
     <Stack gap={6}>
@@ -107,7 +155,7 @@ export default function ScrapeEmbed({ loaderData }: Route.ComponentProps) {
         </pre>
       </Stack>
 
-      <Stack>
+      <Stack gap={4}>
         <SettingsSection
           title="Widget size"
           description="Set the size of the widget to be when it's embedded on your website"
@@ -130,6 +178,49 @@ export default function ScrapeEmbed({ loaderData }: Route.ComponentProps) {
               ))}
             </SelectContent>
           </SelectRoot>
+        </SettingsSection>
+
+        <SettingsSection
+          title="Welcome message"
+          description="Add your custom welcome message to the widget. Supports markdown."
+          fetcher={welcomeMessageFetcher}
+        >
+          <Textarea
+            name="welcomeMessage"
+            defaultValue={loaderData.scrape?.widgetConfig?.welcomeMessage ?? ""}
+            placeholder="Hi, I'm the CrawlChat bot. How can I help you today?"
+            rows={8}
+          />
+        </SettingsSection>
+
+        <SettingsSection
+          title="Example questions"
+          description="Show few example questions when a user visits the widget for the first time"
+          fetcher={questionsFetcher}
+        >
+          <input type="hidden" name="from-questions" value={"true"} />
+          {questions.map((question, i) => (
+            <Group>
+              <Input
+                name={"questions"}
+                placeholder={"Ex: How to use the product?"}
+                defaultValue={question.text}
+              />
+              <IconButton
+                variant={"subtle"}
+                onClick={() => removeQuestion(i)}
+                colorPalette={"red"}
+              >
+                <TbTrash />
+              </IconButton>
+            </Group>
+          ))}
+          <Box>
+            <Button size="sm" variant={"subtle"} onClick={addQuestion}>
+              <TbPlus />
+              Add question
+            </Button>
+          </Box>
         </SettingsSection>
       </Stack>
     </Stack>
