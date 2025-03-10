@@ -32,6 +32,7 @@ import {
   MenuTrigger,
 } from "~/components/ui/menu";
 import { track } from "~/pirsch";
+import { Link as RouterLink } from "react-router";
 
 function ChatInput({
   onAsk,
@@ -309,10 +310,16 @@ function Toolbar({
       w={"full"}
       justify={"space-between"}
     >
-      <Group w="full">
+      <Group>
         <Group></Group>
       </Group>
       <Group>
+        <Text fontSize={"xs"} opacity={0.5}>
+          Powered by{" "}
+          <Link asChild target="_blank" fontWeight={"bold"}>
+            <RouterLink to="/">CrawlChat</RouterLink>
+          </Link>
+        </Text>
         {pinnedCount > 0 && (
           <MenuRoot
             positioning={{ placement: "bottom-end" }}
