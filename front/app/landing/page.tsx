@@ -13,6 +13,8 @@ import {
   Center,
   List,
   Badge,
+  Flex,
+  Image,
 } from "@chakra-ui/react";
 import type { PropsWithChildren } from "react";
 import {
@@ -34,6 +36,7 @@ import { Link } from "react-router";
 import { Button } from "~/components/ui/button";
 import { useOpenScrape } from "./use-open-scrape";
 import { Toaster } from "~/components/ui/toaster";
+import { useColorMode } from "~/components/ui/color-mode";
 
 const maxW = "1200px";
 
@@ -738,12 +741,49 @@ export function Footer() {
   );
 }
 
+function UsedBy() {
+  const { colorMode } = useColorMode();
+  const companies = [
+    {
+      name: "Remotion",
+      image:
+        colorMode === "dark"
+          ? "/used-by/remotion-white.png"
+          : "/used-by/remotion.png",
+    },
+  ];
+
+  return (
+    <Stack w={"full"} px={8} py={12}>
+      <Container>
+        <Stack alignItems={"center"} w="full" gap={6}>
+          <Text textAlign={"center"}>
+            Already being used by awesome companies!
+          </Text>
+          <Flex gap={4}>
+            {companies.map((company) => (
+              <Image
+                key={company.name}
+                src={company.image}
+                alt={company.name}
+                maxW={"180px"}
+                maxH={"90px"}
+              />
+            ))}
+          </Flex>
+        </Stack>
+      </Container>
+    </Stack>
+  );
+}
+
 export default function LandingPage() {
   return (
     <Stack gap={0} w="full">
       <Navbar />
       <Hero />
       <Demo />
+      <UsedBy />
       <HowItWorks />
       <UseCases />
       <Pricing />
