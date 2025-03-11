@@ -28,8 +28,8 @@ export const PLAN_FREE: Plan = {
 };
 
 export const PLAN_STARTER: Plan = {
-  id: "pro",
-  name: "Pro",
+  id: "starter",
+  name: "Starter",
   price: 29,
   type: "SUBSCRIPTION",
   credits: {

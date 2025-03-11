@@ -2,6 +2,7 @@ import {
   Group,
   Heading,
   IconButton,
+  Progress,
   Spinner,
   Stack,
   Text,
@@ -23,9 +24,9 @@ import {
   MenuTrigger,
 } from "~/components/ui/menu";
 import type { User } from "libs/prisma";
-import { useContext } from "react";
-import { AppContext } from "./context";
 import { LogoText } from "~/landing/page";
+import type { Plan } from "libs/user-plan";
+import { numberToKMB } from "~/number-util";
 
 const links = [
   { label: "Home", to: "/app", icon: <TbHome /> },
@@ -62,18 +63,54 @@ function SideMenuItem({
   );
 }
 
+function CreditProgress({
+  title,
+  used,
+  total,
+}: {
+  title: string;
+  used: number;
+  total: number;
+}) {
+  return (
+    <Stack gap={1}>
+      <Group justify="space-between" fontSize={"sm"}>
+        <Text>{title}</Text>
+        <Text>
+          {numberToKMB(used)}/{numberToKMB(total)}
+        </Text>
+      </Group>
+      <Progress.Root value={used} max={total}>
+        <Progress.Track rounded="full">
+          <Progress.Range />
+        </Progress.Track>
+      </Progress.Root>
+    </Stack>
+  );
+}
+
 export function SideMenu({
   fixed,
   width,
   user,
   contentRef,
+  plan,
 }: {
   fixed: boolean;
   width: number;
   user: User;
   contentRef?: React.RefObject<HTMLDivElement | null>;
+  plan: Plan;
 }) {
-  const { threadTitle } = useContext(AppContext);
+  const totalMessages = plan.credits.messages;
+  const totalScrapes = plan.credits.scrapes;
+
+  const availableMessages =
+    user.plan?.credits?.messages ?? plan.credits.messages;
+  const usedMessages = totalMessages - availableMessages;
+
+  const availableScrapes = user.plan?.credits?.scrapes ?? plan.credits.scrapes;
+  const usedScrapes = totalScrapes - availableScrapes;
 
   return (
     <Stack
@@ -111,7 +148,19 @@ export function SideMenu({
         </Stack>
       </Stack>
 
-      <Stack p={4}>
+      <Stack p={4} gap={4}>
+        <Stack bg="brand.gray.100" rounded="md" p={4} gap={4}>
+          <CreditProgress
+            title="Messages"
+            used={usedMessages}
+            total={totalMessages}
+          />
+          <CreditProgress
+            title="Scrapes"
+            used={usedScrapes}
+            total={totalScrapes}
+          />
+        </Stack>
         <Group
           rounded="md"
           transition={"all 100ms ease"}

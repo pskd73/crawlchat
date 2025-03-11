@@ -5,6 +5,7 @@ import { sessionStorage } from "~/session";
 import { EmailLinkStrategy } from "./email-strategy";
 import { sendEmail } from "~/email";
 import { createToken } from "~/jwt";
+import { PLAN_FREE } from "libs/user-plan";
 
 export const authenticator = new Authenticator<User | null>();
 
@@ -32,7 +33,16 @@ authenticator.use(
 
       if (!user) {
         user = await prisma.user.create({
-          data: { email: email },
+          data: {
+            email: email,
+            plan: {
+              planId: PLAN_FREE.id,
+              type: PLAN_FREE.type,
+              provider: "CUSTOM",
+              status: "ACTIVE",
+              activatedAt: new Date(),
+            },
+          },
         });
       }
 

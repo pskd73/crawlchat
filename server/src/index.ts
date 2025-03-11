@@ -25,6 +25,7 @@ import { Flow } from "./llm/flow";
 import { RAGAgent, RAGAgentCustomMessage } from "./llm/rag-agent";
 import { ChatCompletionAssistantMessageParam } from "openai/resources/chat/completions";
 import { name } from "libs";
+import { consumeCredits } from "libs/user-plan";
 const expressWs = ws(app);
 const port = process.env.PORT || 3000;
 
@@ -167,6 +168,8 @@ app.post("/scrape", authenticate, async function (req: Request, res: Response) {
               status: "completed",
             },
           });
+
+          await consumeCredits(userId, "scrapes", 1);
 
           roomIds.forEach((roomId) =>
             broadcast(
@@ -368,6 +371,7 @@ expressWs.app.ws("/", (ws: any, req) => {
           createdAt: new Date(),
           pinnedAt: null,
         };
+        await consumeCredits(scrape.userId, "messages", 1);
         addMessage(threadId, newAnswerMessage);
         ws.send(
           makeMessage("llm-chunk", {
@@ -413,6 +417,7 @@ app.get("/mcp/:scrapeId", async (req, res) => {
   const result = await indexer.search(scrape.id, query);
   const processed = await indexer.process(query, result);
 
+  await consumeCredits(scrape.userId, "messages", 1);
   await addMessage(thread.id, {
     uuid: uuidv4(),
     llmMessage: { role: "user", content: query },
@@ -567,6 +572,7 @@ app.get("/answer/:scrapeId", async (req, res) => {
     createdAt: new Date(),
     pinnedAt: null,
   };
+  await consumeCredits(scrape.userId, "messages", 1);
   addMessage(thread.id, newAnswerMessage);
 
   res.json({ message: newAnswerMessage });

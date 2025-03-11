@@ -1,4 +1,4 @@
-import { Box, Group, IconButton, Stack } from "@chakra-ui/react";
+import { Group, Stack } from "@chakra-ui/react";
 import { Outlet } from "react-router";
 import type { Route } from "./+types/layout";
 import { AppContext, useApp } from "./context";
@@ -11,7 +11,8 @@ import {
   DrawerRoot,
 } from "~/components/ui/drawer";
 import { useRef } from "react";
-import { prisma } from "~/prisma";
+import { PLAN_FREE } from "libs/user-plan";
+import { planMap } from "libs/user-plan";
 
 export function meta() {
   return [
@@ -24,16 +25,9 @@ export function meta() {
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request, { redirectTo: "/login" });
 
-  const threads = await prisma.thread.findMany({
-    where: {
-      userId: user!.id,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+  const plan = user!.plan?.planId ? planMap[user!.plan.planId] : PLAN_FREE;
 
-  return { user: user!, threads };
+  return { user: user!, plan };
 }
 
 const drawerWidth = 260;
@@ -50,6 +44,7 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
           width={drawerWidth}
           user={user}
           fixed={true}
+          plan={loaderData.plan}
         />
 
         <DrawerRoot
@@ -65,6 +60,7 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
               user={user}
               fixed={false}
               contentRef={contentRef}
+              plan={loaderData.plan}
             />
           </DrawerContent>
         </DrawerRoot>
