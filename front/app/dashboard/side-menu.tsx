@@ -80,7 +80,7 @@ function CreditProgress({
           {numberToKMB(used)} / {numberToKMB(total)}
         </Text>
       </Group>
-      <Progress.Root value={Math.min(used, total)} max={total}>
+      <Progress.Root value={Math.max(0, Math.min(used, total))} max={total}>
         <Progress.Track rounded="full">
           <Progress.Range />
         </Progress.Track>
