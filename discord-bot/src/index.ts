@@ -66,9 +66,7 @@ const cleanContent = (content: string) => {
 const discordPrompt = (query: string) => {
   return `Query: ${query}
 Keep the response very short and very concised.
-It should be under 1000 charecters.
-Give the answer in bullet points. Each point should be very concise.
-The response is for a discrod channel. Format it accordingly.`;
+It should be under 1000 charecters.`;
 };
 
 client.once(Events.ClientReady, (readyClient) => {
@@ -94,17 +92,6 @@ client.on(Events.MessageCreate, async (message) => {
       return;
     }
 
-    let rawQuery = message.content;
-    rawQuery = rawQuery.replace(/^<@\d+> /, "").trim();
-
-    if (message.reference?.messageId) {
-      const parentMessage = await message.channel.messages.fetch(
-        message.reference?.messageId as Snowflake
-      );
-
-      rawQuery = parentMessage.content;
-    }
-
     const { scrapeId, userId } = await getDiscordDetails(message.guildId!);
 
     if (!scrapeId || !userId) {
@@ -112,12 +99,27 @@ client.on(Events.MessageCreate, async (message) => {
       return;
     }
 
+    let rawQuery = message.content;
+    rawQuery = rawQuery.replace(/^<@\d+> /, "").trim();
+
+    const messages = (await fetchAllParentMessages(message, []))
+      .reverse()
+      .map((m) => ({
+        role: m.author.id === process.env.BOT_USER_ID! ? "assistant" : "user",
+        content: cleanContent(m.content),
+      }));
+
+    messages.push({
+      role: "user",
+      content: discordPrompt(cleanContent(rawQuery)),
+    });
+
     const { stopTyping } = await sendTyping(message.channel as TextChannel);
 
     let response = "Something went wrong";
     const { answer, error } = await query(
       scrapeId,
-      discordPrompt(rawQuery),
+      messages,
       createToken(userId)
     );
 

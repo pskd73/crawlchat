@@ -1,7 +1,13 @@
-export async function query(scrapeId: string, query: string, token: string) {
+export async function query(
+  scrapeId: string,
+  messages: { role: string; content: string }[],
+  token: string
+) {
   const result = await fetch(
-    `${process.env.SERVER_HOST}/answer/${scrapeId}?query=${query}`,
+    `${process.env.SERVER_HOST}/answer/${scrapeId}`,
     {
+      method: "POST",
+      body: JSON.stringify({ messages }),
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,

@@ -508,7 +508,7 @@ app.post("/resource/:scrapeId", authenticate, async (req, res) => {
   res.json({ scrapeItem });
 });
 
-app.get("/answer/:scrapeId", async (req, res) => {
+app.post("/answer/:scrapeId", async (req, res) => {
   const scrape = await prisma.scrape.findFirstOrThrow({
     where: { id: req.params.scrapeId },
   });
@@ -529,11 +529,13 @@ app.get("/answer/:scrapeId", async (req, res) => {
       },
     });
   }
-  const query = req.query.query as string;
+  let query = req.body.query as string;
+  const messages = req.body.messages as { role: string; content: string }[];
+  if (messages && messages.length > 0) {
+    query = messages[messages.length - 1].content;
+  }
 
   const indexer = makeIndexer({ key: scrape.indexer });
-  const result = await indexer.search(scrape.id, query);
-  const processed = await indexer.process(query, result);
 
   await addMessage(thread.id, {
     uuid: uuidv4(),
@@ -549,6 +551,12 @@ app.get("/answer/:scrapeId", async (req, res) => {
     },
     {
       messages: [
+        ...messages.map((m) => ({
+          llmMessage: {
+            role: m.role as "user" | "assistant",
+            content: m.content,
+          },
+        })),
         {
           llmMessage: {
             role: "user",
@@ -588,11 +596,7 @@ app.get("/answer/:scrapeId", async (req, res) => {
   await addMessage(thread.id, {
     uuid: uuidv4(),
     llmMessage: { role: "user", content: query },
-    links: processed.map((p) => ({
-      url: p.url,
-      title: null,
-      score: p.score,
-    })),
+    links,
     createdAt: new Date(),
     pinnedAt: null,
   });
