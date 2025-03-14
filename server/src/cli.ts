@@ -3,6 +3,7 @@ dotenv.config();
 
 import { prisma } from "libs/prisma";
 import { consumeCredits } from "libs/user-plan";
+import { cleanupThreads } from "./scripts/thread-cleanup";
 
 async function main() {
   const user = await prisma.user.findFirstOrThrow({
@@ -12,5 +13,5 @@ async function main() {
 }
 
 console.log("Starting...");
-main();
-// cleanupThreads();
+// main();
+cleanupThreads();

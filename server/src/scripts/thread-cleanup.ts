@@ -18,7 +18,7 @@ export async function cleanupThreads() {
     },
   });
 
-  threads = threads.filter((thread) => thread.messages.length > 0);
+  threads = threads.filter((thread) => thread.messages.length === 0);
   console.log("Found", threads.length, "threads");
 
   const chunks = chunk(threads, 100);
