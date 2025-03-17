@@ -192,10 +192,10 @@ export default function Messages({ loaderData }: Route.ComponentProps) {
   }, [filter, score, scrapeId, loaderData.messagePairs]);
 
   function getScoreColor(score: number) {
-    if (score < 0.3) {
+    if (score < 0.2) {
       return "red";
     }
-    if (score < 0.5) {
+    if (score < 0.6) {
       return "orange";
     }
     return "brand";
@@ -320,7 +320,7 @@ export default function Messages({ loaderData }: Route.ComponentProps) {
                         <Group>
                           {pair.uniqueLinks.length > 0 && (
                             <Badge
-                              colorPalette={getScoreColor(pair.minScore)}
+                              colorPalette={getScoreColor(pair.maxScore)}
                               variant={"surface"}
                             >
                               {pair.minScore.toFixed(2)} -{" "}
