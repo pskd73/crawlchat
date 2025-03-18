@@ -103,6 +103,9 @@ export function Navbar() {
           <ChakraLink href={"/#use-cases"} display={["none", "flex"]}>
             Use cases
           </ChakraLink>
+          <ChakraLink href={"/#features"} display={["none", "flex"]}>
+            Features
+          </ChakraLink>
           <ChakraLink href={"/#pricing"} display={["none", "flex"]}>
             Pricing
           </ChakraLink>
@@ -724,7 +727,7 @@ export function Footer() {
             <ChakraLink href={"/"}>Home</ChakraLink>
             <ChakraLink href={"/#pricing"}>Pricing</ChakraLink>
             <ChakraLink href={"/#use-cases"}>Use cases</ChakraLink>
-            <ChakraLink href={"/llm-txt"}>LLM.txt Generator</ChakraLink>
+            <ChakraLink href={"/#features"}>Use cases</ChakraLink>
             <ChakraLink href={"/embed-demo"}>Demo embed</ChakraLink>
           </Stack>
           <Stack flex={1}>
@@ -961,7 +964,7 @@ function Features() {
   }, []);
 
   return (
-    <Stack w={"full"} px={8} py={12} bg="brand.gray.50">
+    <Stack w={"full"} px={8} py={12} bg="brand.gray.50" id="features">
       <Container>
         <Stack alignItems={"center"} w="full" gap={6}>
           <LandingHeading>Features</LandingHeading>
