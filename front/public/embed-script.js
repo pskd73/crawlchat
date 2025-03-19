@@ -139,7 +139,7 @@ class CrawlChatEmbed {
     div.style.color = color;
     div.style.borderRadius = radius;
     div.style.cursor = "pointer";
-    div.style.fontWeight = "bold";
+    // div.style.fontWeight = "bold";
     div.style.transition = "scale 0.1s ease, opacity 0.3s ease";
     div.style.fontSize = fontSize;
 

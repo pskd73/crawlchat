@@ -1,11 +1,16 @@
 import {
   Box,
+  Clipboard,
   Code,
   createListCollection,
   Group,
   Heading,
+  HStack,
   IconButton,
   Input,
+  NativeSelect,
+  parseColor,
+  Slider,
   Stack,
   Text,
   Textarea,
@@ -29,9 +34,27 @@ import type {
   WidgetSize,
 } from "libs/prisma";
 import { Button } from "~/components/ui/button";
-import { TbPlus, TbTrash } from "react-icons/tb";
-import { useEffect, useState } from "react";
-import { InputGroup } from "~/components/ui/input-group";
+import { TbPlus, TbSettings, TbSettings2, TbTrash } from "react-icons/tb";
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  AccordionItem,
+  AccordionItemContent,
+  AccordionItemTrigger,
+  AccordionRoot,
+} from "~/components/ui/accordion";
+import {
+  ColorPickerArea,
+  ColorPickerContent,
+  ColorPickerControl,
+  ColorPickerEyeDropper,
+  ColorPickerInput,
+  ColorPickerLabel,
+  ColorPickerRoot,
+  ColorPickerSliders,
+  ColorPickerTrigger,
+} from "~/components/ui/color-picker";
+import { Field } from "~/components/ui/field";
+import { ClipboardIconButton, ClipboardRoot } from "~/components/ui/clipboard";
 
 export async function loader({ params, request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -101,10 +124,121 @@ const sizes = createListCollection({
   ],
 });
 
+type EmbedProps = {
+  button?: boolean;
+  text?: string;
+  buttonColor?: string;
+  buttonTextColor?: string;
+  buttonText?: string;
+  position?: string;
+  radius: number;
+};
+
+function makeScriptCode(props: EmbedProps, scrapeId: string) {
+  if (typeof window === "undefined") {
+    return "";
+  }
+
+  const origin = window.location.origin;
+
+  const attributes: Record<string, string> = {};
+  const {
+    button,
+    text,
+    buttonColor,
+    buttonTextColor,
+    buttonText,
+    position,
+    radius,
+  } = props;
+
+  if (text) {
+    attributes["data-ask-ai-text"] = text;
+  }
+
+  if (button) {
+    attributes["data-ask-ai"] = "true";
+  }
+
+  if (buttonColor) {
+    attributes["data-ask-ai-background-color"] = buttonColor;
+  }
+
+  if (buttonTextColor) {
+    attributes["data-ask-ai-color"] = buttonTextColor;
+  }
+
+  if (buttonText) {
+    attributes["data-ask-ai-text"] = buttonText;
+  }
+
+  if (position) {
+    attributes["data-ask-ai-position"] = position;
+  }
+
+  if (radius) {
+    attributes["data-ask-ai-radius"] = `${radius}px`;
+  }
+
+  return `<script src="${origin}/embed.js" 
+  id="crawlchat-script" 
+  data-id="${scrapeId}" 
+  ${Object.entries(attributes)
+    .map(([key, value]) => `${key}="${value}"`)
+    .join(" ")}
+></script>`;
+}
+
+function PreviewEmbed({ scriptCode }: { scriptCode: string }) {
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+
+  useEffect(() => {
+    if (!iframeRef.current || !iframeRef.current.contentDocument) return;
+
+    iframeRef.current.contentDocument.open();
+    iframeRef.current.contentDocument.close();
+
+    iframeRef.current.contentDocument.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>CrawlChat</title>
+          <style>
+            body {
+              font-family: 'Inter', sans-serif;
+            }
+          </style>
+        </head>
+        <body>
+          <div>
+            Preview
+          </div>
+          ${scriptCode}
+        </body>
+      </html>`);
+  }, [scriptCode]);
+
+  return (
+    <iframe ref={iframeRef} id="crawlchat-script" style={{ height: "100%" }} />
+  );
+}
+
 export default function ScrapeEmbed({ loaderData }: Route.ComponentProps) {
   const sizeFetcher = useFetcher();
   const questionsFetcher = useFetcher();
   const welcomeMessageFetcher = useFetcher();
+  const [embedProps, setEmbedProps] = useState<EmbedProps>({
+    button: true,
+    buttonColor: "#7b2cbf",
+    buttonTextColor: "#ffffff",
+    buttonText: "💬 Ask AI",
+    position: "br",
+    radius: 20,
+  });
+  const scriptCode = useMemo(
+    () => makeScriptCode(embedProps, loaderData.scrape?.id ?? ""),
+    [embedProps, loaderData.scrape?.id]
+  );
 
   const [questions, setQuestions] = useState<WidgetQuestion[]>(
     loaderData.scrape?.widgetConfig?.questions ?? []
@@ -124,36 +258,177 @@ export default function ScrapeEmbed({ loaderData }: Route.ComponentProps) {
 
   return (
     <Stack gap={6}>
-      <Stack>
-        <Heading>1. Script</Heading>
-        <Text>
-          First step in embedding the chat widget on your website is to add the{" "}
-          <Code>script</Code> to your page. Add the following script to the{" "}
-          <Code>head</Code> tag of your page.
-        </Text>
-        <pre>
-          <Code
-            as="pre"
-            whiteSpace="pre-wrap"
-            wordBreak="break-word"
-            overflowX="auto"
-            p={4}
-          >{`<script src="https://crawlchat.app/embed.js" id="crawlchat-script" data-id="${loaderData.scrape?.id}"></script>`}</Code>
-        </pre>
-      </Stack>
+      <Text>
+        Configure the widget and copy paste the <Code>&lt;script&gt;</Code> tag
+        below to your website.
+      </Text>
 
-      <Stack>
-        <Heading>2. Show & Hide</Heading>
-        <Text>
-          To show and hide the chat widget, you can use the following code:
-        </Text>
-        <pre>
-          <Code>{`window.crawlchatEmbed.show();`}</Code>
-        </pre>
-        <pre>
-          <Code>{`window.crawlchatEmbed.hide();`}</Code>
-        </pre>
-      </Stack>
+      <Group alignItems={"flex-start"}>
+        <Stack flex={2}>
+          <AccordionRoot defaultValue={["basic"]} variant={"enclosed"}>
+            <AccordionItem value={"basic"}>
+              <AccordionItemTrigger>
+                <TbSettings />
+                Basic
+              </AccordionItemTrigger>
+              <AccordionItemContent>
+                <Stack gap={6}>
+                  {/* <Switch
+                    checked={embedProps.button}
+                    onCheckedChange={(e) =>
+                      setEmbedProps({ ...embedProps, button: e.checked })
+                    }
+                  >
+                    Ask AI button
+                  </Switch> */}
+
+                  <ColorPickerRoot
+                    maxW="200px"
+                    value={parseColor(embedProps.buttonColor ?? "")}
+                    onValueChange={(e) =>
+                      setEmbedProps({
+                        ...embedProps,
+                        buttonColor: e.valueAsString,
+                      })
+                    }
+                  >
+                    <ColorPickerLabel>Button color</ColorPickerLabel>
+                    <ColorPickerControl>
+                      <ColorPickerInput />
+                      <ColorPickerTrigger />
+                    </ColorPickerControl>
+                    <ColorPickerContent>
+                      <ColorPickerArea />
+                      <HStack>
+                        <ColorPickerEyeDropper />
+                        <ColorPickerSliders />
+                      </HStack>
+                    </ColorPickerContent>
+                  </ColorPickerRoot>
+
+                  <ColorPickerRoot
+                    maxW="200px"
+                    value={parseColor(embedProps.buttonTextColor ?? "")}
+                    onValueChange={(e) =>
+                      setEmbedProps({
+                        ...embedProps,
+                        buttonTextColor: e.valueAsString,
+                      })
+                    }
+                  >
+                    <ColorPickerLabel>Button text color</ColorPickerLabel>
+                    <ColorPickerControl>
+                      <ColorPickerInput />
+                      <ColorPickerTrigger />
+                    </ColorPickerControl>
+                    <ColorPickerContent>
+                      <ColorPickerArea />
+                      <HStack>
+                        <ColorPickerEyeDropper />
+                        <ColorPickerSliders />
+                      </HStack>
+                    </ColorPickerContent>
+                  </ColorPickerRoot>
+                </Stack>
+              </AccordionItemContent>
+            </AccordionItem>
+            <AccordionItem value={"advanced"}>
+              <AccordionItemTrigger>
+                <TbSettings2 />
+                Advanced
+              </AccordionItemTrigger>
+              <AccordionItemContent>
+                <Stack gap={4}>
+                  <Field label="Button text">
+                    <Input
+                      placeholder="Button text"
+                      value={embedProps.buttonText}
+                      onChange={(e) =>
+                        setEmbedProps({
+                          ...embedProps,
+                          buttonText: e.target.value,
+                        })
+                      }
+                    />
+                  </Field>
+
+                  <Field label="Position">
+                    <NativeSelect.Root width="100%">
+                      <NativeSelect.Field
+                        value={embedProps.position}
+                        onChange={(e) =>
+                          setEmbedProps({
+                            ...embedProps,
+                            position: e.target.value,
+                          })
+                        }
+                      >
+                        <option value="br">Bottom right</option>
+                        <option value="bl">Bottom left</option>
+                        <option value="tr">Top right</option>
+                        <option value="tl">Top left</option>
+                      </NativeSelect.Field>
+                      <NativeSelect.Indicator />
+                    </NativeSelect.Root>
+                  </Field>
+
+                  <Slider.Root
+                    value={[embedProps.radius]}
+                    min={0}
+                    max={25}
+                    step={1}
+                    onValueChange={(e) =>
+                      setEmbedProps({ ...embedProps, radius: e.value[0] })
+                    }
+                  >
+                    <Slider.Label>Roundness</Slider.Label>
+                    <Slider.Control>
+                      <Slider.Track>
+                        <Slider.Range />
+                      </Slider.Track>
+                      <Slider.Thumb index={0} />
+                    </Slider.Control>
+                  </Slider.Root>
+                </Stack>
+              </AccordionItemContent>
+            </AccordionItem>
+          </AccordionRoot>
+        </Stack>
+
+        <Stack
+          flex={1}
+          bg="brand.outline-subtle"
+          p={4}
+          rounded={"md"}
+          overflow={"hidden"}
+          alignSelf={"stretch"}
+        >
+          <PreviewEmbed
+            key={JSON.stringify(embedProps)}
+            scriptCode={scriptCode}
+          />
+        </Stack>
+
+        <Stack
+          flex={1}
+          border={"1px solid"}
+          borderColor="brand.outline"
+          rounded={"md"}
+          alignSelf={"stretch"}
+        >
+          <Stack p={4} h="full" alignItems={"flex-start"} flexDir={"column"}>
+            <Text fontSize={"sm"} flex={1}>
+              {scriptCode}
+            </Text>
+
+            <Group justifyContent={"flex-end"} w="full">
+              <ClipboardRoot value={scriptCode}>
+                <ClipboardIconButton />
+              </ClipboardRoot>
+            </Group>
+          </Stack>
+        </Stack>
+      </Group>
 
       <Stack gap={4}>
         <SettingsSection
@@ -200,7 +475,7 @@ export default function ScrapeEmbed({ loaderData }: Route.ComponentProps) {
         >
           <input type="hidden" name="from-questions" value={"true"} />
           {questions.map((question, i) => (
-            <Group>
+            <Group key={i}>
               <Input
                 name={"questions"}
                 placeholder={"Ex: How to use the product?"}
