@@ -9,6 +9,7 @@ import {
   Text,
 } from "@chakra-ui/react";
 import {
+  TbBook,
   TbChevronRight,
   TbFileX,
   TbFolder,
@@ -162,6 +163,14 @@ export function SideMenu({
               label: "Roadmap",
               to: "https://crawlchat.features.vote/roadmap",
               icon: <TbRoad />,
+              external: true,
+            }}
+          />
+          <SideMenuItem
+            link={{
+              label: "Guides",
+              to: "https://guides.crawlchat.app",
+              icon: <TbBook />,
               external: true,
             }}
           />

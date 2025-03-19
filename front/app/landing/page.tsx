@@ -727,7 +727,10 @@ export function Footer() {
             <ChakraLink href={"/"}>Home</ChakraLink>
             <ChakraLink href={"/#pricing"}>Pricing</ChakraLink>
             <ChakraLink href={"/#use-cases"}>Use cases</ChakraLink>
-            <ChakraLink href={"/#features"}>Use cases</ChakraLink>
+            <ChakraLink href={"/#features"}>Features</ChakraLink>
+            <ChakraLink href={"https://guides.crawlchat.app"}>
+              Guides
+            </ChakraLink>
             <ChakraLink href={"/embed-demo"}>Demo embed</ChakraLink>
           </Stack>
           <Stack flex={1}>

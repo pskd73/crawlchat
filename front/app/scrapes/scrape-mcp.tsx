@@ -1,4 +1,11 @@
-import { Heading, Input, Stack, Text } from "@chakra-ui/react";
+import {
+  Group,
+  Heading,
+  IconButton,
+  Input,
+  Stack,
+  Text,
+} from "@chakra-ui/react";
 import { useFetcher } from "react-router";
 import { getAuthUser } from "~/auth/middleware";
 import { SettingsSection } from "~/dashboard/settings";
@@ -6,6 +13,7 @@ import type { Route } from "./+types/scrape-mcp";
 import { prisma } from "~/prisma";
 import type { Prisma } from "libs/prisma";
 import { MarkdownProse } from "~/widget/markdown-prose";
+import { TbHelp } from "react-icons/tb";
 
 export async function loader({ params, request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -65,7 +73,19 @@ export default function ScrapeMcp({ loaderData }: Route.ComponentProps) {
         p={4}
         borderRadius={"md"}
       >
-        <Heading size={"md"}>MCP Command</Heading>
+        <Heading size={"md"}>
+          <Group>
+            <Text>MCP Command</Text>
+            <IconButton size={"xs"} variant={"ghost"} asChild>
+              <a
+                href="https://guides.crawlchat.app/walkthrough/67db0080600010f091e529b7"
+                target="_blank"
+              >
+                <TbHelp />
+              </a>
+            </IconButton>
+          </Group>
+        </Heading>
         <Text opacity={0.5} fontSize={"sm"}>
           MCP (Model Context Protocol) is a standard protocol to connect with
           LLM applications like Claude App, Cursor, Windsurf or more such
@@ -83,7 +103,19 @@ export default function ScrapeMcp({ loaderData }: Route.ComponentProps) {
         p={4}
         borderRadius={"md"}
       >
-        <Heading size={"md"}>Cursor MCP Command</Heading>
+        <Heading size={"md"}>
+          <Group>
+            <Text>Cursor MCP Command</Text>
+            <IconButton size={"xs"} variant={"ghost"} asChild>
+              <a
+                href="https://guides.crawlchat.app/walkthrough/67db0080600010f091e529b7"
+                target="_blank"
+              >
+                <TbHelp />
+              </a>
+            </IconButton>
+          </Group>
+        </Heading>
         <Text opacity={0.5} fontSize={"sm"}>
           Cursor needs a JSON snippet to be added to the Cursor settings. Copy
           and paste the following snippet
