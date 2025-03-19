@@ -81,5 +81,5 @@ async function main() {
 }
 
 console.log("Starting...");
-main();
-// cleanupThreads();
+// main();
+cleanupThreads();

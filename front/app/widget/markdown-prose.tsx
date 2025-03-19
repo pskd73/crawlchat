@@ -7,7 +7,10 @@ import { Box, Image } from "@chakra-ui/react";
 import { ClipboardIconButton, ClipboardRoot } from "~/components/ui/clipboard";
 import type { PropsWithChildren } from "react";
 
-export function MarkdownProse({ children }: PropsWithChildren) {
+export function MarkdownProse({
+  children,
+  noMarginCode,
+}: PropsWithChildren<{ noMarginCode?: boolean }>) {
   return (
     <Prose maxW="full">
       <Markdown
@@ -31,12 +34,12 @@ export function MarkdownProse({ children }: PropsWithChildren) {
             }).value;
 
             return (
-              <Box position={"relative"} className="group">
+              <Box className="group">
                 <Box dangerouslySetInnerHTML={{ __html: highlighted }} />
                 <Box
                   position={"absolute"}
-                  top={0}
-                  right={0}
+                  top={1}
+                  right={1}
                   opacity={0}
                   _groupHover={{ opacity: 1 }}
                   transition={"opacity 100ms ease-in-out"}
@@ -51,6 +54,20 @@ export function MarkdownProse({ children }: PropsWithChildren) {
           img: ({ node, ...props }) => {
             const { src, alt, ...rest } = props;
             return <Image src={src} alt={alt} boxShadow={"none"} {...rest} />;
+          },
+          pre: ({ node, ...props }) => {
+            const { children, ...rest } = props;
+            return (
+              <pre
+                {...rest}
+                style={{
+                  margin: noMarginCode ? 0 : undefined,
+                  position: "relative",
+                }}
+              >
+                {children}
+              </pre>
+            );
           },
         }}
       >
