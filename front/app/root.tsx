@@ -45,6 +45,7 @@ export function loader() {
 export function Layout({ children }: { children: React.ReactNode }) {
   const matches = useMatches();
   const isEmbed = matches.some((match) => match.id === "landing/embed-demo");
+  const isLandingPage = matches.some((match) => match.id === "landing/page");
 
   return (
     <html lang="en">
@@ -77,6 +78,19 @@ export function Layout({ children }: { children: React.ReactNode }) {
             data-ask-ai-margin-y="20px"
             data-ask-ai-radius="30px"
             data-ask-ai="true"
+          />
+        )}
+        {isLandingPage && (
+          <script
+            src="https://crawlchat.app/embed.js"
+            id="crawlchat-script"
+            data-id="67dbfc7258ed87c571a04b83"
+            data-ask-ai="true"
+            data-ask-ai-background-color="#7b2cbf"
+            data-ask-ai-color="#ffffff"
+            data-ask-ai-text="💬 Ask AI"
+            data-ask-ai-position="br"
+            data-ask-ai-radius="20px"
           />
         )}
       </body>
