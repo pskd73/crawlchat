@@ -73,7 +73,7 @@ function BandColumn({
   );
 }
 
-export default function Email(props: {
+export default function WeeklyEmail(props: {
   messages: number;
   MCPHits: number;
   performance: {
@@ -180,7 +180,7 @@ export default function Email(props: {
                 <MetricCard title="Messages" value={messages} />
               </Column>
               <Column>
-                <MetricCard title="MCP Hits" value={MCPHits} />
+                <MetricCard title="MCP & Discord" value={MCPHits} />
               </Column>
             </Row>
 
