@@ -597,7 +597,22 @@ app.post("/answer/:scrapeId", async (req, res) => {
     },
   });
 
-  res.json({ message: newAnswerMessage });
+  const citationMatches = content.match(/\!\!([0-9]*)!!/g);
+  let citedUrls: string[] = [];
+  if (citationMatches) {
+    const citationIndexes = citationMatches.map((match) =>
+      parseInt(match.replace(/\!\!|!!/g, ""))
+    );
+    citedUrls = citationIndexes
+      .map((index) => matches[index].url)
+      .filter((url) => url) as string[];
+  }
+
+  let updatedContent = content;
+  updatedContent = updatedContent.replace(/\!\!([0-9]*)!!/g, "");
+  updatedContent += "\n\nSources:\n" + citedUrls.join("\n");
+
+  res.json({ message: newAnswerMessage, content: updatedContent });
 });
 
 app.get("/discord/:channelId", async (req, res) => {

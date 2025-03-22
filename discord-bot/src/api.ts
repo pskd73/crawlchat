@@ -23,7 +23,7 @@ export async function query(
     error = (await result.json()).message;
   } else {
     answerJson = await result.json();
-    answer = answerJson.message.llmMessage.content;
+    answer = answerJson.content;
   }
 
   return { answer, json: answerJson, error };

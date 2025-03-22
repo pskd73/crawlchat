@@ -5,7 +5,8 @@ import { cleanupThreads } from "./scripts/thread-cleanup";
 import { multiLinePrompt, SimpleAgent, SimpleTool } from "./llm/agentic";
 import { z } from "zod";
 import { Flow } from "./llm/flow";
-import { makeRagTool } from "./llm/flow-jasmine";
+import { makeFlow, makeRagTool } from "./llm/flow-jasmine";
+import { prisma } from "./prisma";
 
 async function main() {
   const ragTool = makeRagTool("67c1d700cb1ec09c237bab8a", "mars");
@@ -70,7 +71,9 @@ async function main() {
     console.log(message);
 
     if (message.agentId === "gap-finder") {
-      const { missingDetails } = JSON.parse(message.llmMessage.content as string);
+      const { missingDetails } = JSON.parse(
+        message.llmMessage.content as string
+      );
       if (missingDetails.length > 0) {
         flow.addNextAgents(["rag-agent"]);
       }
@@ -80,6 +83,33 @@ async function main() {
   }
 }
 
+async function citing() {
+  const scrape = await prisma.scrape.findFirstOrThrow({
+    where: {
+      id: "67c1d700cb1ec09c237bab8a",
+    },
+  });
+  const query = "How to make a composition and render it on lambda?";
+  const flow = makeFlow(
+    scrape.id,
+    scrape.chatPrompt ?? "",
+    query,
+    [],
+    scrape.indexer
+  );
+  while (await flow.stream({})) {}
+
+  console.log(flow.getLastMessage().llmMessage);
+
+  const matches = flow.flowState.state.messages
+    .map((m) => m.custom?.result)
+    .filter((r) => r !== undefined)
+    .flat();
+
+  console.log(matches.length);
+}
+
 console.log("Starting...");
 // main();
-cleanupThreads();
+// cleanupThreads();
+citing();

@@ -37,12 +37,17 @@ export function makeRagTool(scrapeId: string, indexerKey: string | null) {
       });
 
       let processed = await indexer.process(query, result);
-      // processed = processed.filter((r) => r.score >= 0.1);
 
       return {
         content:
           processed.length > 0
-            ? processed.map((r) => r.content).join("\n\n")
+            ? JSON.stringify(
+                processed.map((r, i) => ({
+                  url: r.url,
+                  content: r.content,
+                  index: i,
+                }))
+              )
             : "No relevant information found. Don't answer the query. Inform that you don't know the answer.",
         customMessage: {
           result: processed,
@@ -84,6 +89,9 @@ export function makeFlow(
     id: "answerer",
     prompt: multiLinePrompt([
       `Given above context, answer the query "${query}".`,
+      "Cite the sources in the format of !!<index>!! at the end of the sentance or paragraph. Example: !!0!!",
+      "Cite only for the sources that are used to answer the query.",
+      "Pick most relevant sources and cite them.",
       systemPrompt,
     ]),
   });

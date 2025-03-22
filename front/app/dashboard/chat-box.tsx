@@ -215,7 +215,13 @@ function AssistantMessage({
     );
     updatedLinks.sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
 
-    const minLinks = 2;
+    const cited = content.match(/\!\!([0-9]*)!!/g);
+    if (cited) {
+      const indexes = cited.map((c) => parseInt(c.replace(/\!\!|!!/g, "")));
+      updatedLinks = updatedLinks.filter((_, index) => indexes.includes(index));
+    }
+
+    const minLinks = 4;
     const linksToShow = more ? updatedLinks.length : minLinks;
 
     return [
@@ -228,7 +234,14 @@ function AssistantMessage({
   return (
     <Stack>
       <Stack px={4} gap={0}>
-        <MarkdownProse>{content}</MarkdownProse>
+        <MarkdownProse
+          sources={links.map((link) => ({
+            title: link?.title ?? link?.url ?? "Source",
+            url: link?.url ?? undefined,
+          }))}
+        >
+          {content}
+        </MarkdownProse>
         <Group pb={uniqueLinks.length === 0 ? 4 : 0}>
           <Tooltip content="Pin message" showArrow>
             <IconButton

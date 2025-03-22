@@ -3,18 +3,24 @@ import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import hljs from "highlight.js";
 import "highlight.js/styles/vs.css";
-import { Box, Image } from "@chakra-ui/react";
+import { Box, Image, Link, Text } from "@chakra-ui/react";
 import { ClipboardIconButton, ClipboardRoot } from "~/components/ui/clipboard";
 import type { PropsWithChildren } from "react";
+import { Tooltip } from "~/components/ui/tooltip";
+const linkifyRegex = require("remark-linkify-regex");
 
 export function MarkdownProse({
   children,
   noMarginCode,
-}: PropsWithChildren<{ noMarginCode?: boolean }>) {
+  sources,
+}: PropsWithChildren<{
+  noMarginCode?: boolean;
+  sources?: Array<{ title: string; url?: string }>;
+}>) {
   return (
     <Prose maxW="full">
       <Markdown
-        remarkPlugins={[remarkGfm]}
+        remarkPlugins={[remarkGfm, linkifyRegex(/\!\![0-9]!!/)]}
         components={{
           code: ({ node, ...props }) => {
             const { children, className, ...rest } = props;
@@ -67,6 +73,47 @@ export function MarkdownProse({
               >
                 {children}
               </pre>
+            );
+          },
+          a: ({ node, ...props }) => {
+            const { children, ...rest } = props;
+
+            const defaultNode = <a {...rest}>{children}</a>;
+            if (!sources || typeof children !== "string") {
+              return defaultNode;
+            }
+
+            const match = children.match(/\!\!([0-9]*)!!/);
+            if (!match) {
+              return defaultNode;
+            }
+
+            const index = parseInt(match[1]);
+            const source = sources[index];
+
+            return (
+              <Tooltip content={source?.title ?? "Loading..."} showArrow>
+                <Text as="span">
+                  <Link
+                    variant={"plain"}
+                    href={source?.url ?? "#"}
+                    target="_blank"
+                    bg="brand.fg"
+                    color="brand.white"
+                    fontSize={"10px"}
+                    height={"16px"}
+                    width={"14px"}
+                    rounded={"md"}
+                    textDecoration={"none"}
+                    display={"inline-flex"}
+                    alignItems={"center"}
+                    justifyContent={"center"}
+                    transform={"translateY(-6px)"}
+                  >
+                    {index + 1}
+                  </Link>
+                </Text>
+              </Tooltip>
             );
           },
         }}
