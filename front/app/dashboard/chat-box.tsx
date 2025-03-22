@@ -215,7 +215,13 @@ function AssistantMessage({
     );
     updatedLinks.sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
 
-    const minLinks = 2;
+    const cited = content.match(/\!\!([0-9]*)!!/g);
+    if (cited) {
+      const indexes = cited.map((c) => parseInt(c.replace(/\!\!|!!/g, "")));
+      updatedLinks = updatedLinks.filter((_, index) => indexes.includes(index));
+    }
+
+    const minLinks = 4;
     const linksToShow = more ? updatedLinks.length : minLinks;
 
     return [
@@ -230,7 +236,8 @@ function AssistantMessage({
       <Stack px={4} gap={0}>
         <MarkdownProse
           sources={links.map((link) => ({
-            title: link.title ?? link.url ?? "Source",
+            title: link?.title ?? link?.url ?? "Source",
+            url: link?.url ?? undefined,
           }))}
         >
           {content}
@@ -317,9 +324,7 @@ function NoMessages({
 
       {scrape.widgetConfig?.welcomeMessage && (
         <Stack w="full" maxW={"400px"}>
-          <MarkdownProse>
-            {scrape.widgetConfig?.welcomeMessage}
-          </MarkdownProse>
+          <MarkdownProse>{scrape.widgetConfig?.welcomeMessage}</MarkdownProse>
         </Stack>
       )}
 

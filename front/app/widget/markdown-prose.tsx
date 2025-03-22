@@ -17,7 +17,7 @@ export function MarkdownProse({
   sources,
 }: PropsWithChildren<{
   noMarginCode?: boolean;
-  sources?: Array<{ title: string }>;
+  sources?: Array<{ title: string; url?: string }>;
 }>) {
   return (
     <Prose maxW="full">
@@ -91,19 +91,29 @@ export function MarkdownProse({
             }
 
             const index = parseInt(match[1]);
+            const source = sources[index];
 
             return (
-              <Tooltip content={sources[index].title} showArrow>
-                <Text
-                  as="span"
-                  bg="brand.fg"
-                  color="brand.white"
-                  fontSize={"xs"}
-                  px={1}
-                  py={0.6}
-                  rounded={"md"}
-                >
-                  {index + 1}
+              <Tooltip content={source?.title ?? "Loading..."} showArrow>
+                <Text as="span">
+                  <Link
+                    variant={"plain"}
+                    href={source?.url ?? "#"}
+                    target="_blank"
+                    bg="brand.fg"
+                    color="brand.white"
+                    fontSize={"10px"}
+                    height={"16px"}
+                    width={"14px"}
+                    rounded={"md"}
+                    textDecoration={"none"}
+                    display={"inline-flex"}
+                    alignItems={"center"}
+                    justifyContent={"center"}
+                    transform={"translateY(-6px)"}
+                  >
+                    {index + 1}
+                  </Link>
                 </Text>
               </Tooltip>
             );
