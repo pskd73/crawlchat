@@ -10,7 +10,7 @@ import { TbSignature } from "react-icons/tb";
 const cache = new Cache(() => readPosts(), 5 * 60 * 1000);
 
 export function loader() {
-  return { posts: [...cache.get(), ...cache.get(), ...cache.get()] };
+  return { posts: cache.get() };
 }
 
 export function meta() {
