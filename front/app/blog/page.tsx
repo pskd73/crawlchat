@@ -54,7 +54,9 @@ export default function BlogPage({ loaderData }: Route.ComponentProps) {
 
               <Stack alignItems={"center"} w="full">
                 <Stack w="full">
-                  <MarkdownProse>{loaderData.post.markdown}</MarkdownProse>
+                  <MarkdownProse size="lg">
+                    {loaderData.post.markdown}
+                  </MarkdownProse>
                 </Stack>
               </Stack>
             </Stack>
