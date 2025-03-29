@@ -50,6 +50,9 @@ export default [
     route("knowledge/item/:itemId", "knowledge/link-item.tsx"),
   ]),
 
+  route("blog/:slug", "blog/page.tsx"),
+  route("blog", "blog/list.tsx"),
+
   route("w/:id", "widget/scrape.tsx"),
   route("w/not-found", "widget/not-found.tsx"),
   route("embed.js", "embed-script.ts"),

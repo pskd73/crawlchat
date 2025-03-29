@@ -1,0 +1,59 @@
+.card-bg-0 {
+  background-color: #e5e5f7;
+  opacity: 0.3;
+  background-image: linear-gradient(135deg, #7b2cc0 25%, transparent 25%),
+    linear-gradient(225deg, #7b2cc0 25%, transparent 25%),
+    linear-gradient(45deg, #7b2cc0 25%, transparent 25%),
+    linear-gradient(315deg, #7b2cc0 25%, #e5e5f7 25%);
+  background-position: 18px 0, 18px 0, 0 0, 0 0;
+  background-size: 18px 18px;
+  background-repeat: repeat;
+}
+
+.card-bg-1 {
+  background-color: #e5e5f7;
+  opacity: 0.3;
+  background-image: repeating-radial-gradient(
+      circle at 0 0,
+      transparent 0,
+      #e5e5f7 18px
+    ),
+    repeating-linear-gradient(#7b2cc055, #7b2cc0);
+}
+
+.card-bg-2 {
+  background-color: #e5e5f7;
+  opacity: 0.3;
+  background-image:  linear-gradient(135deg, #7b2cc0 25%, transparent 25%), linear-gradient(225deg, #7b2cc0 25%, transparent 25%), linear-gradient(45deg, #7b2cc0 25%, transparent 25%), linear-gradient(315deg, #7b2cc0 25%, #e5e5f7 25%);
+  background-position:  18px 0, 18px 0, 0 0, 0 0;
+  background-size: 36px 36px;
+  background-repeat: repeat;
+}
+
+.card-bg-3 {
+  background-color: #e5e5f7;
+  opacity: 0.3;
+  background: linear-gradient(135deg, #7b2cc055 25%, transparent 25%) -18px 0/ 36px 36px, linear-gradient(225deg, #7b2cc0 25%, transparent 25%) -18px 0/ 36px 36px, linear-gradient(315deg, #7b2cc055 25%, transparent 25%) 0px 0/ 36px 36px, linear-gradient(45deg, #7b2cc0 25%, #e5e5f7 25%) 0px 0/ 36px 36px;
+}
+
+.card-bg-4 {
+  background-color: #e5e5f7;
+  opacity: 0.3;
+  background-image: radial-gradient( ellipse farthest-corner at 18px 18px , #7b2cc0, #7b2cc0 50%, #e5e5f7 50%);
+  background-size: 18px 18px;
+}
+
+.card-bg-5 {
+  background-color: #e5e5f7;
+  opacity: 0.3;
+  background-image: linear-gradient(45deg, #7b2cc0 50%, #e5e5f7 50%);
+  background-size: 18px 18px;
+}
+
+.card-bg-6 {
+  background-color: #e5e5f7;
+  opacity: 0.3;
+  background-image:  repeating-linear-gradient(45deg, #7b2cc0 25%, transparent 25%, transparent 75%, #7b2cc0 75%, #7b2cc0), repeating-linear-gradient(45deg, #7b2cc0 25%, #e5e5f7 25%, #e5e5f7 75%, #7b2cc0 75%, #7b2cc0);
+  background-position: 0 0, 18px 18px;
+  background-size: 36px 36px;
+}
