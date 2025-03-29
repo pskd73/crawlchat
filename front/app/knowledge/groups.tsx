@@ -6,6 +6,7 @@ import {
   Table,
   Text,
   Center,
+  Progress,
 } from "@chakra-ui/react";
 import type { Route } from "./+types/groups";
 import { getAuthUser } from "~/auth/middleware";
@@ -52,7 +53,30 @@ export async function loader({ request }: Route.LoaderArgs) {
     });
   }
 
-  return { scrape, knowledgeGroups, counts };
+  const ONE_WEEK_AGO = new Date(Date.now() - 1000 * 60 * 60 * 24 * 7);
+  const citationCounts: Record<string, number> = {};
+  for (const group of knowledgeGroups) {
+    const messages = await prisma.message.findMany({
+      where: {
+        scrapeId,
+        links: { some: { knowledgeGroupId: group.id } },
+        createdAt: { gte: ONE_WEEK_AGO },
+      },
+      select: {
+        links: {
+          select: {
+            knowledgeGroupId: true,
+          },
+        },
+      },
+    });
+    const links = messages
+      .flatMap((m) => m.links)
+      .filter((l) => l.knowledgeGroupId === group.id);
+    citationCounts[group.id] = links.length;
+  }
+
+  return { scrape, knowledgeGroups, counts, citationCounts };
 }
 
 export default function KnowledgeGroups({ loaderData }: Route.ComponentProps) {
@@ -72,10 +96,21 @@ export default function KnowledgeGroups({ loaderData }: Route.ComponentProps) {
         typeText = "Discord";
       }
 
+      const totalCited = Object.values(loaderData.citationCounts).reduce(
+        (acc, count) => acc + count,
+        0
+      );
+
       return {
         icon,
         typeText,
         group,
+        citationPct:
+          totalCited > 0
+            ? (loaderData.citationCounts[group.id] / totalCited) * 100
+            : 0,
+        totalCited,
+        citedNum: loaderData.citationCounts[group.id],
       };
     });
   }, [loaderData.knowledgeGroups]);
@@ -117,9 +152,10 @@ export default function KnowledgeGroups({ loaderData }: Route.ComponentProps) {
               <Table.Row>
                 <Table.ColumnHeader w="12%">Type</Table.ColumnHeader>
                 <Table.ColumnHeader>Title</Table.ColumnHeader>
+                <Table.ColumnHeader w="15%">Citations</Table.ColumnHeader>
                 <Table.ColumnHeader w="10%"># Items</Table.ColumnHeader>
                 <Table.ColumnHeader w="10%">Status</Table.ColumnHeader>
-                <Table.ColumnHeader w="20%">Updated</Table.ColumnHeader>
+                <Table.ColumnHeader w="16%">Updated</Table.ColumnHeader>
                 <Table.ColumnHeader w="10%">Actions</Table.ColumnHeader>
               </Table.Row>
             </Table.Header>
@@ -144,6 +180,23 @@ export default function KnowledgeGroups({ loaderData }: Route.ComponentProps) {
                         {item.group.title ?? "Untitled"}
                       </Link>
                     </ChakraLink>
+                  </Table.Cell>
+                  <Table.Cell>
+                    <Group w="full">
+                      <Text fontSize={"xs"}>
+                        {item.citedNum} / {item.totalCited}
+                      </Text>
+                      <Progress.Root
+                        w="150px"
+                        value={item.citationPct}
+                        min={0}
+                        max={100}
+                      >
+                        <Progress.Track>
+                          <Progress.Range />
+                        </Progress.Track>
+                      </Progress.Root>
+                    </Group>
                   </Table.Cell>
                   <Table.Cell>
                     <Badge variant={"subtle"}>
