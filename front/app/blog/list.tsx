@@ -37,7 +37,7 @@ export default function BlogPage({ loaderData }: Route.ComponentProps) {
           <Stack w="full" gap={10}>
             <Group gap={2} alignItems="center">
               <TbSignature size={32} />
-              <Heading size={"3xl"}>Handcrafted blog</Heading>
+              <Heading size={"3xl"}>Blog</Heading>
             </Group>
 
             <SimpleGrid columns={[1, 2, 3]} w="full" gap={6}>

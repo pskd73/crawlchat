@@ -1,7 +1,7 @@
 ---
 title: How Remotion uses CrawlChat to integrate AI in their documentation
 date: 2025-03-29
-description: This is a short description
+description: Remotion uses CrawlChat to let the community have better access to it using AI. Understand how it is done
 ---
 
 [Remotion](https://remotion.dev) is an open source library to make videos programmatically. It is powering amazing apps such as [Submagic](https://submagic.co), [AIVideo.com](https://aivideo.com), [Icon.me](https://icon.me), [MotionShot](https://motionshot.app) and more. They have a very strong documentation so that the community can easily build applications around Remotion. 

@@ -746,6 +746,7 @@ export function Footer() {
             <ChakraLink href={"https://crawlchat.features.vote/roadmap"}>
               Roadmap
             </ChakraLink>
+            <ChakraLink href={"/blog"}>Blog</ChakraLink>
           </Stack>
           <Stack flex={1}>
             <ChakraLink href={"/terms"}>Terms</ChakraLink>
