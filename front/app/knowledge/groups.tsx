@@ -152,7 +152,7 @@ export default function KnowledgeGroups({ loaderData }: Route.ComponentProps) {
               <Table.Row>
                 <Table.ColumnHeader w="12%">Type</Table.ColumnHeader>
                 <Table.ColumnHeader>Title</Table.ColumnHeader>
-                <Table.ColumnHeader w="15%">Citations</Table.ColumnHeader>
+                <Table.ColumnHeader w="18%">Citations</Table.ColumnHeader>
                 <Table.ColumnHeader w="10%"># Items</Table.ColumnHeader>
                 <Table.ColumnHeader w="10%">Status</Table.ColumnHeader>
                 <Table.ColumnHeader w="16%">Updated</Table.ColumnHeader>
