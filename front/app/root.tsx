@@ -11,6 +11,7 @@ import {
 import type { Route } from "./+types/root";
 import stylesheet from "./app.css?url";
 import { Provider } from "./components/ui/provider";
+import { PiArrowBendRightDown } from "react-icons/pi";
 
 declare global {
   interface Window {
@@ -29,7 +30,7 @@ export const links: Route.LinksFunction = () => [
   },
   {
     rel: "stylesheet",
-    href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Mynerve&family=Courier+Prime:ital,wght@0,400;0,700;1,400;1,700&display=swap",
+    href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Mynerve&family=Courier+Prime:ital,wght@0,400;0,700;1,400;1,700&family=Dawning+of+a+New+Day&display=swap",
   },
   { rel: "stylesheet", href: stylesheet },
 ];
@@ -40,6 +41,43 @@ export function loader() {
       VITE_SERVER_WS_URL: process.env.VITE_SERVER_WS_URL,
     },
   };
+}
+
+function WidgetHighligter() {
+  return (
+    <div
+      className="widget-highlighter"
+      style={{
+        position: "fixed",
+        bottom: 60,
+        right: 10,
+      }}
+    >
+      <div
+        style={{
+          transform: "rotate(10deg)",
+          fontFamily: `"Dawning of a New Day", cursive`,
+          fontSize: "30px",
+          marginTop: "-40px",
+          lineHeight: "1",
+          textAlign: "center",
+        }}
+      >
+        try it out{" "}
+        <br />
+        now
+      </div>
+      <div
+        style={{
+          fontSize: "40px",
+          marginTop: "10px",
+          transform: "rotate(20deg)",
+        }}
+      >
+        <PiArrowBendRightDown />
+      </div>
+    </div>
+  );
 }
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -81,17 +119,20 @@ export function Layout({ children }: { children: React.ReactNode }) {
           />
         )}
         {isLandingPage && (
-          <script
-            src="https://crawlchat.app/embed.js"
-            id="crawlchat-script"
-            data-id="67dbfc7258ed87c571a04b83"
-            data-ask-ai="true"
-            data-ask-ai-background-color="#7b2cbf"
-            data-ask-ai-color="#ffffff"
-            data-ask-ai-text="💬 Ask AI"
-            data-ask-ai-position="br"
-            data-ask-ai-radius="20px"
-          />
+          <>
+            <WidgetHighligter />
+            <script
+              src="https://crawlchat.app/embed.js"
+              id="crawlchat-script"
+              data-id="67dbfc7258ed87c571a04b83"
+              data-ask-ai="true"
+              data-ask-ai-background-color="#7b2cbf"
+              data-ask-ai-color="#ffffff"
+              data-ask-ai-text="💬 Ask AI"
+              data-ask-ai-position="br"
+              data-ask-ai-radius="20px"
+            />
+          </>
         )}
       </body>
     </html>

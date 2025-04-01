@@ -1,0 +1,15 @@
+.gradient-text {
+  background-clip: text;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+.widget-highlighter {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .widget-highlighter {
+    display: flex;
+  }
+}
