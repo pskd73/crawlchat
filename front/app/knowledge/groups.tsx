@@ -26,7 +26,7 @@ import { Button } from "~/components/ui/button";
 import { EmptyState } from "~/components/ui/empty-state";
 import { useMemo } from "react";
 import { GroupStatus } from "./group/status";
-import { RefreshButton } from "./group/refresh-button";
+import { ActionButton } from "./group/action-button";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -213,16 +213,7 @@ export default function KnowledgeGroups({ loaderData }: Route.ComponentProps) {
                     <Group>
                       {["scrape_web", "scrape_github"].includes(
                         item.group.type
-                      ) && (
-                        <RefreshButton
-                          knowledgeGroupId={item.group.id}
-                          disabled={
-                            !["pending", "error", "done"].includes(
-                              item.group.status
-                            )
-                          }
-                        />
-                      )}
+                      ) && <ActionButton group={item.group} />}
                     </Group>
                   </Table.Cell>
                 </Table.Row>

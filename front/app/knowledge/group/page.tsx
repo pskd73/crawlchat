@@ -15,7 +15,7 @@ import { SegmentedControl } from "~/components/ui/segmented-control";
 import { Outlet, useLocation, useNavigate } from "react-router";
 import { useMemo } from "react";
 import { createToken } from "~/jwt";
-import { RefreshButton } from "./refresh-button";
+import { ActionButton } from "./action-button";
 
 export async function loader({ request, params }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -56,6 +56,11 @@ export async function action({ request, params }: Route.ActionArgs) {
       return { error: "Knowledge group ID is required" };
     }
 
+    await prisma.knowledgeGroup.update({
+      where: { id: knowledgeGroupId, userId: user!.id },
+      data: { status: "processing" },
+    });
+
     const token = createToken(user!.id);
     await fetch(`${process.env.VITE_SERVER_URL}/scrape`, {
       method: "POST",
@@ -72,6 +77,19 @@ export async function action({ request, params }: Route.ActionArgs) {
     await prisma.knowledgeGroup.update({
       where: { id: knowledgeGroupId, userId: user!.id },
       data: { status: "processing" },
+    });
+
+    return { success: true };
+  } else if (intent === "stop") {
+    const knowledgeGroupId = params.groupId;
+
+    if (!knowledgeGroupId) {
+      return { error: "Knowledge group ID is required" };
+    }
+
+    await prisma.knowledgeGroup.update({
+      where: { id: knowledgeGroupId, userId: user!.id },
+      data: { status: "done" },
     });
 
     return { success: true };
@@ -127,15 +145,7 @@ export default function KnowledgeGroupPage({
       icon={getIcon()}
       right={
         <Group>
-          <RefreshButton
-            knowledgeGroupId={loaderData.knowledgeGroup.id}
-            buttonSize="md"
-            disabled={
-              !["pending", "error", "done"].includes(
-                loaderData.knowledgeGroup.status
-              )
-            }
-          />
+          <ActionButton group={loaderData.knowledgeGroup} buttonSize="md" />
         </Group>
       }
     >

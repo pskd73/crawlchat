@@ -1,4 +1,4 @@
-import { Scrape } from "libs/prisma";
+import { KnowledgeGroup, prisma, Scrape } from "libs/prisma";
 import {
   BaseKbProcesser,
   KbProcesserListener,
@@ -28,6 +28,7 @@ export class WebKbProcesser extends BaseKbProcesser {
   constructor(
     protected listener: KbProcesserListener,
     private readonly scrape: Scrape,
+    private readonly knowledgeGroup: KnowledgeGroup,
     private readonly url: string,
     protected readonly options: {
       hasCredits: () => Promise<boolean>;
@@ -76,7 +77,18 @@ export class WebKbProcesser extends BaseKbProcesser {
       skipRegex: this.options.skipRegex,
       allowOnlyRegex: this.options.allowOnlyRegex,
       onComplete: () => this.onComplete(),
-      shouldScrape: () => this.options.hasCredits(),
+      shouldScrape: async () => {
+        if (!this.options.hasCredits()) {
+          return false;
+        }
+        const group = await prisma.knowledgeGroup.findFirstOrThrow({
+          where: { id: this.knowledgeGroup.id },
+        });
+        if (group.status !== "processing") {
+          return false;
+        }
+        return true;
+      },
       afterScrape: async (url, { markdown, error }) => {
         const progress = calculateProgress(this.store, this.options.limit);
         const metaTags = this.store.urls[url]?.metaTags ?? [];

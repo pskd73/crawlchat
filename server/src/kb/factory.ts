@@ -14,20 +14,26 @@ export function makeKbProcesser(
       throw new Error("URL is required");
     }
 
-    const processer = new WebKbProcesser(listener, scrape, url, {
-      hasCredits: options.hasCredits,
-      removeHtmlTags: knowledgeGroup.removeHtmlTags ?? undefined,
-      dynamicFallbackContentLength:
-        knowledgeGroup.staticContentThresholdLength ?? undefined,
-      limit: options.limit,
-      allowOnlyRegex:
-        knowledgeGroup.matchPrefix && knowledgeGroup.url
-          ? new RegExp(`^${knowledgeGroup.url.replace(/\/$/, "")}.*`)
+    const processer = new WebKbProcesser(
+      listener,
+      scrape,
+      knowledgeGroup,
+      url,
+      {
+        hasCredits: options.hasCredits,
+        removeHtmlTags: knowledgeGroup.removeHtmlTags ?? undefined,
+        dynamicFallbackContentLength:
+          knowledgeGroup.staticContentThresholdLength ?? undefined,
+        limit: options.limit,
+        allowOnlyRegex:
+          knowledgeGroup.matchPrefix && knowledgeGroup.url
+            ? new RegExp(`^${knowledgeGroup.url.replace(/\/$/, "")}.*`)
+            : undefined,
+        skipRegex: knowledgeGroup.skipPageRegex
+          ? knowledgeGroup.skipPageRegex.split(",").map((r) => new RegExp(r))
           : undefined,
-      skipRegex: knowledgeGroup.skipPageRegex
-        ? knowledgeGroup.skipPageRegex.split(",").map((r) => new RegExp(r))
-        : undefined,
-    });
+      }
+    );
 
     return processer;
   }
@@ -46,14 +52,20 @@ export function makeKbProcesser(
     const removeSelectors = [".react-line-number", "#repos-file-tree"];
     const removeHtmlTags = removeSelectors.join(",");
 
-    const processer = new WebKbProcesser(listener, scrape, url, {
-      hasCredits: options.hasCredits,
-      removeHtmlTags,
-      dynamicFallbackContentLength:
-        knowledgeGroup.staticContentThresholdLength ?? undefined,
-      limit: options.limit,
-      allowOnlyRegex: new RegExp(allowOnlyRegex),
-    });
+    const processer = new WebKbProcesser(
+      listener,
+      scrape,
+      knowledgeGroup,
+      url,
+      {
+        hasCredits: options.hasCredits,
+        removeHtmlTags,
+        dynamicFallbackContentLength:
+          knowledgeGroup.staticContentThresholdLength ?? undefined,
+        limit: options.limit,
+        allowOnlyRegex: new RegExp(allowOnlyRegex),
+      }
+    );
 
     return processer;
   }
