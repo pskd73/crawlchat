@@ -32,6 +32,7 @@ export function extractCitations(
 
   if (cleanCitations) {
     cleanedContent = cleanedContent.replace(/!!([0-9]+)!!/g, "");
+    cleanedContent = cleanedContent.replace(/!!<fetchUniqueId>!!/g, "");
   }
 
   return { content: cleanedContent, citedLinks };
