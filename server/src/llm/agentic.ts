@@ -60,7 +60,19 @@ export class Agent<CustomState = {}, CustomMessage = {}> {
       content: await this.getSystemPrompt(state),
     };
 
+    let developerMessages: ChatCompletionMessageParam[] = [];
+
+    if (this.model === "o1-mini") {
+      developerMessages = [
+        {
+          role: "developer",
+          content: "Formatting re-enabled",
+        } as ChatCompletionMessageParam,
+      ];
+    }
+
     const messages = [
+      ...developerMessages,
       ...state.messages.map((m) => m.llmMessage),
       systemPromptMessage,
     ];
