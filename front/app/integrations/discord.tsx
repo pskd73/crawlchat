@@ -7,6 +7,7 @@ import {
   List,
   NumberInput,
   NativeSelect,
+  Box,
 } from "@chakra-ui/react";
 import { useFetcher } from "react-router";
 import { SettingsSection } from "~/dashboard/profile";
@@ -26,8 +27,9 @@ import {
 import { Button } from "~/components/ui/button";
 import { getSessionScrapeId } from "~/scrapes/util";
 import { Switch } from "~/components/ui/switch";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Field } from "~/components/ui/field";
+import { toaster } from "~/components/ui/toaster";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -59,21 +61,28 @@ export async function action({ request }: Route.ActionArgs) {
     update.discordServerId = discordServerId;
   }
 
-  if (formData.has("fromDiscordAnswer")) {
-    const enabled = formData.get("discordAnswerEnabled") === "on";
+  if (formData.has("fromDiscordDraft")) {
+    const enabled = formData.get("discordDraftEnabled") === "on";
     if (enabled) {
-      const channelId =
-        (formData.get("discordAnswerChannelId") as string) ?? "";
-      const minScore =
-        (formData.get("discordAnswerMinScore") as string) ?? "0.5";
-      const emoji = (formData.get("discordAnswerEmoji") as string) ?? "✋🏻";
-      update.discordAnswerConfig = {
-        channels: [{ channelId }],
-        minScore: parseFloat(minScore),
+      const sourceChannelId = formData.get(
+        "discordDraftSourceChannelId"
+      ) as string;
+      const emoji = formData.get("discordDraftEmoji") as string;
+      const destinationChannelId = formData.get(
+        "discordDraftDestinationChannelId"
+      ) as string;
+
+      if (!sourceChannelId || !destinationChannelId || !emoji) {
+        return { error: "All fields are required" };
+      }
+
+      update.discordDraftConfig = {
+        sourceChannelIds: [sourceChannelId],
+        destinationChannelId: destinationChannelId,
         emoji,
       };
     } else {
-      update.discordAnswerConfig = null;
+      update.discordDraftConfig = null;
     }
   }
 
@@ -89,10 +98,19 @@ export default function ScrapeIntegrations({
   loaderData,
 }: Route.ComponentProps) {
   const discordServerIdFetcher = useFetcher();
-  const discordAnswerFetcher = useFetcher();
-  const [discordAnswerEnabled, setDiscordAnswerEnabled] = useState(
-    !!loaderData.scrape.discordAnswerConfig
+  const discordDraftFetcher = useFetcher();
+  const [discordDraftEnabled, setDiscordDraftEnabled] = useState(
+    !!loaderData.scrape.discordDraftConfig
   );
+
+  useEffect(() => {
+    if (discordDraftFetcher.data?.error) {
+      toaster.error({
+        title: "Error",
+        description: discordDraftFetcher.data.error,
+      });
+    }
+  }, [discordDraftFetcher.data]);
 
   return (
     <Stack gap={6}>
@@ -165,90 +183,73 @@ export default function ScrapeIntegrations({
       <SettingsSection
         title={
           <Group>
-            <Text>Reactive answer</Text>
-            <PopoverRoot>
-              <PopoverTrigger asChild>
-                <IconButton size={"xs"} variant={"ghost"}>
-                  <TbInfoCircle />
-                </IconButton>
-              </PopoverTrigger>
-              <PopoverContent>
-                <PopoverArrow />
-                <PopoverBody>
-                  <PopoverTitle fontWeight="medium">
-                    Find channel ID
-                  </PopoverTitle>
-                  <List.Root as="ol">
-                    <List.Item>Right click on channel</List.Item>
-                    <List.Item>Click on "Copy URL"</List.Item>
-                    <List.Item>Copy the last part of the URL</List.Item>
-                    <List.Item>Paste it below</List.Item>
-                  </List.Root>
-                </PopoverBody>
-              </PopoverContent>
-            </PopoverRoot>
+            <Text>Drafting</Text>
+            <IconButton size={"xs"} variant={"ghost"} asChild>
+              <a
+                href="https://guides.crawlchat.app/walkthrough/67fd0aad123cc427aca681a7/read"
+                target="_blank"
+              >
+                <TbInfoCircle />
+              </a>
+            </IconButton>
           </Group>
         }
-        description="This features let's the Discord bot check every message if it is a question and the bot has a strong answer for it. If so, it reacts to the message so that your community knows it and replys @crawlchat to get the full answer."
-        fetcher={discordAnswerFetcher}
+        description="This features let's you draft the answers from your diccord channel with multiple prompts so that you can tweak the answer the way you want."
+        fetcher={discordDraftFetcher}
       >
         <Stack gap={4}>
-          <input type="hidden" name="fromDiscordAnswer" value={"true"} />
+          <input type="hidden" name="fromDiscordDraft" value={"true"} />
           <Switch
-            name="discordAnswerEnabled"
+            name="discordDraftEnabled"
             maxW={"400px"}
-            defaultChecked={discordAnswerEnabled}
-            onCheckedChange={(e) => setDiscordAnswerEnabled(e.checked)}
+            defaultChecked={discordDraftEnabled}
+            onCheckedChange={(e) => setDiscordDraftEnabled(e.checked)}
           >
             Enable
           </Switch>
-          {discordAnswerEnabled && (
+          {discordDraftEnabled && (
             <>
               <Field
-                label="Channel Id"
-                helperText="The channel id where the bot should check and react for messages if best answer found"
+                label="Source Channel Id"
+                helperText="The channel id where the original questions are posted"
               >
                 <Input
-                  name="discordAnswerChannelId"
+                  name="discordDraftSourceChannelId"
                   placeholder="Enter your Discord server ID"
                   defaultValue={
-                    loaderData.scrape.discordAnswerConfig?.channels?.[0]
-                      .channelId ?? ""
+                    loaderData.scrape.discordDraftConfig
+                      ?.sourceChannelIds?.[0] ?? ""
                   }
                   maxW={"400px"}
                 />
               </Field>
+
               <Field
-                label="Min Score"
-                helperText="The minimum score required for the answer to be reactive"
+                label="Destination Channel Id"
+                helperText="The channel id where the draft will be posted"
               >
-                <NumberInput.Root maxW={"400px"} w="full">
-                  <NumberInput.Control>
-                    <NumberInput.IncrementTrigger />
-                    <NumberInput.DecrementTrigger />
-                  </NumberInput.Control>
-                  <NumberInput.Scrubber />
-                  <NumberInput.Input
-                    placeholder="Ex: 0.5"
-                    name="discordAnswerMinScore"
-                    defaultValue={
-                      loaderData.scrape.discordAnswerConfig?.minScore ?? 0.5
-                    }
-                  />
-                </NumberInput.Root>
+                <Input
+                  name="discordDraftDestinationChannelId"
+                  placeholder="Enter your Discord server ID"
+                  defaultValue={
+                    loaderData.scrape.discordDraftConfig
+                      ?.destinationChannelId ?? ""
+                  }
+                  maxW={"400px"}
+                />
               </Field>
+
               <NativeSelect.Root maxW="400px">
                 <NativeSelect.Field
                   placeholder="Emoji"
-                  name="discordAnswerEmoji"
+                  name="discordDraftEmoji"
                   defaultValue={
-                    loaderData.scrape.discordAnswerConfig?.emoji ?? "✋🏻"
+                    loaderData.scrape.discordDraftConfig?.emoji ?? "✍️"
                   }
                 >
-                  <option value="✋🏻">✋🏻</option>
-                  <option value="👍🏻">👍🏻</option>
-                  <option value="😇">😇</option>
-                  <option value="✌🏻">✌🏻</option>
+                  <option value="✍️">✍️</option>
+                  <option value="✏️">✏️</option>
+                  <option value="🤔">🤔</option>
                 </NativeSelect.Field>
                 <NativeSelect.Indicator />
               </NativeSelect.Root>

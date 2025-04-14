@@ -56,29 +56,15 @@ export async function learn(scrapeId: string, content: string, token: string) {
 
 export async function getDiscordDetails(channelId: string) {
   const result = await fetch(`${process.env.SERVER_HOST}/discord/${channelId}`);
-  const { scrapeId, userId, autoAnswerChannelIds, answerEmoji } =
+  const { scrapeId, userId, draftChannelIds, draftEmoji, draftDestinationChannelId } =
     await result.json();
 
   return {
     scrapeId,
     userId,
-    autoAnswerChannelIds: autoAnswerChannelIds ?? [],
-    answerEmoji,
+    draftChannelIds,
+    draftEmoji,
+    draftDestinationChannelId
   };
 }
 
-export async function testQuery(text: string, token: string, scrapeId: string) {
-  const result = await fetch(
-    `${process.env.SERVER_HOST}/test-query/${scrapeId}`,
-    {
-      method: "POST",
-      body: JSON.stringify({ text }),
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
-
-  return (await result.json()).canAnswer;
-}

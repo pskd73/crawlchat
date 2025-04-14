@@ -734,8 +734,8 @@ export function Pricing() {
               title="Free"
               description="For personal use"
               features={[
-                { label: "100 page scrapes/month" },
-                { label: "200 message credits/month" },
+                { label: "100 page scrapes" },
+                { label: "100 message credits" },
                 { label: "API not available", excluded: true },
                 { label: "MCP not available", excluded: true },
                 { label: "Discord bot", excluded: true },

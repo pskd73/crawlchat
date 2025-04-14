@@ -620,54 +620,9 @@ app.get("/discord/:channelId", async (req, res) => {
   res.json({
     scrapeId: scrape.id,
     userId: scrape.userId,
-    autoAnswerChannelIds: scrape.discordAnswerConfig?.channels
-      .map((c) => c.channelId)
-      .flatMap((c) => c.split(","))
-      .map((c) => c.trim()),
-    answerEmoji: scrape.discordAnswerConfig?.emoji ?? "✋🏻",
-  });
-});
-
-app.post("/test-query/:scrapeId", authenticate, async (req, res) => {
-  const scrape = await prisma.scrape.findFirstOrThrow({
-    where: { id: req.params.scrapeId },
-  });
-
-  let canAnswer = false;
-  const flow = makeTestQueryFlow(req.body.text);
-
-  while (await flow.stream()) {}
-  const message = JSON.parse((flow.getLastMessage().llmMessage as any).content);
-
-  if (
-    scrape.discordAnswerConfig &&
-    message.isQuestion &&
-    message.confidence > 0.6
-  ) {
-    const flow = makeFlow(
-      scrape.id,
-      scrape.chatPrompt ?? "",
-      req.body.text,
-      [],
-      scrape.indexer
-    );
-
-    while (await flow.stream()) {}
-
-    const links = await collectSourceLinks(
-      scrape.id,
-      flow.flowState.state.messages
-    );
-
-    const maxScore = Math.max(...links.map((l) => l.score ?? 0));
-
-    if (maxScore >= scrape.discordAnswerConfig.minScore) {
-      canAnswer = true;
-    }
-  }
-
-  res.json({
-    canAnswer,
+    draftChannelIds: scrape.discordDraftConfig?.sourceChannelIds ?? [],
+    draftEmoji: scrape.discordDraftConfig?.emoji,
+    draftDestinationChannelId: scrape.discordDraftConfig?.destinationChannelId,
   });
 });
 

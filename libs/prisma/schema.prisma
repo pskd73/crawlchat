@@ -73,14 +73,10 @@ type ScrapeAnalytics {
   updatedAt           DateTime
 }
 
-type DiscordAnswerChannel {
-  channelId           String
-}
-
-type DiscordAnswerConfig {
-  minScore            Float
-  channels            DiscordAnswerChannel[]
-  emoji               String?
+type DiscordDraftConfig {
+  emoji                   String
+  sourceChannelIds        String[]
+  destinationChannelId    String
 }
 
 enum LlmModel {
@@ -104,7 +100,7 @@ model Scrape {
   widgetConfig          WidgetConfig?
   indexer               String?
   discordServerId       String?
-  discordAnswerConfig   DiscordAnswerConfig?
+  discordDraftConfig    DiscordDraftConfig?
 
   analytics             ScrapeAnalytics?
   llmModel              LlmModel?
