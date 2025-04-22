@@ -67,6 +67,7 @@ class CrawlChatEmbed {
     setTimeout(() => {
       div.style.width = "0px";
       div.style.height = "0px";
+      document.body.focus();
     }, this.transitionDuration);
 
     if (this.askAIEnabled) {
@@ -82,7 +83,6 @@ class CrawlChatEmbed {
   handleOnMessage(event) {
     if (event.data === "close") {
       window.crawlchatEmbed.hide();
-      document.body.focus();
     }
   }
 
