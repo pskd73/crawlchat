@@ -62,7 +62,6 @@ export async function loader({ params, request }: Route.LoaderArgs) {
     {
       headers: {
         "Set-Cookie": await commitSession(session),
-        "cross-origin-resource-policy": "cross-origin",
       },
     }
   );

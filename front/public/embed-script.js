@@ -183,7 +183,7 @@ function setupCrawlChat() {
   window.crawlchatEmbed.mount();
 }
 
-if (document.readyState === "complete") {
+if (document.readyState === "complete" || window.frameElement) {
   setupCrawlChat();
 } else {
   window.addEventListener("load", setupCrawlChat);
