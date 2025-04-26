@@ -13,6 +13,7 @@ export default [
   ]),
 
   index("landing/page.tsx"),
+  route("landing-v2", "landing-v2/page.tsx"),
   route("llm-txt", "landing/tools/llm-txt.tsx"),
   route("open-scrape", "landing/open-scrape.ts"),
   route("terms", "landing/terms.tsx"),
