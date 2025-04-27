@@ -82,7 +82,14 @@ function DemoWindow() {
           <div className="w-[10px] h-[10px] bg-green-500 rounded-full" />
         </div>
       </div>
-      <div className="bg-canvas rounded-lg aspect-[16/10]"></div>
+      <div className="bg-canvas rounded-lg aspect-[960/600] overflow-hidden">
+        <video
+          src="https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat-hero.mp4"
+          autoPlay
+          muted
+          loop
+        />
+      </div>
     </div>
   );
 }
