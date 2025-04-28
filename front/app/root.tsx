@@ -11,6 +11,7 @@ import {
 
 import type { Route } from "./+types/root";
 import stylesheet from "./app.css?url";
+import fontsStylesheet from "./fonts.css?url";
 import { Provider } from "./components/ui/provider";
 import { PiArrowBendRightDown } from "react-icons/pi";
 import { useMemo } from "react";
@@ -35,6 +36,7 @@ export const links: Route.LinksFunction = () => [
     href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Mynerve&family=Courier+Prime:ital,wght@0,400;0,700;1,400;1,700&family=Dawning+of+a+New+Day&display=swap",
   },
   { rel: "stylesheet", href: stylesheet },
+  { rel: "stylesheet", href: fontsStylesheet },
 ];
 
 export function loader() {
@@ -90,7 +92,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       "67c0a28c5b075f0bb35e5366",
       "67bca5b7b57f15a3a6f8eac6",
     ];
-  
+
     const shouldTrack = trackingExcludedScrapeIds.every(
       (id) => !location.pathname.includes(`/w/${id}`)
     );
@@ -108,7 +110,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta property="og:title" content="CrawlChat - Your documentation with AI!" />
+        <meta
+          property="og:title"
+          content="CrawlChat - Your documentation with AI!"
+        />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://crawlchat.app" />
         <meta property="og:image" content="https://crawlchat.app/og-1.png" />

@@ -38,7 +38,13 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     throw new Response("Not found", { status: 404 });
   }
 
-  return { scrape, knowledgeGroup };
+  const items = await prisma.scrapeItem.count({
+    where: {
+      knowledgeGroupId: knowledgeGroup.id,
+    },
+  });
+
+  return { scrape, knowledgeGroup, items };
 }
 
 export async function action({ request, params }: Route.ActionArgs) {
@@ -113,11 +119,11 @@ export default function KnowledgeGroupPage({
       },
       {
         value: `/knowledge/group/${loaderData.knowledgeGroup.id}/items`,
-        label: "Knowledge items",
+        label: `Knowledge items (${loaderData.items})`,
         icon: <TbBook2 />,
       },
     ];
-  }, [loaderData.knowledgeGroup.id]);
+  }, [loaderData.knowledgeGroup.id, loaderData.items]);
 
   function handleTabChange(value: string) {
     navigate(value);

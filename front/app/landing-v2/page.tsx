@@ -1,6 +1,7 @@
 import { useMemo, useState, type PropsWithChildren } from "react";
 import cn from "@meltdownjs/cn";
 import "../tailwind.css";
+import "../fonts.css";
 import { TbArrowRight, TbLoader2, TbMessage } from "react-icons/tb";
 import { useOpenScrape } from "~/landing/use-open-scrape";
 import { prisma } from "libs/prisma";
