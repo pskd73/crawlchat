@@ -1,8 +1,70 @@
 import { useMemo, useState, type PropsWithChildren } from "react";
 import cn from "@meltdownjs/cn";
 import "../tailwind.css";
-import { TbArrowRight, TbLoader, TbLoader2, TbMessage } from "react-icons/tb";
+import { TbArrowRight, TbLoader2, TbMessage } from "react-icons/tb";
 import { useOpenScrape } from "~/landing/use-open-scrape";
+import { prisma } from "libs/prisma";
+import type { Route } from "./+types/page";
+
+export function meta() {
+  return [
+    {
+      title: "CrawlChat - Your documentation with AI!",
+      description: "Deliver your documentation with AI",
+    },
+  ];
+}
+
+const cache = {
+  messagesThisWeek: 0,
+  messagesDay: 0,
+  messagesMonth: 0,
+  updatedAt: 0,
+};
+
+export async function loader() {
+  const MINS_5 = 5 * 60 * 1000;
+  const DAY = 24 * 60 * 60 * 1000;
+  const WEEK = 7 * DAY;
+  const MONTH = 30 * DAY;
+
+  const now = new Date();
+  const startOfWeek = new Date(now.getTime() - WEEK);
+  const startOfDay = new Date(now.getTime() - DAY);
+  const startOfMonth = new Date(now.getTime() - MONTH);
+
+  if (cache.updatedAt < now.getTime() - MINS_5) {
+    cache.messagesThisWeek = await prisma.message.count({
+      where: {
+        createdAt: {
+          gte: startOfWeek,
+        },
+      },
+    });
+
+    cache.messagesDay = await prisma.message.count({
+      where: {
+        createdAt: {
+          gte: startOfDay,
+        },
+      },
+    });
+
+    cache.messagesMonth = await prisma.message.count({
+      where: {
+        createdAt: {
+          gte: startOfMonth,
+        },
+      },
+    });
+  }
+
+  return {
+    messagesThisWeek: cache.messagesThisWeek,
+    messagesDay: cache.messagesDay,
+    messagesMonth: cache.messagesMonth,
+  };
+}
 
 function Container({ children }: PropsWithChildren) {
   return (
@@ -25,7 +87,7 @@ function Logo() {
 
 function NavLink({ children, href }: PropsWithChildren<{ href: string }>) {
   return (
-    <a href="#" className="font-medium hover:underline">
+    <a href={href} className="font-medium hover:underline">
       {children}
     </a>
   );
@@ -35,7 +97,12 @@ function Button({
   children,
   className,
   variant = "outline",
-}: PropsWithChildren & { className?: string; variant?: "solid" | "outline" }) {
+  href,
+}: PropsWithChildren & {
+  className?: string;
+  variant?: "solid" | "outline";
+  href?: string;
+}) {
   return (
     <a
       className={cn(
@@ -44,6 +111,7 @@ function Button({
         variant === "solid" && "bg-brand text-canvas",
         className
       )}
+      href={href}
     >
       {children}
     </a>
@@ -79,14 +147,8 @@ function HeroScrapeButton({
 }
 
 function Scrape() {
-  const {
-    scrapeFetcher,
-    scraping,
-    stage,
-    roomId,
-    disable,
-    openChat,
-  } = useOpenScrape();
+  const { scrapeFetcher, scraping, stage, roomId, disable, openChat } =
+    useOpenScrape();
 
   function getNote() {
     if (scrapeFetcher.data?.error) {
@@ -185,13 +247,21 @@ function StatsItem({ label, value }: { label: string; value: number }) {
   );
 }
 
-function Stats() {
+function Stats({
+  messagesThisWeek,
+  messagesDay,
+  messagesMonth,
+}: {
+  messagesThisWeek: number;
+  messagesDay: number;
+  messagesMonth: number;
+}) {
   return (
     <div className="flex flex-col md:flex-row gap-8 w-full mt-8 md:items-center">
       <div className="flex-1 flex flex-col gap-10">
         <div className="text-md md:text-xl font-medium px-6 py-3 shadow-md rounded-2xl bg-canvas w-fit flex items-center gap-4 -rotate-[4deg]">
           <div className="w-3 h-3 bg-green-500 rounded-full outline-2 outline-green-300 outline" />
-          Answering questions continuously
+          Serving the community
         </div>
         <h3 className="text-4xl md:text-5xl font-radio-grotesk font-bold leading-[1.2]">
           Answering <br />
@@ -201,9 +271,9 @@ function Stats() {
       </div>
 
       <div className="flex-1 shadow-md bg-canvas rounded-2xl">
-        <StatsItem label="Today" value={272} />
-        <StatsItem label="In the last week" value={2220} />
-        <StatsItem label="In the last month" value={7223} />
+        <StatsItem label="Today" value={messagesDay} />
+        <StatsItem label="In the last week" value={messagesThisWeek} />
+        <StatsItem label="In the last month" value={messagesMonth} />
       </div>
     </div>
   );
@@ -312,14 +382,14 @@ function CustomiseIcon({ src, rotate }: { src: string; rotate: number }) {
 
 function Works() {
   return (
-    <div className="mt-32">
+    <div className="mt-32" id="how-it-works">
       <Heading>
         Works in <HeadingHighlight>three</HeadingHighlight> simple steps
       </Heading>
 
       <HeadingDescription>
-        CrawlChat has a very simple workflow at its core. In three simple steps
-        you can turn your docs into LLM ready for your community.
+        CrawlChat has a very simple workflow at its core. You can turn your docs
+        into LLM ready for your community in three simple steps.
       </HeadingDescription>
 
       <div className="flex flex-col md:flex-row gap-8">
@@ -773,7 +843,7 @@ function ToolItem({
 
 function Tools() {
   return (
-    <div className="mt-32">
+    <div className="mt-32" id="features">
       <Heading>
         All the <HeadingHighlight>tools</HeadingHighlight> to improve your docs
       </Heading>
@@ -901,7 +971,7 @@ function PricingBox({
 
 function Pricing() {
   return (
-    <div className="mt-32">
+    <div className="mt-32" id="pricing">
       <Heading>
         <HeadingHighlight>Pricing</HeadingHighlight> for everyone
       </Heading>
@@ -1044,7 +1114,7 @@ function CTA() {
 
         <div className="flex justify-center">
           <a
-            href="#"
+            href="/login"
             className="px-12 py-4 bg-brand text-canvas font-medium rounded-2xl text-xl"
           >
             Get started
@@ -1078,59 +1148,66 @@ function Footer() {
           <div className="flex-[2]">
             <ul className="flex flex-col gap-4">
               <li>
-                <FooterLink href="#">
+                <FooterLink href="/blog/how-to-embed-ai-chatbot">
                   How to add AI Chatbot for your docs
                 </FooterLink>
               </li>
               <li>
-                <FooterLink href="#">Documentation - Use case</FooterLink>
+                <FooterLink href="/blog/how-remotion-uses-crawlchat">
+                  Documentation - Use case
+                </FooterLink>
               </li>
               <li>
-                <FooterLink href="#">Setup MCP server</FooterLink>
+                <FooterLink href="/blog/how-to-setup-mcp-for-your-documentation">
+                  Setup MCP server
+                </FooterLink>
               </li>
               <li>
-                <FooterLink href="#">How Discord Bot helps?</FooterLink>
-              </li>
-            </ul>
-          </div>
-          <div className="flex-[1]">
-            <ul className="flex flex-col gap-4">
-              <li>
-                <FooterLink href="#">Home</FooterLink>
-              </li>
-              <li>
-                <FooterLink href="#">Pricing</FooterLink>
-              </li>
-              <li>
-                <FooterLink href="#">Use cases</FooterLink>
-              </li>
-              <li>
-                <FooterLink href="#">Features</FooterLink>
-              </li>
-              <li>
-                <FooterLink href="#">Guides</FooterLink>
-              </li>
-              <li>
-                <FooterLink href="#">Roadmap</FooterLink>
-              </li>
-              <li>
-                <FooterLink href="#">Blog</FooterLink>
+                <FooterLink href="/blog/how-discord-bot-helps">
+                  How Discord Bot helps?
+                </FooterLink>
               </li>
             </ul>
           </div>
           <div className="flex-[1]">
             <ul className="flex flex-col gap-4">
               <li>
-                <FooterLink href="#">Terms</FooterLink>
+                <FooterLink href="/">Home</FooterLink>
               </li>
               <li>
-                <FooterLink href="#">Privacy policy</FooterLink>
+                <FooterLink href="/#pricing">Pricing</FooterLink>
+              </li>
+              <li>
+                <FooterLink href="/#features">Features</FooterLink>
+              </li>
+              <li>
+                <FooterLink href="https://guides.crawlchat.app">
+                  Guides
+                </FooterLink>
+              </li>
+              <li>
+                <FooterLink href="https://crawlchat.features.vote/roadmap">
+                  Roadmap
+                </FooterLink>
+              </li>
+              <li>
+                <FooterLink href="/blog">Blog</FooterLink>
+              </li>
+            </ul>
+          </div>
+          <div className="flex-[1]">
+            <ul className="flex flex-col gap-4">
+              <li>
+                <FooterLink href="/terms">Terms</FooterLink>
+              </li>
+              <li>
+                <FooterLink href="/policy">Privacy policy</FooterLink>
               </li>
             </ul>
 
             <ul className="flex gap-6 mt-4">
               <li>
-                <a href="#">
+                <a href="mailto:support@crawlchat.app">
                   <img
                     src="/new-landing/mail.png"
                     alt="Mail"
@@ -1139,7 +1216,7 @@ function Footer() {
                 </a>
               </li>
               <li>
-                <a href="#">
+                <a href="https://x.com/pramodk73">
                   <img src="/new-landing/x.png" alt="X" className="w-4 h-4" />
                 </a>
               </li>
@@ -1158,12 +1235,12 @@ function Nav() {
 
       <div className="flex items-center gap-8">
         <div className="items-center gap-8 hidden md:flex">
-          <NavLink href="#">How it works</NavLink>
-          <NavLink href="#">Features</NavLink>
-          <NavLink href="#">Pricing</NavLink>
+          <NavLink href="#how-it-works">How it works</NavLink>
+          <NavLink href="#features">Features</NavLink>
+          <NavLink href="#pricing">Pricing</NavLink>
         </div>
 
-        <Button>Login</Button>
+        <Button href="/login">Login</Button>
       </div>
     </nav>
   );
@@ -1190,9 +1267,9 @@ function Hero() {
       </h1>
 
       <h2 className="text-center text-xl font-medium max-w-[800px] mx-auto py-8 opacity-60">
-        Add your existing documentation as knowledge base and deliver it through
-        multiple channels for your community. Get visibility how your community
-        consumes it and make your documentation better!
+        Add your existing docs as knowledge base and deliver it as Chatbot,
+        Discord bot, or as a MCP server for your community. Get visibility how
+        your community consumes it and make your documentation better!
       </h2>
 
       <Scrape />
@@ -1202,7 +1279,7 @@ function Hero() {
   );
 }
 
-export default function LandingV2() {
+export default function LandingV2({ loaderData }: Route.ComponentProps) {
   return (
     <div className="bg-ash font-aeonik">
       <div className="hidden md:block aspect-[1440/960] w-full bg-[url('/new-landing/clouds.png')] dark:bg-[url('/new-landing/clouds-dark.png')] bg-contain bg-no-repeat absolute top-0 left-0">
@@ -1223,7 +1300,11 @@ export default function LandingV2() {
         </Container>
 
         <Container>
-          <Stats />
+          <Stats
+            messagesThisWeek={loaderData.messagesThisWeek}
+            messagesDay={loaderData.messagesDay}
+            messagesMonth={loaderData.messagesMonth}
+          />
         </Container>
 
         <Container>
