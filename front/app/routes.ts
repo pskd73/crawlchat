@@ -12,8 +12,8 @@ export default [
     route("verify", "auth/verify.ts"),
   ]),
 
-  index("landing/page.tsx"),
-  route("landing-v2", "landing-v2/page.tsx"),
+  index("landing-v2/page.tsx"),
+  route("landing-old", "landing/page.tsx"),
   route("llm-txt", "landing/tools/llm-txt.tsx"),
   route("open-scrape", "landing/open-scrape.ts"),
   route("terms", "landing/terms.tsx"),
