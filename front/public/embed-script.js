@@ -25,6 +25,7 @@ class CrawlChatEmbed {
     iframe.style.background = "transparent";
     iframe.allowTransparency = "true";
     iframe.style.opacity = "1";
+    iframe.allow = "clipboard-write";
 
     const div = document.createElement("div");
     div.id = this.embedDivId;
