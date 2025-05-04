@@ -204,8 +204,7 @@ export function parseHtml(
   if (!content) {
     content = $("body").html();
   }
-  let markdown = turndownService.turndown(content ?? "");
-  markdown = removeConsecutiveLinks(markdown);
+  const markdown = turndownService.turndown(content ?? "");
 
   return {
     markdown,
