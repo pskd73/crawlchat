@@ -267,6 +267,7 @@ enum KnowledgeGroupType {
   learn_discord
   github_issues
   answer_corrections
+  upload
 }
 
 enum KnowledgeGroupStatus {

@@ -34,7 +34,7 @@ export function ActionButton({
     }
   }, [stopFetcher.data]);
 
-  if (["learn_discord", "answer_corrections"].includes(group.type)) {
+  if (["learn_discord", "answer_corrections", "upload"].includes(group.type)) {
     return null;
   }
 

@@ -115,7 +115,7 @@ export default function ScrapeItem({ loaderData }: Route.ComponentProps) {
 
   const canRefresh =
     loaderData.item?.knowledgeGroup &&
-    !["learn_discord", "answer_corrections"].includes(
+    !["learn_discord", "answer_corrections", "upload"].includes(
       loaderData.item.knowledgeGroup.type
     );
 

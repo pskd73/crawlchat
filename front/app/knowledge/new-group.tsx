@@ -7,8 +7,18 @@ import {
   Icon,
   Checkbox,
   Text,
+  FileUpload as ChakraFileUpload,
+  IconButton,
+  Box,
 } from "@chakra-ui/react";
-import { TbBook2, TbBrandGithub, TbCheck, TbWorld } from "react-icons/tb";
+import {
+  TbBook2,
+  TbBrandGithub,
+  TbCheck,
+  TbTrash,
+  TbUpload,
+  TbWorld,
+} from "react-icons/tb";
 import { SiDocusaurus } from "react-icons/si";
 import { redirect, useFetcher } from "react-router";
 import { getAuthUser } from "~/auth/middleware";
@@ -17,10 +27,12 @@ import { Button } from "~/components/ui/button";
 import { Field } from "~/components/ui/field";
 import { createToken } from "~/jwt";
 import type { Route } from "./+types/new-group";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { prisma } from "~/prisma";
 import { getSessionScrapeId } from "~/scrapes/util";
-import type { KnowledgeGroupType } from "libs/prisma";
+import type { KnowledgeGroupStatus, KnowledgeGroupType } from "libs/prisma";
+import { type FileUpload, parseFormData } from "@mjackson/form-data-parser";
+import { toaster } from "~/components/ui/toaster";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -41,11 +53,33 @@ export async function action({ request }: { request: Request }) {
   const user = await getAuthUser(request);
   const scrapeId = await getSessionScrapeId(request);
 
+  const fileMarkdowns: { markdown: string; title: string }[] = [];
+
+  const uploadHandler = async (fileUpload: FileUpload) => {
+    const arrayBuffer = await fileUpload.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+    const base64 = buffer.toString("base64");
+
+    const response = await fetch(`${process.env.MARKER_HOST}/mark`, {
+      method: "POST",
+      body: JSON.stringify({
+        base64,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+        "X-API-KEY": process.env.MARKER_API_KEY as string,
+      },
+    });
+
+    const data = await response.json();
+    fileMarkdowns.push({ markdown: data.markdown, title: fileUpload.name });
+  };
+
+  const formData = await parseFormData(request, uploadHandler);
+
   const scrape = await prisma.scrape.findUniqueOrThrow({
     where: { id: scrapeId as string, userId: user!.id },
   });
-
-  const formData = await request.formData();
 
   if (request.method === "POST") {
     let url = formData.get("url") as string;
@@ -102,12 +136,18 @@ export async function action({ request }: { request: Request }) {
         .join(",")}`;
     }
 
+    let status: KnowledgeGroupStatus = "pending";
+
+    if (type === "upload") {
+      status = "done";
+    }
+
     const group = await prisma.knowledgeGroup.create({
       data: {
         scrapeId: scrape.id,
         userId: user!.id,
         type: type as KnowledgeGroupType,
-        status: "pending",
+        status,
 
         title,
 
@@ -124,6 +164,24 @@ export async function action({ request }: { request: Request }) {
         githubUrl: githubRepoUrl as string,
       },
     });
+
+    if (type === "upload") {
+      for (const file of fileMarkdowns) {
+        await fetch(`${process.env.VITE_SERVER_URL}/resource/${scrape.id}`, {
+          method: "POST",
+          body: JSON.stringify({
+            markdown: file.markdown,
+            title: file.title,
+            knowledgeGroupType: "upload",
+            defaultGroupTitle: "Upload",
+          }),
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${createToken(user!.id)}`,
+          },
+        });
+      }
+    }
 
     throw redirect(`/knowledge/group/${group.id}`);
   }
@@ -167,11 +225,30 @@ export default function NewScrape({ loaderData }: Route.ComponentProps) {
           longDescription:
             "Fetch GitHub issues from the provided repository and turns them into the knowledge. The repository must be public (for now).",
         },
+        {
+          title: "Upload",
+          value: "upload",
+          description: "Upload a file. Supports pdf, docx, pptx",
+          icon: <TbUpload />,
+          longDescription: "Upload a file as the knowledge base",
+        },
       ];
     },
     [loaderData.scrapes]
   );
   const [type, setType] = useState<string>("scrape_web");
+
+  useEffect(() => {
+    if (scrapeFetcher.data?.error) {
+      toaster.error({
+        title: "Error",
+        description:
+          scrapeFetcher.data.error ??
+          scrapeFetcher.data.message ??
+          "Unknown error",
+      });
+    }
+  }, [scrapeFetcher.data]);
 
   function getDescription(type: string) {
     return types.find((t) => t.value === type)?.longDescription;
@@ -179,8 +256,8 @@ export default function NewScrape({ loaderData }: Route.ComponentProps) {
 
   return (
     <Page title="New knowledge group" icon={<TbBook2 />}>
-      <Stack maxW={"800px"} w={"full"}>
-        <scrapeFetcher.Form method="post">
+      <Stack maxW={"1200px"} w={"full"}>
+        <scrapeFetcher.Form method="post" encType="multipart/form-data">
           <Stack gap={4}>
             <RadioCard.Root
               name="type"
@@ -240,6 +317,60 @@ export default function NewScrape({ loaderData }: Route.ComponentProps) {
                   </Checkbox.Control>
                   <Checkbox.Label>Match exact prefix</Checkbox.Label>
                 </Checkbox.Root>
+              </>
+            )}
+
+            {type === "upload" && (
+              <>
+                <input type="hidden" name="url" value="file" />
+                <ChakraFileUpload.Root
+                  maxFiles={5}
+                  maxFileSize={1024 * 1024 * 10}
+                  w="full"
+                  disabled={scrapeFetcher.state !== "idle"}
+                  accept={[
+                    "application/pdf",
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                    "application/vnd.ms-powerpoint",
+                    "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                  ]}
+                >
+                  <ChakraFileUpload.HiddenInput name="file" required />
+                  <ChakraFileUpload.Dropzone w="full">
+                    <Icon size="md" color="fg.muted">
+                      <TbUpload />
+                    </Icon>
+                    <ChakraFileUpload.DropzoneContent>
+                      <Box>Drag and drop files here</Box>
+                      <Box color="fg.muted">.pdf, .docx, .pptx up to 5MB</Box>
+                    </ChakraFileUpload.DropzoneContent>
+                  </ChakraFileUpload.Dropzone>
+                  <ChakraFileUpload.ItemGroup>
+                    <ChakraFileUpload.Context>
+                      {({ acceptedFiles }) =>
+                        acceptedFiles.map((file, i) => (
+                          <ChakraFileUpload.Item
+                            key={i}
+                            file={file}
+                            justifyContent={"space-between"}
+                          >
+                            <Group>
+                              <ChakraFileUpload.ItemName />
+                              <ChakraFileUpload.ItemSizeText />
+                            </Group>
+                            <Group>
+                              <ChakraFileUpload.ItemDeleteTrigger asChild>
+                                <IconButton variant="outline" size="sm">
+                                  <TbTrash />
+                                </IconButton>
+                              </ChakraFileUpload.ItemDeleteTrigger>
+                            </Group>
+                          </ChakraFileUpload.Item>
+                        ))
+                      }
+                    </ChakraFileUpload.Context>
+                  </ChakraFileUpload.ItemGroup>
+                </ChakraFileUpload.Root>
               </>
             )}
 

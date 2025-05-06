@@ -17,6 +17,7 @@
     "@chakra-ui/react": "^3.4.0",
     "@emotion/react": "^11.14.0",
     "@meltdownjs/cn": "^1.2.1",
+    "@mjackson/form-data-parser": "^0.7.0",
     "@prisma/client": "^6.2.1",
     "@react-email/components": "0.0.34",
     "@react-router/node": "^7.1.3",
