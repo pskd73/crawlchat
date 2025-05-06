@@ -54,6 +54,7 @@ import { extractCitations } from "libs/citation";
 import { Button } from "~/components/ui/button";
 import { makeCursorMcpJson, makeMcpCommand, makeMcpName } from "~/mcp/setup";
 import { getScoreColor, getMessagesScore } from "~/score";
+import { RiChatVoiceAiFill } from "react-icons/ri";
 
 function ChatInput({
   onAsk,
@@ -767,21 +768,26 @@ function PoweredBy({ embed }: { embed?: boolean }) {
       bottom={0}
       right={0}
       transform={"translateY(100%)"}
-      fontSize={"12px"}
       py={1}
-      opacity={0.4}
-      _hover={{
-        opacity: 0.6,
-      }}
       className="group"
     >
       <Link
         href="https://crawlchat.app"
         target="_blank"
         textDecor={"none"}
+        fontSize={"xs"}
         color={embed ? "white" : undefined}
+        fontWeight={"semibold"}
+        opacity={0.8}
+        _hover={{
+          opacity: 1,
+          textDecor: "underline",
+        }}
       >
-        By CrawlChat
+        <Text>
+          <RiChatVoiceAiFill />
+        </Text>{" "}
+        CrawlChat
       </Link>
     </Text>
   );
