@@ -1218,6 +1218,11 @@ function Footer() {
           <div className="flex-[2]">
             <ul className="flex flex-col gap-4">
               <li>
+                <FooterLink href="/blog/boosting-developer-experience-with-crawlchat">
+                  Boosting Developer Experience - DX
+                </FooterLink>
+              </li>
+              <li>
                 <FooterLink href="/blog/how-to-add-ask-ai-chatbot-to-docusaurus-site">
                   How to integrate with Docusaurus
                 </FooterLink>
