@@ -115,7 +115,8 @@ export async function action({ params, request }: Route.ActionArgs) {
     if (
       role === "agent" &&
       thread.ticketUserEmail &&
-      thread.ticketNumber &&
+      thread.ticketNumber !== null &&
+      thread.ticketNumber !== undefined &&
       thread.ticketKey &&
       thread.title
     ) {
