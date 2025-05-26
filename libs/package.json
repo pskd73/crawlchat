@@ -29,6 +29,10 @@
     "./knowledge-group": {
       "default": "./dist/knowledge-group.js",
       "types": "./dist/knowledge-group.d.ts"
+    },
+    "./mongo-counter": {
+      "default": "./dist/mongo-counter.js",
+      "types": "./dist/mongo-counter.d.ts"
     }
   },
   "typesVersions": {
@@ -47,6 +51,9 @@
       ],
       "knowledge-group": [
         "./dist/knowledge-group.d.ts"
+      ],
+      "mongo-counter": [
+        "./dist/mongo-counter.d.ts"
       ]
     }
   },

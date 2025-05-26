@@ -1,19 +1,6 @@
-import {
-  Html,
-  Head,
-  Preview,
-  Body,
-  Container,
-  Section,
-  Text,
-  Button,
-  Img,
-  Row,
-  Column,
-  Link,
-} from "@react-email/components";
-import * as React from "react";
+import { Section, Text, Row, Column } from "@react-email/components";
 import { emailConfig } from "./config";
+import { MailTemplate } from "./template";
 
 function MetricCard({
   title,
@@ -93,165 +80,54 @@ export default function WeeklyEmail(props: {
     0.8: 200,
     1.0: 200,
   };
+
   return (
-    <Html lang="en">
-      <Head>
-        <title>CrawlChat Weekly</title>
-        <Preview>
-          Your weekly update on your conversations and performance!
-        </Preview>
-      </Head>
-      <Body
+    <MailTemplate
+      title="CrawlChat Weekly"
+      preview="Your weekly update on your conversations and performance!"
+      heading="Weekly"
+      icon="🗓️"
+      text="Thank you for being a part of our community! Here is the weekly updates with the stats for your collection. Keeping up to date with this information will let you make your documentation or content relavent to your customers or community."
+      cta={{
+        text: "Go to app",
+        href: `${emailConfig.baseUrl}/app`,
+      }}
+    >
+      <Row style={{ marginTop: "20px" }}>
+        <Column style={{ opacity: 0.2 }}>This week</Column>
+      </Row>
+      <Row>
+        <Column style={{ paddingRight: "10px" }}>
+          <MetricCard title="Messages" value={messages} />
+        </Column>
+        <Column>
+          <MetricCard title="MCP & Discord" value={MCPHits} />
+        </Column>
+      </Row>
+
+      <Row style={{ marginTop: "20px" }}>
+        <Column style={{ opacity: 0.2 }}>Poor</Column>
+        <Column align="right" style={{ opacity: 0.2 }}>
+          Best
+        </Column>
+      </Row>
+      <Row>
+        <BandColumn tag="0.2" value={performance[0.2]} color="#f2eaf9" />
+        <BandColumn tag="0.4" value={performance[0.4]} color="#e5d5f2" />
+        <BandColumn tag="0.6" value={performance[0.6]} color="#d7c0ec" />
+        <BandColumn tag="0.8" value={performance[0.8]} color="#caabe5" />
+        <BandColumn tag="1.0" value={performance[1.0]} color="#bd96df" />
+      </Row>
+      <Text
         style={{
-          margin: "0",
-          padding: "30px 10px",
-          fontFamily: "Arial, sans-serif",
-          backgroundColor: "#f3f3f5",
+          fontSize: "12px",
+          margin: "0px",
+          textAlign: "center",
+          opacity: 0.2,
         }}
       >
-        <Container
-          style={{
-            width: "100%",
-            maxWidth: "600px",
-            margin: "0 auto",
-            padding: "20px 20px",
-          }}
-        >
-          <Img width={60} src={`${emailConfig.baseUrl}/logo.png`} />
-        </Container>
-
-        <Container
-          style={{
-            width: "100%",
-            maxWidth: "600px",
-            margin: "0 auto",
-            backgroundColor: "#ffffff",
-            borderRadius: "10px",
-            overflow: "hidden",
-          }}
-        >
-          <Section
-            style={{ background: emailConfig.colors.primary, padding: "30px" }}
-          >
-            <Row>
-              <Column>
-                <Text
-                  style={{
-                    color: "#ffffff",
-                    margin: "0px",
-                    fontSize: "24px",
-                    fontWeight: "medium",
-                  }}
-                >
-                  <span style={{ fontWeight: "bold" }}>CrawlChat</span>{" "}
-                  <span style={{ fontWeight: "lighter", opacity: 0.7 }}>
-                    Weekly
-                  </span>
-                </Text>
-              </Column>
-              <Column align="right">
-                <Text
-                  style={{
-                    color: "#ffffff",
-                    margin: "0px",
-                    fontSize: "24px",
-                    fontWeight: "medium",
-                  }}
-                >
-                  🗓️
-                </Text>
-              </Column>
-            </Row>
-          </Section>
-
-          <Section style={{ padding: "20px 30px" }}>
-            <Text style={{ fontSize: "16px" }}>
-              Thank you for being a part of our community! Here is the weekly
-              updates with the stats for your collection. Keeping up to date
-              with this information will let you make your documentation or
-              content relavent to your customers or community.
-            </Text>
-
-            <Row style={{ marginTop: "20px" }}>
-              <Column style={{ opacity: 0.2 }}>This week</Column>
-            </Row>
-            <Row>
-              <Column style={{ paddingRight: "10px" }}>
-                <MetricCard title="Messages" value={messages} />
-              </Column>
-              <Column>
-                <MetricCard title="MCP & Discord" value={MCPHits} />
-              </Column>
-            </Row>
-
-            <Row style={{ marginTop: "20px" }}>
-              <Column style={{ opacity: 0.2 }}>Poor</Column>
-              <Column align="right" style={{ opacity: 0.2 }}>
-                Best
-              </Column>
-            </Row>
-            <Row>
-              <BandColumn tag="0.2" value={performance[0.2]} color="#f2eaf9" />
-              <BandColumn tag="0.4" value={performance[0.4]} color="#e5d5f2" />
-              <BandColumn tag="0.6" value={performance[0.6]} color="#d7c0ec" />
-              <BandColumn tag="0.8" value={performance[0.8]} color="#caabe5" />
-              <BandColumn tag="1.0" value={performance[1.0]} color="#bd96df" />
-            </Row>
-            <Text
-              style={{
-                fontSize: "12px",
-                margin: "0px",
-                textAlign: "center",
-                opacity: 0.2,
-              }}
-            >
-              Responses spread across the scores. 0 is the worst, 1 is the best.
-            </Text>
-          </Section>
-
-          <Section style={{ padding: "0px 20px", paddingBottom: "30px" }}>
-            <Row>
-              <Column align="center">
-                <Button
-                  style={{
-                    color: "#fff",
-                    padding: "10px 20px",
-                    background: emailConfig.colors.primary,
-                    borderRadius: "6px",
-                  }}
-                  href={`${emailConfig.baseUrl}/app`}
-                >
-                  Go to app →
-                </Button>
-              </Column>
-            </Row>
-          </Section>
-        </Container>
-
-        <Container
-          style={{
-            width: "100%",
-            maxWidth: "600px",
-            margin: "0 auto",
-            padding: "20px 20px",
-          }}
-        >
-          <Row>
-            <Column align="center">
-              <Link
-                style={{
-                  textAlign: "center",
-                  opacity: 0.4,
-                  color: "#000000",
-                }}
-                href={`${emailConfig.baseUrl}/profile`}
-              >
-                Update email preferences
-              </Link>
-            </Column>
-          </Row>
-        </Container>
-      </Body>
-    </Html>
+        Responses spread across the scores. 0 is the worst, 1 is the best.
+      </Text>
+    </MailTemplate>
   );
 }

@@ -22,6 +22,7 @@ import {
   TbRoad,
   TbSettings,
   TbThumbDown,
+  TbTicket,
   TbUser,
 } from "react-icons/tb";
 import { Link, NavLink, type FetcherWithComponents } from "react-router";
@@ -55,6 +56,7 @@ const links = [
     forScrape: true,
   },
   { label: "Messages", to: "/messages", icon: <TbMessage />, forScrape: true },
+  { label: "Tickets", to: "/tickets", icon: <TbTicket />, forScrape: true },
   { label: "Settings", to: "/settings", icon: <TbSettings />, forScrape: true },
   {
     label: "Integrations",
@@ -165,6 +167,7 @@ export function SideMenu({
   scrapeId,
   scrapeIdFetcher,
   toBeFixedMessages,
+  openTickets,
 }: {
   fixed: boolean;
   width: number;
@@ -175,6 +178,7 @@ export function SideMenu({
   scrapeId?: string;
   scrapeIdFetcher: FetcherWithComponents<any>;
   toBeFixedMessages: number;
+  openTickets: number;
 }) {
   const formRef = useRef<HTMLFormElement>(null);
   const collections = useMemo(
@@ -197,6 +201,24 @@ export function SideMenu({
 
   const availableScrapes = user.plan?.credits?.scrapes ?? plan.credits.scrapes;
   const usedScrapes = totalScrapes - availableScrapes;
+
+  function getLinkNumber(label: string) {
+    if (label === "Tickets" && openTickets > 0) {
+      return {
+        value: openTickets,
+        icon: <TbTicket />,
+        color: "blue",
+      };
+    }
+    if (label === "Messages" && toBeFixedMessages > 0) {
+      return {
+        value: toBeFixedMessages,
+        icon: <TbThumbDown />,
+        color: "red",
+      };
+    }
+    return undefined;
+  }
 
   return (
     <Stack
@@ -260,15 +282,7 @@ export function SideMenu({
               <SideMenuItem
                 key={index}
                 link={link}
-                number={
-                  toBeFixedMessages && link.label === "Messages"
-                    ? {
-                        value: toBeFixedMessages,
-                        icon: <TbThumbDown />,
-                        color: "red",
-                      }
-                    : undefined
-                }
+                number={getLinkNumber(link.label)}
               />
             ))}
         </Stack>

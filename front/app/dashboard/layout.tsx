@@ -50,7 +50,21 @@ export async function loader({ request }: Route.LoaderArgs) {
     },
   });
 
-  return { user: user!, plan, scrapes, scrapeId, toBeFixedMessages };
+  const openTickets = await prisma.thread.count({
+    where: {
+      scrapeId,
+      ticketStatus: "open",
+    },
+  });
+
+  return {
+    user: user!,
+    plan,
+    scrapes,
+    scrapeId,
+    toBeFixedMessages,
+    openTickets,
+  };
 }
 
 const drawerWidth = 260;
@@ -73,6 +87,7 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
           scrapeId={loaderData.scrapeId}
           scrapeIdFetcher={scrapeIdFetcher}
           toBeFixedMessages={loaderData.toBeFixedMessages}
+          openTickets={loaderData.openTickets}
         />
 
         <DrawerRoot
@@ -93,6 +108,7 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
               scrapeId={loaderData.scrapeId}
               scrapeIdFetcher={scrapeIdFetcher}
               toBeFixedMessages={loaderData.toBeFixedMessages}
+              openTickets={loaderData.openTickets}
             />
           </DrawerContent>
         </DrawerRoot>
