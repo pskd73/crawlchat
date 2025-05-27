@@ -65,7 +65,7 @@ export function meta() {
   return [
     {
       title: "CrawlChat - Your documentation with AI!",
-      description: "Deliver your documentation with AI",
+      description: "AI Chatbot for your knowledge base and documentation",
     },
   ];
 }

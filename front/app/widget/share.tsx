@@ -33,7 +33,7 @@ export function meta({ data }: Route.MetaArgs) {
   }
 
   let title = data.thread.scrape.title ?? data.thread.scrape.url;
-  let description = "Deliver your docs with AI";
+  let description = "AI Chatbot for your knowledge base and documentation";
   if (
     data.thread.messages.length > 0 &&
     (data.thread.messages[0].llmMessage as any).role === "user"

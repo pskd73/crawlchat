@@ -16,7 +16,7 @@ export function meta() {
   return [
     {
       title: "CrawlChat - Your documentation with AI!",
-      description: "Deliver your documentation with AI",
+      description: "AI Chatbot for your knowledge base and documentation",
     },
   ];
 }
@@ -1202,7 +1202,9 @@ function Footer() {
         <div className="py-8 flex flex-col md:flex-row gap-10">
           <div className="flex-[2] flex flex-col gap-4">
             <Logo />
-            <p className="font-medium opacity-60">Deliver your docs with AI!</p>
+            <p className="font-medium opacity-60">
+              AI Chatbot for your knowledge base and documentation
+            </p>
             <p className="opacity-50 text-xs mt-4 font-medium">
               © 2025 CrawlChat
             </p>
