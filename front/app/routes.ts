@@ -26,6 +26,7 @@ export default [
   route("discord-bot", "landing/discord-bot.tsx"),
 
   route("test", "landing/test.tsx"),
+  route("public-bots", "dashboard/public-bots.tsx"),
 
   route("payment/lemonsqueezy-webhook", "payment/lemonsqueezy-webhook.ts"),
 

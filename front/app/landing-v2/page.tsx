@@ -89,7 +89,7 @@ export async function loader() {
   };
 }
 
-function Container({ children }: PropsWithChildren) {
+export function Container({ children }: PropsWithChildren) {
   return (
     <div className="flex justify-center">
       <div className="max-w-[1000px] w-full p-4">{children}</div>
@@ -302,7 +302,7 @@ function Stats({
   );
 }
 
-function UsedBy() {
+export function UsedBy() {
   return (
     <div className="flex flex-col gap-8">
       <h3 className="text-center text-xl font-medium opacity-50">
@@ -1271,7 +1271,7 @@ function Testimonials() {
   );
 }
 
-function CTA() {
+export function CTA() {
   return (
     <div className="mt-32">
       <div className="w-full bg-gradient-to-b from-canvas to-ash shadow-md rounded-2xl py-20 px-10 relative">
@@ -1314,7 +1314,7 @@ function FooterLink({ children, href }: PropsWithChildren<{ href: string }>) {
   );
 }
 
-function Footer() {
+export function Footer() {
   return (
     <div className="bg-canvas mt-32 border-t border-outline">
       <Container>
@@ -1429,16 +1429,17 @@ function Footer() {
   );
 }
 
-function Nav() {
+export function Nav() {
   return (
     <nav className="flex items-center justify-between gap-2 lg:py-6">
       <Logo />
 
       <div className="flex items-center gap-8">
         <div className="items-center gap-8 hidden md:flex">
-          <NavLink href="#how-it-works">How it works</NavLink>
-          <NavLink href="#features">Features</NavLink>
-          <NavLink href="#pricing">Pricing</NavLink>
+          <NavLink href="/#how-it-works">How it works</NavLink>
+          <NavLink href="/#features">Features</NavLink>
+          <NavLink href="/#pricing">Pricing</NavLink>
+          <NavLink href="/public-bots">Public bots</NavLink>
         </div>
 
         <Button href="/login">Login</Button>
@@ -1447,7 +1448,7 @@ function Nav() {
   );
 }
 
-function ctaClassNames(primary: boolean) {
+export function ctaClassNames(primary: boolean) {
   return cn(
     "text-2xl border-2 border-brand px-8 py-4 rounded-xl font-medium flex items-center gap-2 transition-all hover:translate-y-[-2px]",
     !primary && "text-brand hover:bg-brand-subtle",
@@ -1506,68 +1507,70 @@ function Hero() {
   );
 }
 
-export default function LandingV2({ loaderData }: Route.ComponentProps) {
+export function LandingPage({ children }: PropsWithChildren) {
   return (
     <div className="bg-ash font-aeonik">
       <div className="hidden md:block aspect-[1440/960] w-full bg-[url('/new-landing/clouds.png')] dark:bg-[url('/new-landing/clouds-dark.png')] bg-contain bg-no-repeat absolute top-0 left-0">
         <div className="w-full h-full bg-gradient-to-b from-[rgba(246,246,245,0)] to-ash"></div>
       </div>
 
-      <div className="relative">
-        <Container>
-          <Nav />
-        </Container>
-
-        <Container>
-          <Hero />
-        </Container>
-
-        <Container>
-          <UsedBy />
-        </Container>
-
-        <Container>
-          <Stats
-            messagesThisWeek={loaderData.messagesThisWeek}
-            messagesDay={loaderData.messagesDay}
-            messagesMonth={loaderData.messagesMonth}
-          />
-        </Container>
-
-        <Container>
-          <Works />
-        </Container>
-
-        {/* <Container>
-          <ImportKnowledge />
-        </Container> */}
-
-        <Container>
-          <Integrations />
-        </Container>
-
-        <Container>
-          <ChatWidget />
-        </Container>
-
-        <Container>
-          <Tools />
-        </Container>
-
-        <Container>
-          <Pricing />
-        </Container>
-
-        <Container>
-          <Testimonials />
-        </Container>
-
-        <Container>
-          <CTA />
-        </Container>
-
-        <Footer />
-      </div>
+      <div className="relative">{children}</div>
     </div>
+  );
+}
+
+export default function LandingV2({ loaderData }: Route.ComponentProps) {
+  return (
+    <LandingPage>
+      <Container>
+        <Nav />
+      </Container>
+
+      <Container>
+        <Hero />
+      </Container>
+
+      <Container>
+        <UsedBy />
+      </Container>
+
+      <Container>
+        <Stats
+          messagesThisWeek={loaderData.messagesThisWeek}
+          messagesDay={loaderData.messagesDay}
+          messagesMonth={loaderData.messagesMonth}
+        />
+      </Container>
+
+      <Container>
+        <Works />
+      </Container>
+
+      <Container>
+        <Integrations />
+      </Container>
+
+      <Container>
+        <ChatWidget />
+      </Container>
+
+      <Container>
+        <Tools />
+      </Container>
+
+      <Container>
+        <Pricing />
+      </Container>
+
+      <Container>
+        <Testimonials />
+      </Container>
+
+      <Container>
+        <CTA />
+      </Container>
+
+      <Footer />
+    </LandingPage>
   );
 }
