@@ -12,6 +12,7 @@ import { randomUUID } from "crypto";
 import { getNextNumber } from "libs/mongo-counter";
 import { sendReactEmail } from "~/email";
 import TicketUserCreateEmail from "emails/ticket-user-create";
+import { Toaster, toaster } from "~/components/ui/toaster";
 
 export async function loader({ params, request }: Route.LoaderArgs) {
   const scrape = await prisma.scrape.findUnique({
@@ -263,6 +264,15 @@ export default function ScrapeWidget({ loaderData }: Route.ComponentProps) {
     };
   }, [loaderData.embed]);
 
+  useEffect(() => {
+    if (ticketCreateFetcher.data) {
+      toaster.create({
+        title: "Ticket created",
+        description: "You will be notified on email on updates!",
+      });
+    }
+  }, [ticketCreateFetcher.data]);
+
   function handleClose() {
     if (loaderData.embed) {
       window.parent.postMessage("close", "*");
@@ -286,6 +296,10 @@ export default function ScrapeWidget({ loaderData }: Route.ComponentProps) {
   }
 
   function handleRate(id: string, rating: MessageRating) {
+    toaster.create({
+      title: "Rating submitted",
+      description: "Thank you for your feedback!",
+    });
     rateFetcher.submit({ intent: "rate", id, rating }, { method: "post" });
   }
 
@@ -301,6 +315,7 @@ export default function ScrapeWidget({ loaderData }: Route.ComponentProps) {
       h="100dvh"
       bg={loaderData.embed ? "blackAlpha.700" : "brand.gray.100"}
     >
+      <Toaster />
       <ChatBox
         thread={loaderData.thread}
         scrape={loaderData.scrape!}

@@ -991,42 +991,44 @@ function TicketCreate({
   }
 
   return (
-    <Stack p={4}>
-      <Text opacity={0.5} mb={4}>
-        Our team will work on the issue and get back with a resolution. We'll
-        send you an email with a link to the ticket.
-      </Text>
-      <Field label="Email">
-        <Input
-          type="email"
-          placeholder="youremail@example.com"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          disabled={loading}
-        />
-      </Field>
-      <Field label="Title">
-        <Input
-          type="text"
-          placeholder="Title of your issue"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          disabled={loading}
-        />
-      </Field>
-      <Field label="Message">
-        <Textarea
-          placeholder="Explain your issue in detail"
-          rows={4}
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          disabled={loading}
-        />
-      </Field>
-      <Text opacity={0.5} mb={4}>
-        This chat will be turned into a ticket and you cannot continue the AI
-        help on the same thread. A new thread will be created for you.
-      </Text>
+    <Stack p={4} flex="1">
+      <Stack flex="1">
+        <Text opacity={0.5} mb={4}>
+          Our team will work on the issue and get back with a resolution. We'll
+          send you an email with a link to the ticket.
+        </Text>
+        <Field label="Email">
+          <Input
+            type="email"
+            placeholder="youremail@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            disabled={loading}
+          />
+        </Field>
+        <Field label="Title">
+          <Input
+            type="text"
+            placeholder="Title of your issue"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            disabled={loading}
+          />
+        </Field>
+        <Field label="Message">
+          <Textarea
+            placeholder="Explain your issue in detail"
+            rows={4}
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            disabled={loading}
+          />
+        </Field>
+        <Text opacity={0.5} mb={4}>
+          This chat will be turned into a ticket and you cannot continue the AI
+          help on the same thread. A new thread will be created for you.
+        </Text>
+      </Stack>
       <Group justify={"flex-end"}>
         <Button variant={"subtle"} onClick={onCancel} disabled={loading}>
           Cancel
@@ -1324,15 +1326,17 @@ export default function ScrapeWidget({
             />
           )}
         </Stack>
-        <ChatInput
-          inputRef={inputRef}
-          onAsk={handleAsk}
-          stage={chat.askStage}
-          searchQuery={chat.searchQuery}
-          disabled={screen !== "chat" || readOnly}
-          scrape={scrape}
-          embed={embed}
-        />
+        {screen === "chat" && (
+          <ChatInput
+            inputRef={inputRef}
+            onAsk={handleAsk}
+            stage={chat.askStage}
+            searchQuery={chat.searchQuery}
+            disabled={screen !== "chat" || readOnly}
+            scrape={scrape}
+            embed={embed}
+          />
+        )}
 
         <PoweredBy embed={embed} />
       </Stack>
