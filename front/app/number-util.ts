@@ -1,5 +1,7 @@
 export function numberToKMB(num: number) {
-  if (num < 1000) return num;
-  if (num < 1000000) return `${(num / 1000).toFixed(1)}k`;
-  return `${(num / 1000000).toFixed(1)}M`;
+  const prefix = num < 0 ? "-" : "";
+  num = Math.abs(num);
+  if (num < 1000) return `${prefix}${num}`;
+  if (num < 1000000) return `${prefix}${(num / 1000).toFixed(1)}k`;
+  return `${prefix}${(num / 1000000).toFixed(1)}M`;
 }

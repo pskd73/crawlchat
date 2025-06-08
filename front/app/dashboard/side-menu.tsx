@@ -88,7 +88,7 @@ function SideMenuItem({
       {({ isPending, isActive }) => (
         <Group
           px={3}
-          py={2}
+          py={1}
           w="full"
           bg={isActive ? "brand.fg" : undefined}
           color={isActive ? "brand.contrast" : undefined}
@@ -260,6 +260,7 @@ export function SideMenu({
                 formRef.current?.submit();
               }}
               disabled={collections.items.length === 0}
+              size={"sm"}
             >
               <SelectTrigger bg="brand.white">
                 <SelectValueText placeholder="Select collection" />
@@ -310,7 +311,7 @@ export function SideMenu({
       </Stack>
 
       <Stack p={4} gap={4}>
-        <Stack bg="brand.gray.100" rounded="md" p={4} gap={4}>
+        <Stack bg="brand.gray.100" rounded="md" px={3} py={2}>
           <CreditProgress
             title="Messages"
             used={usedMessages}
