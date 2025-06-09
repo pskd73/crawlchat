@@ -308,13 +308,13 @@ export function Resolved({
               </Button>
             )}
             {screen === "yes" && (
-              <Button size={"xs"} onClick={onYes}>
+              <Button size={"xs"} onClick={onYes} variant={"outline"}>
                 {resolveYesConfig?.btnLabel || "Go"}
                 <TbArrowRight />
               </Button>
             )}
             {screen === "no" && (
-              <Button size={"xs"} onClick={onNo}>
+              <Button size={"xs"} onClick={onNo} variant={"outline"}>
                 {resolveNoConfig?.btnLabel || "Go"}
                 <TbArrowRight />
               </Button>
