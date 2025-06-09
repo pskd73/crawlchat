@@ -8,7 +8,7 @@ import {
 } from "@chakra-ui/react";
 import { useFetcher } from "react-router";
 import { getAuthUser } from "~/auth/middleware";
-import { SettingsSection } from "~/dashboard/profile";
+import { SettingsSection } from "~/settings-section";
 import { prisma } from "~/prisma";
 import type { Prisma } from "libs/prisma";
 import { MarkdownProse } from "~/widget/markdown-prose";

@@ -8,13 +8,15 @@ import {
   Badge,
   createListCollection,
   DataList,
-  Group,
-  Heading,
   Input,
   Stack,
   Text,
 } from "@chakra-ui/react";
-import { SettingsSection } from "~/dashboard/profile";
+import {
+  SettingsContainer,
+  SettingsSection,
+  SettingsSectionProvider,
+} from "~/settings-section";
 import { useEffect, useMemo, useState } from "react";
 import { redirect, useFetcher } from "react-router";
 import { Switch } from "~/components/ui/switch";
@@ -174,7 +176,9 @@ function WebSettings({ group }: { group: KnowledgeGroup }) {
           </DataList.Item>
         ))}
       </DataList.Root>
+
       <SettingsSection
+        id="match-prefix"
         fetcher={matchPrefixFetcher}
         title="Match prefix"
         description="If enabled, it scrapes only the pages whose prefix is the same as the group URL"
@@ -184,7 +188,9 @@ function WebSettings({ group }: { group: KnowledgeGroup }) {
           Active
         </Switch>
       </SettingsSection>
+
       <SettingsSection
+        id="html-tags-to-remove"
         fetcher={htmlTagsToRemoveFetcher}
         title="HTML tags to remove"
         description="You can specify the HTML selectors whose content is not added to the document. It is recommended to use this to remove junk content such as side menus, headers, footers, etc. You can give multiple selectors comma separated."
@@ -196,7 +202,9 @@ function WebSettings({ group }: { group: KnowledgeGroup }) {
           name="removeHtmlTags"
         />
       </SettingsSection>
+
       <SettingsSection
+        id="skip-pages-regex"
         fetcher={skipRegexFetcher}
         title="Skip pages regex"
         description="Specify the regex of the URLs that you don't want it to scrape. You can give multiple regexes comma separated."
@@ -213,6 +221,7 @@ function WebSettings({ group }: { group: KnowledgeGroup }) {
         group.type
       ) && (
         <SettingsSection
+          id="auto-update"
           fetcher={autoUpdateFetcher}
           title="Auto update"
           description="If enabled, the knowledge group will be updated automatically every day at the specified time."
@@ -246,6 +255,7 @@ function WebSettings({ group }: { group: KnowledgeGroup }) {
       )}
 
       <SettingsSection
+        id="item-context"
         fetcher={itemContextFetcher}
         title="Item context"
         description="Pass context for the group knowledge. Usefule to segregate the data between types. Example: v1, v2, node, bun, etc."
@@ -262,6 +272,7 @@ function WebSettings({ group }: { group: KnowledgeGroup }) {
       </SettingsSection>
 
       <SettingsSection
+        id="scroll-selector"
         fetcher={scrollSelectorFetcher}
         title="Scroll selector"
         description="Specify the selector of the element to scroll to. It is useful to scrape pages that have infinite scroll."
@@ -306,7 +317,9 @@ function GithubSettings({ group }: { group: KnowledgeGroup }) {
           </DataList.Item>
         ))}
       </DataList.Root>
+
       <SettingsSection
+        id="branch"
         fetcher={branchFetcher}
         title="Branch"
         description="Specify the branch to scrape"
@@ -381,44 +394,36 @@ export default function KnowledgeGroupSettings({
   }
 
   return (
-    <Stack gap={6}>
-      {loaderData.knowledgeGroup.type === "scrape_web" && (
-        <WebSettings group={loaderData.knowledgeGroup} />
-      )}
-      {loaderData.knowledgeGroup.type === "scrape_github" && (
-        <GithubSettings group={loaderData.knowledgeGroup} />
-      )}
-      {loaderData.knowledgeGroup.type === "github_issues" && (
-        <GithubIssuesSettings group={loaderData.knowledgeGroup} />
-      )}
+    <SettingsSectionProvider>
+      <SettingsContainer>
+        {loaderData.knowledgeGroup.type === "scrape_web" && (
+          <WebSettings group={loaderData.knowledgeGroup} />
+        )}
+        {loaderData.knowledgeGroup.type === "scrape_github" && (
+          <GithubSettings group={loaderData.knowledgeGroup} />
+        )}
+        {loaderData.knowledgeGroup.type === "github_issues" && (
+          <GithubIssuesSettings group={loaderData.knowledgeGroup} />
+        )}
 
-      <Stack
-        border={"1px solid"}
-        borderColor={"red.300"}
-        bg={"brand.danger.subtle"}
-        rounded={"lg"}
-        p={4}
-        gap={4}
-      >
-        <Stack>
-          <Heading>Delete knowledge group</Heading>
-          <Text fontSize={"sm"} opacity={0.5}>
-            This will delete the knowledge group and all the data that is
-            associated with it. This is not reversible.
-          </Text>
-        </Stack>
-        <Group>
-          <Button
-            colorPalette={"red"}
-            onClick={handleDelete}
-            loading={deleteFetcher.state !== "idle"}
-            variant={deleteConfirm ? "solid" : "outline"}
-          >
-            {deleteConfirm ? "Sure to delete?" : "Delete"}
-            <TbTrash />
-          </Button>
-        </Group>
-      </Stack>
-    </Stack>
+        <SettingsSection
+          id="delete-knowledge-group"
+          title="Delete group"
+          description="This will delete the knowledge group and all the data that is associated with it. This is not reversible."
+          danger
+          actionRight={
+            <Button
+              colorPalette={"red"}
+              onClick={handleDelete}
+              loading={deleteFetcher.state !== "idle"}
+              variant={deleteConfirm ? "solid" : "outline"}
+            >
+              {deleteConfirm ? "Sure to delete?" : "Delete"}
+              <TbTrash />
+            </Button>
+          }
+        />
+      </SettingsContainer>
+    </SettingsSectionProvider>
   );
 }

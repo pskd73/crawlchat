@@ -10,7 +10,7 @@ import {
   Box,
 } from "@chakra-ui/react";
 import { useFetcher } from "react-router";
-import { SettingsSection } from "~/dashboard/profile";
+import { SettingsSection } from "~/settings-section";
 import type { Route } from "./+types/discord";
 import type { Prisma } from "libs/prisma";
 import { prisma } from "~/prisma";

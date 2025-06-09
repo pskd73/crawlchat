@@ -16,7 +16,7 @@ import {
 } from "@chakra-ui/react";
 import { prisma } from "~/prisma";
 import { getAuthUser } from "~/auth/middleware";
-import { SettingsSection } from "~/dashboard/profile";
+import { SettingsContainer, SettingsSection, SettingsSectionProvider } from "~/settings-section";
 import { useFetcher } from "react-router";
 import {
   SelectContent,
@@ -301,240 +301,241 @@ export default function ScrapeEmbed({ loaderData }: Route.ComponentProps) {
   }
 
   return (
-    <Stack gap={6}>
-      <SettingsSection
-        id="customise-widget"
-        title="Customise widget"
-        description="Configure the widget and copy paste the <script> tag below to your website."
-        actionRight={
-          <Button size={"xs"} onClick={copyCode}>
-            Copy code
-            <TbCopy />
-          </Button>
-        }
-      >
-        <Group alignItems={"flex-start"} gap={10}>
-          <Stack flex={1}>
-            <Stack gap={6}>
-              <Group>
-                <ColorPickerRoot
-                  flex={1}
-                  value={parseColor(embedProps.buttonColor ?? "")}
-                  onValueChange={(e) =>
-                    setEmbedProps({
-                      ...embedProps,
-                      buttonColor: e.valueAsString,
-                    })
-                  }
-                >
-                  <ColorPickerLabel>Button color</ColorPickerLabel>
-                  <ColorPickerControl>
-                    <ColorPickerInput />
-                    <ColorPickerTrigger />
-                  </ColorPickerControl>
-                  <ColorPickerContent>
-                    <ColorPickerArea />
-                    <HStack>
-                      <ColorPickerEyeDropper />
-                      <ColorPickerSliders />
-                    </HStack>
-                  </ColorPickerContent>
-                </ColorPickerRoot>
-
-                <ColorPickerRoot
-                  flex={1}
-                  value={parseColor(embedProps.buttonTextColor ?? "")}
-                  onValueChange={(e) =>
-                    setEmbedProps({
-                      ...embedProps,
-                      buttonTextColor: e.valueAsString,
-                    })
-                  }
-                >
-                  <ColorPickerLabel>Button text color</ColorPickerLabel>
-                  <ColorPickerControl>
-                    <ColorPickerInput />
-                    <ColorPickerTrigger />
-                  </ColorPickerControl>
-                  <ColorPickerContent>
-                    <ColorPickerArea />
-                    <HStack>
-                      <ColorPickerEyeDropper />
-                      <ColorPickerSliders />
-                    </HStack>
-                  </ColorPickerContent>
-                </ColorPickerRoot>
-              </Group>
-
-              <Group>
-                <Field label="Button text">
-                  <Input
-                    placeholder="Button text"
-                    value={embedProps.buttonText}
-                    onChange={(e) =>
+    <SettingsSectionProvider>
+      <SettingsContainer>
+        <SettingsSection
+          id="customise-widget"
+          title="Customise widget"
+          description="Configure the widget and copy paste the <script> tag below to your website."
+          actionRight={
+            <Button size={"xs"} onClick={copyCode}>
+              Copy code
+              <TbCopy />
+            </Button>
+          }
+        >
+          <Group alignItems={"flex-start"} gap={10}>
+            <Stack flex={1}>
+              <Stack gap={6}>
+                <Group>
+                  <ColorPickerRoot
+                    flex={1}
+                    value={parseColor(embedProps.buttonColor ?? "")}
+                    onValueChange={(e) =>
                       setEmbedProps({
                         ...embedProps,
-                        buttonText: e.target.value,
+                        buttonColor: e.valueAsString,
                       })
                     }
-                  />
-                </Field>
+                  >
+                    <ColorPickerLabel>Button color</ColorPickerLabel>
+                    <ColorPickerControl>
+                      <ColorPickerInput />
+                      <ColorPickerTrigger />
+                    </ColorPickerControl>
+                    <ColorPickerContent>
+                      <ColorPickerArea />
+                      <HStack>
+                        <ColorPickerEyeDropper />
+                        <ColorPickerSliders />
+                      </HStack>
+                    </ColorPickerContent>
+                  </ColorPickerRoot>
 
-                <Field label="Position">
-                  <NativeSelect.Root width="100%">
-                    <NativeSelect.Field
-                      value={embedProps.position}
+                  <ColorPickerRoot
+                    flex={1}
+                    value={parseColor(embedProps.buttonTextColor ?? "")}
+                    onValueChange={(e) =>
+                      setEmbedProps({
+                        ...embedProps,
+                        buttonTextColor: e.valueAsString,
+                      })
+                    }
+                  >
+                    <ColorPickerLabel>Button text color</ColorPickerLabel>
+                    <ColorPickerControl>
+                      <ColorPickerInput />
+                      <ColorPickerTrigger />
+                    </ColorPickerControl>
+                    <ColorPickerContent>
+                      <ColorPickerArea />
+                      <HStack>
+                        <ColorPickerEyeDropper />
+                        <ColorPickerSliders />
+                      </HStack>
+                    </ColorPickerContent>
+                  </ColorPickerRoot>
+                </Group>
+
+                <Group>
+                  <Field label="Button text">
+                    <Input
+                      placeholder="Button text"
+                      value={embedProps.buttonText}
                       onChange={(e) =>
                         setEmbedProps({
                           ...embedProps,
-                          position: e.target.value,
+                          buttonText: e.target.value,
                         })
                       }
-                    >
-                      <option value="br">Bottom right</option>
-                      <option value="bl">Bottom left</option>
-                      <option value="tr">Top right</option>
-                      <option value="tl">Top left</option>
-                    </NativeSelect.Field>
-                    <NativeSelect.Indicator />
-                  </NativeSelect.Root>
-                </Field>
-              </Group>
+                    />
+                  </Field>
 
-              <Group>
-                <Slider.Root
-                  flex={1}
-                  value={[embedProps.radius]}
-                  min={0}
-                  max={25}
-                  step={1}
+                  <Field label="Position">
+                    <NativeSelect.Root width="100%">
+                      <NativeSelect.Field
+                        value={embedProps.position}
+                        onChange={(e) =>
+                          setEmbedProps({
+                            ...embedProps,
+                            position: e.target.value,
+                          })
+                        }
+                      >
+                        <option value="br">Bottom right</option>
+                        <option value="bl">Bottom left</option>
+                        <option value="tr">Top right</option>
+                        <option value="tl">Top left</option>
+                      </NativeSelect.Field>
+                      <NativeSelect.Indicator />
+                    </NativeSelect.Root>
+                  </Field>
+                </Group>
+
+                <Group>
+                  <Slider.Root
+                    flex={1}
+                    value={[embedProps.radius]}
+                    min={0}
+                    max={25}
+                    step={1}
+                    onValueChange={(e) =>
+                      setEmbedProps({ ...embedProps, radius: e.value[0] })
+                    }
+                  >
+                    <Slider.Label>Roundness</Slider.Label>
+                    <Slider.Control>
+                      <Slider.Track>
+                        <Slider.Range />
+                      </Slider.Track>
+                      <Slider.Thumb index={0} />
+                    </Slider.Control>
+                  </Slider.Root>
+                  <Box flex={1} />
+                </Group>
+              </Stack>
+            </Stack>
+
+            <Stack flex={1}>
+              <Box>
+                <SegmentGroup.Root
+                  value={tab}
                   onValueChange={(e) =>
-                    setEmbedProps({ ...embedProps, radius: e.value[0] })
+                    setTab(e.value as "preview" | "code" | "docusaurus")
                   }
                 >
-                  <Slider.Label>Roundness</Slider.Label>
-                  <Slider.Control>
-                    <Slider.Track>
-                      <Slider.Range />
-                    </Slider.Track>
-                    <Slider.Thumb index={0} />
-                  </Slider.Control>
-                </Slider.Root>
-                <Box flex={1} />
-              </Group>
+                  <SegmentGroup.Indicator />
+                  {widgetConfigTabs.items.map((item) => (
+                    <SegmentGroup.Item key={item.value} value={item.value}>
+                      <SegmentGroup.ItemText>
+                        <HStack>
+                          {item.icon}
+                          {item.label}
+                        </HStack>
+                      </SegmentGroup.ItemText>
+                      <SegmentGroup.ItemHiddenInput />
+                    </SegmentGroup.Item>
+                  ))}
+                </SegmentGroup.Root>
+              </Box>
+              {tab === "preview" && (
+                <Stack
+                  flex={1}
+                  bg="brand.outline-subtle"
+                  p={2}
+                  rounded={"md"}
+                  overflow={"hidden"}
+                  alignSelf={"stretch"}
+                >
+                  <PreviewEmbed
+                    key={JSON.stringify(embedProps)}
+                    scriptCode={scriptCode.script}
+                  />
+                </Stack>
+              )}
+
+              {tab === "code" && (
+                <Stack>
+                  <Stack
+                    flex={1}
+                    border={"1px solid"}
+                    borderColor="brand.outline"
+                    rounded={"md"}
+                    alignSelf={"stretch"}
+                  >
+                    <Stack
+                      p={4}
+                      h="full"
+                      alignItems={"flex-start"}
+                      flexDir={"column"}
+                    >
+                      <Text fontSize={"sm"} flex={1} whiteSpace={"pre-wrap"}>
+                        {scriptCode.script}
+                      </Text>
+
+                      <Group justifyContent={"flex-end"} w="full">
+                        <ClipboardRoot value={scriptCode.script}>
+                          <ClipboardIconButton />
+                        </ClipboardRoot>
+                      </Group>
+                    </Stack>
+                  </Stack>
+                  <Text fontSize={"sm"}>
+                    Copy and paste the above code inside the{" "}
+                    <Code>&lt;head&gt;</Code> tag of your website to embed the
+                    widget.
+                  </Text>
+                </Stack>
+              )}
+
+              {tab === "docusaurus" && (
+                <Stack>
+                  <Stack
+                    flex={1}
+                    border={"1px solid"}
+                    borderColor="brand.outline"
+                    rounded={"md"}
+                    alignSelf={"stretch"}
+                  >
+                    <Stack
+                      p={4}
+                      h="full"
+                      alignItems={"flex-start"}
+                      flexDir={"column"}
+                    >
+                      <Text fontSize={"sm"} flex={1} whiteSpace={"pre-wrap"}>
+                        {scriptCode.docusaurusConfig}
+                      </Text>
+
+                      <Group justifyContent={"flex-end"} w="full">
+                        <ClipboardRoot value={scriptCode.docusaurusConfig}>
+                          <ClipboardIconButton />
+                        </ClipboardRoot>
+                      </Group>
+                    </Stack>
+                  </Stack>
+                  <Text fontSize={"sm"}>
+                    Copy and paste the above config inside your{" "}
+                    <Code>docusaurus.config.js</Code> file to embed the widget.
+                  </Text>
+                </Stack>
+              )}
             </Stack>
-          </Stack>
+          </Group>
+        </SettingsSection>
 
-          <Stack flex={1}>
-            <Box>
-              <SegmentGroup.Root
-                value={tab}
-                onValueChange={(e) =>
-                  setTab(e.value as "preview" | "code" | "docusaurus")
-                }
-              >
-                <SegmentGroup.Indicator />
-                {widgetConfigTabs.items.map((item) => (
-                  <SegmentGroup.Item key={item.value} value={item.value}>
-                    <SegmentGroup.ItemText>
-                      <HStack>
-                        {item.icon}
-                        {item.label}
-                      </HStack>
-                    </SegmentGroup.ItemText>
-                    <SegmentGroup.ItemHiddenInput />
-                  </SegmentGroup.Item>
-                ))}
-              </SegmentGroup.Root>
-            </Box>
-            {tab === "preview" && (
-              <Stack
-                flex={1}
-                bg="brand.outline-subtle"
-                p={2}
-                rounded={"md"}
-                overflow={"hidden"}
-                alignSelf={"stretch"}
-              >
-                <PreviewEmbed
-                  key={JSON.stringify(embedProps)}
-                  scriptCode={scriptCode.script}
-                />
-              </Stack>
-            )}
-
-            {tab === "code" && (
-              <Stack>
-                <Stack
-                  flex={1}
-                  border={"1px solid"}
-                  borderColor="brand.outline"
-                  rounded={"md"}
-                  alignSelf={"stretch"}
-                >
-                  <Stack
-                    p={4}
-                    h="full"
-                    alignItems={"flex-start"}
-                    flexDir={"column"}
-                  >
-                    <Text fontSize={"sm"} flex={1} whiteSpace={"pre-wrap"}>
-                      {scriptCode.script}
-                    </Text>
-
-                    <Group justifyContent={"flex-end"} w="full">
-                      <ClipboardRoot value={scriptCode.script}>
-                        <ClipboardIconButton />
-                      </ClipboardRoot>
-                    </Group>
-                  </Stack>
-                </Stack>
-                <Text fontSize={"sm"}>
-                  Copy and paste the above code inside the{" "}
-                  <Code>&lt;head&gt;</Code> tag of your website to embed the
-                  widget.
-                </Text>
-              </Stack>
-            )}
-
-            {tab === "docusaurus" && (
-              <Stack>
-                <Stack
-                  flex={1}
-                  border={"1px solid"}
-                  borderColor="brand.outline"
-                  rounded={"md"}
-                  alignSelf={"stretch"}
-                >
-                  <Stack
-                    p={4}
-                    h="full"
-                    alignItems={"flex-start"}
-                    flexDir={"column"}
-                  >
-                    <Text fontSize={"sm"} flex={1} whiteSpace={"pre-wrap"}>
-                      {scriptCode.docusaurusConfig}
-                    </Text>
-
-                    <Group justifyContent={"flex-end"} w="full">
-                      <ClipboardRoot value={scriptCode.docusaurusConfig}>
-                        <ClipboardIconButton />
-                      </ClipboardRoot>
-                    </Group>
-                  </Stack>
-                </Stack>
-                <Text fontSize={"sm"}>
-                  Copy and paste the above config inside your{" "}
-                  <Code>docusaurus.config.js</Code> file to embed the widget.
-                </Text>
-              </Stack>
-            )}
-          </Stack>
-        </Group>
-      </SettingsSection>
-
-      <Stack gap={4}>
         <SettingsSection
+          id="widget-size"
           title="Widget size"
           description="Set the size of the widget to be when it's embedded on your website"
           fetcher={sizeFetcher}
@@ -559,6 +560,7 @@ export default function ScrapeEmbed({ loaderData }: Route.ComponentProps) {
         </SettingsSection>
 
         <SettingsSection
+          id="welcome-message"
           title="Welcome message"
           description="Add your custom welcome message to the widget. Supports markdown."
           fetcher={welcomeMessageFetcher}
@@ -572,6 +574,7 @@ export default function ScrapeEmbed({ loaderData }: Route.ComponentProps) {
         </SettingsSection>
 
         <SettingsSection
+          id="example-questions"
           title="Example questions"
           description="Show few example questions when a user visits the widget for the first time"
           fetcher={questionsFetcher}
@@ -602,6 +605,7 @@ export default function ScrapeEmbed({ loaderData }: Route.ComponentProps) {
         </SettingsSection>
 
         <SettingsSection
+          id="text-input-placeholder"
           title="Text input placeholder"
           description="Set the placeholder text for the text input field"
           fetcher={textInputPlaceholderFetcher}
@@ -616,7 +620,8 @@ export default function ScrapeEmbed({ loaderData }: Route.ComponentProps) {
         </SettingsSection>
 
         <SettingsSection
-          title="MCP client setup instructions"
+          id="mcp-setup"
+          title="MCP setup instructions"
           description="Show the MCP client setup instrctions on the widget"
           fetcher={mcpSetupFetcher}
         >
@@ -630,7 +635,7 @@ export default function ScrapeEmbed({ loaderData }: Route.ComponentProps) {
             Show it
           </Switch>
         </SettingsSection>
-      </Stack>
-    </Stack>
+      </SettingsContainer>
+    </SettingsSectionProvider>
   );
 }

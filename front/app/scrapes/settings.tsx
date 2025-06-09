@@ -7,7 +7,6 @@ import {
   DataList,
   Drawer,
   Group,
-  Heading,
   IconButton,
   Image,
   Input,
@@ -19,7 +18,11 @@ import {
   Textarea,
 } from "@chakra-ui/react";
 import { redirect, useFetcher } from "react-router";
-import { SettingsSection } from "~/dashboard/profile";
+import {
+  SettingsContainer,
+  SettingsSection,
+  SettingsSectionProvider,
+} from "~/settings-section";
 import { prisma } from "~/prisma";
 import type { Route } from "./+types/settings";
 import { getAuthUser } from "~/auth/middleware";
@@ -405,12 +408,14 @@ function RichBlocksSettings({ scrape }: { scrape: Scrape }) {
   return (
     <>
       <SettingsSection
+        id="rich-blocks"
         title={
           <Group>
             <Text>Rich Blocks</Text>
             <Badge variant={"surface"}>Experimental</Badge>
           </Group>
         }
+        plainTitle="Rich Blocks"
         description="Rich blocks are interactive UI elements that would be embedded in the AI response. You can add multiple blocks and customize them as per your needs."
         fetcher={richBlocksFetcher}
       >
@@ -483,6 +488,7 @@ function TicketingSettings({ scrape }: { scrape: Scrape }) {
 
   return (
     <SettingsSection
+      id="resolved-enquiry"
       title="Resolved enquiry"
       description="Enable resolved enquiry for this collection. If enabled, users will see a 'Issue resolved?' section end of the message. Users will be able to create support tickets and you can resolve them from Tickets section if they say no."
       fetcher={ticketingFetcher}
@@ -666,195 +672,190 @@ export default function ScrapeSettings({ loaderData }: Route.ComponentProps) {
 
   return (
     <Page title="Settings" icon={<TbSettings />}>
-      <Stack gap={4}>
-        <DataList.Root orientation={"horizontal"}>
-          <DataList.Item>
-            <DataList.ItemLabel>Created</DataList.ItemLabel>
-            <DataList.ItemValue>
-              {moment(loaderData.scrape.createdAt).fromNow()}
-            </DataList.ItemValue>
-          </DataList.Item>
-          <DataList.Item>
-            <DataList.ItemLabel>Id</DataList.ItemLabel>
-            <DataList.ItemValue>{loaderData.scrape.id}</DataList.ItemValue>
-          </DataList.Item>
-        </DataList.Root>
+      <SettingsSectionProvider>
+        <SettingsContainer>
+          <DataList.Root orientation={"horizontal"}>
+            <DataList.Item>
+              <DataList.ItemLabel>Created</DataList.ItemLabel>
+              <DataList.ItemValue>
+                {moment(loaderData.scrape.createdAt).fromNow()}
+              </DataList.ItemValue>
+            </DataList.Item>
+            <DataList.Item>
+              <DataList.ItemLabel>Id</DataList.ItemLabel>
+              <DataList.ItemValue>{loaderData.scrape.id}</DataList.ItemValue>
+            </DataList.Item>
+          </DataList.Root>
 
-        <SettingsSection
-          title="Name"
-          description="Give it a name. It will be shown on chat screen."
-          fetcher={nameFetcher}
-        >
-          <Input
-            name="title"
-            defaultValue={loaderData.scrape.title ?? ""}
-            placeholder="Enter a name for this scrape."
-          />
-        </SettingsSection>
-
-        <SettingsSection
-          id="logo"
-          title="Logo"
-          description="Set the logo URL for this collection. It will be shown on embed widget and other appropriate places."
-          fetcher={logoFetcher}
-        >
-          <Stack>
-            <Center
-              w={"100px"}
-              h={"100px"}
-              bg={"gray.100"}
-              rounded={"lg"}
-              p={2}
-            >
-              {loaderData.scrape.logoUrl ? (
-                <Image src={loaderData.scrape.logoUrl} alt="Logo" />
-              ) : (
-                <Text fontSize={"3xl"} opacity={0.4}>
-                  <TbPhoto />
-                </Text>
-              )}
-            </Center>
+          <SettingsSection
+            id="name"
+            title="Name"
+            description="Give it a name. It will be shown on chat screen."
+            fetcher={nameFetcher}
+          >
             <Input
-              name="logoUrl"
-              defaultValue={loaderData.scrape.logoUrl ?? ""}
-              placeholder="Enter a logo URL"
-              pattern="https://.*"
+              name="title"
+              defaultValue={loaderData.scrape.title ?? ""}
+              placeholder="Enter a name for this scrape."
             />
-          </Stack>
-        </SettingsSection>
+          </SettingsSection>
 
-        <SettingsSection
-          id="prompt"
-          title="Chat Prompt"
-          description="Customize the chat prompt for this scrape."
-          fetcher={promptFetcher}
-        >
-          <Textarea
-            name="chatPrompt"
-            defaultValue={loaderData.scrape.chatPrompt ?? ""}
-            placeholder="Enter a custom chat prompt for this scrape."
-          />
-        </SettingsSection>
-
-        <TicketingSettings scrape={loaderData.scrape} />
-
-        <SettingsSection
-          title="Min score"
-          description="Configure the minimum score (relevance score) required for the knowledge base to have to be considered for a question. If it is too high, it will not be able to answer questions as much. If it is too low, it will answer questions that are not relevant."
-          fetcher={minScoreFetcher}
-        >
-          <Group>
-            <Slider.Root
-              width="300px"
-              defaultValue={[minScore]}
-              onValueChange={(e) => setMinScore(e.value[0])}
-              min={0}
-              max={1}
-              step={0.01}
-            >
-              <Slider.Control>
-                <Slider.Track>
-                  <Slider.Range />
-                </Slider.Track>
-                <Slider.Thumb index={0}>
-                  <Slider.HiddenInput name="minScore" />
-                </Slider.Thumb>
-              </Slider.Control>
-            </Slider.Root>
-
-            <Badge size={"lg"} variant={"surface"}>
-              {minScore}
-            </Badge>
-          </Group>
-        </SettingsSection>
-
-        <SettingsSection
-          title="AI Model"
-          description="Select the AI model to use for the messages across channels."
-          fetcher={modelFetcher}
-        >
-          <Stack>
-            <Select.Root
-              name="llmModel"
-              collection={models}
-              maxW="400px"
-              positioning={{ sameWidth: true }}
-              defaultValue={[loaderData.scrape.llmModel ?? "gpt_4o_mini"]}
-              onValueChange={(e) => setSelectedModel(e.value[0] as LlmModel)}
-            >
-              <Select.HiddenSelect />
-              <Select.Control>
-                <Select.Trigger>
-                  <Select.ValueText placeholder="Select model" />
-                </Select.Trigger>
-                <Select.IndicatorGroup>
-                  <Select.Indicator />
-                </Select.IndicatorGroup>
-              </Select.Control>
-              <Portal>
-                <Select.Positioner>
-                  <Select.Content>
-                    {models.items.map((model) => (
-                      <Select.Item item={model} key={model.value}>
-                        {model.label}
-                        <Select.ItemIndicator />
-                      </Select.Item>
-                    ))}
-                  </Select.Content>
-                </Select.Positioner>
-              </Portal>
-            </Select.Root>
-            {selectedModel.startsWith("sonnet") && (
-              <Alert.Root status="info" title="Alert" maxW="400px">
-                <Alert.Indicator />
-                <Alert.Title>
-                  <Text>
-                    <Text as={"span"} fontWeight={"bolder"}>
-                      {selectedModel}
-                    </Text>{" "}
-                    is the best performing model available and it consumes{" "}
-                    <Text as="span" fontWeight={"bolder"}>
-                      4 message credits
-                    </Text>
-                    .
+          <SettingsSection
+            id="logo"
+            title="Logo"
+            description="Set the logo URL for this collection. It will be shown on embed widget and other appropriate places."
+            fetcher={logoFetcher}
+          >
+            <Stack>
+              <Center
+                w={"100px"}
+                h={"100px"}
+                bg={"gray.100"}
+                rounded={"lg"}
+                p={2}
+              >
+                {loaderData.scrape.logoUrl ? (
+                  <Image src={loaderData.scrape.logoUrl} alt="Logo" />
+                ) : (
+                  <Text fontSize={"3xl"} opacity={0.4}>
+                    <TbPhoto />
                   </Text>
-                </Alert.Title>
-              </Alert.Root>
-            )}
-          </Stack>
-        </SettingsSection>
+                )}
+              </Center>
+              <Input
+                name="logoUrl"
+                defaultValue={loaderData.scrape.logoUrl ?? ""}
+                placeholder="Enter a logo URL"
+                pattern="https://.*"
+              />
+            </Stack>
+          </SettingsSection>
 
-        <RichBlocksSettings scrape={loaderData.scrape} />
+          <SettingsSection
+            id="prompt"
+            title="Chat Prompt"
+            description="Customize the chat prompt for this scrape."
+            fetcher={promptFetcher}
+          >
+            <Textarea
+              name="chatPrompt"
+              defaultValue={loaderData.scrape.chatPrompt ?? ""}
+              placeholder="Enter a custom chat prompt for this scrape."
+            />
+          </SettingsSection>
 
-        <Stack
-          border={"1px solid"}
-          borderColor={"red.300"}
-          bg={"brand.danger.subtle"}
-          rounded={"lg"}
-          p={4}
-          gap={4}
-        >
-          <Stack>
-            <Heading>Delete collection</Heading>
-            <Text fontSize={"sm"} opacity={0.5}>
-              This will delete the collection and all the messages, knowledge
-              base, and the other data that is associated with it. This is not
-              reversible.
-            </Text>
-          </Stack>
-          <Group>
-            <Button
-              colorPalette={"red"}
-              onClick={handleDelete}
-              loading={deleteFetcher.state !== "idle"}
-              variant={deleteConfirm ? "solid" : "outline"}
-            >
-              {deleteConfirm ? "Sure to delete?" : "Delete"}
-              <TbTrash />
-            </Button>
-          </Group>
-        </Stack>
-      </Stack>
+          <TicketingSettings scrape={loaderData.scrape} />
+
+          <SettingsSection
+            id="min-score"
+            title="Min score"
+            description="Configure the minimum score (relevance score) required for the knowledge base to have to be considered for a question. If it is too high, it will not be able to answer questions as much. If it is too low, it will answer questions that are not relevant."
+            fetcher={minScoreFetcher}
+          >
+            <Group>
+              <Slider.Root
+                width="300px"
+                defaultValue={[minScore]}
+                onValueChange={(e) => setMinScore(e.value[0])}
+                min={0}
+                max={1}
+                step={0.01}
+              >
+                <Slider.Control>
+                  <Slider.Track>
+                    <Slider.Range />
+                  </Slider.Track>
+                  <Slider.Thumb index={0}>
+                    <Slider.HiddenInput name="minScore" />
+                  </Slider.Thumb>
+                </Slider.Control>
+              </Slider.Root>
+
+              <Badge size={"lg"} variant={"surface"}>
+                {minScore}
+              </Badge>
+            </Group>
+          </SettingsSection>
+
+          <SettingsSection
+            id="ai-model"
+            title="AI Model"
+            description="Select the AI model to use for the messages across channels."
+            fetcher={modelFetcher}
+          >
+            <Stack>
+              <Select.Root
+                name="llmModel"
+                collection={models}
+                maxW="400px"
+                positioning={{ sameWidth: true }}
+                defaultValue={[loaderData.scrape.llmModel ?? "gpt_4o_mini"]}
+                onValueChange={(e) => setSelectedModel(e.value[0] as LlmModel)}
+              >
+                <Select.HiddenSelect />
+                <Select.Control>
+                  <Select.Trigger>
+                    <Select.ValueText placeholder="Select model" />
+                  </Select.Trigger>
+                  <Select.IndicatorGroup>
+                    <Select.Indicator />
+                  </Select.IndicatorGroup>
+                </Select.Control>
+                <Portal>
+                  <Select.Positioner>
+                    <Select.Content>
+                      {models.items.map((model) => (
+                        <Select.Item item={model} key={model.value}>
+                          {model.label}
+                          <Select.ItemIndicator />
+                        </Select.Item>
+                      ))}
+                    </Select.Content>
+                  </Select.Positioner>
+                </Portal>
+              </Select.Root>
+              {selectedModel.startsWith("sonnet") && (
+                <Alert.Root status="info" title="Alert" maxW="400px">
+                  <Alert.Indicator />
+                  <Alert.Title>
+                    <Text>
+                      <Text as={"span"} fontWeight={"bolder"}>
+                        {selectedModel}
+                      </Text>{" "}
+                      is the best performing model available and it consumes{" "}
+                      <Text as="span" fontWeight={"bolder"}>
+                        4 message credits
+                      </Text>
+                      .
+                    </Text>
+                  </Alert.Title>
+                </Alert.Root>
+              )}
+            </Stack>
+          </SettingsSection>
+
+          <RichBlocksSettings scrape={loaderData.scrape} />
+
+          <SettingsSection
+            id="delete-collection"
+            title="Delete collection"
+            description="This will delete the collection and all the messages, knowledge base, and the other data that is associated with it. This is not reversible."
+            danger
+            actionRight={
+              <Button
+                colorPalette={"red"}
+                onClick={handleDelete}
+                loading={deleteFetcher.state !== "idle"}
+                variant={deleteConfirm ? "solid" : "outline"}
+                size={"sm"}
+              >
+                {deleteConfirm ? "Sure to delete?" : "Delete"}
+                <TbTrash />
+              </Button>
+            }
+          />
+        </SettingsContainer>
+      </SettingsSectionProvider>
     </Page>
   );
 }
