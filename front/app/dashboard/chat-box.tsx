@@ -298,12 +298,12 @@ export function Resolved({
           </Stack>
           <Group>
             {screen === "default" && (
-              <Button size={"xs"} variant={"solid"} onClick={handleYes}>
+              <Button size={"xs"} variant={"outline"} onClick={handleYes}>
                 <TbThumbUp /> Yes
               </Button>
             )}
             {screen === "default" && (
-              <Button size={"xs"} variant={"outline"} onClick={handleNo}>
+              <Button size={"xs"} variant={"subtle"} onClick={handleNo}>
                 <TbThumbDown /> No
               </Button>
             )}
@@ -506,28 +506,27 @@ function AssistantMessage({
           )}
         </Group>
       </Stack>
-      {Object.keys(cleanedLinks).length > 0 && (
-        <Stack gap={0}>
-          <Stack borderTop="1px solid" borderColor={"brand.outline"} gap={0}>
-            {last && !disabled && ticketingEnabled && !currentRating && (
-              <Resolved
-                onNo={() => handleResolved(false)}
-                onYes={() => handleResolved(true)}
-                onCancel={() => handleResolved(null)}
-                resolveQuestion={resolveQuestion}
-                resolveDescription={resolveDescription}
-                resolveYesConfig={resolveYesConfig}
-                resolveNoConfig={resolveNoConfig}
-              />
-            )}
-            {Object.entries(cleanedLinks)
-              .filter(([_, link]) => link)
-              .map(([index, link]) => (
-                <SourceLink key={index} link={link} index={Number(index)} />
-              ))}
-          </Stack>
+
+      <Stack gap={0}>
+        <Stack borderTop="1px solid" borderColor={"brand.outline"} gap={0}>
+          {last && !disabled && ticketingEnabled && !currentRating && (
+            <Resolved
+              onNo={() => handleResolved(false)}
+              onYes={() => handleResolved(true)}
+              onCancel={() => handleResolved(null)}
+              resolveQuestion={resolveQuestion}
+              resolveDescription={resolveDescription}
+              resolveYesConfig={resolveYesConfig}
+              resolveNoConfig={resolveNoConfig}
+            />
+          )}
+          {Object.entries(cleanedLinks)
+            .filter(([_, link]) => link)
+            .map(([index, link]) => (
+              <SourceLink key={index} link={link} index={Number(index)} />
+            ))}
         </Stack>
-      )}
+      </Stack>
     </Stack>
   );
 }

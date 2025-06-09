@@ -4,10 +4,9 @@ import {
   Nav,
   Footer,
   CTA,
-  UsedBy,
   ctaClassNames,
 } from "~/landing-v2/page";
-import type { Route } from "./+types/public-bots";
+import type { Route } from "./+types/shopify-app-bot";
 import { TbArrowRight } from "react-icons/tb";
 import cn from "@meltdownjs/cn";
 
