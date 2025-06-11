@@ -134,7 +134,7 @@ export async function action({ params, request }: Route.ActionArgs) {
     ) {
       await sendReactEmail(
         thread.ticketUserEmail,
-        `New message on ticket #${thread.ticketNumber}`,
+        `New message on ticket (#${thread.ticketNumber})`,
         <TicketUserMessageEmail
           scrapeTitle={thread.scrape.title ?? "CrawlChat"}
           ticketNumber={thread.ticketNumber}
@@ -156,7 +156,7 @@ export async function action({ params, request }: Route.ActionArgs) {
     ) {
       await sendReactEmail(
         thread.scrape.user.email,
-        `New message on ticket #${thread.ticketNumber}`,
+        `New message on ticket (#${thread.ticketNumber})`,
         <TicketAdminMessageEmail
           scrapeTitle={thread.scrape.title ?? "CrawlChat"}
           ticketNumber={thread.ticketNumber}
