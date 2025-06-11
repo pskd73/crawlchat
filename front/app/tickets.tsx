@@ -102,6 +102,9 @@ function Ticket({ thread }: { thread: Thread }) {
           {thread.title}
         </Link>
       </Text>
+      <Text fontSize={"sm"} opacity={0.5}>
+        {thread.ticketUserEmail}
+      </Text>
       <Group>
         <Badge
           colorPalette={thread.ticketStatus === "open" ? "green" : "red"}

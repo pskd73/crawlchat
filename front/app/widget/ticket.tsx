@@ -8,6 +8,7 @@ import {
   Heading,
   Image,
   Link,
+  Separator,
   Stack,
   Text,
   Textarea,
@@ -53,7 +54,10 @@ export async function loader({ params, request }: Route.LoaderArgs) {
     thread = null;
   }
 
-  return { thread, passedKey: key, ticketNumber };
+  const role =
+    thread && loggedInUser?.id === thread.scrape.userId ? "agent" : "user";
+
+  return { thread, passedKey: key, ticketNumber, role };
 }
 
 export function meta({ data }: Route.MetaArgs) {
@@ -329,7 +333,14 @@ export default function Ticket({ loaderData }: Route.ComponentProps) {
               >
                 {loaderData.thread.ticketStatus!.toUpperCase()}
               </Badge>
+              <Separator h="4" orientation="vertical" />
               <Text opacity={0.5}>Opened {moment(openedAt).fromNow()}</Text>
+              {loaderData.role === "agent" && (
+                <>
+                  <Separator h="4" orientation="vertical" />
+                  <Text opacity={0.5}>{loaderData.thread.ticketUserEmail}</Text>
+                </>
+              )}
             </Group>
           </Stack>
         )}
