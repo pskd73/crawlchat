@@ -45,6 +45,7 @@ import {
   SelectTrigger,
   SelectValueText,
 } from "~/components/ui/select";
+import { toaster } from "~/components/ui/toaster";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -164,6 +165,16 @@ export async function action({ request }: Route.ActionArgs) {
   }
   if (formData.has("minScore")) {
     update.minScore = parseFloat(formData.get("minScore") as string);
+  }
+  if (formData.has("slug")) {
+    const slug = formData.get("slug") as string;
+    const existing = await prisma.scrape.findFirst({
+      where: { slug },
+    });
+    if (existing && existing.id !== scrapeId) {
+      return { error: "Slug already exists" };
+    }
+    update.slug = slug;
   }
 
   const scrape = await prisma.scrape.update({
@@ -647,6 +658,7 @@ export default function ScrapeSettings({ loaderData }: Route.ComponentProps) {
   const modelFetcher = useFetcher();
   const logoFetcher = useFetcher();
   const minScoreFetcher = useFetcher();
+  const slugFetcher = useFetcher();
 
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [selectedModel, setSelectedModel] = useState<LlmModel>(
@@ -672,6 +684,15 @@ export default function ScrapeSettings({ loaderData }: Route.ComponentProps) {
       }, 5000);
     }
   }, [deleteConfirm]);
+
+  useEffect(() => {
+    if (slugFetcher.data?.error) {
+      toaster.error({
+        title: "Error",
+        description: slugFetcher.data.error,
+      });
+    }
+  }, [slugFetcher.data?.error]);
 
   function handleDelete() {
     if (!deleteConfirm) {
@@ -711,6 +732,21 @@ export default function ScrapeSettings({ loaderData }: Route.ComponentProps) {
               name="title"
               defaultValue={loaderData.scrape.title ?? ""}
               placeholder="Enter a name for this scrape."
+            />
+          </SettingsSection>
+
+          <SettingsSection
+            id="slug"
+            title="Slug"
+            description="Give it a slug and you can use it in the URL to access the chatbot. Should be 4-16 characters long and can only contain lowercase letters, numbers, and hyphens."
+            fetcher={slugFetcher}
+          >
+            <Input
+              name="slug"
+              defaultValue={loaderData.scrape.slug ?? ""}
+              placeholder="Ex: remotion"
+              pattern="^[a-z0-9\-]{4,16}$"
+              required
             />
           </SettingsSection>
 

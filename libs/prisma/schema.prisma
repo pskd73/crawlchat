@@ -133,6 +133,7 @@ model Scrape {
   llmModel              LlmModel?
   richBlocksConfig      RichBlocksConfig?
   minScore              Float?
+  slug                  String?
 
   user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -140,6 +141,8 @@ model Scrape {
   items                 ScrapeItem[]
   messages              Message[]
   knowoledgeGroups      KnowledgeGroup[]
+
+  @@index([slug])
 }
 
 type MessageSourceLink {

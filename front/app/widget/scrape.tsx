@@ -14,9 +14,13 @@ import { sendReactEmail } from "~/email";
 import TicketUserCreateEmail from "emails/ticket-user-create";
 import { Toaster, toaster } from "~/components/ui/toaster";
 
+function isMongoObjectId(id: string) {
+  return /^[0-9a-fA-F]{24}$/.test(id);
+}
+
 export async function loader({ params, request }: Route.LoaderArgs) {
-  const scrape = await prisma.scrape.findUnique({
-    where: { id: params.id },
+  const scrape = await prisma.scrape.findFirst({
+    where: isMongoObjectId(params.id) ? { id: params.id } : { slug: params.id },
   });
 
   if (!scrape) {
@@ -82,7 +86,15 @@ export function meta({ data }: Route.MetaArgs) {
 }
 
 export async function action({ request, params }: Route.ActionArgs) {
-  const scrapeId = params.id;
+  const scrape = await prisma.scrape.findFirst({
+    where: isMongoObjectId(params.id) ? { id: params.id } : { slug: params.id },
+  });
+
+  if (!scrape) {
+    return redirect("/w/not-found");
+  }
+
+  const scrapeId = scrape.id;
   const formData = await request.formData();
   const intent = formData.get("intent");
 
