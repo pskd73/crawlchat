@@ -4,21 +4,19 @@ import { getSession } from "~/session";
 import type { SetupProgressInput } from "./setup-progress";
 import { prisma } from "libs/prisma";
 
-export async function loader({ request }: Route.LoaderArgs) {
-  const user = await getAuthUser(request, { redirectTo: "/login" });
-
-  const session = await getSession(request.headers.get("cookie"));
-  const scrapeId = session.get("scrapeId");
-
-  const setupProgressInput: SetupProgressInput = {
+export async function getSetupProgressInput(
+  userId: string,
+  scrapeId: string
+): Promise<SetupProgressInput> {
+  return {
     nScrapes: await prisma.scrape.count({
       where: {
-        userId: user!.id,
+        userId,
       },
     }),
     nMessages: await prisma.message.count({
       where: {
-        ownerUserId: user!.id,
+        ownerUserId: userId,
         scrapeId,
       },
     }),
@@ -30,27 +28,27 @@ export async function loader({ request }: Route.LoaderArgs) {
     }),
     nKnowledgeGroups: await prisma.knowledgeGroup.count({
       where: {
-        userId: user!.id,
+        userId,
         scrapeId,
       },
     }),
     nChatbotMessages: await prisma.message.count({
       where: {
-        ownerUserId: user!.id,
+        ownerUserId: userId,
         scrapeId,
         channel: { isSet: false },
       },
     }),
     nDiscordMessages: await prisma.message.count({
       where: {
-        ownerUserId: user!.id,
+        ownerUserId: userId,
         scrapeId,
         channel: "discord",
       },
     }),
     nMCPMessages: await prisma.message.count({
       where: {
-        ownerUserId: user!.id,
+        ownerUserId: userId,
         scrapeId,
         channel: "mcp",
       },
@@ -61,8 +59,15 @@ export async function loader({ request }: Route.LoaderArgs) {
       },
     }),
   };
+}
+
+export async function loader({ request }: Route.LoaderArgs) {
+  const user = await getAuthUser(request, { redirectTo: "/login" });
+
+  const session = await getSession(request.headers.get("cookie"));
+  const scrapeId = session.get("scrapeId");
 
   return {
-    input: setupProgressInput,
+    input: await getSetupProgressInput(user!.id, scrapeId!)
   };
 }

@@ -23,7 +23,10 @@ export default [
 
   route("payment/lemonsqueezy-webhook", "payment/lemonsqueezy-webhook.ts"),
 
-  ...prefix("triggers", [route("weekly", "triggers/weekly.tsx")]),
+  ...prefix("triggers", [
+    route("weekly", "triggers/weekly.tsx"),
+    route("setup-progress", "triggers/setup-progress.tsx"),
+  ]),
 
   route("/logout", "auth/logout.tsx"),
   layout("dashboard/layout.tsx", [
