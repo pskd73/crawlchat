@@ -467,7 +467,9 @@ export function SideMenu({
       </Stack>
 
       <Stack p={4} gap={4}>
-        {/* {scrapeId && <SetupProgress scrapeId={scrapeId} />} */}
+        {scrapeId && user.email === "pramodkumar.damam73@gmail.com" && (
+          <SetupProgress scrapeId={scrapeId} />
+        )}
         <Stack bg="brand.gray.100" rounded="md" px={3} py={2}>
           <CreditProgress
             title="Messages"
