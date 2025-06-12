@@ -1,10 +1,8 @@
 import type { Route } from "./+types/weekly";
 import { prisma } from "libs/prisma";
 import { getSetupProgressInput } from "~/dashboard/setup-progress-api";
-import {
-  allSetupProgressActions,
-  type SetupProgressInput,
-} from "~/dashboard/setup-progress";
+import { allSetupProgressActions } from "~/dashboard/setup-progress";
+import type { SetupProgressInput } from "~/dashboard/setup-progress";
 import { sendReactEmail } from "~/email";
 import SetupProgressEmail from "emails/setup-progress";
 
