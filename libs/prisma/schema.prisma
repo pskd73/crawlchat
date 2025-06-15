@@ -57,6 +57,10 @@ type WidgetConfig {
   welcomeMessage        String?
   showMcpSetup          Boolean?
   textInputPlaceholder  String?
+  primaryColor          String?
+  buttonText            String?
+  buttonTextColor       String?
+  showLogo              Boolean?
 }
 
 type ScrapeAnalyticsCategoryMessageId {

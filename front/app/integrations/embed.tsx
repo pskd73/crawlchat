@@ -16,7 +16,11 @@ import {
 } from "@chakra-ui/react";
 import { prisma } from "~/prisma";
 import { getAuthUser } from "~/auth/middleware";
-import { SettingsContainer, SettingsSection, SettingsSectionProvider } from "~/settings-section";
+import {
+  SettingsContainer,
+  SettingsSection,
+  SettingsSectionProvider,
+} from "~/settings-section";
 import { useFetcher } from "react-router";
 import {
   SelectContent,
@@ -88,28 +92,40 @@ export async function action({ request }: Route.ActionArgs) {
     welcomeMessage: null,
     showMcpSetup: null,
     textInputPlaceholder: null,
+    primaryColor: null,
+    buttonText: null,
+    buttonTextColor: null,
+    showLogo: null,
   };
 
   if (size) {
     update.size = size as WidgetSize;
   }
-
   if (formData.has("from-questions")) {
     update.questions = questions.map((text) => ({ text: text as string }));
   }
-
   if (welcomeMessage !== null && welcomeMessage !== undefined) {
     update.welcomeMessage = welcomeMessage as string;
   }
-
   if (formData.has("from-mcp-setup")) {
     update.showMcpSetup = formData.get("showMcpSetup") === "on";
   }
-
   if (formData.has("textInputPlaceholder")) {
     update.textInputPlaceholder = formData.get(
       "textInputPlaceholder"
     ) as string;
+  }
+  if (formData.has("primaryColor")) {
+    update.primaryColor = formData.get("primaryColor") as string;
+  }
+  if (formData.has("buttonText")) {
+    update.buttonText = formData.get("buttonText") as string;
+  }
+  if (formData.has("buttonTextColor")) {
+    update.buttonTextColor = formData.get("buttonTextColor") as string;
+  }
+  if (formData.has("from-widget")) {
+    update.showLogo = formData.get("showLogo") === "on";
   }
 
   await prisma.scrape.update({
@@ -128,73 +144,21 @@ const sizes = createListCollection({
   items: [
     { label: "Small", value: "small" },
     { label: "Large", value: "large" },
-    // { label: "Full Screen", value: "full_screen" },
   ],
 });
 
-type EmbedProps = {
-  button?: boolean;
-  text?: string;
-  buttonColor?: string;
-  buttonTextColor?: string;
-  buttonText?: string;
-  position?: string;
-  radius: number;
-};
-
-function makeScriptCode(props: EmbedProps, scrapeId: string) {
+function makeScriptCode(scrapeId: string) {
   if (typeof window === "undefined") {
     return { script: "", docusaurusConfig: "" };
   }
 
   const origin = window.location.origin;
 
-  const attributes: Record<string, string> = {};
-  const {
-    button,
-    text,
-    buttonColor,
-    buttonTextColor,
-    buttonText,
-    position,
-    radius,
-  } = props;
-
-  if (text) {
-    attributes["data-ask-ai-text"] = text;
-  }
-
-  if (button) {
-    attributes["data-ask-ai"] = "true";
-  }
-
-  if (buttonColor) {
-    attributes["data-ask-ai-background-color"] = buttonColor;
-  }
-
-  if (buttonTextColor) {
-    attributes["data-ask-ai-color"] = buttonTextColor;
-  }
-
-  if (buttonText) {
-    attributes["data-ask-ai-text"] = buttonText;
-  }
-
-  if (position) {
-    attributes["data-ask-ai-position"] = position;
-  }
-
-  if (radius) {
-    attributes["data-ask-ai-radius"] = `${radius}px`;
-  }
-
   const script = `<script 
   src="${origin}/embed.js" 
   id="crawlchat-script" 
   data-id="${scrapeId}" 
-  ${Object.entries(attributes)
-    .map(([key, value]) => `${key}="${value}"`)
-    .join("\n  ")}
+  data-ask-ai="true"
 ></script>`;
 
   const docusaurusConfig = `headTags: [
@@ -204,9 +168,7 @@ function makeScriptCode(props: EmbedProps, scrapeId: string) {
         "src": "${origin}/embed.js",
         "id": "crawlchat-script",
         "data-id": "${scrapeId}",
-        ${Object.entries(attributes)
-          .map(([key, value]) => `"${key}": "${value}"`)
-          .join(",\n        ")}
+        "data-ask-ai": "true"
       },
     },
 ],`;
@@ -259,18 +221,11 @@ export default function ScrapeEmbed({ loaderData }: Route.ComponentProps) {
   const welcomeMessageFetcher = useFetcher();
   const mcpSetupFetcher = useFetcher();
   const textInputPlaceholderFetcher = useFetcher();
-  const [embedProps, setEmbedProps] = useState<EmbedProps>({
-    button: true,
-    buttonColor: "#7b2cbf",
-    buttonTextColor: "#ffffff",
-    buttonText: "💬 Ask AI",
-    position: "br",
-    radius: 20,
-  });
+  const widgetConfigFetcher = useFetcher();
   const [tab, setTab] = useState<"preview" | "code" | "docusaurus">("preview");
   const scriptCode = useMemo(
-    () => makeScriptCode(embedProps, loaderData.scrape?.id ?? ""),
-    [embedProps, loaderData.scrape?.id]
+    () => makeScriptCode(loaderData.scrape?.id ?? ""),
+    [loaderData.scrape?.id]
   );
 
   const [questions, setQuestions] = useState<WidgetQuestion[]>(
@@ -307,25 +262,22 @@ export default function ScrapeEmbed({ loaderData }: Route.ComponentProps) {
           id="customise-widget"
           title="Customise widget"
           description="Configure the widget and copy paste the <script> tag below to your website."
-          actionRight={
-            <Button size={"xs"} onClick={copyCode}>
-              Copy code
-              <TbCopy />
-            </Button>
-          }
+          fetcher={widgetConfigFetcher}
         >
+          <input type="hidden" name="from-widget" value={"true"} />
           <Group alignItems={"flex-start"} gap={10}>
             <Stack flex={1}>
               <Stack gap={6}>
                 <Group>
                   <ColorPickerRoot
                     flex={1}
-                    value={parseColor(embedProps.buttonColor ?? "")}
-                    onValueChange={(e) =>
-                      setEmbedProps({
-                        ...embedProps,
-                        buttonColor: e.valueAsString,
-                      })
+                    name="primaryColor"
+                    defaultValue={
+                      loaderData.scrape?.widgetConfig?.primaryColor
+                        ? parseColor(
+                            loaderData.scrape.widgetConfig.primaryColor
+                          )
+                        : undefined
                     }
                   >
                     <ColorPickerLabel>Button color</ColorPickerLabel>
@@ -344,12 +296,13 @@ export default function ScrapeEmbed({ loaderData }: Route.ComponentProps) {
 
                   <ColorPickerRoot
                     flex={1}
-                    value={parseColor(embedProps.buttonTextColor ?? "")}
-                    onValueChange={(e) =>
-                      setEmbedProps({
-                        ...embedProps,
-                        buttonTextColor: e.valueAsString,
-                      })
+                    name="buttonTextColor"
+                    defaultValue={
+                      loaderData.scrape?.widgetConfig?.buttonTextColor
+                        ? parseColor(
+                            loaderData.scrape.widgetConfig.buttonTextColor
+                          )
+                        : undefined
                     }
                   >
                     <ColorPickerLabel>Button text color</ColorPickerLabel>
@@ -371,57 +324,23 @@ export default function ScrapeEmbed({ loaderData }: Route.ComponentProps) {
                   <Field label="Button text">
                     <Input
                       placeholder="Button text"
-                      value={embedProps.buttonText}
-                      onChange={(e) =>
-                        setEmbedProps({
-                          ...embedProps,
-                          buttonText: e.target.value,
-                        })
+                      name="buttonText"
+                      defaultValue={
+                        loaderData.scrape?.widgetConfig?.buttonText ?? ""
                       }
                     />
-                  </Field>
-
-                  <Field label="Position">
-                    <NativeSelect.Root width="100%">
-                      <NativeSelect.Field
-                        value={embedProps.position}
-                        onChange={(e) =>
-                          setEmbedProps({
-                            ...embedProps,
-                            position: e.target.value,
-                          })
-                        }
-                      >
-                        <option value="br">Bottom right</option>
-                        <option value="bl">Bottom left</option>
-                        <option value="tr">Top right</option>
-                        <option value="tl">Top left</option>
-                      </NativeSelect.Field>
-                      <NativeSelect.Indicator />
-                    </NativeSelect.Root>
                   </Field>
                 </Group>
 
                 <Group>
-                  <Slider.Root
-                    flex={1}
-                    value={[embedProps.radius]}
-                    min={0}
-                    max={25}
-                    step={1}
-                    onValueChange={(e) =>
-                      setEmbedProps({ ...embedProps, radius: e.value[0] })
+                  <Switch
+                    name="showLogo"
+                    defaultChecked={
+                      loaderData.scrape?.widgetConfig?.showLogo ?? false
                     }
                   >
-                    <Slider.Label>Roundness</Slider.Label>
-                    <Slider.Control>
-                      <Slider.Track>
-                        <Slider.Range />
-                      </Slider.Track>
-                      <Slider.Thumb index={0} />
-                    </Slider.Control>
-                  </Slider.Root>
-                  <Box flex={1} />
+                    Show logo
+                  </Switch>
                 </Group>
               </Stack>
             </Stack>
@@ -458,7 +377,7 @@ export default function ScrapeEmbed({ loaderData }: Route.ComponentProps) {
                   alignSelf={"stretch"}
                 >
                   <PreviewEmbed
-                    key={JSON.stringify(embedProps)}
+                    key={widgetConfigFetcher.state}
                     scriptCode={scriptCode.script}
                   />
                 </Stack>

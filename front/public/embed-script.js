@@ -14,7 +14,13 @@ class CrawlChatEmbed {
     this.askAIEnabled = script.getAttribute("data-ask-ai") === "true";
   }
 
-  mount() {
+  async getWidgetConfig() {
+    const response = await fetch(`${this.host}/w/${this.scrapeId}/config`);
+    const data = await response.json();
+    return data.widgetConfig;
+  }
+
+  async mount() {
     const iframe = document.createElement("iframe");
     iframe.id = this.iframeId;
     iframe.src = `${this.host}/w/${this.scrapeId}?embed=true`;
@@ -44,7 +50,7 @@ class CrawlChatEmbed {
     window.addEventListener("message", this.handleOnMessage);
 
     if (this.askAIEnabled) {
-      this.showAskAIButton();
+      await this.showAskAIButton();
     }
   }
 
@@ -71,7 +77,7 @@ class CrawlChatEmbed {
     iframe.contentWindow.postMessage("focus", "*");
   }
 
-  hide() {
+  async hide() {
     document.body.style = this.lastBodyStyle;
     window.scrollTo(0, this.lastScrollTop);
 
@@ -84,7 +90,7 @@ class CrawlChatEmbed {
     }, this.transitionDuration);
 
     if (this.askAIEnabled) {
-      this.showAskAIButton();
+      await this.showAskAIButton();
     }
   }
 
@@ -104,22 +110,33 @@ class CrawlChatEmbed {
     button.style.opacity = "0";
   }
 
-  showAskAIButton() {
+  async showAskAIButton() {
+    const widgetConfig = await this.getWidgetConfig();
+
     const script = document.getElementById(this.scriptId);
 
     if (!script) {
       return;
     }
 
-    const text = script.getAttribute("data-ask-ai-text") ?? "💬 Ask AI";
+    const text =
+      widgetConfig.buttonText ??
+      script.getAttribute("data-ask-ai-text") ??
+      "💬 Ask AI";
     const backgroundColor =
-      script.getAttribute("data-ask-ai-background-color") ?? "#7b2cbf";
-    const color = script.getAttribute("data-ask-ai-color") ?? "white";
+      widgetConfig.primaryColor ??
+      script.getAttribute("data-ask-ai-background-color") ??
+      "#7b2cbf";
+    const color =
+      widgetConfig.buttonTextColor ??
+      script.getAttribute("data-ask-ai-color") ??
+      "white";
     const position = script.getAttribute("data-ask-ai-position") ?? "br";
     const marginX = script.getAttribute("data-ask-ai-margin-x") ?? "20px";
     const marginY = script.getAttribute("data-ask-ai-margin-y") ?? "20px";
     const radius = script.getAttribute("data-ask-ai-radius") ?? "20px";
     const fontSize = script.getAttribute("data-ask-ai-font-size");
+    const logoUrl = widgetConfig.logoUrl;
 
     let bottom = undefined;
     let right = undefined;
@@ -160,6 +177,11 @@ class CrawlChatEmbed {
     div.style.scale = "1";
     div.style.boxShadow = "0 2px 5px rgba(0, 0, 0, 0.2)";
 
+    div.style.display = "flex";
+    div.style.flexDirection = "column";
+    div.style.alignItems = "center";
+    div.style.justifyContent = "center";
+
     div.addEventListener("mouseover", function () {
       div.style.scale = "1.05";
     });
@@ -168,7 +190,18 @@ class CrawlChatEmbed {
       div.style.scale = "1";
     });
 
-    div.innerText = text;
+    if (logoUrl && widgetConfig.showLogo) {
+      const logo = document.createElement("img");
+      logo.src = logoUrl;
+      logo.style.width = "40px";
+      logo.style.height = "40px";
+      div.appendChild(logo);
+      div.style.borderRadius = "10px";
+    }
+
+    const span = document.createElement("span");
+    span.innerText = text;
+    div.appendChild(span);
 
     div.addEventListener("click", function () {
       window.crawlchatEmbed.show();
@@ -179,9 +212,9 @@ class CrawlChatEmbed {
   }
 }
 
-function setupCrawlChat() {
+async function setupCrawlChat() {
   window.crawlchatEmbed = new CrawlChatEmbed();
-  window.crawlchatEmbed.mount();
+  await window.crawlchatEmbed.mount();
 }
 
 if (document.readyState === "complete" || window.frameElement) {
