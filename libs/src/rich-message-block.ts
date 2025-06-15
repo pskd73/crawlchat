@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-type RichMessageBlock = {
+export type RichMessageBlock = {
   schema: z.ZodSchema;
 };
 
@@ -13,6 +13,18 @@ export const ctaBlock: RichMessageBlock = {
   }),
 };
 
+export const createTicketBlock: RichMessageBlock = {
+  schema: z.object({
+    title: z.string({
+      description: "Title of the ticket. Keep it short and concise.",
+    }),
+    message: z.string({
+      description: "Message of the ticket from the user point of view",
+    }),
+  }),
+};
+
 export const richMessageBlocks: Record<string, RichMessageBlock> = {
   cta: ctaBlock,
+  "create-ticket": createTicketBlock,
 };

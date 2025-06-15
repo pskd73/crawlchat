@@ -3,9 +3,20 @@ import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import hljs from "highlight.js";
 import "highlight.js/styles/vs.css";
-import { Box, Image, Link, Stack, Text } from "@chakra-ui/react";
+import {
+  Box,
+  Center,
+  Group,
+  Image,
+  Input,
+  Link,
+  Spinner,
+  Stack,
+  Text,
+  Textarea,
+} from "@chakra-ui/react";
 import { ClipboardIconButton, ClipboardRoot } from "~/components/ui/clipboard";
-import type { PropsWithChildren } from "react";
+import { useState, type PropsWithChildren } from "react";
 import { Tooltip } from "~/components/ui/tooltip";
 import { Button } from "~/components/ui/button";
 import { TbArrowRight } from "react-icons/tb";
@@ -54,15 +65,109 @@ const RichCTA = ({
   );
 };
 
+const RichCreateTicket = ({
+  title: initialTitle,
+  message: initialMessage,
+  onTicketCreate,
+  loading,
+  disabled,
+}: {
+  title: string;
+  message: string;
+  onTicketCreate: (email: string, title: string, message: string) => void;
+  loading?: boolean;
+  disabled?: boolean;
+}) => {
+  const [email, setEmail] = useState("");
+  const [title, setTitle] = useState(initialTitle);
+  const [message, setMessage] = useState(initialMessage);
+
+  function handleSubmit() {
+    if (!email || !title || !message) {
+      alert("Please fill in all fields");
+      return;
+    }
+
+    onTicketCreate(email, title, message);
+  }
+
+  return (
+    <Stack
+      border="4px solid"
+      borderColor={"brand.outline"}
+      p={4}
+      rounded={"2xl"}
+      maxW="400px"
+      w="full"
+      my={8}
+    >
+      {!loading && (
+        <>
+          <Text fontWeight={"bold"} m={0}>
+            Create a support ticket
+          </Text>
+          <Input
+            placeholder="Title"
+            defaultValue={title}
+            onChange={(e) => setTitle(e.target.value)}
+            size="xs"
+            disabled={disabled}
+          />
+          <Textarea
+            placeholder="Message"
+            defaultValue={message}
+            onChange={(e) => setMessage(e.target.value)}
+            rows={4}
+            disabled={disabled}
+          />
+          <Input
+            placeholder="Email"
+            defaultValue={email}
+            onChange={(e) => setEmail(e.target.value)}
+            size="xs"
+            disabled={disabled}
+          />
+          <Group justifyContent={"flex-end"}>
+            <Button
+              variant={"subtle"}
+              size="xs"
+              loading={loading}
+              onClick={handleSubmit}
+              disabled={disabled}
+            >
+              Create <TbArrowRight />
+            </Button>
+          </Group>
+        </>
+      )}
+      {loading && (
+        <Center>
+          <Spinner />
+        </Center>
+      )}
+    </Stack>
+  );
+};
+
 export function MarkdownProse({
   children,
   noMarginCode,
   sources,
   size = "md",
+  options,
 }: PropsWithChildren<{
   noMarginCode?: boolean;
   sources?: Array<{ title: string; url?: string }>;
   size?: "md" | "lg";
+  options?: {
+    onTicketCreate?: (
+      title: string,
+      description: string,
+      email: string
+    ) => void;
+    ticketCreateLoading?: boolean;
+    disabled?: boolean;
+  };
 }>) {
   return (
     <Prose maxW="full" size={size}>
@@ -83,6 +188,19 @@ export function MarkdownProse({
                 const json = JSON.parse(jsonrepair(children as string));
                 if (language === "json|cta") {
                   return <RichCTA {...json} />;
+                }
+                if (
+                  language === "json|create-ticket" &&
+                  options?.onTicketCreate
+                ) {
+                  return (
+                    <RichCreateTicket
+                      {...json}
+                      onTicketCreate={options.onTicketCreate}
+                      loading={options.ticketCreateLoading}
+                      disabled={options.disabled}
+                    />
+                  );
                 }
               } catch (e) {
                 console.log(e);

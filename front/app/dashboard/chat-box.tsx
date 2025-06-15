@@ -382,6 +382,8 @@ function AssistantMessage({
   resolveDescription,
   resolveYesConfig,
   resolveNoConfig,
+  onTicketCreate,
+  ticketCreateLoading,
 }: {
   id: string;
   content: string;
@@ -403,6 +405,8 @@ function AssistantMessage({
   resolveDescription?: string;
   resolveYesConfig?: ResolveBtnConfig;
   resolveNoConfig?: ResolveBtnConfig;
+  onTicketCreate?: (title: string, description: string, email: string) => void;
+  ticketCreateLoading?: boolean;
 }) {
   const [cleanedLinks, cleanedContent, score] = useMemo(() => {
     const citation = extractCitations(content, links);
@@ -443,6 +447,11 @@ function AssistantMessage({
             title: link?.title ?? link?.url ?? "Source",
             url: link?.url ?? undefined,
           }))}
+          options={{
+            onTicketCreate,
+            ticketCreateLoading,
+            disabled,
+          }}
         >
           {cleanedContent}
         </MarkdownProse>
@@ -1321,6 +1330,8 @@ export default function ScrapeWidget({
                       resolveDescription={resolveDescription}
                       resolveYesConfig={resolveYesConfig}
                       resolveNoConfig={resolveNoConfig}
+                      onTicketCreate={handleTicketCreate}
+                      ticketCreateLoading={ticketCreationLoading}
                     />
                   )}
                   {(chat.askStage === "asked" ||

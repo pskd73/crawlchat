@@ -13,7 +13,12 @@ import { authenticate, verifyToken } from "./jwt";
 import { splitMarkdown } from "./scrape/markdown-splitter";
 import { makeLLMTxt } from "./llm-txt";
 import { v4 as uuidv4 } from "uuid";
-import { Message, MessageSourceLink, Prisma } from "libs/prisma";
+import {
+  Message,
+  MessageSourceLink,
+  Prisma,
+  RichBlockConfig,
+} from "libs/prisma";
 import { makeIndexer } from "./indexer/factory";
 import { name } from "libs";
 import { consumeCredits, hasEnoughCredits } from "libs/user-plan";
@@ -22,12 +27,12 @@ import { extractCitations } from "libs/citation";
 import { BaseKbProcesserListener } from "./kb/listener";
 import { makeKbProcesser } from "./kb/factory";
 import { FlowMessage, multiLinePrompt, SimpleAgent } from "./llm/agentic";
-import { makeTestQueryFlow } from "./llm/flow-test-query";
 import { getConfig } from "./llm/config";
 import { chunk } from "libs/chunk";
 import { retry } from "./retry";
 import { Flow } from "./llm/flow";
 import { z } from "zod";
+import { RichMessageBlock } from "libs/rich-message-block";
 
 const app: Express = express();
 const expressWs = ws(app);
@@ -98,6 +103,14 @@ async function updateLastMessageAt(threadId: string) {
     data: { lastMessageAt: new Date() },
   });
 }
+
+const createTicketRichBlock: RichBlockConfig = {
+  name: "Create support ticket",
+  key: "create-ticket",
+  payload: {},
+  prompt: `Use this whenever you say contact the support team.
+This is the way they can contact the support team. This is mandatory.`,
+};
 
 app.get("/", function (req: Request, res: Response) {
   res.json({ message: "ok" });
@@ -331,6 +344,11 @@ expressWs.app.ws("/", (ws: any, req) => {
         await retry(async (nTime) => {
           const llmConfig = getConfig(scrape.llmModel);
 
+          const richBlocks = scrape.richBlocksConfig?.blocks ?? [];
+          if (scrape.ticketingEnabled) {
+            richBlocks.push(createTicketRichBlock);
+          }
+
           const flow = makeFlow(
             scrape.id,
             scrape.chatPrompt ?? "",
@@ -352,7 +370,7 @@ expressWs.app.ws("/", (ws: any, req) => {
               baseURL: llmConfig.baseURL,
               apiKey: llmConfig.apiKey,
               topN: llmConfig.ragTopN,
-              richBlocks: scrape.richBlocksConfig?.blocks,
+              richBlocks,
               minScore: scrape.minScore ?? undefined,
             }
           );
