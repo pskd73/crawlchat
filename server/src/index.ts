@@ -377,6 +377,7 @@ expressWs.app.ws("/", (ws: any, req) => {
         const agentEnabledScrapeIds = [
           "67bca5b7b57f15a3a6f8eac6",
           "67e312247a822a2303f2b8a7", // Polotno
+          "67c1d700cb1ec09c237bab8a", // Remotion dev
         ];
 
         let answerer = baseAnswerer;
