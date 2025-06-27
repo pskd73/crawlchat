@@ -59,17 +59,19 @@ export async function loader({ params, request }: Route.LoaderArgs) {
   const chatSessionKeys = session.get("chatSessionKeys") ?? {};
 
   if (chatSessionKeys[scrape.id]) {
-    thread = await prisma.thread.findFirstOrThrow({
+    thread = await prisma.thread.findFirst({
       where: { id: chatSessionKeys[scrape.id] },
     });
 
-    messages = await prisma.message.findMany({
-      where: { threadId: thread.id },
-    });
+    if (thread) {
+      messages = await prisma.message.findMany({
+        where: { threadId: thread.id },
+      });
 
-    userToken = createToken(chatSessionKeys[scrape.id], {
-      expiresInSeconds: 60 * 60 * 24,
-    });
+      userToken = createToken(chatSessionKeys[scrape.id], {
+        expiresInSeconds: 60 * 60 * 24,
+      });
+    }
   }
 
   return {
