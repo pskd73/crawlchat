@@ -80,6 +80,9 @@ function ChatInput({
 }) {
   const [query, setQuery] = useState("");
   const [height, setHeight] = useState(60);
+  const cleanedQuery = useMemo(() => {
+    return query.trim();
+  }, [query]);
 
   useEffect(adjustHeight, [query]);
 
@@ -104,6 +107,7 @@ function ChatInput({
   );
 
   function handleAsk() {
+    if (!cleanedQuery.length) return;
     onAsk(query);
     setQuery("");
     track("chat_ask", { query });
@@ -173,7 +177,7 @@ function ChatInput({
           onClick={handleAsk}
           size={"xs"}
           disabled={isDisabled}
-          variant={query.length > 0 ? "solid" : "subtle"}
+          variant={cleanedQuery.length > 0 ? "solid" : "subtle"}
         >
           <TbArrowUp />
         </IconButton>
@@ -1372,7 +1376,7 @@ export default function ScrapeWidget({
         >
           <Text fontSize={"xs"} opacity={0.4}>
             Powered by{" "}
-            <Link href="https://crawlchat.com" target="_blank">
+            <Link href="https://crawlchat.app" target="_blank">
               CrawlChat
             </Link>
           </Text>
