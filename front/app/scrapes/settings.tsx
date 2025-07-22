@@ -671,7 +671,7 @@ export default function ScrapeSettings({ loaderData }: Route.ComponentProps) {
       items: [
         { label: "GPT-4o-mini", value: "gpt_4o_mini" },
         { label: "Gemini-2.5-flash", value: "gemini_2_5_flash" },
-        // { label: "Gemini-2.5-flash-lite", value: "gemini_2_5_flash_lite" },
+        { label: "o4-mini", value: "o4_mini" },
       ],
     });
   }, []);

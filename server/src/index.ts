@@ -379,12 +379,13 @@ expressWs.app.ws("/", (ws: any, req) => {
           "67e312247a822a2303f2b8a7", // Polotno
           "67c1d700cb1ec09c237bab8a", // Remotion dev
           "67dbfc7258ed87c571a04b83", // CrawlChat
+          "67d29ce750df5f4d86e1db33", // Dev CrawlChat
         ];
 
         let answerer = baseAnswerer;
-        if (agentEnabledScrapeIds.includes(scrape.id)) {
-          answerer = agenticAnswerer;
-        }
+        // if (agentEnabledScrapeIds.includes(scrape.id)) {
+        //   answerer = agenticAnswerer;
+        // }
 
         await retry(async () => {
           answerer(

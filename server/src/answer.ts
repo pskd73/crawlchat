@@ -194,7 +194,7 @@ export const agenticAnswerer: Answerer = async (
   messages,
   options
 ) => {
-  const config = getConfig("gemini_2_5_flash_lite");
+  const config = getConfig("o4_mini");
   const ragTool = makeRagTool(scrape.id, scrape.indexer, {
     onPreSearch: async (query) => {
       options?.listen?.({

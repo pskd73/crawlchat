@@ -92,6 +92,7 @@ enum LlmModel {
   sonnet_3_5
   gemini_2_5_flash
   gemini_2_5_flash_lite
+  o4_mini
 }
 
 type RichBlockConfig {
