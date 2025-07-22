@@ -53,6 +53,14 @@ export const getConfig = (model?: LlmModel | null): LlmConfig => {
       baseURL: "https://generativelanguage.googleapis.com/v1beta/openai/",
     };
   }
+  if (model === LlmModel.o4_mini) {
+    return {
+      model: "o4-mini",
+      apiKey: process.env.OPENAI_API_KEY!,
+      ragTopN: 4,
+      creditsPerMessage: 2,
+    };
+  }
   return {
     model: "gpt-4o-mini",
     apiKey: process.env.OPENAI_API_KEY!,
