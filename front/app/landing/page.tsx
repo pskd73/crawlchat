@@ -1396,7 +1396,7 @@ function FAQ() {
           <div key={index} className="border-b border-outline last:border-b-0">
             <div
               className={cn(
-                "flex justify-between text-2xl cursor-pointer py-8",
+                "flex justify-between gap-4 text-2xl cursor-pointer py-8",
                 "hover:text-brand",
                 active === index && "text-brand"
               )}
