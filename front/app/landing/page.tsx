@@ -10,7 +10,9 @@ import {
   TbBrandSlack,
   TbBrandX,
   TbChartBar,
+  TbChevronDown,
   TbChevronRight,
+  TbChevronUp,
   TbClock,
   TbDatabase,
   TbFile,
@@ -1227,6 +1229,196 @@ export function CustomTestimonials() {
   );
 }
 
+function FAQ() {
+  const questions = [
+    {
+      question: <span>How do I train the AI chatbot?</span>,
+      answer: (
+        <p>
+          There is technically no special process like training the AI chatbot.
+          All you need to do is to add your existing help documentation about
+          your product or service to the knowledge base. You can either pass the
+          URL of your documentation or upload the files (multiple formats are
+          supported) to the knowledge base. The chatbot will smartly understand
+          the documentation and uses it to answer the questions.
+        </p>
+      ),
+    },
+    {
+      question: <span>I already user other chatbot, why do I switch?</span>,
+      answer: (
+        <p>
+          CrawlChat shines in three areas:
+          <ul className="list-disc list-inside pl-4 my-4">
+            <li>
+              CrawlChat uses latest LLM models and gives you the best answers
+              for your customer queries.
+            </li>
+            <li>
+              It comes with a support ticket system that is makes sure that the
+              queries reaches your if the documentation is not enough.
+            </li>
+            <li>
+              It provides all the necessary analytics required to monitor the
+              performance of the chatbot and fine tune your documentation.
+            </li>
+          </ul>
+        </p>
+      ),
+    },
+    {
+      question: <span>Do I need to bring my own OpenAI API key?</span>,
+      answer: (
+        <p>
+          No, CrawlChat uses the latest LLM models from OpenAI, Anthropic,
+          Google, and Gemini. You can use the chatbot without any API key. You
+          can choose the model that best suits your needs from the dashboard.
+        </p>
+      ),
+    },
+    {
+      question: <span>Does it support other languages?</span>,
+      answer: (
+        <p>
+          Absolutely. That's is the advantage of using AI based chatbots. The
+          LLMs/AI models are capable of answering your customer or client's
+          queries in their own language out of the box. This includes all major
+          32 languages like English, Spanish, French, German, Italian,
+          Portuguese, Russian, Chinese, Japanese, Korean, etc.
+        </p>
+      ),
+    },
+    {
+      question: <span>Can I try it out first?</span>,
+      answer: (
+        <p>
+          You can signup without paying anything and try out adding your
+          knowledge base, integrating the chatbot to your website. You can check
+          the{" "}
+          <a href="/#pricing" className="text-brand">
+            pricing
+          </a>{" "}
+          section for more details about the credits.
+        </p>
+      ),
+    },
+    {
+      question: <span>How can I integrate the chatbot to my website?</span>,
+      answer: (
+        <p>
+          It is a very simple process. You can navigate to the integration
+          section and copy the code snippet. You can then paste the code snippet
+          in your website. It also provides config for documentation solutions
+          like Docusaurus, etc.
+        </p>
+      ),
+    },
+    {
+      question: <span>How can add chatbot to Slack or Discord?</span>,
+      answer: (
+        <p>
+          Yes! CrawlChat provides a Discord bot and a Slack app that can be
+          integrated with your Discord or Slack server. You can find the
+          instructions to integrate the chatbot to your Discord or Slack server
+          in the{" "}
+          <a href="/discord-bot" className="text-brand">
+            Discord bot
+          </a>{" "}
+          and Slack app pages. Once added to the channel or server, your
+          community can tag <span className="text-brand">@CrawlChat</span> to
+          ask questions to get the answers.
+        </p>
+      ),
+    },
+    {
+      question: <span>What kind of analytics does it provide?</span>,
+      answer: (
+        <div className="flex flex-col gap-4">
+          <p>
+            CrawlChat gives rating to each answer based on the relevance of the
+            answer to the question. The more the score is, the better the answer
+            and the documentation was for the given query. CrawlChat provides
+            charts over time, distribution of the score and per messange &
+            conversation scores as well. They help you to monitor the
+            performance of the chatbot and the knowledge base.
+          </p>
+          <p>
+            It also provides analytics on geo location of the users, browser,
+            device, etc. so that you can understand the user behavior and
+            improve your documentation.
+          </p>
+          <p>
+            Apart from that, you can also what knowledge groups are being used
+            the most to answer the questions.
+          </p>
+        </div>
+      ),
+    },
+    {
+      question: <span>How does Support Ticket System work?</span>,
+      answer: (
+        <div className="flex flex-col gap-4">
+          <p>
+            CrawlChat's goal is to direct the queries to the humans if the
+            documentation does not have answer for any query. So, when it has no
+            answer, it prompts the user to give their email to create the
+            support ticket. Once the support ticket is created, you can view
+            them from the dashboard and work on the resolution. CrawlChat sends
+            email notifications to the user whenever there is an update.
+          </p>
+          <p>You can close the ticket once the query is resolved.</p>
+          <p>You can enable or disable this module as per your requirement</p>
+        </div>
+      ),
+    },
+    {
+      question: <span>How can I customise the Ask AI widget?</span>,
+      answer: (
+        <p>
+          You can configure your own brand colors, text, logo for the Ask AI
+          button that will be visible on your website. This can be controlled
+          from the dashboard without updating the embedded snippet.
+        </p>
+      ),
+    },
+  ];
+
+  const [active, setActive] = useState<number>();
+
+  return (
+    <div className="flex flex-col mt-32">
+      <Heading>
+        Frequently Asked Questions
+      </Heading>
+
+      <div className="mt-20">
+        {questions.map((question, index) => (
+          <div key={index} className="border-b border-outline last:border-b-0">
+            <div
+              className={cn(
+                "flex justify-between text-2xl cursor-pointer py-8",
+                "hover:text-brand",
+                active === index && "text-brand"
+              )}
+              onClick={() => setActive(active === index ? undefined : index)}
+            >
+              <h3>{question.question}</h3>
+              <span className="shrink-0">
+                {active === index ? <TbChevronUp /> : <TbChevronDown />}
+              </span>
+            </div>
+            <div
+              className={cn("text-xl hidden pb-8", active === index && "block")}
+            >
+              {question.answer}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function Landing({ loaderData }: Route.ComponentProps) {
   return (
     <LandingPage>
@@ -1277,6 +1469,10 @@ export default function Landing({ loaderData }: Route.ComponentProps) {
       {/* <Container>
         <Testimonials />
       </Container> */}
+
+      <Container>
+        <FAQ />
+      </Container>
 
       <Container>
         <CTA />
