@@ -5,18 +5,25 @@ import "../fonts.css";
 import {
   TbArrowRight,
   TbArrowsShuffle,
+  TbBook,
+  TbBook2,
   TbBrandDiscord,
   TbBrandLinkedin,
   TbBrandSlack,
   TbBrandX,
   TbChartBar,
+  TbChartLine,
   TbChevronDown,
   TbChevronRight,
   TbChevronUp,
   TbClock,
+  TbCode,
+  TbDashboard,
   TbDatabase,
   TbFile,
   TbMessage,
+  TbNumber,
+  TbPencil,
   TbRobotFace,
   TbScoreboard,
   TbSettings,
@@ -85,8 +92,6 @@ export async function loader() {
     });
   }
 
-  
-
   return {
     messagesThisWeek: cache.messagesThisWeek,
     messagesDay: cache.messagesDay,
@@ -97,7 +102,7 @@ export async function loader() {
 export function Container({ children }: PropsWithChildren) {
   return (
     <div className="flex justify-center">
-      <div className="max-w-[1000px] w-full p-4">{children}</div>
+      <div className="max-w-[1200px] w-full p-4">{children}</div>
     </div>
   );
 }
@@ -1043,7 +1048,7 @@ function Hero() {
       <div className="flex justify-center gap-4 my-8 flex-wrap">
         <button className={ctaClassNames(false)} onClick={handleAskCrawlChat}>
           <TbMessage />
-          Try it now
+          Ask AI
         </button>
         <a className={ctaClassNames(true)} href="/login">
           Create your chatbot
@@ -1444,11 +1449,98 @@ function FAQ() {
   );
 }
 
+function Gallery() {
+  const steps = [
+    {
+      title: "Dashboard",
+      img: "/dashboard.png",
+      icon: <TbDashboard/>
+    },
+    {
+      title: "Add knowledge",
+      img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/add-knowledge.gif",
+      icon: <TbBook />,
+    },
+    {
+      title: "View knowledge",
+      img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/view-knowledge.gif",
+      icon: <TbBook2 />,
+    },
+    {
+      title: "Embed chatbot",
+      img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/customise-embed.gif",
+      icon: <TbCode />,
+    },
+    {
+      title: "Analytics",
+      img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/base-analytics.gif",
+      icon: <TbChartBar />,
+    },
+    {
+      title: "Conversations",
+      img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/view-conversations.gif",
+      icon: <TbMessage />,
+    },
+    {
+      title: "Performance",
+      img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/view-performance.gif",
+      icon: <TbChartLine />,
+    },
+    {
+      title: "Answer correction",
+      img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/answer-correction.gif",
+      icon: <TbPencil />,
+    },
+  ];
+
+  const [activeStep, setActiveStep] = useState(0);
+
+  return (
+    <div className="mb-16">
+      <div
+        className={cn(
+          "flex justify-center items-center",
+          "bg-canvas aspect-video rounded-xl shadow-xl",
+          "overflow-hidden mb-4"
+        )}
+      >
+        <img src={steps[activeStep].img} />
+      </div>
+
+      <div
+        className={cn(
+          "border border-outline rounded-xl p-2",
+          "flex gap-2 bg-canvas justify-center lg:justify-between",
+          "flex-wrap"
+        )}
+      >
+        {steps.map((step, index) => (
+          <button
+            key={index}
+            className={cn(
+              "flex items-center p-1 rounded-md w-fit px-3 text-sm gap-1",
+              activeStep === index && "bg-brand text-canvas"
+            )}
+            onClick={() => setActiveStep(index)}
+          >
+            {step.icon}
+            {step.title}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function Landing({ loaderData }: Route.ComponentProps) {
   return (
     <>
       <Container>
         <Hero />
+      </Container>
+
+      <Container>
+        <Gallery />
       </Container>
 
       <Container>
