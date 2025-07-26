@@ -374,18 +374,7 @@ expressWs.app.ws("/", (ws: any, req) => {
           return;
         }
 
-        const agentEnabledScrapeIds = [
-          "67bca5b7b57f15a3a6f8eac6",
-          "67e312247a822a2303f2b8a7", // Polotno
-          "67c1d700cb1ec09c237bab8a", // Remotion dev
-          "67dbfc7258ed87c571a04b83", // CrawlChat
-          "67d29ce750df5f4d86e1db33", // Dev CrawlChat
-        ];
-
-        let answerer = baseAnswerer;
-        // if (agentEnabledScrapeIds.includes(scrape.id)) {
-        //   answerer = agenticAnswerer;
-        // }
+        const answerer = baseAnswerer;
 
         await retry(async () => {
           answerer(
@@ -616,19 +605,12 @@ app.post("/answer/:scrapeId", authenticate, async (req, res) => {
     return;
   }
 
-  const { content, sources } = answer;
-  const citation = extractCitations(content, sources, { cleanCitations: true });
+  const citation = extractCitations(answer.content, answer.sources, {
+    cleanCitations: true,
+    addSourcesToMessage: true,
+  });
 
-  let updatedContent = citation.content;
-  if (Object.keys(citation.citedLinks).length > 0) {
-    updatedContent +=
-      "\n\nSources:\n" +
-      Object.values(citation.citedLinks)
-        .map((l) => l.url)
-        .join("\n");
-  }
-
-  res.json({ content: updatedContent });
+  res.json({ content: citation.content });
 });
 
 app.get("/discord/:channelId", async (req, res) => {

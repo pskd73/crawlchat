@@ -198,11 +198,12 @@ export function SourceLink({
       borderBottom={"1px solid"}
       borderColor={"brand.outline"}
       _hover={{
-        bg: "brand.gray.100",
+        bg: link.url ? "brand.gray.50" : "transparent",
       }}
       transition={"background-color 100ms ease-in-out"}
       variant={"plain"}
       href={link.url ?? undefined}
+      cursor={!link.url ? "default" : "pointer"}
       target="_blank"
       textDecoration={"none"}
       outline={"none"}
@@ -226,7 +227,7 @@ export function SourceLink({
             </Text>
           </Stack>
           <Group>
-            <Badge colorPalette={"brand"}>{index + 1}</Badge>
+            <Badge variant={"surface"}>{index + 1}</Badge>
             <TbChevronRight />
           </Group>
         </Group>
@@ -403,13 +404,7 @@ function AssistantMessage({
   const [cleanedLinks, cleanedContent, score] = useMemo(() => {
     const citation = extractCitations(content, links);
     const score = Math.max(...links.map((l) => l.score ?? 0), 0);
-    const uniqueLinks = links.filter(
-      (link, index, self) => index === self.findIndex((t) => t.url === link.url)
-    );
-    const topLinks = uniqueLinks
-      .sort((a, b) => (b.score ?? 0) - (a.score ?? 0))
-      .splice(0, 4);
-    return [topLinks, citation.content, score];
+    return [citation.citedLinks, citation.content, score];
   }, [links]);
   const [currentRating, setCurrentRating] = useState<MessageRating | null>(
     rating
@@ -1379,7 +1374,7 @@ export default function ScrapeWidget({
               Powered by{" "}
             </Text>
             <Link
-              href="https://crawlchat.app"
+              href="https://crawlchat.app?ref=powered-by"
               target="_blank"
               color={"brand.fg"}
             >

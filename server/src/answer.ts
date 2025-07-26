@@ -56,6 +56,7 @@ export type Answerer = (
   options?: {
     listen?: AnswerListener;
     prompt?: string;
+    showSources?: boolean;
   }
 ) => Promise<AnswerCompleteEvent | null>;
 
@@ -154,6 +155,7 @@ export const baseAnswerer: Answerer = async (
       topN: llmConfig.ragTopN,
       richBlocks,
       minScore: scrape.minScore ?? undefined,
+      showSources: scrape.showSources ?? false,
     }
   );
 

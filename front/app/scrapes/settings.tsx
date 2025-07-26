@@ -146,6 +146,9 @@ export async function action({ request }: Route.ActionArgs) {
     }
     update.slug = slug;
   }
+  if (formData.has("from-show-sources")) {
+    update.showSources = formData.get("showSources") === "on";
+  }
 
   const scrape = await prisma.scrape.update({
     where: { id: scrapeId, userId: user!.id },
@@ -614,6 +617,37 @@ function AiModelSettings({ scrape, user }: { scrape: Scrape; user: User }) {
   );
 }
 
+function ShowSourcesSetting({ scrape, user }: { scrape: Scrape; user: User }) {
+  const showSourcesFetcher = useFetcher();
+
+  function isAllowed() {
+    return ["starter", "pro"].includes(user.plan?.planId ?? "free");
+  }
+
+  return (
+    <SettingsSection
+      id="show-sources"
+      title="Show sources"
+      description="Show the sources that the chatbot used from the knowledge base. It will be visible on the chat widget under every answer and on Discord/Slcack messages."
+      fetcher={showSourcesFetcher}
+    >
+      <Group>
+        <input type="hidden" name="from-show-sources" value={"true"} />
+        <Switch
+          name="showSources"
+          defaultChecked={scrape.showSources ?? false}
+          disabled={!isAllowed()}
+        >
+          Active
+        </Switch>
+        <Badge variant={"surface"} colorPalette={"brand"} size={"xs"}>
+          <TbCrown /> Starter
+        </Badge>
+      </Group>
+    </SettingsSection>
+  );
+}
+
 export default function ScrapeSettings({ loaderData }: Route.ComponentProps) {
   const promptFetcher = useFetcher();
   const nameFetcher = useFetcher();
@@ -779,6 +813,11 @@ export default function ScrapeSettings({ loaderData }: Route.ComponentProps) {
           </SettingsSection>
 
           <AiModelSettings scrape={loaderData.scrape} user={loaderData.user} />
+
+          <ShowSourcesSetting
+            scrape={loaderData.scrape}
+            user={loaderData.user}
+          />
 
           <RichBlocksSettings scrape={loaderData.scrape} />
 

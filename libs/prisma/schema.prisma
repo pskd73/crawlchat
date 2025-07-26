@@ -142,6 +142,7 @@ model Scrape {
   richBlocksConfig      RichBlocksConfig?
   minScore              Float?
   slug                  String?
+  showSources           Boolean?
 
   user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 

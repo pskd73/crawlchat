@@ -3,7 +3,10 @@ import { MessageSourceLink } from "@prisma/client";
 export function extractCitations(
   content: string,
   links: MessageSourceLink[],
-  { cleanCitations }: { cleanCitations?: boolean } = {}
+  {
+    cleanCitations,
+    addSourcesToMessage,
+  }: { cleanCitations?: boolean; addSourcesToMessage?: boolean } = {}
 ) {
   function getLinkIndex(fetchUniqueId: string) {
     return links.findIndex((l) => l.fetchUniqueId === fetchUniqueId);
@@ -33,6 +36,14 @@ export function extractCitations(
   if (cleanCitations) {
     cleanedContent = cleanedContent.replace(/!!([0-9]+)!!/g, "");
     cleanedContent = cleanedContent.replace(/!!<fetchUniqueId>!!/g, "");
+  }
+
+  if (addSourcesToMessage) {
+    cleanedContent +=
+      "\n\nSources:\n" +
+      Object.values(citedLinks)
+        .map((l) => l.url)
+        .join("\n");
   }
 
   return { content: cleanedContent, citedLinks };

@@ -4,12 +4,12 @@ import remarkGfm from "remark-gfm";
 import hljs from "highlight.js";
 import "highlight.js/styles/vs.css";
 import {
+  Badge,
   Box,
   Center,
   Group,
   Image,
   Input,
-  Link,
   Spinner,
   Stack,
   Text,
@@ -285,26 +285,15 @@ export function MarkdownProse({
 
             return (
               <Tooltip content={source?.title ?? "Loading..."} showArrow>
-                <Text as="span">
-                  <Link
-                    variant={"plain"}
-                    href={source?.url ?? "#"}
-                    target="_blank"
-                    bg="brand.emphasized"
-                    color="brand.white"
-                    fontSize={"10px"}
-                    height={"16px"}
-                    width={"14px"}
-                    rounded={"md"}
-                    textDecoration={"none"}
-                    display={"inline-flex"}
-                    alignItems={"center"}
-                    justifyContent={"center"}
-                    transform={"translateY(-6px)"}
-                  >
-                    {index + 1}
-                  </Link>
-                </Text>
+                <Badge transform={"translateY(-6px)"} asChild>
+                  {source?.url ? (
+                    <a href={source.url} target="_blank">
+                      {index + 1}
+                    </a>
+                  ) : (
+                    <span>{index + 1}</span>
+                  )}
+                </Badge>
               </Tooltip>
             );
           },

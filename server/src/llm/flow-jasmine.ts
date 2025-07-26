@@ -93,6 +93,7 @@ export function makeFlow(
     topN?: number;
     richBlocks?: RichBlockConfig[];
     minScore?: number;
+    showSources?: boolean;
   }
 ) {
   const ragTool = makeRagTool(scrapeId, indexerKey, options);
@@ -161,7 +162,7 @@ export function makeFlow(
       "Once you have the context,",
       `Given above context, answer the query "${query}".`,
 
-      citationPrompt,
+      options?.showSources ? citationPrompt : "",
 
       enabledRichBlocks.length > 0 ? richBlocksPrompt : "",
 
