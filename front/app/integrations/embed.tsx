@@ -93,6 +93,7 @@ export async function action({ request }: Route.ActionArgs) {
     buttonText: null,
     buttonTextColor: null,
     showLogo: null,
+    tooltip: null,
   };
 
   if (size) {
@@ -123,6 +124,9 @@ export async function action({ request }: Route.ActionArgs) {
   }
   if (formData.has("from-widget")) {
     update.showLogo = formData.get("showLogo") === "on";
+  }
+  if (formData.has("tooltip")) {
+    update.tooltip = formData.get("tooltip") as string;
   }
 
   await prisma.scrape.update({
@@ -311,6 +315,18 @@ export default function ScrapeEmbed({ loaderData }: Route.ComponentProps) {
                       name="buttonText"
                       defaultValue={
                         loaderData.scrape?.widgetConfig?.buttonText ?? ""
+                      }
+                    />
+                  </Field>
+                </Group>
+
+                <Group>
+                  <Field label="Tooltip">
+                    <Input
+                      placeholder="Ex: Ask AI or reach out to us!"
+                      name="tooltip"
+                      defaultValue={
+                        loaderData.scrape?.widgetConfig?.tooltip ?? ""
                       }
                     />
                   </Field>

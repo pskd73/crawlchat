@@ -190,7 +190,7 @@ class CrawlChatEmbed {
     div.style.fontSize = fontSize;
 
     div.style.scale = "1";
-    div.style.boxShadow = "rgba(0, 0, 0, 0.1) 0px 10px 50px";
+    div.style.boxShadow = "rgba(0, 0, 0, 0.2) 0px 2px 4px";
 
     div.style.display = "flex";
     div.style.flexDirection = "column";
@@ -220,12 +220,36 @@ class CrawlChatEmbed {
     span.innerText = text;
     div.appendChild(span);
 
+    if (this.widgetConfig.tooltip) {
+      div.appendChild(this.makeTooltip(this.widgetConfig.tooltip));
+    }
+
     div.addEventListener("click", function () {
       window.crawlchatEmbed.show();
       div.style.opacity = "0";
     });
 
     document.body.appendChild(div);
+  }
+
+  makeTooltip(text) {
+    const div = document.createElement("div");
+    div.innerText = text;
+    div.style.position = "absolute";
+    div.style.top = "-10px";
+    div.style.right = "0";
+    div.style.transform = "translateY(-100%)";
+    div.style.backgroundColor = "white";
+    div.style.color = "black";
+    div.style.padding = "10px 14px";
+    div.style.borderRadius = "10px";
+    div.style.border = "1px solid #e0e0e0";
+    div.style.textAlign = "right";
+    div.style.display = "flex";
+    div.style.whiteSpace = "nowrap";
+    div.style.fontSize = "14px";
+
+    return div;
   }
 }
 
