@@ -148,6 +148,7 @@ export function makeFlow(
       "Don't repeat similar search terms. Don't use more than 3 searches from RAG.",
       "Don't use the RAG tool once you have the answer.",
       "Output should be very very short and under 200 words.",
+      "Give the answer in human readable format with markdown.",
 
       "Once you have the context,",
       `Given above context, answer the query "${query}".`,
