@@ -1,8 +1,8 @@
 import { prisma } from "~/prisma";
-import type { Route } from "./+types/scrape";
+import type { Route } from "./+types/page";
 import { Stack } from "@chakra-ui/react";
 import { createToken } from "~/jwt";
-import ChatBox from "~/widget/chat-box";
+import ChatBox, { ChatboxContainer } from "~/widget/chat-box";
 import { commitSession, getSession } from "~/session";
 import { data, redirect, type Session } from "react-router";
 import type { Message, MessageRating, Thread } from "libs/prisma";
@@ -74,12 +74,19 @@ export async function loader({ params, request }: Route.LoaderArgs) {
     }
   }
 
+  const searchParams = new URL(request.url).searchParams;
+  const embed = searchParams.get("embed") === "true";
+  const width = searchParams.get("width");
+  const height = searchParams.get("height");
+
   return {
     scrape,
     userToken,
     thread,
     messages,
-    embed: new URL(request.url).searchParams.get("embed") === "true",
+    embed,
+    width,
+    height,
   };
 }
 
@@ -304,7 +311,9 @@ export default function ScrapeWidget({ loaderData }: Route.ComponentProps) {
         bg={loaderData.embed ? "blackAlpha.700" : "brand.gray.100"}
       >
         <Toaster />
-        <ChatBox/>
+        <ChatboxContainer width={loaderData.width} height={loaderData.height}>
+          <ChatBox />
+        </ChatboxContainer>
       </Stack>
     </ChatBoxProvider>
   );

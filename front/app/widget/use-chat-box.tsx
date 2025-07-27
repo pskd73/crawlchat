@@ -3,7 +3,6 @@ import type {
   MessageRating,
   Scrape,
   Thread,
-  WidgetSize,
 } from "libs/prisma";
 import { useTheme } from "next-themes";
 import {
@@ -18,48 +17,6 @@ import { useFetcher } from "react-router";
 import { toaster } from "~/components/ui/toaster";
 import { getMessagesScore } from "~/score";
 import { useScrapeChat } from "~/widget/use-chat";
-
-function useChatBoxDimensions(
-  size: WidgetSize | null,
-  ref: React.RefObject<HTMLDivElement | null>
-) {
-  const [width, setWidth] = useState<number>(0);
-  const [height, setHeight] = useState<number>(0);
-
-  function getDimensionsForSize(width: number, height: number) {
-    const padding = 32;
-    width -= padding * 2;
-    height -= padding * 2;
-
-    switch (size) {
-      case "large":
-        width = Math.min(width, 700);
-        height = Math.min(height, 600);
-        return { width: width, height: height };
-      default:
-        width = Math.min(width, 520);
-        height = Math.min(height, 460);
-        return { width: width, height: height };
-    }
-  }
-
-  useEffect(() => {
-    const handleResize = () => {
-      if (ref.current) {
-        const rect = ref.current.getBoundingClientRect();
-        const dims = getDimensionsForSize(rect.width, rect.height);
-        setWidth(dims.width);
-        setHeight(dims.height);
-      }
-    };
-    window.addEventListener("resize", handleResize);
-
-    handleResize();
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  return { width, height };
-}
 
 export function useChatBox({
   scrape,
@@ -100,11 +57,7 @@ export function useChatBox({
     "chat"
   );
   const overallScore = useMemo(() => getMessagesScore(messages), [messages]);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const boxDimensions = useChatBoxDimensions(
-    scrape.widgetConfig?.size ?? null,
-    containerRef
-  );
+  
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const [pendingQuery, setPendingQuery] = useState<string>();
   const titleSlug = useMemo(() => {
@@ -333,7 +286,6 @@ export function useChatBox({
     createThreadFetcher,
     eraseAt,
     chat,
-    boxDimensions,
     inputRef,
     readOnly,
     screen,
@@ -341,7 +293,6 @@ export function useChatBox({
     admin,
     customerEmail,
     titleSlug,
-    containerRef,
     close,
     erase,
     deleteMessages,

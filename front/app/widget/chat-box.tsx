@@ -2,7 +2,7 @@ import {
   Accordion,
   Badge,
   Box,
-  Center,
+  Flex,
   Group,
   Heading,
   Icon,
@@ -14,8 +14,8 @@ import {
   Textarea,
 } from "@chakra-ui/react";
 import { Stack, Text } from "@chakra-ui/react";
-import type { MessageSourceLink, MessageRating } from "libs/prisma";
-import { useEffect, useMemo, useState } from "react";
+import type { MessageSourceLink, MessageRating, WidgetSize } from "libs/prisma";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   TbArrowUp,
   TbChevronRight,
@@ -50,6 +50,48 @@ import { getScoreColor } from "~/score";
 import { Field } from "~/components/ui/field";
 import { toaster } from "~/components/ui/toaster";
 import { useChatBoxContext } from "./use-chat-box";
+
+export function useChatBoxDimensions(
+  size: WidgetSize | null,
+  ref: React.RefObject<HTMLDivElement | null>
+) {
+  const [width, setWidth] = useState<number>(0);
+  const [height, setHeight] = useState<number>(0);
+
+  function getDimensionsForSize(width: number, height: number) {
+    const padding = 32;
+    width -= padding * 2;
+    height -= padding * 2;
+
+    switch (size) {
+      case "large":
+        width = Math.min(width, 700);
+        height = Math.min(height, 600);
+        return { width: width, height: height };
+      default:
+        width = Math.min(width, 520);
+        height = Math.min(height, 460);
+        return { width: width, height: height };
+    }
+  }
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (ref.current) {
+        const rect = ref.current.getBoundingClientRect();
+        const dims = getDimensionsForSize(rect.width, rect.height);
+        setWidth(dims.width);
+        setHeight(dims.height);
+      }
+    };
+    window.addEventListener("resize", handleResize);
+
+    handleResize();
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  return { width, height };
+}
 
 function ChatInput() {
   const { ask, chat, screen, readOnly, scrape, inputRef, embed } =
@@ -841,9 +883,40 @@ function TicketCreate() {
   );
 }
 
-export default function ScrapeWidget() {
-  const { close, titleSlug, containerRef, boxDimensions, screen, chat } =
-    useChatBoxContext();
+function PoweredBy() {
+  const { titleSlug } = useChatBoxContext();
+
+  return (
+    <Text fontSize={"xs"}>
+      <Text as="span" opacity={0.4}>
+        Powered by{" "}
+      </Text>
+      <Link
+        href={`https://crawlchat.app?ref=powered-by-${titleSlug}`}
+        target="_blank"
+        color={"brand.fg"}
+      >
+        CrawlChat
+      </Link>
+    </Text>
+  );
+}
+
+export function ChatboxContainer({
+  children,
+  width,
+  height,
+}: {
+  children: React.ReactNode;
+  width?: string | null;
+  height?: string | null;
+}) {
+  const { close, scrape } = useChatBoxContext();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const boxDimensions = useChatBoxDimensions(
+    scrape.widgetConfig?.size ?? null,
+    containerRef
+  );
 
   function handleBgClick(event: React.MouseEvent<HTMLDivElement>) {
     if (event.target === event.currentTarget) {
@@ -851,83 +924,91 @@ export default function ScrapeWidget() {
     }
   }
 
+  const cover = width || height;
+
   return (
-    <Center w="full" h="full" onClick={handleBgClick} ref={containerRef}>
+    <Flex
+      w="full"
+      h="full"
+      onClick={handleBgClick}
+      ref={containerRef}
+      justify={cover ? "flex-start" : "center"}
+      align={cover ? "flex-start" : "center"}
+    >
       <Stack
-        border="1px solid"
+        border={cover ? "none" : "1px solid"}
         borderColor={"brand.outline"}
-        rounded={"xl"}
-        boxShadow={"rgba(100, 100, 111, 0.2) 0px 7px 29px 0px"}
+        rounded={cover ? "none" : "xl"}
+        boxShadow={cover ? "none" : "rgba(100, 100, 111, 0.2) 0px 7px 29px 0px"}
         bg="brand.white"
-        w={boxDimensions.width}
-        maxH={boxDimensions.height}
         gap={0}
         position={"relative"}
         overflow={"hidden"}
+        w={width ?? boxDimensions.width}
+        h={height ?? undefined}
+        maxH={height ?? boxDimensions.height}
       >
-        <Toolbar />
-        <Stack flex="1" overflow={"auto"} gap={0}>
-          {screen === "chat" && (
-            <>
-              {chat.allMessages.length === 0 && <NoMessages />}
-              {chat.allMessages.map((message, index) => (
-                <Stack
-                  key={index}
-                  id={`message-${message.id}`}
-                  borderTop={message.role === "user" ? "1px solid" : "none"}
-                  borderColor={"brand.outline"}
-                  _first={{
-                    borderTop: "none",
-                  }}
-                >
-                  {message.role === "user" ? (
-                    <UserMessage content={message.content} />
-                  ) : (
-                    <AssistantMessage
-                      id={message.id}
-                      questionId={chat.allMessages[index - 1]?.id}
-                      content={message.content}
-                      links={message.links}
-                      rating={message.rating}
-                      last={index === chat.allMessages.length - 1}
-                    />
-                  )}
-                  {(chat.askStage === "asked" ||
-                    chat.askStage === "searching") &&
-                    index === chat.allMessages.length - 1 && <LoadingMessage />}
-                  {chat.askStage !== "idle" &&
-                    index === chat.allMessages.length - 1 && (
-                      <Box h={"2000px"} w="full" />
-                    )}
-                </Stack>
-              ))}
-            </>
-          )}
-          {screen === "mcp" && <MCPSetup />}
-          {screen === "ticket-create" && <TicketCreate />}
-        </Stack>
-        {screen === "chat" && <ChatInput />}
-        <Group
-          px={4}
-          py={2}
-          bg="brand.gray.50/50"
-          borderTop={"1px solid"}
-          borderColor={"brand.outline/50"}
-        >
-          <Text fontSize={"xs"}>
-            <Text as="span" opacity={0.4}>
-              Powered by{" "}
-            </Text>
-            <Link
-              href={`https://crawlchat.app?ref=powered-by-${titleSlug}`}
-              target="_blank"
-              color={"brand.fg"}
-            >
-              CrawlChat
-            </Link>
-          </Text>
-        </Group>
+        {children}
       </Stack>
-    </Center>
+    </Flex>
+  );
+}
+
+export default function ScrapeWidget() {
+  const { screen, chat } = useChatBoxContext();
+
+  return (
+    <>
+      <Toolbar />
+      <Stack flex="1" overflow={"auto"} gap={0}>
+        {screen === "chat" && (
+          <>
+            {chat.allMessages.length === 0 && <NoMessages />}
+            {chat.allMessages.map((message, index) => (
+              <Stack
+                key={index}
+                id={`message-${message.id}`}
+                borderTop={message.role === "user" ? "1px solid" : "none"}
+                borderColor={"brand.outline"}
+                _first={{
+                  borderTop: "none",
+                }}
+              >
+                {message.role === "user" ? (
+                  <UserMessage content={message.content} />
+                ) : (
+                  <AssistantMessage
+                    id={message.id}
+                    questionId={chat.allMessages[index - 1]?.id}
+                    content={message.content}
+                    links={message.links}
+                    rating={message.rating}
+                    last={index === chat.allMessages.length - 1}
+                  />
+                )}
+                {(chat.askStage === "asked" || chat.askStage === "searching") &&
+                  index === chat.allMessages.length - 1 && <LoadingMessage />}
+                {chat.askStage !== "idle" &&
+                  index === chat.allMessages.length - 1 && (
+                    <Box h={"2000px"} w="full" />
+                  )}
+              </Stack>
+            ))}
+          </>
+        )}
+        {screen === "mcp" && <MCPSetup />}
+        {screen === "ticket-create" && <TicketCreate />}
+      </Stack>
+      {screen === "chat" && <ChatInput />}
+      <Group
+        px={4}
+        py={2}
+        bg="brand.gray.50/50"
+        borderTop={"1px solid"}
+        borderColor={"brand.outline/50"}
+      >
+        <PoweredBy />
+      </Group>
+    </>
   );
 }
