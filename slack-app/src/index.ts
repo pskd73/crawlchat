@@ -106,6 +106,8 @@ type Message = {
 app.message(
   `<@${process.env.SLACK_BOT_USER_ID}>`,
   async ({ message, say, client, context }) => {
+    console.log("Got message", message, "from", context.teamId);
+    
     let messages: Message[] = [];
 
     if ((message as any).thread_ts) {
