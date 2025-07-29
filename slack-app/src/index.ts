@@ -104,7 +104,6 @@ type Message = {
 };
 
 app.message(
-  `<@${process.env.SLACK_BOT_USER_ID}>`,
   async ({ message, say, client, context }) => {
     console.log("Got message", message, "from", context.teamId);
     const scrape = await prisma.scrape.findFirst({
@@ -113,9 +112,20 @@ app.message(
       },
     });
 
-    const botUserId = (scrape?.slackConfig?.installation as any)?.bot?.userId;
+    if (!scrape) {
+      await say({
+        text: "You need to integrate your Slack with CrawlChat.app first!",
+      });
+      return;
+    }
+    
+    // Check if the bot is mentioned in the message
+    const messageText = (message as any).text || "";
+    const botMentionPattern = new RegExp(`<@${context.botUserId}>`, "i");
+    
+    if (!botMentionPattern.test(messageText)) return;
 
-    console.log(botUserId, context.botUserId);
+    console.log("Bot mentioned:", context.botUserId, "in message:", messageText);
 
     let messages: Message[] = [];
 
@@ -138,16 +148,9 @@ app.message(
     }
 
     const llmMessages = messages.map((m) => ({
-      role: m.user === process.env.SLACK_BOT_USER_ID ? "assistant" : "user",
+      role: m.user === botUserId ? "assistant" : "user",
       content: cleanText(m.text ?? ""),
     }));
-
-    if (!scrape) {
-      await say({
-        text: "You need to integrate your Slack with CrawlChat.app first!",
-      });
-      return;
-    }
 
     const { answer, error } = await query(
       scrape.id,
