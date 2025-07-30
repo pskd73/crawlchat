@@ -11,12 +11,9 @@ import { joinRoom } from "./socket-room";
 import { getRoomIds } from "./socket-room";
 import { authenticate, authoriseScrapeUser, verifyToken } from "./jwt";
 import { splitMarkdown } from "./scrape/markdown-splitter";
-import { makeLLMTxt } from "./llm-txt";
 import { v4 as uuidv4 } from "uuid";
 import {
   Message,
-  MessageSourceLink,
-  Prisma,
   MessageChannel,
 } from "libs/prisma";
 import { makeIndexer } from "./indexer/factory";
@@ -31,7 +28,7 @@ import { chunk } from "libs/chunk";
 import { retry } from "./retry";
 import { Flow } from "./llm/flow";
 import { z } from "zod";
-import { baseAnswerer, AnswerListener, agenticAnswerer } from "./answer";
+import { baseAnswerer, AnswerListener, agenticAnswerer, collectSourceLinks } from "./answer";
 
 const app: Express = express();
 const expressWs = ws(app);
@@ -49,52 +46,6 @@ function cleanUrl(url: string) {
     url = "https://" + url;
   }
   return url.toLowerCase();
-}
-
-async function collectSourceLinks(
-  scrapeId: string,
-  messages: FlowMessage<RAGAgentCustomMessage>[]
-) {
-  const matches = messages
-    .map((m) => m.custom?.result)
-    .filter((r) => r !== undefined)
-    .flat();
-
-  const links: MessageSourceLink[] = [];
-  for (const match of matches) {
-    const where: Prisma.ScrapeItemWhereInput = {
-      scrapeId,
-    };
-
-    if (match.scrapeItemId) {
-      where.id = match.scrapeItemId;
-    } else if (match.id) {
-      where.embeddings = {
-        some: {
-          id: match.id,
-        },
-      };
-    } else if (match.url) {
-      where.url = match.url;
-    }
-
-    const item = await prisma.scrapeItem.findFirst({
-      where,
-    });
-    if (item) {
-      links.push({
-        url: match.url ?? null,
-        title: item.title,
-        score: match.score,
-        scrapeItemId: item.id,
-        fetchUniqueId: match.fetchUniqueId ?? null,
-        knowledgeGroupId: item.knowledgeGroupId,
-        searchQuery: match.query ?? null,
-      });
-    }
-  }
-
-  return links;
 }
 
 async function updateLastMessageAt(threadId: string) {
@@ -142,26 +93,6 @@ function answerListener(
 
       case "answer-complete":
         await consumeCredits(userId, "messages", event.creditsUsed);
-
-        // get links from db
-        const linkIds = event.sources
-          .filter((l) => !l.url)
-          .map((l) => l.scrapeItemId)
-          .filter(Boolean) as string[];
-          
-        if (linkIds.length > 0) {
-          const items = await prisma.scrapeItem.findMany({
-            where: { id: { in: linkIds } },
-          });
-          for (let i = 0; i < event.sources.length; i++) {
-            const source = event.sources[i];
-            const item = items.find((item) => item.id === source.scrapeItemId);
-            if (item) {
-              event.sources[i].url = item.url;
-            }
-          }
-        }
-
         const newAnswerMessage = await prisma.message.create({
           data: {
             threadId,

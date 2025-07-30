@@ -71,7 +71,7 @@ Use this if customer wants to contact the support team.
 Don't tell user to reach out to support team, instead use this block.`,
 };
 
-async function collectSourceLinks(
+export async function collectSourceLinks(
   scrapeId: string,
   messages: FlowMessage<RAGAgentCustomMessage>[]
 ) {
@@ -111,6 +111,25 @@ async function collectSourceLinks(
         knowledgeGroupId: item.knowledgeGroupId,
         searchQuery: match.query ?? null,
       });
+    }
+  }
+
+  // get links from db
+  const linkIds = links
+    .filter((l) => !l.url)
+    .map((l) => l.scrapeItemId)
+    .filter(Boolean) as string[];
+
+  if (linkIds.length > 0) {
+    const items = await prisma.scrapeItem.findMany({
+      where: { id: { in: linkIds } },
+    });
+    for (let i = 0; i < links.length; i++) {
+      const source = links[i];
+      const item = items.find((item) => item.id === source.scrapeItemId);
+      if (item) {
+        links[i].url = item.url;
+      }
     }
   }
 
