@@ -105,7 +105,6 @@ type Message = {
 
 app.message(
   async ({ message, say, client, context }) => {
-    console.log("Got message", message, "from", context.teamId);
     const scrape = await prisma.scrape.findFirst({
       where: {
         slackTeamId: context.teamId,
