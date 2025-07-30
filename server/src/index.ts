@@ -142,6 +142,26 @@ function answerListener(
 
       case "answer-complete":
         await consumeCredits(userId, "messages", event.creditsUsed);
+
+        // get links from db
+        const linkIds = event.sources
+          .filter((l) => !l.url)
+          .map((l) => l.scrapeItemId)
+          .filter(Boolean) as string[];
+          
+        if (linkIds.length > 0) {
+          const items = await prisma.scrapeItem.findMany({
+            where: { id: { in: linkIds } },
+          });
+          for (let i = 0; i < event.sources.length; i++) {
+            const source = event.sources[i];
+            const item = items.find((item) => item.id === source.scrapeItemId);
+            if (item) {
+              event.sources[i].url = item.url;
+            }
+          }
+        }
+
         const newAnswerMessage = await prisma.message.create({
           data: {
             threadId,

@@ -13,6 +13,7 @@ import { createToken } from "~/jwt";
 import { toaster } from "~/components/ui/toaster";
 import type { Prisma, ScrapeItem } from "libs/prisma";
 import { SettingsSection } from "~/settings-section";
+import { useFetcherToast } from "~/dashboard/use-fetcher-toast";
 
 export async function loader({ params, request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -96,6 +97,9 @@ export async function action({ params, request }: Route.ActionArgs) {
     if (formData.get("title")) {
       update.title = formData.get("title") as string;
     }
+    if (formData.get("url")) {
+      update.url = formData.get("url") as string;
+    }
 
     await prisma.scrapeItem.update({
       where: { id: params.itemId },
@@ -109,23 +113,10 @@ export async function action({ params, request }: Route.ActionArgs) {
 function NameSection({ item }: { item: ScrapeItem }) {
   const updateFetcher = useFetcher();
 
-  useEffect(() => {
-    if (!updateFetcher.data) return;
-
-    if (updateFetcher.data) {
-      toaster.success({
-        title: "Updated",
-        description: "Title updated",
-      });
-    }
-
-    if (updateFetcher.data.error) {
-      toaster.error({
-        title: "Error",
-        description: updateFetcher.data.error,
-      });
-    }
-  }, [updateFetcher.data]);
+  useFetcherToast(updateFetcher, {
+    title: "Updated",
+    description: "Title updated",
+  });
 
   return (
     <SettingsSection
@@ -138,6 +129,30 @@ function NameSection({ item }: { item: ScrapeItem }) {
         name="title"
         placeholder="Example: FAQ Document"
         defaultValue={item.title ?? ""}
+      />
+    </SettingsSection>
+  );
+}
+
+function UrlSection({ item }: { item: ScrapeItem }) {
+  const updateFetcher = useFetcher();
+
+  useFetcherToast(updateFetcher, {
+    title: "Updated",
+    description: "Title updated",
+  });
+
+  return (
+    <SettingsSection
+      title="URL"
+      description="Change the URL of the item. The URL will be used to fetch the item."
+      fetcher={updateFetcher}
+    >
+      <input type="hidden" name="intent" value="update" />
+      <Input
+        name="url"
+        placeholder="Example: https://example.com/faq"
+        defaultValue={item.url ?? ""}
       />
     </SettingsSection>
   );
@@ -218,7 +233,13 @@ export default function ScrapeItem({ loaderData }: Route.ComponentProps) {
     >
       <Stack>
         <Stack maxW={"800px"}>
-          {loaderData.item && <NameSection item={loaderData.item} />}
+          {loaderData.item &&
+            loaderData.item.knowledgeGroup?.type === "upload" && (
+              <>
+                <NameSection item={loaderData.item} />
+                <UrlSection item={loaderData.item} />
+              </>
+            )}
           <MarkdownProse>{loaderData.item?.markdown}</MarkdownProse>
         </Stack>
       </Stack>
