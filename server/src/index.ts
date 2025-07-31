@@ -12,10 +12,7 @@ import { getRoomIds } from "./socket-room";
 import { authenticate, authoriseScrapeUser, verifyToken } from "./jwt";
 import { splitMarkdown } from "./scrape/markdown-splitter";
 import { v4 as uuidv4 } from "uuid";
-import {
-  Message,
-  MessageChannel,
-} from "libs/prisma";
+import { Message, MessageChannel } from "libs/prisma";
 import { makeIndexer } from "./indexer/factory";
 import { name } from "libs";
 import { consumeCredits, hasEnoughCredits } from "libs/user-plan";
@@ -28,7 +25,12 @@ import { chunk } from "libs/chunk";
 import { retry } from "./retry";
 import { Flow } from "./llm/flow";
 import { z } from "zod";
-import { baseAnswerer, AnswerListener, agenticAnswerer, collectSourceLinks } from "./answer";
+import {
+  baseAnswerer,
+  AnswerListener,
+  agenticAnswerer,
+  collectSourceLinks,
+} from "./answer";
 
 const app: Express = express();
 const expressWs = ws(app);
@@ -533,6 +535,17 @@ app.post("/answer/:scrapeId", authenticate, async (req, res) => {
     .filter(Boolean)
     .join("\n\n");
 
+  await prisma.message.create({
+    data: {
+      threadId: thread.id,
+      scrapeId: scrape.id,
+      llmMessage: { role: "user", content: query },
+      ownerUserId: scrape.userId,
+      channel: req.body.channel as MessageChannel,
+    },
+  });
+  await updateLastMessageAt(thread.id);
+
   const answer = await baseAnswerer(
     scrape,
     query,
@@ -543,12 +556,22 @@ app.post("/answer/:scrapeId", authenticate, async (req, res) => {
       },
     })),
     {
-      listen: answerListener(scrape.id, scrape.userId, thread.id, {
-        channel: req.body.channel as MessageChannel,
-      }),
       prompt,
     }
   );
+
+  await consumeCredits(scrape.userId, "messages", answer!.creditsUsed);
+  const newAnswerMessage = await prisma.message.create({
+    data: {
+      threadId: thread.id,
+      scrapeId: scrape.id,
+      llmMessage: { role: "assistant", content: answer!.content },
+      links: answer!.sources,
+      ownerUserId: scrape.userId,
+      channel: req.body.channel as MessageChannel,
+    },
+  });
+  await updateLastMessageAt(thread.id);
 
   if (!answer) {
     res.status(400).json({ message: "Failed to answer" });
@@ -560,7 +583,7 @@ app.post("/answer/:scrapeId", authenticate, async (req, res) => {
     addSourcesToMessage: true,
   });
 
-  res.json({ content: citation.content });
+  res.json({ content: citation.content, message: newAnswerMessage });
 });
 
 app.get("/discord/:channelId", async (req, res) => {

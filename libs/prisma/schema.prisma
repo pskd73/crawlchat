@@ -215,6 +215,9 @@ model Message {
   correctionItemId          String?  @db.ObjectId
   ticketMessage             TicketMessage?
 
+  slackMessageId            String?
+  discordMessageId          String?
+
   createdAt                 DateTime @default(now())
   updatedAt                 DateTime @updatedAt
 

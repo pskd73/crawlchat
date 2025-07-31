@@ -21,6 +21,7 @@ export async function query(
 
   let answer = null;
   let answerJson: any = {};
+  let message = null;
   let error = null;
 
   if (result.status === 400) {
@@ -28,7 +29,8 @@ export async function query(
   } else {
     answerJson = await result.json();
     answer = answerJson.content;
+    message = answerJson.message;
   }
 
-  return { answer, json: answerJson, error };
+  return { answer, json: answerJson, error, message };
 }
