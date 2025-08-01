@@ -29,7 +29,12 @@ export default function ChangelogPage({ loaderData }: Route.ComponentProps) {
           {loaderData.posts.map((post) => (
             <div key={post.slug}>
               <div className="flex flex-col gap-2">
-                <h2 className="text-3xl font-medium">{post.title}</h2>
+                <a
+                  className="text-3xl font-medium hover:underline"
+                  href={`/changelog/${post.slug}`}
+                >
+                  {post.title}
+                </a>
                 <p className="opacity-60 text-sm">
                   {moment(post.date).format("MMMM D, YYYY")}
                 </p>

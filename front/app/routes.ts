@@ -64,6 +64,7 @@ export default [
     route("blog/:slug", "blog/page.tsx"),
     route("blog", "blog/list.tsx"),
     route("changelog", "changelog/list.tsx"),
+    route("changelog/:slug", "changelog/page.tsx"),
     route("public-bots", "landing/public-bots.tsx"),
 
     route("discord-bot", "landing/discord-bot.tsx"),
