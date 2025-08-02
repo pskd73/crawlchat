@@ -1,5 +1,5 @@
 import { prisma } from "./prisma";
-import {
+import type {
   PlanCredits,
   PlanLimits,
   PlanType,
