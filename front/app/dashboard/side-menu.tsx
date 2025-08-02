@@ -403,6 +403,8 @@ export function SideMenu({
     return undefined;
   }
 
+  const planId = scrapeOwner.plan?.planId;
+
   return (
     <Stack
       h="100dvh"
@@ -435,9 +437,9 @@ export function SideMenu({
                   {scrape?.widgetConfig?.private ? <TbLock /> : <TbWorld />}
                 </Badge>
               </Tooltip>
-              {["pro", "starter"].includes(scrapeOwner.plan?.planId ?? "") && (
+              {["pro", "starter"].includes(planId ?? "") && (
                 <Tooltip
-                  content={`Collection on ${scrapeOwner.plan!.type} plan`}
+                  content={`Collection on ${planId} plan`}
                   positioning={{ placement: "right" }}
                   showArrow
                 >
