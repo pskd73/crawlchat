@@ -10,6 +10,9 @@ import {
   Input,
   DialogCloseTrigger,
   Center,
+  List,
+  ListItem,
+  Table,
 } from "@chakra-ui/react";
 import type { Route } from "./+types/page";
 import {
@@ -54,6 +57,8 @@ import { EmptyState } from "~/components/ui/empty-state";
 import { Tooltip as ChakraTooltip } from "~/components/ui/tooltip";
 import { getLimits } from "libs/user-plan";
 import { toaster } from "~/components/ui/toaster";
+import type { KnowledgeGroup, ScrapeItem } from "libs/prisma";
+import moment from "moment";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -121,7 +126,7 @@ export async function loader({ request }: Route.LoaderArgs) {
   const messagesToday = dailyMessages[todayKey] ?? 0;
 
   const scoreDestribution: Record<number, { count: number }> = {};
-  const points = 50;
+  const points = 10;
   for (let i = 0; i < points; i++) {
     scoreDestribution[i] = { count: 0 };
   }
@@ -139,6 +144,43 @@ export async function loader({ request }: Route.LoaderArgs) {
   const ratingUpCount = messages.filter((m) => m.rating === "up").length;
   const ratingDownCount = messages.filter((m) => m.rating === "down").length;
 
+  const itemCounts: Record<string, number> = {};
+  for (const message of messages) {
+    if (!message.links || message.links.length === 0) continue;
+    for (const link of message.links) {
+      if (!link.scrapeItemId) continue;
+      itemCounts[link.scrapeItemId] = (itemCounts[link.scrapeItemId] ?? 0) + 1;
+    }
+  }
+
+  const topItemIds = Object.entries(itemCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5);
+
+  const topItems: {
+    item: ScrapeItem;
+    count: number;
+    knowledgeGroup: KnowledgeGroup;
+  }[] = [];
+  for (const [itemId, count] of topItemIds) {
+    const item = await prisma.scrapeItem.findUnique({
+      where: { id: itemId },
+      include: {
+        knowledgeGroup: true,
+      },
+    });
+    if (item) {
+      topItems.push({ item, count, knowledgeGroup: item.knowledgeGroup! });
+    }
+  }
+
+  const latestQuestions = messages
+    .filter((m) => (m.llmMessage as any)?.role === "user")
+    .sort(
+      (a, b) => (b.createdAt?.getTime() ?? 0) - (a.createdAt?.getTime() ?? 0)
+    )
+    .slice(0, 5);
+
   return {
     user,
     dailyMessages,
@@ -149,6 +191,8 @@ export async function loader({ request }: Route.LoaderArgs) {
     ratingUpCount,
     ratingDownCount,
     noScrapes: scrapes.length === 0,
+    topItems,
+    latestQuestions,
   };
 }
 
@@ -411,68 +455,134 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
             />
           </Group>
 
-          <Stack>
-            <Heading>
-              <Group>
-                <TbMessage />
-                <Text>Messages</Text>
-                <ChakraTooltip
-                  showArrow
-                  content={
-                    "Shows the number of messages in conversations in the last 7 days across all the channels"
-                  }
-                >
-                  <Icon opacity={0.5}>
-                    <TbHelp />
-                  </Icon>
-                </ChakraTooltip>
-              </Group>
-            </Heading>
-            <AreaChart width={width - 10} height={200} data={chartData}>
-              <XAxis dataKey="name" />
-              <Tooltip />
-              <CartesianGrid strokeDasharray="3 3" />
-              <Area
-                type="monotone"
-                dataKey="Messages"
-                stroke={"var(--chakra-colors-brand-emphasized)"}
-                fill={"var(--chakra-colors-brand-muted)"}
-              />
-            </AreaChart>
-          </Stack>
+          <Group gap={8}>
+            <Stack>
+              <Heading>
+                <Group>
+                  <TbMessage />
+                  <Text>Messages</Text>
+                  <ChakraTooltip
+                    showArrow
+                    content={
+                      "Shows the number of messages in conversations in the last 7 days across all the channels"
+                    }
+                  >
+                    <Icon opacity={0.5}>
+                      <TbHelp />
+                    </Icon>
+                  </ChakraTooltip>
+                </Group>
+              </Heading>
+              <AreaChart width={width / 2 - 10} height={200} data={chartData}>
+                <XAxis dataKey="name" />
+                <Tooltip />
+                <CartesianGrid strokeDasharray="3 3" />
+                <Area
+                  type="monotone"
+                  dataKey="Messages"
+                  stroke={"var(--chakra-colors-brand-emphasized)"}
+                  fill={"var(--chakra-colors-brand-muted)"}
+                />
+              </AreaChart>
+            </Stack>
 
-          <Stack>
-            <Heading>
-              <Group>
-                <TbMessage />
-                <Text>Score distribution</Text>
-                <ChakraTooltip
-                  showArrow
-                  content={
-                    "Shows how the score of each message from AI is distributed from 0 to 1. 0 is worst and 1 is best."
-                  }
-                >
-                  <Icon opacity={0.5}>
-                    <TbHelp />
-                  </Icon>
-                </ChakraTooltip>
-              </Group>
-            </Heading>
-            <BarChart
-              width={width - 10}
-              height={200}
-              data={scoreDistributionData}
-            >
-              <XAxis dataKey="score" />
-              <Tooltip />
-              <CartesianGrid strokeDasharray="3 3" />
-              <Bar
-                type="monotone"
-                dataKey="Messages"
-                fill={"var(--chakra-colors-brand-emphasized)"}
-              />
-            </BarChart>
-          </Stack>
+            <Stack>
+              <Heading>
+                <Group>
+                  <TbMessage />
+                  <Text>Score distribution</Text>
+                  <ChakraTooltip
+                    showArrow
+                    content={
+                      "Shows how the score of each message from AI is distributed from 0 to 1. 0 is worst and 1 is best."
+                    }
+                  >
+                    <Icon opacity={0.5}>
+                      <TbHelp />
+                    </Icon>
+                  </ChakraTooltip>
+                </Group>
+              </Heading>
+              <BarChart
+                width={width / 2 - 14}
+                height={200}
+                data={scoreDistributionData}
+              >
+                <XAxis dataKey="score" />
+                <Tooltip />
+                <CartesianGrid strokeDasharray="3 3" />
+                <Bar
+                  type="monotone"
+                  dataKey="Messages"
+                  fill={"var(--chakra-colors-brand-emphasized)"}
+                />
+              </BarChart>
+            </Stack>
+          </Group>
+
+          <Group gap={8}>
+            <Stack flex={1}>
+              <Heading>
+                <Group>
+                  <TbDatabase />
+                  <Text>Top cited pages</Text>
+                </Group>
+              </Heading>
+              <Table.Root size="sm" flex={1}>
+                <Table.Header>
+                  <Table.Row>
+                    <Table.ColumnHeader>Page</Table.ColumnHeader>
+                    <Table.ColumnHeader>Count</Table.ColumnHeader>
+                    <Table.ColumnHeader textAlign="end">
+                      Group
+                    </Table.ColumnHeader>
+                  </Table.Row>
+                </Table.Header>
+                <Table.Body>
+                  {loaderData.topItems.map((item) => (
+                    <Table.Row key={item.item.id}>
+                      <Table.Cell>{item.item.url}</Table.Cell>
+                      <Table.Cell>{item.count}</Table.Cell>
+                      <Table.Cell textAlign="end">
+                        {item.knowledgeGroup.title}
+                      </Table.Cell>
+                    </Table.Row>
+                  ))}
+                </Table.Body>
+              </Table.Root>
+            </Stack>
+
+            <Stack flex={1}>
+              <Heading>
+                <Group>
+                  <TbMessage />
+                  <Text>Latest questions</Text>
+                </Group>
+              </Heading>
+              <Table.Root size="sm" flex={1}>
+                <Table.Header>
+                  <Table.Row>
+                    <Table.ColumnHeader>Question</Table.ColumnHeader>
+                    <Table.ColumnHeader textAlign="end">
+                      Created at
+                    </Table.ColumnHeader>
+                  </Table.Row>
+                </Table.Header>
+                <Table.Body>
+                  {loaderData.latestQuestions.map((question) => (
+                    <Table.Row key={question.id}>
+                      <Table.Cell>
+                        {(question.llmMessage as any).content}
+                      </Table.Cell>
+                      <Table.Cell textAlign="end">
+                        {moment(question.createdAt).fromNow()}
+                      </Table.Cell>
+                    </Table.Row>
+                  ))}
+                </Table.Body>
+              </Table.Root>
+            </Stack>
+          </Group>
         </Stack>
       )}
 
