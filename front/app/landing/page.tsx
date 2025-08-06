@@ -811,11 +811,21 @@ export function Footer() {
           <div className="flex-[2] flex flex-col gap-4">
             <Logo />
             <p className="font-medium opacity-60">
-              AI Chatbot for your knowledge base and documentation
+              AI Chatbot for your documentation and support
             </p>
-            <p className="opacity-50 text-xs mt-4 font-medium">
-              © 2025 CrawlChat
-            </p>
+            <p className="opacity-50 text-xs font-medium">© 2025 CrawlChat</p>
+            <div>
+              <a
+                href="https://www.tinystartups.com/launch/crawlchat/?utm_source=badge"
+                target="_blank"
+              >
+                <img
+                  src="https://cdn.prod.website-files.com/657b3d8ca1cab4015f06c850/680a4af610583c7e07a8f1a1_No2prgold-removebg-preview.png"
+                  alt="CrawlChat was #2 Product of the Week on Tiny Startups"
+                  style={{ width: "160px", height: "auto" }}
+                />
+              </a>
+            </div>
           </div>
           <div className="flex-[2]">
             <ul className="flex flex-col gap-4">
