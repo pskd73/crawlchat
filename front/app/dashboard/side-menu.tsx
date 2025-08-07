@@ -403,7 +403,7 @@ export function SideMenu({
     return undefined;
   }
 
-  const planId = scrapeOwner.plan?.planId;
+  const planId = scrapeOwner?.plan?.planId;
 
   return (
     <Stack
