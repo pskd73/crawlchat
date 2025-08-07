@@ -94,15 +94,17 @@ export async function action({ request }: Route.ActionArgs) {
       );
     }
 
-    const email = formData.get("email");
+    let email = formData.get("email") as string;
 
     if (!email) {
       return Response.json({ error: "Email is required" }, { status: 400 });
     }
 
+    email = email.toLowerCase();
+
     const invitingUser = await prisma.user.findUnique({
       where: {
-        email: email as string,
+        email,
       },
     });
 
@@ -111,13 +113,13 @@ export async function action({ request }: Route.ActionArgs) {
         data: {
           scrapeId,
           role: "member",
-          email: email as string,
+          email,
           invited: true,
         },
       });
 
       await sendInvitationEmail(
-        email as string,
+        email,
         user!.email,
         scrape!.title ?? "CrawlChat"
       );
