@@ -89,7 +89,7 @@ export default function SettingsPage({ loaderData }: Route.ComponentProps) {
   const nameFetcher = useFetcher();
 
   const credits = loaderData.user.plan!.credits!;
-  const limits = loaderData.user.plan!.limits!;
+  const limits = loaderData.user.plan!.limits;
   const plan = loaderData.plan!;
 
   return (
@@ -222,21 +222,25 @@ export default function SettingsPage({ loaderData }: Route.ComponentProps) {
                   </DataList.ItemValue>
                 </DataList.Item>
 
-                <DataList.Item>
-                  <DataList.ItemLabel>Collections</DataList.ItemLabel>
-                  <DataList.ItemValue>
-                    Available {limits.scrapes - loaderData.scrapes} /{" "}
-                    {limits.scrapes}
-                  </DataList.ItemValue>
-                </DataList.Item>
+                {limits && (
+                  <DataList.Item>
+                    <DataList.ItemLabel>Collections</DataList.ItemLabel>
+                    <DataList.ItemValue>
+                      Available {limits.scrapes - loaderData.scrapes} /{" "}
+                      {limits.scrapes}
+                    </DataList.ItemValue>
+                  </DataList.Item>
+                )}
 
-                <DataList.Item>
-                  <DataList.ItemLabel>Team members</DataList.ItemLabel>
-                  <DataList.ItemValue>
-                    Available {limits.teamMembers - loaderData.teamMembers} /{" "}
-                    {limits.teamMembers}
-                  </DataList.ItemValue>
-                </DataList.Item>
+                {limits && (
+                  <DataList.Item>
+                    <DataList.ItemLabel>Team members</DataList.ItemLabel>
+                    <DataList.ItemValue>
+                      Available {limits.teamMembers - loaderData.teamMembers} /{" "}
+                      {limits.teamMembers}
+                    </DataList.ItemValue>
+                  </DataList.Item>
+                )}
               </DataList.Root>
             </SettingsSection>
           </SettingsContainer>
