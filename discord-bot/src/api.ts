@@ -30,7 +30,7 @@ export async function query(
     answer = answerJson.content;
   }
 
-  return { answer, json: answerJson, error };
+  return { answer, json: answerJson, error, message: answerJson.message };
 }
 
 export async function learn(scrapeId: string, content: string, token: string) {
@@ -53,18 +53,3 @@ export async function learn(scrapeId: string, content: string, token: string) {
 
   return result.json();
 }
-
-export async function getDiscordDetails(channelId: string) {
-  const result = await fetch(`${process.env.SERVER_HOST}/discord/${channelId}`);
-  const { scrapeId, userId, draftChannelIds, draftEmoji, draftDestinationChannelId } =
-    await result.json();
-
-  return {
-    scrapeId,
-    userId,
-    draftChannelIds,
-    draftEmoji,
-    draftDestinationChannelId
-  };
-}
-

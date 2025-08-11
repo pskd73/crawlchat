@@ -13,7 +13,7 @@ import {
 } from "discord.js";
 import { learn, query } from "./api";
 import { createToken } from "./jwt";
-import { prisma } from "libs/prisma";
+import { MessageRating, prisma } from "libs/prisma";
 
 type DiscordMessage = Message<boolean>;
 
@@ -94,6 +94,42 @@ const getDiscordDetails = async (channelId: string) => {
   };
 };
 
+function getMessageRating(message: DiscordMessage): MessageRating {
+  const reactions = message.reactions.cache.map((r) => r.emoji.toString());
+  const thumbsUp = reactions.filter((r) =>
+    ["👍", "👍🏻", "👍🏼", "👍🏽", "👍🏾", "👍🏿"].includes(r)
+  ).length;
+  const thumbsDown = reactions.filter((r) =>
+    ["👎", "👎🏻", "👎🏼", "👎🏽", "👎🏾", "👎🏿"].includes(r)
+  ).length;
+
+  if (thumbsDown >= thumbsUp) {
+    return MessageRating.down;
+  }
+  if (thumbsUp > 0) {
+    return MessageRating.up;
+  }
+
+  return MessageRating.none;
+}
+
+async function updateMessageRating(discordMessage: DiscordMessage) {
+  const message = await prisma.message.findFirst({
+    where: {
+      discordMessageId: discordMessage.id,
+    },
+  });
+
+  if (!message) return;
+
+  const rating = getMessageRating(discordMessage);
+
+  await prisma.message.update({
+    where: { id: message.id },
+    data: { rating },
+  });
+}
+
 client.once(Events.ClientReady, (readyClient) => {
   console.log(`Ready! Logged in as ${readyClient.user.tag}`);
 });
@@ -173,14 +209,13 @@ client.on(Events.MessageCreate, async (message) => {
     const { stopTyping } = await sendTyping(message.channel as TextChannel);
 
     let response = "Something went wrong";
-    const { answer, error } = await query(
-      scrapeId,
-      messages,
-      createToken(userId),
-      {
-        prompt: defaultPrompt,
-      }
-    );
+    const {
+      answer,
+      error,
+      message: answerMessage,
+    } = await query(scrapeId, messages, createToken(userId), {
+      prompt: defaultPrompt,
+    });
 
     if (error) {
       response = `‼️ Attention required: ${error}`;
@@ -191,7 +226,14 @@ client.on(Events.MessageCreate, async (message) => {
 
     stopTyping();
 
-    message.reply(response);
+    const replyResult = await message.reply(response);
+
+    await prisma.message.update({
+      where: { id: answerMessage.id },
+      data: {
+        discordMessageId: replyResult.id,
+      },
+    });
   } else if (
     message.channel.type === ChannelType.PublicThread &&
     message.channel.parent?.id &&
@@ -247,14 +289,16 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
   const { scrapeId, userId, draftEmoji, draftDestinationChannelId } =
     await getDiscordDetails(reaction.message.guildId!);
 
+  if (!scrapeId || !userId) {
+    reaction.message.reply("‼️ Integrate it on CrawlChat.app to use this bot!");
+    return;
+  }
+
+  await updateMessageRating(await reaction.message.fetch());
+
   const emojiStr = reaction.emoji.toString();
 
-  if (
-    emojiStr !== draftEmoji ||
-    !scrapeId ||
-    !userId ||
-    !draftDestinationChannelId
-  ) {
+  if (emojiStr !== draftEmoji || !draftDestinationChannelId) {
     return;
   }
 
@@ -299,6 +343,28 @@ Question: ${reaction.message.content}`,
 
     thread.send(answer);
   }
+});
+
+client.on(Events.MessageReactionRemove, async (reaction, user) => {
+  if (reaction.partial) {
+    try {
+      await reaction.fetch();
+    } catch (error) {
+      console.error("Something went wrong when fetching the message:", error);
+      return;
+    }
+  }
+
+  const { scrapeId, userId } = await getDiscordDetails(
+    reaction.message.guildId!
+  );
+
+  if (!scrapeId || !userId) {
+    reaction.message.reply("‼️ Integrate it on CrawlChat.app to use this bot!");
+    return;
+  }
+
+  await updateMessageRating(await reaction.message.fetch());
 });
 
 client.login(process.env.DISCORD_TOKEN);
