@@ -778,7 +778,7 @@ export function Pricing() {
 
 export function CTA({ text }: { text?: string }) {
   return (
-    <div className="mt-32">
+    <div className="mt-32" id="cta">
       <div className="w-full bg-gradient-to-b from-canvas to-ash shadow-md rounded-2xl py-20 px-10 relative">
         <h2 className="font-radio-grotesk text-[42px] md:text-[42px] leading-[1.2] font-medium text-center max-w-[800px] mx-auto">
           {text || "Reduce your support queries and make your users happy now!"}
@@ -805,7 +805,7 @@ function FooterLink({ children, href }: PropsWithChildren<{ href: string }>) {
 
 export function Footer() {
   return (
-    <div className="bg-canvas mt-32 border-t border-outline">
+    <footer className="bg-canvas mt-32 border-t border-outline">
       <Container>
         <div className="py-8 flex flex-col md:flex-row gap-10">
           <div className="flex-[2] flex flex-col gap-4">
@@ -937,7 +937,7 @@ export function Footer() {
           </div>
         </div>
       </Container>
-    </div>
+    </footer>
   );
 }
 
