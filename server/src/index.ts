@@ -24,6 +24,7 @@ import { retry } from "./retry";
 import { Flow } from "./llm/flow";
 import { z } from "zod";
 import { baseAnswerer, AnswerListener, collectSourceLinks } from "./answer";
+import { fillMessageAnalysis } from "./llm/analyse-message";
 
 const app: Express = express();
 const expressWs = ws(app);
@@ -50,69 +51,12 @@ async function updateLastMessageAt(threadId: string) {
   });
 }
 
-function answerListener(
-  scrapeId: string,
-  userId: string,
-  threadId: string,
-  options?: {
-    ws?: WebSocket;
-    channel?: MessageChannel;
-  }
-): AnswerListener {
-  return async (event) => {
-    const { ws, channel } = options ?? {};
-    switch (event.type) {
-      case "init":
-        const newQueryMessage = await prisma.message.create({
-          data: {
-            threadId,
-            scrapeId,
-            llmMessage: { role: "user", content: event.query },
-            ownerUserId: userId,
-            channel: channel ?? null,
-          },
-        });
-        await updateLastMessageAt(threadId);
-        ws?.send(makeMessage("query-message", newQueryMessage));
-        break;
-
-      case "stream-delta":
-        ws?.send(makeMessage("llm-chunk", { content: event.delta }));
-        break;
-
-      case "tool-call":
-        ws?.send(
-          makeMessage("stage", {
-            stage: "tool-call",
-            query: event.query,
-            action: event.action,
-          })
-        );
-        break;
-
-      case "answer-complete":
-        await consumeCredits(userId, "messages", event.creditsUsed);
-        const newAnswerMessage = await prisma.message.create({
-          data: {
-            threadId,
-            scrapeId,
-            llmMessage: { role: "assistant", content: event.content },
-            links: event.sources,
-            apiActionCalls: event.actionCalls as any,
-            ownerUserId: userId,
-            channel: channel ?? null,
-          },
-        });
-        await updateLastMessageAt(threadId);
-        ws?.send(
-          makeMessage("llm-chunk", {
-            end: true,
-            content: event.content,
-            message: newAnswerMessage,
-          })
-        );
-    }
-  };
+function getContext(messages: FlowMessage<RAGAgentCustomMessage>[]) {
+  return messages
+    .filter((m) => m.custom?.result)
+    .flatMap((m) => m.custom!.result!)
+    .map((m) => m.content)
+    .join("\n\n");
 }
 
 app.get("/", function (req: Request, res: Response) {
@@ -330,6 +274,73 @@ expressWs.app.ws("/", (ws: any, req) => {
           },
         });
 
+        let questionMessage: Message | null = null;
+
+        const answerListener: AnswerListener = async (event) => {
+          switch (event.type) {
+            case "init":
+              questionMessage = await prisma.message.create({
+                data: {
+                  threadId,
+                  scrapeId: scrape.id,
+                  llmMessage: { role: "user", content: event.query },
+                  ownerUserId: scrape.userId,
+                },
+              });
+              await updateLastMessageAt(threadId);
+              ws?.send(makeMessage("query-message", questionMessage));
+              break;
+
+            case "stream-delta":
+              ws?.send(makeMessage("llm-chunk", { content: event.delta }));
+              break;
+
+            case "tool-call":
+              ws?.send(
+                makeMessage("stage", {
+                  stage: "tool-call",
+                  query: event.query,
+                  action: event.action,
+                })
+              );
+              break;
+
+            case "answer-complete":
+              await consumeCredits(
+                scrape.userId,
+                "messages",
+                event.creditsUsed
+              );
+              const newAnswerMessage = await prisma.message.create({
+                data: {
+                  threadId,
+                  scrapeId: scrape.id,
+                  llmMessage: { role: "assistant", content: event.content },
+                  links: event.sources,
+                  apiActionCalls: event.actionCalls as any,
+                  ownerUserId: scrape.userId,
+                  questionId: questionMessage?.id ?? null,
+                },
+              });
+              await updateLastMessageAt(threadId);
+              ws?.send(
+                makeMessage("llm-chunk", {
+                  end: true,
+                  content: event.content,
+                  message: newAnswerMessage,
+                })
+              );
+
+              await fillMessageAnalysis(
+                newAnswerMessage.id,
+                message.data.query,
+                event.content,
+                event.sources,
+                getContext(event.messages)
+              );
+          }
+        };
+
         const answerer = baseAnswerer;
 
         await retry(async () => {
@@ -340,9 +351,7 @@ expressWs.app.ws("/", (ws: any, req) => {
               llmMessage: message.llmMessage as any,
             })),
             {
-              listen: answerListener(scrape.id, scrape.userId, threadId, {
-                ws,
-              }),
+              listen: answerListener,
               actions,
             }
           );
@@ -597,6 +606,13 @@ app.post("/answer/:scrapeId", authenticate, async (req, res) => {
     },
   });
   await updateLastMessageAt(thread.id);
+  await fillMessageAnalysis(
+    newAnswerMessage.id,
+    query,
+    answer!.content,
+    answer!.sources,
+    getContext(answer!.messages)
+  );
 
   if (!answer) {
     res.status(400).json({ message: "Failed to answer" });

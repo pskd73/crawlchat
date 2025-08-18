@@ -3,14 +3,11 @@ import {
   ApiActionCall,
   ApiActionDataItem,
   ApiActionDataType,
-  prisma,
   RichBlockConfig,
-  Scrape,
 } from "libs/prisma";
 import { makeIndexer } from "../indexer/factory";
 import {
   FlowMessage,
-  LlmTool,
   multiLinePrompt,
   SimpleAgent,
   SimpleTool,

@@ -205,11 +205,28 @@ type TicketMessage {
   event                     TicketEvent
 }
 
+enum QuestionSentiment {
+  sad
+  neutral
+  happy
+}
+
+type MessageAnalysis {
+  contextRelevanceScore Float?
+  category  String?
+  questionRelevanceScore Float?
+  questionSentiment QuestionSentiment?
+  
+  dataGapTitle String?
+  dataGapDescription String?
+}
+
 model Message {
   id                        String   @id @default(auto()) @map("_id") @db.ObjectId
   threadId                  String   @db.ObjectId
   ownerUserId               String   @db.ObjectId
   scrapeId                  String   @db.ObjectId
+  questionId                String?  @db.ObjectId
 
   llmMessage                Json
   links                     MessageSourceLink[]
@@ -222,6 +239,7 @@ model Message {
 
   slackMessageId            String?
   discordMessageId          String?
+  analysis                  MessageAnalysis?
 
   createdAt                 DateTime @default(now())
   updatedAt                 DateTime @updatedAt

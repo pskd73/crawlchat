@@ -25,6 +25,7 @@ export type AnswerCompleteEvent = {
   actionCalls: ApiActionCall[];
   llmCalls: number;
   creditsUsed: number;
+  messages: FlowMessage<RAGAgentCustomMessage>[];
 };
 
 export type ToolCallEvent = {
@@ -226,6 +227,7 @@ export const baseAnswerer: Answerer = async (
       ),
       llmCalls: 1,
       creditsUsed: llmConfig.creditsPerMessage,
+      messages: flow.flowState.state.messages,
     };
     options?.listen?.(answer);
   }
