@@ -21,6 +21,7 @@ export function useChatBox({
   admin,
   token: initialToken,
   fullscreen,
+  readonly: initReadOnly,
 }: {
   scrape: Scrape;
   thread: Thread | null;
@@ -29,6 +30,7 @@ export function useChatBox({
   admin: boolean;
   token: string | null;
   fullscreen?: boolean;
+  readonly?: boolean;
 }) {
   const pinFetcher = useFetcher();
   const unpinFetcher = useFetcher();
@@ -40,7 +42,7 @@ export function useChatBox({
   const [eraseAt, setEraseAt] = useState<number>();
   const [thread, setThread] = useState<Thread | null>(initialThread);
   const [token, setToken] = useState<string | null>(initialToken);
-  const readOnly = admin;
+  const readOnly = admin || initReadOnly;
 
   const { setTheme } = useTheme();
   const chat = useScrapeChat({
@@ -326,6 +328,7 @@ export function ChatBoxProvider({
   admin,
   token,
   fullscreen,
+  readonly,
 }: {
   children: React.ReactNode;
   scrape: Scrape;
@@ -335,6 +338,7 @@ export function ChatBoxProvider({
   admin: boolean;
   token: string | null;
   fullscreen?: boolean;
+  readonly?: boolean;
 }) {
   const chatBox = useChatBox({
     scrape,
@@ -344,6 +348,7 @@ export function ChatBoxProvider({
     admin,
     token,
     fullscreen,
+    readonly,
   });
   return (
     <ChatBoxContext.Provider value={chatBox}>

@@ -46,7 +46,8 @@ export default [
     ]),
 
     route("connect", "integrations/page.tsx", [
-      index("integrations/embed.tsx"),
+      index("integrations/customise.tsx"),
+      route("embed", "integrations/embed.tsx"),
       route("mcp", "integrations/mcp.tsx"),
       route("discord", "integrations/discord.tsx"),
       route("slack", "integrations/slack.tsx"),

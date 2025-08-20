@@ -236,9 +236,11 @@ export function SourceLink({
     >
       <TbFileDescription />
       {link.title}
-      <Icon display={"none"} _groupHover={{ display: "inline-block" }}>
-        <TbArrowRight />
-      </Icon>
+      {link.url && (
+        <Icon display={"none"} _groupHover={{ display: "inline-block" }}>
+          <TbArrowRight />
+        </Icon>
+      )}
     </Link>
   );
 }
@@ -593,29 +595,31 @@ function NoMessages() {
               QUICK QUESTIONS
             </Heading>
             <Stack w="full">
-              {scrape.widgetConfig?.questions.map((question, i) => (
-                <Group
-                  key={i}
-                  border={"1px solid"}
-                  borderColor={"brand.outline"}
-                  rounded={"md"}
-                  p={2}
-                  px={3}
-                  w="full"
-                  _hover={{
-                    bg: "brand.gray.100",
-                  }}
-                  transition={"background-color 200ms ease-in-out"}
-                  cursor={"pointer"}
-                  alignItems={"flex-start"}
-                  onClick={() => ask(question.text)}
-                >
-                  <Box mt={1}>
-                    <TbHelp />
-                  </Box>
-                  <Text>{question.text}</Text>
-                </Group>
-              ))}
+              {scrape.widgetConfig?.questions
+                .filter((q) => q.text)
+                .map((question, i) => (
+                  <Group
+                    key={i}
+                    border={"1px solid"}
+                    borderColor={"brand.outline"}
+                    rounded={"md"}
+                    p={2}
+                    px={3}
+                    w="full"
+                    _hover={{
+                      bg: "brand.gray.100",
+                    }}
+                    transition={"background-color 200ms ease-in-out"}
+                    cursor={"pointer"}
+                    alignItems={"flex-start"}
+                    onClick={() => ask(question.text)}
+                  >
+                    <Box mt={1}>
+                      <TbHelp />
+                    </Box>
+                    <Text>{question.text}</Text>
+                  </Group>
+                ))}
             </Stack>
           </Stack>
         )}
@@ -732,7 +736,6 @@ function Toolbar() {
     setScreen,
     overallScore,
     scrape,
-    readOnly,
     admin,
     fullscreen,
     close,
@@ -788,9 +791,9 @@ function Toolbar() {
               <TbX />
             </IconButton>
           )}
-          {scrape.logoUrl && (
+          {scrape.widgetConfig?.logoUrl && (
             <img
-              src={scrape.logoUrl}
+              src={scrape.widgetConfig.logoUrl}
               alt="Logo"
               style={{ maxWidth: "24px", maxHeight: "24px" }}
             />
@@ -802,16 +805,18 @@ function Toolbar() {
                 : scrape.title ?? "Ask AI"}
             </Text>
           </Stack>
-          {admin && overallScore !== undefined && (
-            <Tooltip content="Avg score of all messages" showArrow>
-              <Badge
-                colorPalette={getScoreColor(overallScore)}
-                variant={"surface"}
-              >
-                {overallScore.toFixed(2)}
-              </Badge>
-            </Tooltip>
-          )}
+          {admin &&
+            overallScore !== undefined &&
+            Number.isFinite(overallScore) && (
+              <Tooltip content="Avg score of all messages" showArrow>
+                <Badge
+                  colorPalette={getScoreColor(overallScore)}
+                  variant={"surface"}
+                >
+                  {overallScore.toFixed(2)}
+                </Badge>
+              </Tooltip>
+            )}
         </Group>
       </Group>
       <Group>

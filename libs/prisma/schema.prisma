@@ -67,6 +67,8 @@ type WidgetConfig {
   showLogo              Boolean?
   tooltip               String?
   private               Boolean?
+  logoUrl               String?
+  applyColorsToChatbox  Boolean?
 }
 
 type ScrapeAnalyticsCategoryMessageId {

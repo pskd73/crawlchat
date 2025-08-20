@@ -4,13 +4,9 @@ import {
   createListCollection,
   Group,
   HStack,
-  IconButton,
-  Input,
-  parseColor,
   SegmentGroup,
   Stack,
   Text,
-  Textarea,
 } from "@chakra-ui/react";
 import { prisma } from "~/prisma";
 import { getAuthUser } from "~/auth/middleware";
@@ -27,25 +23,12 @@ import {
   SelectTrigger,
   SelectValueText,
 } from "~/components/ui/select";
-import type { WidgetConfig, WidgetQuestion, WidgetSize } from "libs/prisma";
-import { Button } from "~/components/ui/button";
-import { TbCode, TbEye, TbCopy, TbPlus, TbTrash } from "react-icons/tb";
-import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  ColorPickerArea,
-  ColorPickerContent,
-  ColorPickerControl,
-  ColorPickerEyeDropper,
-  ColorPickerInput,
-  ColorPickerLabel,
-  ColorPickerRoot,
-  ColorPickerSliders,
-  ColorPickerTrigger,
-} from "~/components/ui/color-picker";
-import { Field } from "~/components/ui/field";
+import type { WidgetConfig, WidgetSize } from "libs/prisma";
+import { TbCode } from "react-icons/tb";
+import { useMemo, useState } from "react";
 import { ClipboardIconButton, ClipboardRoot } from "~/components/ui/clipboard";
 import type { Route } from "./+types/embed";
-import { authoriseScrapeUser, getSessionScrapeId } from "../scrapes/util";
+import { authoriseScrapeUser, getSessionScrapeId } from "~/scrapes/util";
 import { Switch } from "~/components/ui/switch";
 import { SiDocusaurus } from "react-icons/si";
 
@@ -80,8 +63,6 @@ export async function action({ request }: Route.ActionArgs) {
 
   const formData = await request.formData();
   const size = formData.get("size");
-  const questions = formData.getAll("questions");
-  const welcomeMessage = formData.get("welcomeMessage");
 
   const update: WidgetConfig = scrape.widgetConfig ?? {
     size: "small",
@@ -95,39 +76,12 @@ export async function action({ request }: Route.ActionArgs) {
     showLogo: null,
     tooltip: null,
     private: false,
+    logoUrl: null,
+    applyColorsToChatbox: null,
   };
 
   if (size) {
     update.size = size as WidgetSize;
-  }
-  if (formData.has("from-questions")) {
-    update.questions = questions.map((text) => ({ text: text as string }));
-  }
-  if (welcomeMessage !== null && welcomeMessage !== undefined) {
-    update.welcomeMessage = welcomeMessage as string;
-  }
-  if (formData.has("from-mcp-setup")) {
-    update.showMcpSetup = formData.get("showMcpSetup") === "on";
-  }
-  if (formData.has("textInputPlaceholder")) {
-    update.textInputPlaceholder = formData.get(
-      "textInputPlaceholder"
-    ) as string;
-  }
-  if (formData.has("primaryColor")) {
-    update.primaryColor = formData.get("primaryColor") as string;
-  }
-  if (formData.has("buttonText")) {
-    update.buttonText = formData.get("buttonText") as string;
-  }
-  if (formData.has("buttonTextColor")) {
-    update.buttonTextColor = formData.get("buttonTextColor") as string;
-  }
-  if (formData.has("from-widget")) {
-    update.showLogo = formData.get("showLogo") === "on";
-  }
-  if (formData.has("tooltip")) {
-    update.tooltip = formData.get("tooltip") as string;
   }
   if (formData.has("from-private")) {
     update.private = formData.get("private") === "on";
@@ -179,40 +133,8 @@ function makeScriptCode(scrapeId: string) {
   return { script, docusaurusConfig };
 }
 
-function PreviewEmbed({ scriptCode }: { scriptCode: string }) {
-  const iframeRef = useRef<HTMLIFrameElement>(null);
-
-  useEffect(() => {
-    if (!iframeRef.current || !iframeRef.current.contentDocument) return;
-
-    iframeRef.current.contentDocument.open();
-    iframeRef.current.contentDocument.close();
-
-    iframeRef.current.contentDocument.write(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>CrawlChat</title>
-          <style>
-            body {
-              font-family: 'Inter', sans-serif;
-            }
-          </style>
-        </head>
-        <body>
-          ${scriptCode}
-        </body>
-      </html>`);
-  }, [scriptCode]);
-
-  return (
-    <iframe ref={iframeRef} id="crawlchat-script" style={{ height: "100%" }} />
-  );
-}
-
 const widgetConfigTabs = createListCollection({
   items: [
-    { label: "Preview", value: "preview", icon: <TbEye /> },
     { label: "Code", value: "code", icon: <TbCode /> },
     { label: "Docusaurus", value: "docusaurus", icon: <SiDocusaurus /> },
   ],
@@ -220,142 +142,28 @@ const widgetConfigTabs = createListCollection({
 
 export default function ScrapeEmbed({ loaderData }: Route.ComponentProps) {
   const sizeFetcher = useFetcher();
-  const questionsFetcher = useFetcher();
-  const welcomeMessageFetcher = useFetcher();
-  const mcpSetupFetcher = useFetcher();
-  const textInputPlaceholderFetcher = useFetcher();
-  const widgetConfigFetcher = useFetcher();
   const privateFetcher = useFetcher();
-  const [tab, setTab] = useState<"preview" | "code" | "docusaurus">("preview");
+  const [tab, setTab] = useState<"code" | "docusaurus">("code");
   const scriptCode = useMemo(
     () => makeScriptCode(loaderData.scrape?.id ?? ""),
     [loaderData.scrape?.id]
   );
 
-  const [questions, setQuestions] = useState<WidgetQuestion[]>(
-    loaderData.scrape?.widgetConfig?.questions ?? []
-  );
-
-  useEffect(() => {
-    setQuestions(loaderData.scrape?.widgetConfig?.questions ?? []);
-  }, [loaderData.scrape?.widgetConfig?.questions]);
-
-  function addQuestion() {
-    setQuestions([...questions, { text: "" }]);
-  }
-
-  function removeQuestion(index: number) {
-    setQuestions(questions.filter((_, i) => i !== index));
-  }
-
   return (
     <SettingsSectionProvider>
       <SettingsContainer>
         <SettingsSection
-          id="customise-widget"
-          title="Customise widget"
-          description="Configure the widget and copy paste the <script> tag below to your website."
-          fetcher={widgetConfigFetcher}
+          id="embed"
+          title="Embed Ask AI"
+          description="Copy paste the <script> tag below to your website."
         >
-          <input type="hidden" name="from-widget" value={"true"} />
           <Group alignItems={"flex-start"} gap={10}>
-            <Stack flex={1}>
-              <Stack gap={6}>
-                <Group>
-                  <ColorPickerRoot
-                    flex={1}
-                    name="primaryColor"
-                    defaultValue={
-                      loaderData.scrape?.widgetConfig?.primaryColor
-                        ? parseColor(
-                            loaderData.scrape.widgetConfig.primaryColor
-                          )
-                        : undefined
-                    }
-                  >
-                    <ColorPickerLabel>Button color</ColorPickerLabel>
-                    <ColorPickerControl>
-                      <ColorPickerInput />
-                      <ColorPickerTrigger />
-                    </ColorPickerControl>
-                    <ColorPickerContent>
-                      <ColorPickerArea />
-                      <HStack>
-                        <ColorPickerEyeDropper />
-                        <ColorPickerSliders />
-                      </HStack>
-                    </ColorPickerContent>
-                  </ColorPickerRoot>
-
-                  <ColorPickerRoot
-                    flex={1}
-                    name="buttonTextColor"
-                    defaultValue={
-                      loaderData.scrape?.widgetConfig?.buttonTextColor
-                        ? parseColor(
-                            loaderData.scrape.widgetConfig.buttonTextColor
-                          )
-                        : undefined
-                    }
-                  >
-                    <ColorPickerLabel>Button text color</ColorPickerLabel>
-                    <ColorPickerControl>
-                      <ColorPickerInput />
-                      <ColorPickerTrigger />
-                    </ColorPickerControl>
-                    <ColorPickerContent>
-                      <ColorPickerArea />
-                      <HStack>
-                        <ColorPickerEyeDropper />
-                        <ColorPickerSliders />
-                      </HStack>
-                    </ColorPickerContent>
-                  </ColorPickerRoot>
-                </Group>
-
-                <Group>
-                  <Field label="Button text">
-                    <Input
-                      placeholder="Button text"
-                      name="buttonText"
-                      defaultValue={
-                        loaderData.scrape?.widgetConfig?.buttonText ?? ""
-                      }
-                    />
-                  </Field>
-                </Group>
-
-                <Group>
-                  <Field label="Tooltip">
-                    <Input
-                      placeholder="Ex: Ask AI or reach out to us!"
-                      name="tooltip"
-                      defaultValue={
-                        loaderData.scrape?.widgetConfig?.tooltip ?? ""
-                      }
-                    />
-                  </Field>
-                </Group>
-
-                <Group>
-                  <Switch
-                    name="showLogo"
-                    defaultChecked={
-                      loaderData.scrape?.widgetConfig?.showLogo ?? false
-                    }
-                  >
-                    Show logo
-                  </Switch>
-                </Group>
-              </Stack>
-            </Stack>
-
             <Stack flex={1}>
               <Box>
                 <SegmentGroup.Root
                   value={tab}
                   onValueChange={(e) =>
-                    setTab(e.value as "preview" | "code" | "docusaurus")
+                    setTab(e.value as "code" | "docusaurus")
                   }
                 >
                   <SegmentGroup.Indicator />
@@ -372,21 +180,6 @@ export default function ScrapeEmbed({ loaderData }: Route.ComponentProps) {
                   ))}
                 </SegmentGroup.Root>
               </Box>
-              {tab === "preview" && (
-                <Stack
-                  flex={1}
-                  bg="brand.outline-subtle"
-                  p={2}
-                  rounded={"md"}
-                  overflow={"hidden"}
-                  alignSelf={"stretch"}
-                >
-                  <PreviewEmbed
-                    key={widgetConfigFetcher.state}
-                    scriptCode={scriptCode.script}
-                  />
-                </Stack>
-              )}
 
               {tab === "code" && (
                 <Stack>
@@ -494,83 +287,6 @@ export default function ScrapeEmbed({ loaderData }: Route.ComponentProps) {
               ))}
             </SelectContent>
           </SelectRoot>
-        </SettingsSection>
-
-        <SettingsSection
-          id="welcome-message"
-          title="Welcome message"
-          description="Add your custom welcome message to the widget. Supports markdown."
-          fetcher={welcomeMessageFetcher}
-        >
-          <Textarea
-            name="welcomeMessage"
-            defaultValue={loaderData.scrape?.widgetConfig?.welcomeMessage ?? ""}
-            placeholder="Hi, I'm the CrawlChat bot. How can I help you today?"
-            rows={4}
-          />
-        </SettingsSection>
-
-        <SettingsSection
-          id="example-questions"
-          title="Example questions"
-          description="Show few example questions when a user visits the widget for the first time"
-          fetcher={questionsFetcher}
-        >
-          <input type="hidden" name="from-questions" value={"true"} />
-          {questions.map((question, i) => (
-            <Group key={i}>
-              <Input
-                name={"questions"}
-                placeholder={"Ex: How to use the product?"}
-                defaultValue={question.text}
-              />
-              <IconButton
-                variant={"subtle"}
-                onClick={() => removeQuestion(i)}
-                colorPalette={"red"}
-              >
-                <TbTrash />
-              </IconButton>
-            </Group>
-          ))}
-          <Box>
-            <Button size="sm" variant={"subtle"} onClick={addQuestion}>
-              <TbPlus />
-              Add question
-            </Button>
-          </Box>
-        </SettingsSection>
-
-        <SettingsSection
-          id="text-input-placeholder"
-          title="Text input placeholder"
-          description="Set the placeholder text for the text input field"
-          fetcher={textInputPlaceholderFetcher}
-        >
-          <Input
-            name="textInputPlaceholder"
-            defaultValue={
-              loaderData.scrape?.widgetConfig?.textInputPlaceholder ?? ""
-            }
-            placeholder="Ex: Ask me anything about the product"
-          />
-        </SettingsSection>
-
-        <SettingsSection
-          id="mcp-setup"
-          title="MCP setup instructions"
-          description="Show the MCP client setup instrctions on the widget"
-          fetcher={mcpSetupFetcher}
-        >
-          <input type="hidden" name="from-mcp-setup" value={"true"} />
-          <Switch
-            name="showMcpSetup"
-            defaultChecked={
-              loaderData.scrape?.widgetConfig?.showMcpSetup ?? true
-            }
-          >
-            Show it
-          </Switch>
         </SettingsSection>
       </SettingsContainer>
     </SettingsSectionProvider>

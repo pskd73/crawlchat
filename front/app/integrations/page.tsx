@@ -1,7 +1,14 @@
 import { Page } from "~/components/page";
 import { Box, HStack, Stack } from "@chakra-ui/react";
 import { getAuthUser } from "~/auth/middleware";
-import { TbRobotFace, TbCode, TbBrandDiscord, TbPlug, TbBrandSlack } from "react-icons/tb";
+import {
+  TbRobotFace,
+  TbCode,
+  TbBrandDiscord,
+  TbPlug,
+  TbBrandSlack,
+  TbColorSwatch,
+} from "react-icons/tb";
 import { Outlet, useLocation, useNavigate } from "react-router";
 import { SegmentedControl } from "~/components/ui/segmented-control";
 import { useMemo } from "react";
@@ -28,11 +35,20 @@ export default function ScrapePage() {
       <Stack>
         <Box>
           <SegmentedControl
-            value={tab || "settings"}
+            value={tab}
             onValueChange={(e) => handleTabChange(e.value)}
             items={[
               {
                 value: "/connect",
+                label: (
+                  <HStack>
+                    <TbColorSwatch />
+                    Customise
+                  </HStack>
+                ),
+              },
+              {
+                value: "/connect/embed",
                 label: (
                   <HStack>
                     <TbCode />

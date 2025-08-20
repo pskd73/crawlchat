@@ -80,32 +80,34 @@ export function SettingsSection({
           </Stack>
           {children}
         </Stack>
-        <Group
-          p={4}
-          py={3}
-          borderTop={"1px solid"}
-          borderColor={"brand.outline"}
-          bg={"brand.gray.50"}
-          w="full"
-          justifyContent={"space-between"}
-        >
-          <Group></Group>
-          <Group>
-            {actionRight}
-            {fetcher && (
-              <Button
-                type="submit"
-                size={"xs"}
-                loading={fetcher.state !== "idle"}
-                variant={"surface"}
-                colorPalette={danger ? "red" : undefined}
-              >
-                Save
-                <TbCheck />
-              </Button>
-            )}
+        {(actionRight || fetcher) && (
+          <Group
+            p={4}
+            py={3}
+            borderTop={"1px solid"}
+            borderColor={"brand.outline"}
+            bg={"brand.gray.50"}
+            w="full"
+            justifyContent={"space-between"}
+          >
+            <Group></Group>
+            <Group>
+              {actionRight}
+              {fetcher && (
+                <Button
+                  type="submit"
+                  size={"xs"}
+                  loading={fetcher.state !== "idle"}
+                  variant={"surface"}
+                  colorPalette={danger ? "red" : undefined}
+                >
+                  Save
+                  <TbCheck />
+                </Button>
+              )}
+            </Group>
           </Group>
-        </Group>
+        )}
       </Stack>
     );
   }

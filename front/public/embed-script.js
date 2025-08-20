@@ -156,7 +156,6 @@ class CrawlChatEmbed {
     const marginY = script.getAttribute("data-ask-ai-margin-y") ?? "20px";
     const radius = script.getAttribute("data-ask-ai-radius") ?? "20px";
     const fontSize = script.getAttribute("data-ask-ai-font-size");
-    const logoUrl = this.widgetConfig.logoUrl;
 
     let bottom = undefined;
     let right = undefined;
@@ -188,16 +187,6 @@ class CrawlChatEmbed {
     div.style.color = color;
     div.style.borderRadius = radius;
     div.style.fontSize = fontSize;
-
-    if (logoUrl && this.widgetConfig.showLogo) {
-      const logo = document.createElement("img");
-      logo.className = "logo";
-      logo.src = logoUrl;
-      div.appendChild(logo);
-
-      div.classList.add("with-logo");
-      div.style.border = `1px solid ${color}`;
-    }
 
     const span = document.createElement("span");
     span.innerText = text;

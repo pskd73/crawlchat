@@ -72,12 +72,7 @@ export function meta({ data }: Route.MetaArgs) {
 
 function Nav({ scrape }: { scrape: Scrape }) {
   return (
-    <Stack
-      as="nav"
-      p={4}
-      borderBottom={"1px solid"}
-      borderColor={"brand.outline"}
-    >
+    <Stack as="nav" p={4}>
       <Group justifyContent={"space-between"}>
         <Group>
           {scrape.logoUrl && (
