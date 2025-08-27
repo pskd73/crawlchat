@@ -11,6 +11,7 @@ import { getSession } from "~/session";
 import { vemetric } from "@vemetric/react";
 import { fetchDataGaps } from "~/data-gaps/fetch";
 import { Toaster } from "react-hot-toast";
+import cn from "@meltdownjs/cn";
 
 export function meta() {
   return [
@@ -122,7 +123,12 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
             aria-label="close sidebar"
             className="drawer-overlay"
           />
-          <div className="h-full w-68 bg-base-100 overflow-scroll">
+          <div
+            className={cn(
+              "h-full w-68 bg-base-100 overflow-auto",
+              "md:border-r md:border-base-300"
+            )}
+          >
             <SideMenu
               loggedInUser={user}
               scrapeOwner={loaderData.scrape?.user!}
