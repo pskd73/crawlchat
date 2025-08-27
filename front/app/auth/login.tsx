@@ -1,23 +1,12 @@
-import {
-  Box,
-  Center,
-  Group,
-  Input,
-  Separator,
-  Stack,
-  Text,
-} from "@chakra-ui/react";
+import type { Route } from "./+types/login";
 import { redirect, useFetcher, useLoaderData } from "react-router";
-import { Button } from "~/components/ui/button";
-import type { Route } from "../+types/root";
 import { authenticator } from ".";
 import { commitSession, getSession } from "~/session";
-import { Alert } from "~/components/ui/alert";
 import { useEffect, useRef, useState } from "react";
-import { TbArrowRight, TbBrandGoogleFilled } from "react-icons/tb";
+import { TbArrowRight, TbCircleCheck, TbCircleX } from "react-icons/tb";
 import { getAuthUser } from "./middleware";
-import { LogoChakra } from "~/dashboard/logo-chakra";
-import "../fonts.css";
+import { Logo } from "~/dashboard/logo";
+import cn from "@meltdownjs/cn";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request, { dontRedirect: true });
@@ -57,7 +46,7 @@ export async function action({ request }: Route.ActionArgs) {
 
 function Testi1() {
   return (
-    <Box>
+    <div>
       <blockquote className="twitter-tweet">
         <p lang="en" dir="ltr">
           MCP, llms.txt and{" "}
@@ -79,13 +68,13 @@ function Testi1() {
         </a>
       </blockquote>
       <script async src="https://platform.twitter.com/widgets.js" />
-    </Box>
+    </div>
   );
 }
 
 function Testi2() {
   return (
-    <Box>
+    <div>
       <blockquote className="twitter-tweet">
         <p lang="en" dir="ltr">
           Integrated{" "}
@@ -111,13 +100,13 @@ function Testi2() {
         </a>
       </blockquote>{" "}
       <script async src="https://platform.twitter.com/widgets.js" />
-    </Box>
+    </div>
   );
 }
 
 function Testi3() {
   return (
-    <Box>
+    <div>
       <iframe
         src="https://www.linkedin.com/embed/feed/update/urn:li:ugcPost:7323678686812020736"
         height="860"
@@ -126,7 +115,7 @@ function Testi3() {
         allowFullScreen
         title="Embedded post"
       ></iframe>
-    </Box>
+    </div>
   );
 }
 
@@ -143,85 +132,115 @@ export default function LoginPage() {
   }, [mailSent]);
 
   return (
-    <Group h="100dvh" w="98vw" gap={4} alignItems={"stretch"}>
-      <Stack
-        bg="brand.outline"
-        flex={1}
-        justifyContent={"center"}
-        alignItems={"center"}
-        display={["none", "none", "none", "flex"]}
-        px={4}
-        position={"relative"}
-        gap={0}
+    <div
+      data-theme="brand"
+      className="flex h-screen w-screen gap-2 items-stretch"
+    >
+      <div
+        className={cn(
+          "flex-col items-center justify-center bg-base-300 flex-1",
+          "hidden md:flex px-4 gap-0 relative"
+        )}
       >
-        <Text fontSize={"2xl"} fontWeight={"bold"} textAlign={"center"} py={4}>
-          People love{" "}
-          <Text as={"span"} color={"brand.fg"} fontFamily={"Radio Grotesk"}>
-            CrawlChat
-          </Text>{" "}
-          ❤️
-        </Text>
-        <Stack maxW="500px" overflowY={"auto"} className="no-scrollbar" pb={4}>
+        <div className="text-2xl font-bold text-center py-4">
+          People love <span className="font-radio-grotesk">CrawlChat</span> ❤️
+        </div>
+        <div className="max-w-500px overflow-y-auto no-scrollbar pb-4">
           {testiIndex === 0 && <Testi1 />}
           {testiIndex === 1 && <Testi2 />}
           {testiIndex === 2 && <Testi3 />}
-        </Stack>
-      </Stack>
-      <Stack flex={1}>
-        <Center h="full">
-          <fetcher.Form method="post">
-            <Stack w="240px" align="center" gap={6}>
-              <LogoChakra />
+        </div>
+      </div>
+      <div className="flex flex-col flex-1 gap-2 h-full justify-center items-center">
+        <fetcher.Form method="post">
+          <div
+            className={cn(
+              "flex flex-col w-82 gap-4 items-center border",
+              "border-base-300 rounded-box p-6 bg-base-200/50 shadow"
+            )}
+          >
+            <Logo />
 
-              <Button w="full" colorPalette={"red"} asChild>
-                <a href="/auth/google">
-                  <TbBrandGoogleFilled /> Login with Google
-                </a>
-              </Button>
+            <div className="flex flex-col gap-4 w-full">
+              <div className="text-center text-base-content/50 text-sm">
+                Enter your email to get the login link
+              </div>
 
-              <Separator w="full" />
+              <input
+                className="input w-full"
+                ref={emailRef}
+                type="email"
+                placeholder="myemail@example.com"
+                name="email"
+                required
+                pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+              />
 
-              <Stack>
-                <Text textAlign={"center"} opacity={"0.5"} fontSize={"sm"}>
-                  Enter your email to get the login link
-                </Text>
-                <Stack w="full">
-                  <Input
-                    ref={emailRef}
-                    type="email"
-                    w="full"
-                    placeholder="myemail@example.com"
-                    name="email"
-                    required
-                    pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
-                  />
+              {mailSent && (
+                <div role="alert" className="alert alert-success">
+                  <TbCircleCheck />
+                  <span>Check your email for a login link.</span>
+                </div>
+              )}
 
-                  {mailSent && (
-                    <Alert title="Email sent" status={"success"}>
-                      Check your email for a login link.
-                    </Alert>
-                  )}
+              <button
+                className="btn btn-primary w-full"
+                type="submit"
+                disabled={fetcher.state !== "idle"}
+              >
+                {fetcher.state !== "idle" && (
+                  <span className="loading loading-spinner loading-xs" />
+                )}
+                Login
+                <TbArrowRight />
+              </button>
 
-                  <Button
-                    type="submit"
-                    w="full"
-                    loading={fetcher.state !== "idle"}
-                    colorPalette={"brand"}
-                  >
-                    Login
-                    <TbArrowRight />
-                  </Button>
-                  {fetcher.data?.error && (
-                    <Alert title="Error" status={"error"}>
-                      {fetcher.data.error}
-                    </Alert>
-                  )}
-                </Stack>
-              </Stack>
-            </Stack>
-          </fetcher.Form>
-        </Center>
-      </Stack>
-    </Group>
+              {fetcher.data?.error && (
+                <div role="alert" className="alert alert-error">
+                  <TbCircleX />
+                  <span>{fetcher.data.error}</span>
+                </div>
+              )}
+            </div>
+
+            <div className="divider m-0">OR</div>
+
+            <a
+              href="/auth/google"
+              className="btn bg-white text-black border-[#e5e5e5] w-full"
+            >
+              <svg
+                aria-label="Google logo"
+                width="16"
+                height="16"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 512 512"
+              >
+                <g>
+                  <path d="m0 0H512V512H0" fill="#fff"></path>
+                  <path
+                    fill="#34a853"
+                    d="M153 292c30 82 118 95 171 60h62v48A192 192 0 0190 341"
+                  ></path>
+                  <path
+                    fill="#4285f4"
+                    d="m386 400a140 175 0 0053-179H260v74h102q-7 37-38 57"
+                  ></path>
+                  <path
+                    fill="#fbbc02"
+                    d="m90 341a208 200 0 010-171l63 49q-12 37 0 73"
+                  ></path>
+                  <path
+                    fill="#ea4335"
+                    d="m153 219c22-69 116-109 179-50l55-54c-78-75-230-72-297 55"
+                  ></path>
+                </g>
+              </svg>
+              Login with Google
+            </a>
+          </div>
+        </fetcher.Form>
+      </div>
+    </div>
   );
 }

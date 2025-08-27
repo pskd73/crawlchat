@@ -1,7 +1,5 @@
-import { Box, Button, Group, Input, Kbd, Stack, Text } from "@chakra-ui/react";
 import { useEffect } from "react";
 import { TbArrowRight, TbSearch, TbWorld } from "react-icons/tb";
-import { InputGroup } from "~/components/ui/input-group";
 
 export function meta() {
   return [
@@ -29,48 +27,45 @@ export default function EmbedDemo() {
   }
 
   return (
-    <Stack alignItems={"center"} minH={"100vh"} p={6}>
-      <Stack maxW={"1000px"} w={"full"} gap={6}>
-        <Group justifyContent={"space-between"}>
-          <Group>
+    <div className="flex flex-col gap-2 p-6 min-h-screen items-center">
+      <div className="flex flex-col gap-6 max-w-[1000px] w-full">
+        <div className="flex justify-between gap-2">
+          <div className="flex gap-2 items-center">
             <TbWorld size={26} />
-            <Text
-              fontSize={"2xl"}
-              fontWeight={"bold"}
-              display={["none", "block"]}
-            >
-              Demo Remotion
-            </Text>
-          </Group>
+            <div className="text-2xl font-bold hidden md:block">
+              Demo
+            </div>
+          </div>
 
-          <Group>
-            <InputGroup
-              flex="1"
-              startElement={<TbSearch />}
-              endElement={<Kbd>⌘K</Kbd>}
-            >
-              <Input placeholder="Search contacts" onClick={handleSearch} />
-            </InputGroup>
-            <Button display={["none", "flex"]}>
+          <div className="flex gap-2 items-center">
+            <label className="input">
+              <TbSearch />
+              <input
+                type="search"
+                className="grow"
+                placeholder="Search contacts"
+                onClick={handleSearch}
+              />
+              <kbd className="kbd kbd-sm">⌘K</kbd>
+            </label>
+            <div className="btn btn-primary hidden md:flex">
               Login
               <TbArrowRight />
-            </Button>
-          </Group>
-        </Group>
+            </div>
+          </div>
+        </div>
 
-        <Box w={"full"} h={"100px"} bg={"gray.100"} />
-        <Box w={"full"} h={"240px"} bg={"gray.100"} />
-        <Box w={"full"} h={"60px"} bg={"gray.100"} />
-        <Box w={"full"} h={"60px"} bg={"gray.100"} />
-        <Box w={"full"} h={"60px"} bg={"gray.100"} />
-        <Box w={"full"} h={"60px"} bg={"gray.100"} />
-        <Box w={"full"} h={"100px"} bg={"gray.100"} />
-        <Box w={"full"} h={"240px"} bg={"gray.100"} />
-        <Box w={"full"} h={"60px"} bg={"gray.100"} />
-        <Box w={"full"} h={"60px"} bg={"gray.100"} />
-        <Box w={"full"} h={"60px"} bg={"gray.100"} />
-        <Box w={"full"} h={"60px"} bg={"gray.100"} />
-      </Stack>
-    </Stack>
+        <div className="w-full h-[100px] bg-base-200 rounded-box" />
+        <div className="w-full h-[240px] bg-base-200 rounded-box" />
+        <div className="w-full h-[60px] bg-base-200 rounded-box" />
+        <div className="w-full h-[60px] bg-base-200 rounded-box" />
+        <div className="w-full h-[100px] bg-base-200 rounded-box" />
+        <div className="w-full h-[240px] bg-base-200 rounded-box" />
+        <div className="w-full h-[60px] bg-base-200 rounded-box" />
+        <div className="w-full h-[60px] bg-base-200 rounded-box" />
+        <div className="w-full h-[60px] bg-base-200 rounded-box" />
+        <div className="w-full h-[60px] bg-base-200 rounded-box" />
+      </div>
+    </div>
   );
 }

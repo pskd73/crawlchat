@@ -1,17 +1,13 @@
-import type { KnowledgeGroupUpdateFrequency, Prisma } from "libs/prisma";
-import { prisma, type KnowledgeGroup } from "libs/prisma";
+import type { Route } from "./+types/settings";
+import type {
+  KnowledgeGroupUpdateFrequency,
+  Prisma,
+  KnowledgeGroup,
+} from "libs/prisma";
+import { prisma } from "libs/prisma";
 import { getNextUpdateTime } from "libs/knowledge-group";
 import { getAuthUser } from "~/auth/middleware";
 import { authoriseScrapeUser, getSessionScrapeId } from "~/scrapes/util";
-import type { Route } from "./+types/settings";
-import {
-  Badge,
-  createListCollection,
-  DataList,
-  Input,
-  Stack,
-  Text,
-} from "@chakra-ui/react";
 import {
   SettingsContainer,
   SettingsSection,
@@ -19,21 +15,14 @@ import {
 } from "~/settings-section";
 import { useEffect, useMemo, useState } from "react";
 import { redirect, useFetcher } from "react-router";
-import { Switch } from "~/components/ui/switch";
-import moment from "moment";
 import { GroupStatus } from "./status";
-import { Button } from "~/components/ui/button";
 import { TbTrash } from "react-icons/tb";
 import { createToken } from "libs/jwt";
-import {
-  SelectContent,
-  SelectItem,
-  SelectRoot,
-  SelectTrigger,
-  SelectValueText,
-} from "~/components/ui/select";
 import { MultiSelect, type SelectValue } from "~/components/multi-select";
 import { Client } from "@notionhq/client";
+import { DataList } from "~/components/data-list";
+import { Select } from "~/components/select";
+import moment from "moment";
 
 export async function loader({ request, params }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -140,30 +129,28 @@ export async function action({ request, params }: Route.ActionArgs) {
 function AutoUpdateSettings({ group }: { group: KnowledgeGroup }) {
   const fetcher = useFetcher();
   const autoUpdateCollection = useMemo(() => {
-    return createListCollection({
-      items: [
-        {
-          label: "Never",
-          value: "never",
-        },
-        {
-          label: "Every hour",
-          value: "hourly",
-        },
-        {
-          label: "Every day",
-          value: "daily",
-        },
-        {
-          label: "Every week",
-          value: "weekly",
-        },
-        {
-          label: "Every month",
-          value: "monthly",
-        },
-      ],
-    });
+    return [
+      {
+        label: "Never",
+        value: "never",
+      },
+      {
+        label: "Every hour",
+        value: "hourly",
+      },
+      {
+        label: "Every day",
+        value: "daily",
+      },
+      {
+        label: "Every week",
+        value: "weekly",
+      },
+      {
+        label: "Every month",
+        value: "monthly",
+      },
+    ];
   }, []);
 
   return (
@@ -173,30 +160,19 @@ function AutoUpdateSettings({ group }: { group: KnowledgeGroup }) {
       title="Auto update"
       description="If enabled, the knowledge group will be updated automatically every day at the specified time."
     >
-      <SelectRoot
-        collection={autoUpdateCollection}
-        maxW="400px"
+      <Select
+        label="Select frequency"
+        options={autoUpdateCollection}
+        defaultValue={group.updateFrequency ?? undefined}
         name="updateFrequency"
-        defaultValue={[group.updateFrequency ?? "never"]}
-      >
-        <SelectTrigger>
-          <SelectValueText placeholder="Select auto update" />
-        </SelectTrigger>
-        <SelectContent>
-          {autoUpdateCollection.items.map((item) => (
-            <SelectItem item={item} key={item.value}>
-              {item.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </SelectRoot>
+      />
       {group.nextUpdateAt && (
-        <Text fontSize={"sm"}>
+        <div className="text-sm flex items-center">
           Next update at{" "}
-          <Badge ml={1} colorPalette={"brand"} variant={"surface"}>
+          <span className="badge badge-neutral ml-2">
             {moment(group.nextUpdateAt).format("DD/MM/YYYY HH:mm")}
-          </Badge>
-        </Text>
+          </span>
+        </div>
       )}
     </SettingsSection>
   );
@@ -247,30 +223,23 @@ function WebSettings({ group }: { group: KnowledgeGroup }) {
   const details = useMemo(() => {
     return [
       {
-        key: "URL",
+        label: "URL",
         value: group.url,
       },
       {
-        key: "Updated at",
+        label: "Updated at",
         value: moment(group.updatedAt).format("DD/MM/YYYY HH:mm"),
       },
       {
-        key: "Status",
+        label: "Status",
         value: <GroupStatus status={group.status} />,
       },
     ];
   }, [group]);
 
   return (
-    <Stack gap={6}>
-      <DataList.Root orientation={"horizontal"}>
-        {details.map((item) => (
-          <DataList.Item key={item.key}>
-            <DataList.ItemLabel>{item.key}</DataList.ItemLabel>
-            <DataList.ItemValue>{item.value}</DataList.ItemValue>
-          </DataList.Item>
-        ))}
-      </DataList.Root>
+    <div className="flex flex-col gap-6">
+      <DataList data={details} />
 
       <SettingsSection
         id="match-prefix"
@@ -279,9 +248,15 @@ function WebSettings({ group }: { group: KnowledgeGroup }) {
         description="If enabled, it scrapes only the pages whose prefix is the same as the group URL"
       >
         <input type="hidden" name="from-match-prefix" value={"true"} />
-        <Switch name="matchPrefix" defaultChecked={group.matchPrefix ?? false}>
+        <label className="label">
+          <input
+            type="checkbox"
+            name="matchPrefix"
+            defaultChecked={group.matchPrefix ?? false}
+            className="toggle"
+          />
           Active
-        </Switch>
+        </label>
       </SettingsSection>
 
       <SettingsSection
@@ -290,11 +265,11 @@ function WebSettings({ group }: { group: KnowledgeGroup }) {
         title="HTML tags to remove"
         description="You can specify the HTML selectors whose content is not added to the document. It is recommended to use this to remove junk content such as side menus, headers, footers, etc. You can give multiple selectors comma separated."
       >
-        <Input
+        <input
           placeholder="Ex: #sidebar, #header, #footer"
-          maxW="400px"
           defaultValue={group.removeHtmlTags ?? ""}
           name="removeHtmlTags"
+          className="input"
         />
       </SettingsSection>
 
@@ -308,15 +283,15 @@ function WebSettings({ group }: { group: KnowledgeGroup }) {
         title="Item context"
         description="Pass context for the group knowledge. Usefule to segregate the data between types. Example: v1, v2, node, bun, etc."
       >
-        <Input
+        <input
           name="itemContext"
           defaultValue={group.itemContext ?? ""}
           placeholder="Ex: v1, v2, node, bun, etc."
-          maxW="400px"
+          className="input"
         />
-        <Text fontSize={"sm"} opacity={0.5}>
+        <div className="text-sm text-base-content/50">
           This requires re-fetching the knowledge group.
-        </Text>
+        </div>
       </SettingsSection>
 
       <SettingsSection
@@ -325,95 +300,36 @@ function WebSettings({ group }: { group: KnowledgeGroup }) {
         title="Scroll selector"
         description="Specify the selector of the element to scroll to. It is useful to scrape pages that have infinite scroll."
       >
-        <Input
+        <input
           placeholder="Ex: #panel"
-          maxW="400px"
+          className="input"
           defaultValue={group.scrollSelector ?? ""}
           name="scrollSelector"
         />
       </SettingsSection>
-    </Stack>
-  );
-}
-
-function GithubSettings({ group }: { group: KnowledgeGroup }) {
-  const branchFetcher = useFetcher();
-  const details = useMemo(() => {
-    return [
-      {
-        key: "Repo",
-        value: group.githubUrl,
-      },
-      {
-        key: "Updated at",
-        value: moment(group.updatedAt).format("DD/MM/YYYY HH:mm"),
-      },
-      {
-        key: "Status",
-        value: <GroupStatus status={group.status} />,
-      },
-    ];
-  }, [group]);
-
-  return (
-    <Stack gap={6}>
-      <DataList.Root orientation={"horizontal"}>
-        {details.map((item) => (
-          <DataList.Item key={item.key}>
-            <DataList.ItemLabel>{item.key}</DataList.ItemLabel>
-            <DataList.ItemValue>{item.value}</DataList.ItemValue>
-          </DataList.Item>
-        ))}
-      </DataList.Root>
-
-      <SettingsSection
-        id="branch"
-        fetcher={branchFetcher}
-        title="Branch"
-        description="Specify the branch to scrape"
-      >
-        <Input
-          placeholder="Ex: main"
-          maxW="400px"
-          defaultValue={group.githubBranch ?? ""}
-          name="githubBranch"
-        />
-      </SettingsSection>
-    </Stack>
+    </div>
   );
 }
 
 function GithubIssuesSettings({ group }: { group: KnowledgeGroup }) {
-  const branchFetcher = useFetcher();
   const details = useMemo(() => {
     return [
       {
-        key: "Repo",
+        label: "Repo",
         value: group.githubUrl,
       },
       {
-        key: "Updated at",
+        label: "Updated at",
         value: moment(group.updatedAt).format("DD/MM/YYYY HH:mm"),
       },
       {
-        key: "Status",
+        label: "Status",
         value: <GroupStatus status={group.status} />,
       },
     ];
   }, [group]);
 
-  return (
-    <Stack gap={6}>
-      <DataList.Root orientation={"horizontal"}>
-        {details.map((item) => (
-          <DataList.Item key={item.key}>
-            <DataList.ItemLabel>{item.key}</DataList.ItemLabel>
-            <DataList.ItemValue>{item.value}</DataList.ItemValue>
-          </DataList.Item>
-        ))}
-      </DataList.Root>
-    </Stack>
-  );
+  return <DataList data={details} />;
 }
 
 function NotionSettings({
@@ -424,14 +340,15 @@ function NotionSettings({
   notionPages: Array<SelectValue>;
 }) {
   return (
-    <Stack gap={6}>
+    <div className="flex flex-col gap-6">
       <SkipPagesRegex
         group={group}
         pages={notionPages}
         placeholder="Select pages to skip"
       />
+
       <AutoUpdateSettings group={group} />
-    </Stack>
+    </div>
   );
 }
 
@@ -466,9 +383,6 @@ export default function KnowledgeGroupSettings({
         {loaderData.knowledgeGroup.type === "scrape_web" && (
           <WebSettings group={loaderData.knowledgeGroup} />
         )}
-        {loaderData.knowledgeGroup.type === "scrape_github" && (
-          <GithubSettings group={loaderData.knowledgeGroup} />
-        )}
         {loaderData.knowledgeGroup.type === "github_issues" && (
           <GithubIssuesSettings group={loaderData.knowledgeGroup} />
         )}
@@ -485,15 +399,17 @@ export default function KnowledgeGroupSettings({
           description="This will delete the knowledge group and all the data that is associated with it. This is not reversible."
           danger
           actionRight={
-            <Button
-              colorPalette={"red"}
+            <button
+              className="btn btn-error"
               onClick={handleDelete}
-              loading={deleteFetcher.state !== "idle"}
-              variant={deleteConfirm ? "solid" : "outline"}
+              disabled={deleteFetcher.state !== "idle"}
             >
+              {deleteFetcher.state !== "idle" && (
+                <span className="loading loading-spinner loading-xs" />
+              )}
               {deleteConfirm ? "Sure to delete?" : "Delete"}
               <TbTrash />
-            </Button>
+            </button>
           }
         />
       </SettingsContainer>

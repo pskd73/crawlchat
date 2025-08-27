@@ -1,5 +1,6 @@
-import { redirect, useFetcher } from "react-router";
+import type { Prisma } from "libs/prisma";
 import type { Route } from "./+types/settings";
+import { redirect, useFetcher } from "react-router";
 import { TbSettings } from "react-icons/tb";
 import {
   SettingsContainer,
@@ -7,11 +8,8 @@ import {
   SettingsSectionProvider,
 } from "~/settings-section";
 import { Page } from "~/components/page";
-import { Field } from "~/components/ui/field";
-import { Input } from "@chakra-ui/react";
 import { getAuthUser } from "~/auth/middleware";
 import { getSession } from "~/session";
-import type { Prisma } from "libs/prisma";
 import { prisma } from "~/prisma";
 import { getSessionScrapeId } from "~/scrapes/util";
 
@@ -72,20 +70,26 @@ export default function TicketsSettings({ loaderData }: Route.ComponentProps) {
             description="The users gets prompted if the query is resolved by the chatbot. If they say no, it takes them to form to create a support ticket. You can customise the question and description that is shown to the user."
             fetcher={customEnquiryFetcher}
           >
-            <Field label="Question">
-              <Input
+            <fieldset className="fieldset">
+              <legend className="fieldset-legend">Question</legend>
+              <input
+                className="input"
+                type="text"
                 name="resolveQuestion"
                 defaultValue={loaderData.scrape.resolveQuestion ?? ""}
                 placeholder="Enter the question to ask if issue resolved"
               />
-            </Field>
-            <Field label="Description">
-              <Input
+            </fieldset>
+            <fieldset className="fieldset">
+              <legend className="fieldset-legend">Description</legend>
+              <input
+                className="input"
+                type="text"
                 name="resolveDescription"
                 defaultValue={loaderData.scrape.resolveDescription ?? ""}
                 placeholder="A description"
               />
-            </Field>
+            </fieldset>
           </SettingsSection>
         </SettingsContainer>
       </SettingsSectionProvider>

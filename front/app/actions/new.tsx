@@ -1,13 +1,13 @@
-import { Drawer, Group, Portal, Text } from "@chakra-ui/react";
+import type { Route } from "./+types/new";
 import { TbPointerPlus } from "react-icons/tb";
 import { EditForm } from "./edit-form";
 import { EditActionProvider } from "./use-edit-action";
 import { getAuthUser } from "~/auth/middleware";
 import { prisma } from "libs/prisma";
-import type { Route } from "./+types/new";
 import { authoriseScrapeUser, getSessionScrapeId } from "~/scrapes/util";
 import { redirect, useFetcher } from "react-router";
 import { SaveForm } from "./save-form";
+import { Page } from "~/components/page";
 
 export async function action({ request }: Route.ActionArgs) {
   const user = await getAuthUser(request);
@@ -38,29 +38,13 @@ export default function NewAction() {
 
   return (
     <EditActionProvider>
-      <Drawer.Root open={true} size={"sm"}>
-        <Portal>
-          <Drawer.Backdrop />
-          <Drawer.Positioner>
-            <Drawer.Content>
-              <Drawer.Header>
-                <Drawer.Title>
-                  <Group>
-                    <TbPointerPlus />
-                    <Text>New Action</Text>
-                  </Group>
-                </Drawer.Title>
-              </Drawer.Header>
-              <Drawer.Body>
-                <EditForm />
-              </Drawer.Body>
-              <Drawer.Footer>
-                <SaveForm fetcher={fetcher} />
-              </Drawer.Footer>
-            </Drawer.Content>
-          </Drawer.Positioner>
-        </Portal>
-      </Drawer.Root>
+      <Page
+        title="New Action"
+        icon={<TbPointerPlus />}
+        right={<SaveForm fetcher={fetcher} />}
+      >
+        <EditForm />
+      </Page>
     </EditActionProvider>
   );
 }

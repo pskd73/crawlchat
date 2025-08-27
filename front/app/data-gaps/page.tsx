@@ -1,32 +1,23 @@
-import {
-  Center,
-  EmptyState,
-  Group,
-  IconButton,
-  Spinner,
-  Stack,
-  Text,
-  VStack,
-} from "@chakra-ui/react";
+import type { Route } from "./+types/page";
+import type { Message } from "libs/prisma";
 import {
   TbChartBarOff,
   TbCheck,
   TbCopy,
-  TbExternalLink,
+  TbMessage,
   TbTrash,
 } from "react-icons/tb";
 import { Page } from "~/components/page";
-import type { Route } from "./+types/page";
 import { getAuthUser } from "~/auth/middleware";
 import { authoriseScrapeUser, getSessionScrapeId } from "~/scrapes/util";
 import { prisma } from "~/prisma";
-import type { Message } from "libs/prisma";
 import { MarkdownProse } from "~/widget/markdown-prose";
-import { Button } from "~/components/ui/button";
 import { Link, useFetcher } from "react-router";
-import moment from "moment";
 import { fetchDataGaps } from "./fetch";
-import { toaster } from "~/components/ui/toaster";
+import { EmptyState } from "~/components/empty-state";
+import moment from "moment";
+import cn from "@meltdownjs/cn";
+import toast from "react-hot-toast";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -111,117 +102,101 @@ export function DataGapCard({
         message.analysis!.dataGapDescription
       }`
     );
-    toaster.success({
-      title: "Copied to clipboard",
-    });
+    toast.success("Copied to clipboard");
   };
 
   return (
-    <Stack
-      border="1px solid"
-      borderColor="brand.outline"
-      p={4}
-      borderRadius="md"
-      gap={4}
+    <div
+      className={cn(
+        "flex flex-col gap-4 border border-base-300",
+        "p-4 rounded-box bg-base-200/50 shadow"
+      )}
     >
-      <Stack>
-        <Text fontWeight="bold">{message.analysis!.dataGapTitle}</Text>
-        <Group>
-          <Button variant="subtle" size="xs" asChild>
-            <Link to={`/messages/${message.questionId}`}>
-              Message
-              <TbExternalLink />
+      <div className="flex flex-col gap-2">
+        <div className="font-bold">{message.analysis!.dataGapTitle}</div>
+        <div className="flex gap-2">
+          <div className="join">
+            <Link
+              className="btn btn-sm btn-square join-item"
+              to={`/messages/${message.questionId}`}
+            >
+              <TbMessage />
             </Link>
-          </Button>
+
+            <button
+              className="btn btn-square btn-sm join-item"
+              onClick={handleCopy}
+            >
+              <TbCopy />
+            </button>
+          </div>
+
           {!noControls && (
-            <>
+            <div className="join">
               <doneFetcher.Form method="post">
                 <input type="hidden" name="messageId" value={message.id} />
                 <input type="hidden" name="intent" value="done" />
-                <Button
-                  variant="subtle"
-                  size="xs"
-                  colorPalette={"brand"}
+                <button
+                  className="btn btn-sm btn-success join-item"
                   type="submit"
-                  loading={doneFetcher.state !== "idle"}
+                  disabled={doneFetcher.state !== "idle"}
                 >
-                  Done
                   <TbCheck />
-                </Button>
+                  Done
+                </button>
               </doneFetcher.Form>
               <deleteFetcher.Form method="post">
                 <input type="hidden" name="messageId" value={message.id} />
                 <input type="hidden" name="intent" value="delete" />
-                <IconButton
-                  variant="subtle"
-                  size="xs"
-                  colorPalette={"red"}
+                <button
+                  className="btn btn-sm btn-error join-item"
                   disabled={deleteFetcher.state !== "idle"}
                   type="submit"
                 >
-                  {deleteFetcher.state !== "idle" ? (
-                    <Spinner size="xs" />
-                  ) : (
-                    <TbTrash />
-                  )}
-                </IconButton>
+                  <TbTrash />
+                  Delete
+                </button>
               </deleteFetcher.Form>
-            </>
+            </div>
           )}
-
-          <IconButton variant="subtle" size="xs" onClick={handleCopy}>
-            <TbCopy />
-          </IconButton>
-        </Group>
-      </Stack>
+        </div>
+      </div>
       <MarkdownProse>{message.analysis!.dataGapDescription}</MarkdownProse>
-      <Text fontSize={"sm"} opacity={0.5}>
+      <div className="text-sm text-base-content/50">
         {moment(message.createdAt).fromNow()}
-      </Text>
-    </Stack>
+      </div>
+    </div>
   );
 }
 
 export default function DataGapsPage({ loaderData }: Route.ComponentProps) {
   return (
     <Page title="Data gaps" icon={<TbChartBarOff />}>
-      <Stack h="full">
-        {loaderData.messages.length === 0 && (
-          <Center h="full">
-            <EmptyState.Root maxW="md">
-              <EmptyState.Content>
-                <EmptyState.Indicator>
-                  <TbCheck />
-                </EmptyState.Indicator>
-                <VStack textAlign="center">
-                  <EmptyState.Title>No data gaps</EmptyState.Title>
-                  <EmptyState.Description>
-                    You are sorted! There are no data gaps found in the last
-                    week. If you have not yet integrated the chatbot, integrate
-                    it now so it finds the data gaps automatically.
-                  </EmptyState.Description>
-                </VStack>
-              </EmptyState.Content>
-            </EmptyState.Root>
-          </Center>
-        )}
-        {loaderData.messages.length > 0 && (
-          <Stack gap={4}>
-            <Text opacity={0.5}>
-              Following are the topics that are asked to the chat bot but no
-              significant information is found in the knowledge base. It is
-              worth to take a look at these topics and either add it your
-              knowledge base (or the external documentation) or delete it if it
-              is not appropriate or signification.
-            </Text>
-            <Stack gap={4}>
-              {loaderData.messages.map((message) => (
-                <DataGapCard key={message.id} message={message} />
-              ))}
-            </Stack>
-          </Stack>
-        )}
-      </Stack>
+      {loaderData.messages.length === 0 && (
+        <div className="w-full h-full flex justify-center items-center">
+          <EmptyState
+            icon={<TbCheck />}
+            title="No data gaps"
+            description="You are sorted! There are no data gaps found in the last week. If you have not yet integrated the chatbot, integrate it now so it finds the data gaps automatically."
+          />
+        </div>
+      )}
+      {loaderData.messages.length > 0 && (
+        <div className="flex flex-col gap-4">
+          <div className="text-base-content/50">
+            Following are the topics that are asked to the chat bot but no
+            significant information is found in the knowledge base. It is worth
+            to take a look at these topics and either add it your knowledge base
+            (or the external documentation) or delete it if it is not
+            appropriate or signification.
+          </div>
+          <div className="flex flex-col gap-4">
+            {loaderData.messages.map((message) => (
+              <DataGapCard key={message.id} message={message} />
+            ))}
+          </div>
+        </div>
+      )}
     </Page>
   );
 }

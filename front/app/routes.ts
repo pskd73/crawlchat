@@ -38,12 +38,8 @@ export default [
     route("tickets", "tickets/list.tsx"),
     route("tickets/settings", "tickets/settings.tsx"),
 
-    layout("message/layout.tsx", [
-      ...prefix("messages", [
-        index("message/messages.tsx"),
-        route(":queryMessageId", "message/message.tsx"),
-      ]),
-    ]),
+    route("messages", "message/messages.tsx"),
+    route("messages/:queryMessageId", "message/message.tsx"),
 
     route("connect", "integrations/page.tsx", [
       index("integrations/customise.tsx"),
@@ -65,13 +61,9 @@ export default [
 
     route("setup-progress", "dashboard/setup-progress-api.ts"),
 
-    layout("actions/layout.tsx", [
-      ...prefix("actions", [
-        index("actions/list.tsx"),
-        route("new", "actions/new.tsx"),
-        route(":actionId", "actions/edit.tsx"),
-      ]),
-    ]),
+    route("actions", "actions/list.tsx"),
+    route("actions/new", "actions/new.tsx"),
+    route("actions/:actionId", "actions/edit.tsx"),
 
     route("data-gaps", "data-gaps/page.tsx"),
   ]),
@@ -90,9 +82,7 @@ export default [
     route("pricing", "landing/pricing.tsx"),
   ]),
 
-  ...prefix("admin-fowl", [
-    index("admin/page.tsx"),
-  ]),
+  ...prefix("admin-fowl", [index("admin/page.tsx")]),
 
   route("email-alert", "email-alert.ts"),
 

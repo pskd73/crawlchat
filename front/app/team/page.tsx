@@ -1,37 +1,26 @@
-import {
-  Badge,
-  Dialog,
-  Group,
-  IconButton,
-  Input,
-  Portal,
-  Spinner,
-  Stack,
-  Table,
-  Text,
-} from "@chakra-ui/react";
+import type { Route } from "./+types/page";
 import {
   TbCheck,
   TbCrown,
   TbLogout2,
-  TbPlus,
   TbShield,
   TbTrash,
   TbUser,
+  TbUserPlus,
   TbUsers,
+  TbUserX,
 } from "react-icons/tb";
 import { Page } from "~/components/page";
-import type { Route } from "./+types/page";
 import { getAuthUser } from "~/auth/middleware";
 import { authoriseScrapeUser, getSessionScrapeId } from "~/scrapes/util";
 import { prisma, type ScrapeUser } from "libs/prisma";
 import { redirect, useFetcher } from "react-router";
 import { useEffect, useState } from "react";
-import { toaster } from "~/components/ui/toaster";
-import { Button } from "~/components/ui/button";
 import { sendInvitationEmail, sendTeamJoinEmail } from "~/email";
 import { getLimits } from "libs/user-plan";
-import { SingleLineCell } from "~/components/single-line-cell";
+import { hideModal, showModal } from "~/components/daisy-utils";
+import toast from "react-hot-toast";
+import cn from "@meltdownjs/cn";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -208,177 +197,140 @@ export async function action({ request }: Route.ActionArgs) {
 function RoleBadge({ role }: { role: string }) {
   if (role === "owner") {
     return (
-      <Badge variant={"subtle"} colorPalette={"brand"}>
+      <span className="badge badge-primary">
         <TbCrown />
         OWNER
-      </Badge>
+      </span>
     );
   }
   if (role === "admin") {
     return (
-      <Badge variant={"subtle"} colorPalette={"brand"}>
+      <span className="badge badge-neutral">
         <TbShield />
         ADMIN
-      </Badge>
+      </span>
     );
   }
   return (
-    <Badge variant={"subtle"}>
+    <span className="badge">
       <TbUser />
       {role.toUpperCase()}
-    </Badge>
+    </span>
   );
 }
 
 function DeleteUser({
   scrapeUser,
-  disabled,
+  onClose,
 }: {
-  scrapeUser: ScrapeUser;
-  disabled: boolean;
+  scrapeUser?: ScrapeUser;
+  onClose: () => void;
 }) {
   const fetcher = useFetcher();
-  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     if (!fetcher.data) return;
 
+    onClose();
     if (fetcher.data?.error) {
-      toaster.error({
-        title: "Error",
-        description: fetcher.data.error,
-      });
+      toast.error(fetcher.data.error);
     }
 
     if (fetcher.data.success) {
-      setOpen(false);
-      toaster.success({
-        title: "Success",
-        description: "Deleted the user",
-      });
+      toast.success("Deleted the user");
     }
   }, [fetcher.data]);
 
   return (
-    <Dialog.Root open={open} onOpenChange={(details) => setOpen(details.open)}>
-      <Dialog.Trigger asChild>
-        <IconButton variant={"subtle"} size={"sm"}>
-          <TbTrash />
-        </IconButton>
-      </Dialog.Trigger>
-      <Portal>
-        <Dialog.Backdrop />
-        <Dialog.Positioner>
-          <Dialog.Content>
-            <fetcher.Form method="post">
-              <input type="hidden" name="intent" value="delete" />
-              <input type="hidden" name="scrapeUserId" value={scrapeUser.id} />
-              <Dialog.Header>
-                <Dialog.Title>Delete team member</Dialog.Title>
-              </Dialog.Header>
-              <Dialog.Body>
-                <Stack gap={4}>
-                  <p>
-                    Are you sure you want to delete{" "}
-                    <Text as={"span"} fontWeight={"bold"}>
-                      {scrapeUser.email}
-                    </Text>
-                    ?
-                  </p>
-                </Stack>
-              </Dialog.Body>
-              <Dialog.Footer>
-                <Dialog.ActionTrigger
-                  asChild
-                  disabled={fetcher.state !== "idle"}
-                >
-                  <Button variant="outline">Cancel</Button>
-                </Dialog.ActionTrigger>
-                <Button
-                  type="submit"
-                  loading={fetcher.state !== "idle"}
-                  colorPalette={"red"}
-                >
-                  Delete
-                  <TbTrash />
-                </Button>
-              </Dialog.Footer>
-            </fetcher.Form>
-          </Dialog.Content>
-        </Dialog.Positioner>
-      </Portal>
-    </Dialog.Root>
+    <dialog id="delete-modal" className="modal">
+      <fetcher.Form method="post">
+        <input type="hidden" name="intent" value="delete" />
+        <input type="hidden" name="scrapeUserId" value={scrapeUser?.id} />
+        <div className="modal-box">
+          <h3 className="font-bold text-lg flex items-center gap-2">
+            <TbUserX />
+            Confirm
+          </h3>
+          <p className="py-4">
+            Are you sure you want to delete{" "}
+            <span className="font-bold">{scrapeUser?.email}</span>?
+          </p>
+          <div className="modal-action">
+            <form method="dialog">
+              <button className="btn">Close</button>
+            </form>
+            <button
+              className="btn btn-error"
+              type="submit"
+              disabled={fetcher.state !== "idle"}
+            >
+              {fetcher.state !== "idle" && (
+                <span className="loading loading-spinner" />
+              )}
+              Delete
+              <TbTrash />
+            </button>
+          </div>
+        </div>
+      </fetcher.Form>
+    </dialog>
   );
 }
 
 function Invite() {
   const fetcher = useFetcher();
-  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     if (!fetcher.data) return;
 
+    hideModal("invite-modal");
     if (fetcher.data?.error) {
-      toaster.error({
-        title: "Error",
-        description: fetcher.data.error,
-      });
+      toast.error(fetcher.data.error);
     } else {
-      setOpen(false);
-      toaster.success({
-        title: "Success",
-        description: "Invited the user",
-      });
+      toast.success("Invited the user");
     }
   }, [fetcher.data]);
 
   return (
-    <Dialog.Root open={open} onOpenChange={(details) => setOpen(details.open)}>
-      <Dialog.Trigger asChild>
-        <Button variant={"subtle"}>
-          Invite
-          <TbPlus />
-        </Button>
-      </Dialog.Trigger>
-      <Portal>
-        <Dialog.Backdrop />
-        <Dialog.Positioner>
-          <Dialog.Content>
-            <fetcher.Form method="post">
-              <input type="hidden" name="intent" value="invite" />
-              <Dialog.Header>
-                <Dialog.Title>Invite team member</Dialog.Title>
-              </Dialog.Header>
-              <Dialog.Body>
-                <Stack gap={4}>
-                  <p>
-                    Give your team members email. They will be notified via
-                    email if they have not signed up yet.
-                  </p>
-                  <Input
-                    placeholder="team-member@example.com"
-                    name="email"
-                    required
-                  />
-                </Stack>
-              </Dialog.Body>
-              <Dialog.Footer>
-                <Dialog.ActionTrigger
-                  asChild
-                  disabled={fetcher.state !== "idle"}
-                >
-                  <Button variant="outline">Cancel</Button>
-                </Dialog.ActionTrigger>
-                <Button type="submit" loading={fetcher.state !== "idle"}>
-                  Invite
-                  <TbCheck />
-                </Button>
-              </Dialog.Footer>
-            </fetcher.Form>
-          </Dialog.Content>
-        </Dialog.Positioner>
-      </Portal>
-    </Dialog.Root>
+    <dialog id="invite-modal" className="modal">
+      <fetcher.Form method="post">
+        <input type="hidden" name="intent" value="invite" />
+        <div className="modal-box">
+          <h3 className="font-bold text-lg flex items-center gap-2">
+            <TbUserPlus />
+            Invite team member
+          </h3>
+          <div className="py-4 flex flex-col gap-2">
+            <p>
+              Give your team members email. They will be notified via email if
+              they have not signed up yet.
+            </p>
+            <input
+              className="input w-full"
+              placeholder="Ex: team-member@example.com"
+              name="email"
+              required
+            />
+          </div>
+          <div className="modal-action">
+            <form method="dialog">
+              <button className="btn">Close</button>
+            </form>
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={fetcher.state !== "idle"}
+            >
+              {fetcher.state !== "idle" && (
+                <span className="loading loading-spinner" />
+              )}
+              Invite
+              <TbCheck />
+            </button>
+          </div>
+        </div>
+      </fetcher.Form>
+    </dialog>
   );
 }
 
@@ -391,131 +343,148 @@ function Leave({ scrapeTitle }: { scrapeTitle: string }) {
 
     setOpen(false);
     if (fetcher.data?.error) {
-      toaster.error({
-        title: "Error",
-        description: fetcher.data.error,
-      });
+      toast.error(fetcher.data.error);
     } else {
-      toaster.success({
-        title: "Success",
-        description: "You are removed from the team",
-      });
+      toast.success("You are removed from the team");
     }
   }, [fetcher.data]);
 
   return (
-    <Dialog.Root open={open} onOpenChange={(details) => setOpen(details.open)}>
-      <Dialog.Trigger asChild>
-        <Button variant={"subtle"} colorPalette={"red"}>
-          Leave
-          <TbLogout2 />
-        </Button>
-      </Dialog.Trigger>
-      <Portal>
-        <Dialog.Backdrop />
-        <Dialog.Positioner>
-          <Dialog.Content>
-            <fetcher.Form method="post">
-              <input type="hidden" name="intent" value="leave" />
-              <Dialog.Header>
-                <Dialog.Title>Leave team</Dialog.Title>
-              </Dialog.Header>
-              <Dialog.Body>
-                <Stack gap={4}>
-                  <p>
-                    Are you sure you want to leave the{" "}
-                    <Text as={"span"} fontWeight={"bold"}>
-                      {scrapeTitle}
-                    </Text>
-                    ?
-                  </p>
-                </Stack>
-              </Dialog.Body>
-              <Dialog.Footer>
-                <Dialog.ActionTrigger
-                  asChild
-                  disabled={fetcher.state !== "idle"}
-                >
-                  <Button variant="outline">Cancel</Button>
-                </Dialog.ActionTrigger>
-                <Button
-                  type="submit"
-                  loading={fetcher.state !== "idle"}
-                  colorPalette={"red"}
-                >
-                  Leave
-                  <TbCheck />
-                </Button>
-              </Dialog.Footer>
-            </fetcher.Form>
-          </Dialog.Content>
-        </Dialog.Positioner>
-      </Portal>
-    </Dialog.Root>
+    <dialog id="leave-modal" className="modal">
+      <fetcher.Form method="post">
+        <input type="hidden" name="intent" value="leave" />
+        <div className="modal-box">
+          <h3 className="font-bold text-lg flex items-center gap-2">
+            <TbLogout2 />
+            Leave team
+          </h3>
+          <p className="py-4">
+            Are you sure you want to leave the{" "}
+            <span className="font-bold">{scrapeTitle}</span>?
+          </p>
+          <div className="modal-action">
+            <form method="dialog">
+              <button className="btn">Close</button>
+            </form>
+            <button
+              className="btn btn-error"
+              type="submit"
+              disabled={fetcher.state !== "idle"}
+            >
+              {fetcher.state !== "idle" && (
+                <span className="loading loading-spinner" />
+              )}
+              Leave
+            </button>
+          </div>
+        </div>
+      </fetcher.Form>
+    </dialog>
   );
 }
 
 export default function TeamPage({ loaderData }: Route.ComponentProps) {
-  const canDeleteUser = ["owner", "admin"].includes(loaderData.scrapeUser.role);
+  const [deleteScrapeUser, setDeleteScrapeUser] = useState<ScrapeUser>();
+  const canRemove = ["owner", "admin"].includes(loaderData.scrapeUser.role);
+  const canLeave = loaderData.scrapeUser.role !== "owner";
+
+  useEffect(() => {
+    if (deleteScrapeUser) {
+      showModal("delete-modal");
+    } else {
+      hideModal("delete-modal");
+    }
+  }, [deleteScrapeUser]);
 
   return (
     <Page
       title="Team"
       icon={<TbUsers />}
       right={
-        <Group>
-          <Invite />
-          <Leave scrapeTitle={loaderData.scrape!.title ?? "Team"} />
-        </Group>
+        <>
+          <button
+            className="btn btn-primary btn-soft"
+            onClick={() => {
+              showModal("invite-modal");
+            }}
+          >
+            <TbUserPlus />
+            Invite
+          </button>
+          {canLeave && (
+            <button
+              className="btn btn-error btn-soft"
+              onClick={() => {
+                showModal("leave-modal");
+              }}
+            >
+              <TbLogout2 />
+              Leave
+            </button>
+          )}
+        </>
       }
     >
-      <Stack gap={4}>
-        <Text opacity={0.5}>
+      <div className="flex flex-col gap-4">
+        <p className="text-base-content/50">
           Invite your team members and manage their access.
-        </Text>
-        <Table.Root>
-          <Table.Header>
-            <Table.Row>
-              <Table.ColumnHeader>Email</Table.ColumnHeader>
-              <Table.ColumnHeader>Role</Table.ColumnHeader>
-              <Table.ColumnHeader textAlign="end">
-                Date added
-              </Table.ColumnHeader>
-              <Table.ColumnHeader textAlign="end">Actions</Table.ColumnHeader>
-            </Table.Row>
-          </Table.Header>
-          <Table.Body>
-            {loaderData.scrapeUsers.map((scrapeUser) => (
-              <Table.Row key={scrapeUser.id}>
-                <Table.Cell>
-                  <SingleLineCell>
+        </p>
+        <div
+          className={cn(
+            "overflow-x-auto border border-base-300",
+            "rounded-box bg-base-200/50 shadow"
+          )}
+        >
+          <table className="table">
+            <thead>
+              <tr>
+                <th>Email</th>
+                <th>Role</th>
+                <th className="text-right">Added date</th>
+                <th className="text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loaderData.scrapeUsers.map((scrapeUser) => (
+                <tr key={scrapeUser.id}>
+                  <td>
                     {scrapeUser.email}
                     {scrapeUser.invited && (
-                      <Text opacity={0.5} as={"span"} ml={2}>
+                      <span className="ml-2 text-base-content/50">
                         [Invited]
-                      </Text>
+                      </span>
                     )}
-                  </SingleLineCell>
-                </Table.Cell>
-                <Table.Cell>
-                  <RoleBadge role={scrapeUser.role} />
-                </Table.Cell>
-                <Table.Cell textAlign="end">
-                  {scrapeUser.createdAt.toLocaleDateString()}
-                </Table.Cell>
-                <Table.Cell textAlign="end">
-                  {scrapeUser.role !== "owner" && (
-                    <DeleteUser
-                      scrapeUser={scrapeUser}
-                      disabled={!canDeleteUser}
-                    />
-                  )}
-                </Table.Cell>
-              </Table.Row>
-            ))}
-          </Table.Body>
-        </Table.Root>
-      </Stack>
+                  </td>
+                  <td>
+                    <RoleBadge role={scrapeUser.role} />
+                  </td>
+                  <td className="text-right">
+                    {scrapeUser.createdAt.toLocaleDateString()}
+                  </td>
+                  <td className="text-right">
+                    <button
+                      className="btn btn-square btn-error btn-sm"
+                      disabled={scrapeUser.role === "owner" || !canRemove}
+                      onClick={() => {
+                        setDeleteScrapeUser(scrapeUser);
+                      }}
+                    >
+                      <TbTrash />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <Invite />
+      <DeleteUser
+        scrapeUser={deleteScrapeUser}
+        onClose={() => setDeleteScrapeUser(undefined)}
+      />
+      <Leave scrapeTitle={loaderData.scrape!.title ?? "Team"} />
     </Page>
   );
 }

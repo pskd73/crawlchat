@@ -1,23 +1,11 @@
-import {
-  Input,
-  Stack,
-  Group,
-  RadioCard,
-  HStack,
-  Icon,
-  Checkbox,
-  Text,
-  FileUpload as ChakraFileUpload,
-  IconButton,
-  Box,
-  Flex,
-} from "@chakra-ui/react";
+import type { Route } from "./+types/new-group";
+import type { KnowledgeGroupStatus, KnowledgeGroupType } from "libs/prisma";
+import type { FileUpload } from "@mjackson/form-data-parser";
 import {
   TbBook2,
   TbBrandGithub,
   TbBrandNotion,
   TbCheck,
-  TbTrash,
   TbUpload,
   TbWorld,
 } from "react-icons/tb";
@@ -25,16 +13,13 @@ import { SiDocusaurus } from "react-icons/si";
 import { redirect, useFetcher } from "react-router";
 import { getAuthUser } from "~/auth/middleware";
 import { Page } from "~/components/page";
-import { Button } from "~/components/ui/button";
-import { Field } from "~/components/ui/field";
 import { createToken } from "libs/jwt";
-import type { Route } from "./+types/new-group";
+import { parseFormData } from "@mjackson/form-data-parser";
 import { useEffect, useMemo, useState } from "react";
 import { prisma } from "~/prisma";
 import { authoriseScrapeUser, getSessionScrapeId } from "~/scrapes/util";
-import type { KnowledgeGroupStatus, KnowledgeGroupType } from "libs/prisma";
-import { type FileUpload, parseFormData } from "@mjackson/form-data-parser";
-import { toaster } from "~/components/ui/toaster";
+import { RadioCard } from "~/components/radio-card";
+import toast from "react-hot-toast";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -251,13 +236,11 @@ export default function NewScrape({ loaderData }: Route.ComponentProps) {
 
   useEffect(() => {
     if (scrapeFetcher.data?.error) {
-      toaster.error({
-        title: "Error",
-        description:
-          scrapeFetcher.data.error ??
+      toast.error(
+        scrapeFetcher.data.error ??
           scrapeFetcher.data.message ??
-          "Unknown error",
-      });
+          "Unknown error"
+      );
     }
   }, [scrapeFetcher.data]);
 
@@ -267,220 +250,165 @@ export default function NewScrape({ loaderData }: Route.ComponentProps) {
 
   return (
     <Page title="New knowledge group" icon={<TbBook2 />}>
-      <Stack maxW={"1200px"} w={"full"}>
-        <scrapeFetcher.Form method="post" encType="multipart/form-data">
-          <Stack gap={4}>
-            <RadioCard.Root
-              name="type"
-              value={type}
-              onValueChange={(value) =>
-                setType(value.value as KnowledgeGroupType)
-              }
-            >
-              <Flex
-                align="stretch"
-                flexDir={["column", "column", "row"]}
-                gap={2}
-              >
-                {types.map((item) => (
-                  <RadioCard.Item key={item.value} value={item.value}>
-                    <RadioCard.ItemHiddenInput />
-                    <RadioCard.ItemControl>
-                      <RadioCard.ItemContent>
-                        <Icon fontSize="2xl" color="fg.muted" mb="2">
-                          {item.icon}
-                        </Icon>
-                        <RadioCard.ItemText>{item.title}</RadioCard.ItemText>
-                        <RadioCard.ItemDescription>
-                          {item.description}
-                        </RadioCard.ItemDescription>
-                      </RadioCard.ItemContent>
-                      <RadioCard.ItemIndicator />
-                    </RadioCard.ItemControl>
-                  </RadioCard.Item>
-                ))}
-              </Flex>
-            </RadioCard.Root>
+      <scrapeFetcher.Form method="post" encType="multipart/form-data">
+        <div className="flex flex-col gap-2">
+          <RadioCard
+            name="type"
+            value={type}
+            onChange={(value) => setType(value)}
+            options={types.map((item) => ({
+              label: item.title,
+              value: item.value,
+              description: item.description,
+              icon: item.icon,
+            }))}
+          />
 
-            <Text opacity={0.5}>{getDescription(type)}</Text>
+          <p className="text-base-content/50 mt-2">{getDescription(type)}</p>
 
-            <Field label="Name" required>
-              <Input
+          <fieldset className="fieldset">
+            <legend className="fieldset-legend">Name</legend>
+            <input
+              type="text"
+              className="input w-full"
+              required
+              placeholder="Ex: Documentation"
+              name="title"
+              disabled={scrapeFetcher.state !== "idle"}
+            />
+          </fieldset>
+
+          {type === "scrape_web" && (
+            <>
+              <fieldset className="fieldset">
+                <legend className="fieldset-legend">URL</legend>
+                <input
+                  className="input w-full"
+                  type="url"
+                  required
+                  pattern="^https?://.+"
+                  placeholder="https://example.com"
+                  name="url"
+                  disabled={scrapeFetcher.state !== "idle"}
+                />
+              </fieldset>
+
+              <label className="label">
+                <input
+                  type="checkbox"
+                  name="prefix"
+                  defaultChecked
+                  className="toggle"
+                />
+                Match exact prefix
+              </label>
+            </>
+          )}
+
+          {type === "upload" && (
+            <>
+              <input type="hidden" name="url" value="file" />
+              <input
+                type="file"
+                name="file"
                 required
-                placeholder="Ex: Documentation"
-                name="title"
+                className="file-input w-full"
+                accept={
+                  "application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,text/plain,text/markdown"
+                }
+                multiple
                 disabled={scrapeFetcher.state !== "idle"}
               />
-            </Field>
+            </>
+          )}
 
-            {type === "scrape_web" && (
-              <>
-                <Field label="URL" required>
-                  <Input
-                    required
-                    pattern="^https?://.+"
-                    placeholder="https://example.com"
-                    name="url"
-                    disabled={scrapeFetcher.state !== "idle"}
-                  />
-                </Field>
-
-                <Checkbox.Root name="prefix" defaultChecked>
-                  <Checkbox.HiddenInput />
-                  <Checkbox.Control>
-                    <Checkbox.Indicator />
-                  </Checkbox.Control>
-                  <Checkbox.Label>Match exact prefix</Checkbox.Label>
-                </Checkbox.Root>
-              </>
-            )}
-
-            {type === "upload" && (
-              <>
-                <input type="hidden" name="url" value="file" />
-                <ChakraFileUpload.Root
-                  maxFiles={5}
-                  maxFileSize={1024 * 1024 * 10}
-                  w="full"
+          {type === "docusaurus" && (
+            <>
+              <fieldset className="fieldset">
+                <legend className="fieldset-legend">Docs URL</legend>
+                <input
+                  className="input w-full"
+                  type="url"
+                  required
+                  pattern="^https?://.+"
+                  placeholder="https://example.com/docs"
+                  name="url"
                   disabled={scrapeFetcher.state !== "idle"}
-                  accept={[
-                    "application/pdf",
-                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                    "application/vnd.ms-powerpoint",
-                    "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-                    "text/plain",
-                    "text/markdown",
-                  ]}
-                >
-                  <ChakraFileUpload.HiddenInput name="file" required />
-                  <ChakraFileUpload.Dropzone w="full">
-                    <Icon size="md" color="fg.muted">
-                      <TbUpload />
-                    </Icon>
-                    <ChakraFileUpload.DropzoneContent>
-                      <Box>Drag and drop files here</Box>
-                      <Box color="fg.muted">.pdf, .docx, .pptx up to 5MB</Box>
-                    </ChakraFileUpload.DropzoneContent>
-                  </ChakraFileUpload.Dropzone>
-                  <ChakraFileUpload.ItemGroup>
-                    <ChakraFileUpload.Context>
-                      {({ acceptedFiles }) =>
-                        acceptedFiles.map((file, i) => (
-                          <ChakraFileUpload.Item
-                            key={i}
-                            file={file}
-                            justifyContent={"space-between"}
-                          >
-                            <Group>
-                              <ChakraFileUpload.ItemName />
-                              <ChakraFileUpload.ItemSizeText />
-                            </Group>
-                            <Group>
-                              <ChakraFileUpload.ItemDeleteTrigger asChild>
-                                <IconButton variant="outline" size="sm">
-                                  <TbTrash />
-                                </IconButton>
-                              </ChakraFileUpload.ItemDeleteTrigger>
-                            </Group>
-                          </ChakraFileUpload.Item>
-                        ))
-                      }
-                    </ChakraFileUpload.Context>
-                  </ChakraFileUpload.ItemGroup>
-                </ChakraFileUpload.Root>
-              </>
-            )}
-
-            {type === "docusaurus" && (
-              <>
-                <Field label="Docs URL" required>
-                  <Input
-                    required
-                    pattern="^https?://.+"
-                    placeholder="https://example.com/docs"
-                    name="url"
-                    disabled={scrapeFetcher.state !== "idle"}
-                  />
-                </Field>
-                <Field label="Versions to skip">
-                  <Input
-                    placeholder="Ex: 1.0.0, 1.1.0, 2.x"
-                    name="versionsToSkip"
-                    disabled={scrapeFetcher.state !== "idle"}
-                  />
-                </Field>
-                <input
-                  type="hidden"
-                  name="removeHtmlTags"
-                  value="nav,aside,footer,header,.theme-announcement-bar"
                 />
-                <input type="hidden" name="prefix" value="on" />
+              </fieldset>
+              <fieldset className="fieldset">
+                <legend className="fieldset-legend">Versions to skip</legend>
                 <input
-                  type="hidden"
-                  name="skipPageRegex"
-                  value="/docs/[0-9x]+\.[0-9x]+\.[0-9x]+,/docs/next"
+                  className="input w-full"
+                  type="text"
+                  placeholder="Ex: 1.0.0, 1.1.0, 2.x"
+                  name="versionsToSkip"
+                  disabled={scrapeFetcher.state !== "idle"}
                 />
-                <input type="hidden" name="subType" value="docusaurus" />
-              </>
-            )}
+              </fieldset>
+              <input
+                type="hidden"
+                name="removeHtmlTags"
+                value="nav,aside,footer,header,.theme-announcement-bar"
+              />
+              <input type="hidden" name="prefix" value="on" />
+              <input
+                type="hidden"
+                name="skipPageRegex"
+                value="/docs/[0-9x]+\.[0-9x]+\.[0-9x]+,/docs/next"
+              />
+              <input type="hidden" name="subType" value="docusaurus" />
+            </>
+          )}
 
-            {type === "scrape_github" && (
-              <>
-                <Group gap={4}>
-                  <Field label="GitHub Repo URL" required>
-                    <Input
-                      name="githubRepoUrl"
-                      placeholder="https://github.com/user/repo"
-                      pattern="^https://github.com/.+$"
-                      required
-                    />
-                  </Field>
+          {type === "github_issues" && (
+            <>
+              <fieldset className="fieldset">
+                <legend className="fieldset-legend">GitHub Repo URL</legend>
+                <input
+                  type="url"
+                  className="input w-full"
+                  name="githubRepoUrl"
+                  placeholder="https://github.com/user/repo"
+                  pattern="^https://github.com/.+$"
+                  required
+                />
+              </fieldset>
+            </>
+          )}
 
-                  <Field label="Branch name" required defaultValue={"main"}>
-                    <Input name="githubBranch" placeholder="main" />
-                  </Field>
-                </Group>
-              </>
-            )}
+          {type === "notion" && (
+            <>
+              <fieldset className="fieldset">
+                <legend className="fieldset-legend">
+                  Internal Integration Secret
+                </legend>
+                <input
+                  className="input w-full"
+                  type="text"
+                  name="notionSecret"
+                  placeholder="Ex: ntn_xxxxx"
+                  required
+                />
+              </fieldset>
+            </>
+          )}
 
-            {type === "github_issues" && (
-              <>
-                <Field label="GitHub Repo URL" required>
-                  <Input
-                    name="githubRepoUrl"
-                    placeholder="https://github.com/user/repo"
-                    pattern="^https://github.com/.+$"
-                    required
-                  />
-                </Field>
-              </>
-            )}
-
-            {type === "notion" && (
-              <>
-                <Field label="Internal Integration Secret" required>
-                  <Input
-                    name="notionSecret"
-                    placeholder="Ex: ntn_xxxxx"
-                    required
-                  />
-                </Field>
-              </>
-            )}
-
-            <Group justifyContent={"flex-end"}>
-              <Button
-                type="submit"
-                loading={scrapeFetcher.state !== "idle"}
-                colorPalette={"brand"}
-              >
-                Create
-                <TbCheck />
-              </Button>
-            </Group>
-          </Stack>
-        </scrapeFetcher.Form>
-      </Stack>
+          <div className="flex justify-end">
+            <button
+              className="btn btn-primary"
+              type="submit"
+              disabled={scrapeFetcher.state !== "idle"}
+            >
+              {scrapeFetcher.state !== "idle" && (
+                <span className="loading loading-spinner" />
+              )}
+              Create
+              <TbCheck />
+            </button>
+          </div>
+        </div>
+      </scrapeFetcher.Form>
     </Page>
   );
 }

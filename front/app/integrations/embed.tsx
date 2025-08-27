@@ -1,13 +1,5 @@
-import {
-  Box,
-  Code,
-  createListCollection,
-  Group,
-  HStack,
-  SegmentGroup,
-  Stack,
-  Text,
-} from "@chakra-ui/react";
+import type { Route } from "./+types/embed";
+import type { WidgetConfig, WidgetSize } from "libs/prisma";
 import { prisma } from "~/prisma";
 import { getAuthUser } from "~/auth/middleware";
 import {
@@ -16,21 +8,10 @@ import {
   SettingsSectionProvider,
 } from "~/settings-section";
 import { useFetcher } from "react-router";
-import {
-  SelectContent,
-  SelectItem,
-  SelectRoot,
-  SelectTrigger,
-  SelectValueText,
-} from "~/components/ui/select";
-import type { WidgetConfig, WidgetSize } from "libs/prisma";
-import { TbCode } from "react-icons/tb";
 import { useMemo, useState } from "react";
-import { ClipboardIconButton, ClipboardRoot } from "~/components/ui/clipboard";
-import type { Route } from "./+types/embed";
 import { authoriseScrapeUser, getSessionScrapeId } from "~/scrapes/util";
-import { Switch } from "~/components/ui/switch";
-import { SiDocusaurus } from "react-icons/si";
+import { MarkdownProse } from "~/widget/markdown-prose";
+import { Select } from "~/components/select";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -99,13 +80,6 @@ export async function action({ request }: Route.ActionArgs) {
   return null;
 }
 
-const sizes = createListCollection({
-  items: [
-    { label: "Small", value: "small" },
-    { label: "Large", value: "large" },
-  ],
-});
-
 function makeScriptCode(scrapeId: string) {
   if (typeof window === "undefined") {
     return { script: "", docusaurusConfig: "" };
@@ -133,13 +107,6 @@ function makeScriptCode(scrapeId: string) {
   return { script, docusaurusConfig };
 }
 
-const widgetConfigTabs = createListCollection({
-  items: [
-    { label: "Code", value: "code", icon: <TbCode /> },
-    { label: "Docusaurus", value: "docusaurus", icon: <SiDocusaurus /> },
-  ],
-});
-
 export default function ScrapeEmbed({ loaderData }: Route.ComponentProps) {
   const sizeFetcher = useFetcher();
   const privateFetcher = useFetcher();
@@ -157,98 +124,40 @@ export default function ScrapeEmbed({ loaderData }: Route.ComponentProps) {
           title="Embed Ask AI"
           description="Copy paste the <script> tag below to your website."
         >
-          <Group alignItems={"flex-start"} gap={10}>
-            <Stack flex={1}>
-              <Box>
-                <SegmentGroup.Root
-                  value={tab}
-                  onValueChange={(e) =>
-                    setTab(e.value as "code" | "docusaurus")
-                  }
-                >
-                  <SegmentGroup.Indicator />
-                  {widgetConfigTabs.items.map((item) => (
-                    <SegmentGroup.Item key={item.value} value={item.value}>
-                      <SegmentGroup.ItemText>
-                        <HStack>
-                          {item.icon}
-                          {item.label}
-                        </HStack>
-                      </SegmentGroup.ItemText>
-                      <SegmentGroup.ItemHiddenInput />
-                    </SegmentGroup.Item>
-                  ))}
-                </SegmentGroup.Root>
-              </Box>
+          <div className="flex flex-col gap-2 flex-1">
+            <div className="tabs tabs-lift">
+              <input
+                type="radio"
+                name="embed-code"
+                className="tab"
+                aria-label="Code"
+              />
+              <div className="tab-content bg-base-100 border-base-300 p-6">
+                <MarkdownProse>
+                  {`\`\`\`json
+${scriptCode.script}
+\`\`\`
+`}
+                </MarkdownProse>
+              </div>
 
-              {tab === "code" && (
-                <Stack>
-                  <Stack
-                    flex={1}
-                    border={"1px solid"}
-                    borderColor="brand.outline"
-                    rounded={"md"}
-                    alignSelf={"stretch"}
-                  >
-                    <Stack
-                      p={4}
-                      h="full"
-                      alignItems={"flex-start"}
-                      flexDir={"column"}
-                    >
-                      <Text fontSize={"sm"} flex={1} whiteSpace={"pre-wrap"}>
-                        {scriptCode.script}
-                      </Text>
-
-                      <Group justifyContent={"flex-end"} w="full">
-                        <ClipboardRoot value={scriptCode.script}>
-                          <ClipboardIconButton />
-                        </ClipboardRoot>
-                      </Group>
-                    </Stack>
-                  </Stack>
-                  <Text fontSize={"sm"}>
-                    Copy and paste the above code inside the{" "}
-                    <Code>&lt;head&gt;</Code> tag of your website to embed the
-                    widget.
-                  </Text>
-                </Stack>
-              )}
-
-              {tab === "docusaurus" && (
-                <Stack>
-                  <Stack
-                    flex={1}
-                    border={"1px solid"}
-                    borderColor="brand.outline"
-                    rounded={"md"}
-                    alignSelf={"stretch"}
-                  >
-                    <Stack
-                      p={4}
-                      h="full"
-                      alignItems={"flex-start"}
-                      flexDir={"column"}
-                    >
-                      <Text fontSize={"sm"} flex={1} whiteSpace={"pre-wrap"}>
-                        {scriptCode.docusaurusConfig}
-                      </Text>
-
-                      <Group justifyContent={"flex-end"} w="full">
-                        <ClipboardRoot value={scriptCode.docusaurusConfig}>
-                          <ClipboardIconButton />
-                        </ClipboardRoot>
-                      </Group>
-                    </Stack>
-                  </Stack>
-                  <Text fontSize={"sm"}>
-                    Copy and paste the above config inside your{" "}
-                    <Code>docusaurus.config.js</Code> file to embed the widget.
-                  </Text>
-                </Stack>
-              )}
-            </Stack>
-          </Group>
+              <input
+                type="radio"
+                name="embed-code"
+                className="tab"
+                aria-label="Docusaurus"
+                defaultChecked
+              />
+              <div className="tab-content bg-base-100 border-base-300 p-6">
+                <MarkdownProse>
+                  {`\`\`\`json
+${scriptCode.docusaurusConfig}
+\`\`\`
+`}
+                </MarkdownProse>
+              </div>
+            </div>
+          </div>
         </SettingsSection>
 
         <SettingsSection
@@ -258,10 +167,15 @@ export default function ScrapeEmbed({ loaderData }: Route.ComponentProps) {
           fetcher={privateFetcher}
         >
           <input type="hidden" name="from-private" value={"true"} />
-          <Switch
-            name="private"
-            defaultChecked={loaderData.scrape?.widgetConfig?.private ?? false}
-          />
+          <label className="label">
+            <input
+              type="checkbox"
+              className="toggle"
+              name="private"
+              defaultChecked={loaderData.scrape?.widgetConfig?.private ?? false}
+            />
+            Active
+          </label>
         </SettingsSection>
 
         <SettingsSection
@@ -270,23 +184,15 @@ export default function ScrapeEmbed({ loaderData }: Route.ComponentProps) {
           description="Set the size of the widget to be when it's embedded on your website"
           fetcher={sizeFetcher}
         >
-          <SelectRoot
-            collection={sizes}
-            maxW="320px"
+          <Select
+            label="Size"
+            options={[
+              { label: "Small", value: "small" },
+              { label: "Large", value: "large" },
+            ]}
+            defaultValue={loaderData.scrape?.widgetConfig?.size ?? "small"}
             name="size"
-            defaultValue={[loaderData.scrape?.widgetConfig?.size ?? "small"]}
-          >
-            <SelectTrigger>
-              <SelectValueText placeholder="Select size" />
-            </SelectTrigger>
-            <SelectContent>
-              {sizes.items.map((size) => (
-                <SelectItem item={size} key={size.value}>
-                  {size.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </SelectRoot>
+          />
         </SettingsSection>
       </SettingsContainer>
     </SettingsSectionProvider>

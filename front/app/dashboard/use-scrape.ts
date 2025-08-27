@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { makeMessage } from "./socket-util";
-import { toaster } from "~/components/ui/toaster";
+import toast from "react-hot-toast";
 
 export function useScrape() {
   const socket = useRef<WebSocket>(null);
@@ -51,10 +51,7 @@ export function useScrape() {
       }
 
       if (message.type === "error") {
-        toaster.error({
-          title: "Failed to connect",
-          description: message.data.message,
-        });
+        toast.error(message.data.message);
       }
     };
   }

@@ -1,19 +1,18 @@
-import { Badge } from "@chakra-ui/react";
+import cn from "@meltdownjs/cn";
 import type { Message } from "libs/prisma";
 import { TbThumbDown, TbThumbUp } from "react-icons/tb";
-import { Tooltip } from "~/components/ui/tooltip";
 
 export function Rating({ rating }: { rating: Message["rating"] }) {
   if (!rating) return null;
 
   return (
-    <Tooltip content="Rating from the user" showArrow>
-      <Badge
-        colorPalette={rating === "up" ? "green" : "red"}
-        variant={"surface"}
-      >
-        {rating === "up" ? <TbThumbUp /> : <TbThumbDown />}
-      </Badge>
-    </Tooltip>
+    <div
+      className={cn(
+        "badge badge-soft badge-primary px-2",
+        rating === "up" ? "badge-success" : "badge-error"
+      )}
+    >
+      {rating === "up" ? <TbThumbUp /> : <TbThumbDown />}
+    </div>
   );
 }

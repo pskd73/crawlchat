@@ -1,11 +1,9 @@
+import type { Route } from "./+types/terms";
 import { marked } from "marked";
+import { LandingPage } from "./page";
+import { Container } from "./page";
 import fs from "fs";
 import path from "path";
-import type { Route } from "./+types/terms";
-import { Prose } from "~/components/ui/prose";
-import { LandingPage } from "./page";
-import { Stack } from "@chakra-ui/react";
-import { Container } from "./page";
 
 export function meta() {
   return [
@@ -26,15 +24,14 @@ export async function loader() {
 export default function Terms({ loaderData }: Route.ComponentProps) {
   return (
     <LandingPage>
-      <Stack py={12}>
+      <div className="flex flex-col py-12">
         <Container>
-          <Prose
+          <div
+            className="prose"
             dangerouslySetInnerHTML={{ __html: loaderData.htmlContent }}
-            size={"lg"}
-            maxW={"100%"}
           />
         </Container>
-      </Stack>
+      </div>
     </LandingPage>
   );
 }

@@ -1,5 +1,4 @@
 import type { Message, MessageRating, Scrape, Thread } from "libs/prisma";
-import { useTheme } from "next-themes";
 import {
   createContext,
   useContext,
@@ -8,8 +7,8 @@ import {
   useRef,
   useState,
 } from "react";
+import toast from "react-hot-toast";
 import { useFetcher } from "react-router";
-import { toaster } from "~/components/ui/toaster";
 import { getMessagesScore } from "~/score";
 import { useScrapeChat } from "~/widget/use-chat";
 
@@ -44,7 +43,6 @@ export function useChatBox({
   const [token, setToken] = useState<string | null>(initialToken);
   const readOnly = admin || initReadOnly;
 
-  const { setTheme } = useTheme();
   const chat = useScrapeChat({
     token: token ?? undefined,
     scrapeId: scrape.id,
@@ -69,6 +67,7 @@ export function useChatBox({
       null,
     [thread]
   );
+  const [theme, setTheme] = useState<"light" | "dark">("light");
 
   useEffect(() => {
     if (token) {
@@ -91,6 +90,19 @@ export function useChatBox({
     window.addEventListener("keydown", handleKeyDown);
 
     return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  useEffect(() => {
+    const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    setTheme(isDarkMode ? "dark" : "light");
+
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleThemeChange = (e: MediaQueryListEvent) => {
+      setTheme(e.matches ? "dark" : "light");
+    };
+
+    mediaQuery.addEventListener('change', handleThemeChange);
+    return () => mediaQuery.removeEventListener('change', handleThemeChange);
   }, []);
 
   useEffect(() => {
@@ -157,10 +169,7 @@ export function useChatBox({
 
   useEffect(() => {
     if (ticketCreateFetcher.data) {
-      toaster.create({
-        title: "Ticket created",
-        description: "You will be notified on email on updates!",
-      });
+      toast.success("Ticket created & check your email.");
     }
   }, [ticketCreateFetcher.data]);
 
@@ -199,10 +208,7 @@ export function useChatBox({
   }, [eraseAt]);
 
   function rate(id: string, rating: MessageRating) {
-    toaster.create({
-      title: "Rating submitted",
-      description: "Thank you for your feedback!",
-    });
+    toast.success("Thank you for your feedback!");
     rateFetcher.submit({ intent: "rate", id, rating }, { method: "post" });
   }
 
@@ -295,6 +301,7 @@ export function useChatBox({
     customerEmail,
     titleSlug,
     fullscreen,
+    theme,
     close,
     erase,
     deleteMessages,
@@ -306,6 +313,7 @@ export function useChatBox({
     scrollToMessage,
     scroll,
     setScreen,
+    setTheme,
   };
 }
 

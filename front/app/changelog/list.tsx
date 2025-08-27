@@ -42,7 +42,7 @@ export default function ChangelogPage({ loaderData }: Route.ComponentProps) {
               <p className="prose dark:prose-invert max-w-full w-full mt-4">
                 <Markdown remarkPlugins={[remarkGfm]}>{post.markdown}</Markdown>
               </p>
-              <div className="border-b-2 border-outline my-16 max-w-prose" />
+              <div className="border-b-2 border-base-300 my-16 w-full" />
             </div>
           ))}
         </div>

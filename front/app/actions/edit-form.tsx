@@ -1,20 +1,8 @@
-import {
-  Box,
-  Button,
-  Field,
-  Group,
-  Heading,
-  IconButton,
-  Input,
-  NativeSelect,
-  Separator,
-  Stack,
-  Text,
-} from "@chakra-ui/react";
 import { useContext } from "react";
 import { EditActionContext } from "./use-edit-action";
-import { TbCheck, TbPlus, TbTrash, TbX } from "react-icons/tb";
+import { TbPlus, TbTrash } from "react-icons/tb";
 import type { ApiActionDataItem, ApiActionMethod } from "libs/prisma";
+import cn from "@meltdownjs/cn";
 
 function DataItemForm({
   item,
@@ -32,83 +20,84 @@ function DataItemForm({
   removeDataItem: (index: number) => void;
 }) {
   return (
-    <Stack
-      border={"1px solid"}
-      borderColor={"brand.outline"}
-      p={4}
-      rounded={"lg"}
+    <div
+      className={cn(
+        "flex flex-col border border-base-300",
+        "rounded-box p-4 bg-base-200/50 shadow"
+      )}
     >
-      <Group alignItems={"end"}>
-        <Field.Root>
-          <Field.Label>Type</Field.Label>
-          <NativeSelect.Root>
-            <NativeSelect.Field
-              defaultValue={item.type}
-              onChange={(e) => updateDataItem(index, "type", e.target.value)}
-            >
-              <option value="dynamic">Dynamic</option>
-              <option value="value">Value</option>
-            </NativeSelect.Field>
-            <NativeSelect.Indicator />
-          </NativeSelect.Root>
-        </Field.Root>
-        <Field.Root>
-          <Field.Label>Data Type</Field.Label>
-          <NativeSelect.Root>
-            <NativeSelect.Field
-              defaultValue={item.type}
+      <div className="flex gap-2">
+        <fieldset className="fieldset flex-1">
+          <legend className="fieldset-legend">Type</legend>
+          <select
+            className="select select-bordered w-full"
+            defaultValue={item.type}
+            onChange={(e) => updateDataItem(index, "type", e.target.value)}
+          >
+            <option value="dynamic">Dynamic</option>
+            <option value="value">Value</option>
+          </select>
+        </fieldset>
+
+        <fieldset className="fieldset flex-1">
+          <legend className="fieldset-legend">Data Type</legend>
+          <select
+            className="select select-bordered w-full"
+            defaultValue={item.type}
+            onChange={(e) => updateDataItem(index, "dataType", e.target.value)}
+          >
+            <option value="string">String</option>
+            <option value="number">Number</option>
+            <option value="boolean">Boolean</option>
+          </select>
+        </fieldset>
+      </div>
+
+      <div className="flex gap-2">
+        <fieldset className="fieldset flex-1">
+          <legend className="fieldset-legend">Key</legend>
+          <input
+            className="input w-full"
+            placeholder="Enter your key"
+            value={item.key}
+            onChange={(e) => updateDataItem(index, "key", e.target.value)}
+          />
+        </fieldset>
+
+        {item.type === "dynamic" && (
+          <fieldset className="fieldset flex-1">
+            <legend className="fieldset-legend">Description</legend>
+            <input
+              className="input w-full"
+              placeholder="Enter your description"
+              value={item.description}
               onChange={(e) =>
-                updateDataItem(index, "dataType", e.target.value)
+                updateDataItem(index, "description", e.target.value)
               }
-            >
-              <option value="string">String</option>
-              <option value="number">Number</option>
-              <option value="boolean">Boolean</option>
-            </NativeSelect.Field>
-            <NativeSelect.Indicator />
-          </NativeSelect.Root>
-        </Field.Root>
-        <IconButton
-          colorPalette={"red"}
-          variant={"subtle"}
+            />
+          </fieldset>
+        )}
+        {item.type === "value" && (
+          <fieldset className="fieldset flex-1">
+            <legend className="fieldset-legend">Value</legend>
+            <input
+              className="input w-full"
+              placeholder="Enter the value"
+              value={item.value ?? ""}
+              onChange={(e) => updateDataItem(index, "value", e.target.value)}
+            />
+          </fieldset>
+        )}
+      </div>
+      <div className="flex gap-2 justify-end mt-2">
+        <button
+          className="btn btn-soft btn-error"
           onClick={() => removeDataItem(index)}
         >
-          <TbTrash />
-        </IconButton>
-      </Group>
-
-      <Field.Root flex={1}>
-        <Field.Label>Key</Field.Label>
-        <Input
-          placeholder="Enter your key"
-          value={item.key}
-          onChange={(e) => updateDataItem(index, "key", e.target.value)}
-        />
-      </Field.Root>
-
-      {item.type === "dynamic" && (
-        <Field.Root flex={2}>
-          <Field.Label>Description</Field.Label>
-          <Input
-            placeholder="Enter your description"
-            value={item.description}
-            onChange={(e) =>
-              updateDataItem(index, "description", e.target.value)
-            }
-          />
-        </Field.Root>
-      )}
-      {item.type === "value" && (
-        <Field.Root flex={2}>
-          <Field.Label>Value</Field.Label>
-          <Input
-            placeholder="Enter the value"
-            value={item.value ?? ""}
-            onChange={(e) => updateDataItem(index, "value", e.target.value)}
-          />
-        </Field.Root>
-      )}
-    </Stack>
+          Remove <TbTrash />
+        </button>
+      </div>
+    </div>
   );
 }
 
@@ -133,64 +122,69 @@ export function EditForm() {
   } = useContext(EditActionContext);
 
   return (
-    <Stack>
-      <Text opacity={0.5}>
+    <div className="flex flex-col gap-4">
+      <div className="text-base-content/50">
         Add the external APIs to be used by the chatbot whenever it is required.
         Give URL and describe about the API below so that the AI knows about it
         and uses it appropriately.
-      </Text>
+      </div>
 
-      <Stack mt={6}>
-        <Field.Root required>
-          <Field.Label>Title</Field.Label>
-          <Input
-            placeholder="Enter the title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-          />
-        </Field.Root>
+      <div className="flex flex-col bg-base-200/50 rounded-box p-4 shadow">
+        <div className="flex gap-2">
+          <fieldset className="fieldset flex-1">
+            <legend className="fieldset-legend">Title</legend>
+            <input
+              className="input w-full"
+              type="text"
+              placeholder="Enter the title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+          </fieldset>
 
-        <Field.Root required>
-          <Field.Label>Description</Field.Label>
-          <Input
-            placeholder="Enter the description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-          />
-        </Field.Root>
+          <fieldset className="fieldset flex-1">
+            <legend className="fieldset-legend">Description</legend>
+            <input
+              className="input w-full"
+              placeholder="Enter the description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+          </fieldset>
+        </div>
 
-        <Field.Root required>
-          <Field.Label>URL</Field.Label>
-          <Input
-            placeholder="Enter the URL"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-          />
-        </Field.Root>
+        <div className="flex gap-2">
+          <fieldset className="fieldset flex-1">
+            <legend className="fieldset-legend">URL</legend>
+            <input
+              className="input w-full"
+              placeholder="Enter the URL"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+            />
+          </fieldset>
 
-        <Field.Root required>
-          <Field.Label>Method</Field.Label>
-          <NativeSelect.Root>
-            <NativeSelect.Field
-              defaultValue={method}
+          <fieldset className="fieldset flex-1">
+            <legend className="fieldset-legend">Method</legend>
+            <select
+              className="select select-bordered w-full"
+              value={method}
               onChange={(e) => setMethod(e.target.value as ApiActionMethod)}
             >
               <option value="get">GET</option>
               <option value="post">POST</option>
               <option value="put">PUT</option>
               <option value="delete">DELETE</option>
-            </NativeSelect.Field>
-            <NativeSelect.Indicator />
-          </NativeSelect.Root>
-        </Field.Root>
-      </Stack>
+            </select>
+          </fieldset>
+        </div>
+      </div>
 
-      <Stack mt={6}>
-        <Group>
-          <Heading size={"lg"}>Data</Heading>
-          <IconButton
-            variant={"subtle"}
-            size={"xs"}
+      <div className="flex flex-col gap-2 mt-6">
+        <div className="flex items-center gap-2">
+          <h2 className="text-lg font-medium">Data</h2>
+          <button
+            className="btn btn-sm btn-soft btn-square"
             onClick={() =>
               addDataItem({
                 key: "",
@@ -202,14 +196,14 @@ export function EditForm() {
             }
           >
             <TbPlus />
-          </IconButton>
-        </Group>
+          </button>
+        </div>
 
-        <Text opacity={0.5}>
+        <div className="text-base-content/50">
           Data to be passed to the API. It will be passed as JSON for POST and
           as query parameters for GET requests. Select Value if you want to pass
           the value as constant.
-        </Text>
+        </div>
 
         {data.items.map((item, index) => (
           <DataItemForm
@@ -220,14 +214,13 @@ export function EditForm() {
             removeDataItem={removeDataItem}
           />
         ))}
-      </Stack>
+      </div>
 
-      <Stack mt={6}>
-        <Group>
-          <Heading size={"lg"}>Headers</Heading>
-          <IconButton
-            variant={"subtle"}
-            size={"xs"}
+      <div className="flex flex-col gap-2 mt-6">
+        <div className="flex items-center gap-2">
+          <h2 className="text-lg font-medium">Headers</h2>
+          <button
+            className="btn btn-sm btn-soft btn-square"
             onClick={() =>
               addHeaderItem({
                 key: "",
@@ -239,13 +232,13 @@ export function EditForm() {
             }
           >
             <TbPlus />
-          </IconButton>
-        </Group>
+          </button>
+        </div>
 
-        <Text opacity={0.5}>
+        <div className="text-base-content/50">
           Headers to be passed to the API. Use Value type if it is constant or
           an API key.
-        </Text>
+        </div>
 
         {headers.items.map((item, index) => (
           <DataItemForm
@@ -256,7 +249,7 @@ export function EditForm() {
             removeDataItem={removeHeaderItem}
           />
         ))}
-      </Stack>
-    </Stack>
+      </div>
+    </div>
   );
 }

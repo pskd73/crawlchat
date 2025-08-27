@@ -1,47 +1,50 @@
-import { Badge } from "@chakra-ui/react";
 import type { KnowledgeGroupStatus } from "libs/prisma";
 import { useMemo } from "react";
 import { TbBook, TbCheck, TbLoader, TbX } from "react-icons/tb";
+import cn from "@meltdownjs/cn";
 
 export function GroupStatus({ status }: { status: KnowledgeGroupStatus }) {
   const ui = useMemo(() => {
     if (status === "pending") {
       return {
-        color: undefined,
         icon: <TbBook />,
         text: "To be processed",
       };
     } else if (status === "done") {
       return {
-        color: "brand",
         icon: <TbCheck />,
         text: "Up to date",
       };
     } else if (status === "error") {
       return {
-        color: "red",
         icon: <TbX />,
         text: "Error",
       };
     } else if (status === "processing") {
       return {
-        color: "blue",
         icon: <TbLoader />,
         text: "Updating",
       };
     }
 
     return {
-      color: undefined,
       icon: <TbBook />,
       text: "Unknown",
     };
   }, [status]);
 
   return (
-    <Badge colorPalette={ui.color} variant={"surface"}>
+    <div
+      className={cn(
+        "badge badge-soft",
+        status === "done" && "badge-success",
+        status === "error" && "badge-error",
+        status === "processing" && "badge-info",
+        status === "pending" && "badge-warning"
+      )}
+    >
       {ui.icon}
       {ui.text}
-    </Badge>
+    </div>
   );
 }

@@ -1,13 +1,13 @@
-import { Drawer, Group, Portal, Text } from "@chakra-ui/react";
+import type { Route } from "./+types/edit";
 import { TbPointer } from "react-icons/tb";
 import { EditForm } from "./edit-form";
 import { EditActionProvider } from "./use-edit-action";
 import { getAuthUser } from "~/auth/middleware";
 import { prisma } from "libs/prisma";
-import type { Route } from "./+types/edit";
 import { authoriseScrapeUser, getSessionScrapeId } from "~/scrapes/util";
 import { redirect, useFetcher } from "react-router";
 import { SaveForm } from "./save-form";
+import { Page } from "~/components/page";
 
 export async function loader({ request, params }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -75,29 +75,13 @@ export default function EditAction({ loaderData }: Route.ComponentProps) {
 
   return (
     <EditActionProvider initAction={loaderData.action}>
-      <Drawer.Root open={true} size={"sm"}>
-        <Portal>
-          <Drawer.Backdrop />
-          <Drawer.Positioner>
-            <Drawer.Content>
-              <Drawer.Header>
-                <Drawer.Title>
-                  <Group>
-                    <TbPointer />
-                    <Text>Edit Action</Text>
-                  </Group>
-                </Drawer.Title>
-              </Drawer.Header>
-              <Drawer.Body>
-                <EditForm />
-              </Drawer.Body>
-              <Drawer.Footer>
-                <SaveForm fetcher={fetcher} deleteFetcher={deleteFetcher} />
-              </Drawer.Footer>
-            </Drawer.Content>
-          </Drawer.Positioner>
-        </Portal>
-      </Drawer.Root>
+      <Page
+        title="Edit action"
+        icon={<TbPointer />}
+        right={<SaveForm fetcher={fetcher} deleteFetcher={deleteFetcher} />}
+      >
+        <EditForm />
+      </Page>
     </EditActionProvider>
   );
 }

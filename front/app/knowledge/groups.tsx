@@ -1,13 +1,3 @@
-import {
-  Badge,
-  Group,
-  Link as ChakraLink,
-  Stack,
-  Table,
-  Text,
-  Center,
-  Progress,
-} from "@chakra-ui/react";
 import type { Route } from "./+types/groups";
 import { getAuthUser } from "~/auth/middleware";
 import { prisma } from "~/prisma";
@@ -21,19 +11,17 @@ import {
   TbBrandSlack,
   TbFile,
   TbPlus,
-  TbRefresh,
   TbWorld,
 } from "react-icons/tb";
 import { Link } from "react-router";
 import { authoriseScrapeUser, getSessionScrapeId } from "~/scrapes/util";
 import { Page } from "~/components/page";
-import { Button } from "~/components/ui/button";
-import { EmptyState } from "~/components/ui/empty-state";
 import { useMemo } from "react";
 import { GroupStatus } from "./group/status";
 import { ActionButton } from "./group/action-button";
 import { SiDocusaurus } from "react-icons/si";
-import { Tooltip } from "~/components/ui/tooltip";
+import { EmptyState } from "~/components/empty-state";
+import cn from "@meltdownjs/cn";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -144,150 +132,114 @@ export default function KnowledgeGroups({ loaderData }: Route.ComponentProps) {
       title="Knowledge"
       icon={<TbBook />}
       right={
-        <Group>
-          <Button variant={"subtle"} colorPalette={"brand"} asChild>
-            <Link to="/knowledge/group">
-              <TbPlus />
-              Add group
-            </Link>
-          </Button>
-        </Group>
+        <Link className="btn btn-soft btn-primary" to="/knowledge/group">
+          <TbPlus />
+          Add group
+        </Link>
       }
     >
       {groups.length === 0 && (
-        <Center w="full" h="full">
+        <div className="flex flex-col items-center justify-center flex-1">
           <EmptyState
             title="No knowledge groups"
             description="Create a new knowledge group to get started."
+            icon={<TbBook />}
           >
-            <Button asChild colorPalette={"brand"}>
-              <Link to="/knowledge/group">
-                <TbPlus />
-                Create a group
-              </Link>
-            </Button>
+            <Link className="btn btn-primary" to="/knowledge/group">
+              <TbPlus />
+              Create a group
+            </Link>
           </EmptyState>
-        </Center>
+        </div>
       )}
       {groups.length > 0 && (
-        <Stack>
-          <Table.Root>
-            <Table.Header>
-              <Table.Row>
-                <Table.ColumnHeader w="12%">Type</Table.ColumnHeader>
-                <Table.ColumnHeader>Title</Table.ColumnHeader>
-                <Table.ColumnHeader
-                  w="18%"
-                  display={["none", "none", "table-cell"]}
-                >
-                  Citations
-                </Table.ColumnHeader>
-                <Table.ColumnHeader
-                  w="10%"
-                  display={["none", "none", "table-cell"]}
-                >
-                  # Items
-                </Table.ColumnHeader>
-                <Table.ColumnHeader
-                  w="10%"
-                  display={["none", "none", "table-cell"]}
-                >
-                  Status
-                </Table.ColumnHeader>
-                <Table.ColumnHeader
-                  w="16%"
-                  display={["none", "none", "table-cell"]}
-                >
-                  Updated
-                </Table.ColumnHeader>
-                <Table.ColumnHeader w="10%">Actions</Table.ColumnHeader>
-              </Table.Row>
-            </Table.Header>
-            <Table.Body>
+        <div
+          className={cn(
+            "overflow-x-auto border border-base-300",
+            "rounded-box bg-base-200/50 shadow"
+          )}
+        >
+          <table className="table">
+            <thead>
+              <tr>
+                <th>Type</th>
+                <th>Title</th>
+                <th>Citation</th>
+                <th># Items</th>
+                <th>Status</th>
+                <th>Updated</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
               {groups.map((item) => (
-                <Table.Row key={item.group.id}>
-                  <Table.Cell>
-                    <Badge>
+                <tr key={item.group.id}>
+                  <td>
+                    <div className="badge badge-soft badge-primary">
                       {item.icon}
                       {item.typeText}
-                    </Badge>
-                  </Table.Cell>
-                  <Table.Cell>
-                    <ChakraLink
-                      asChild
-                      variant={"underline"}
-                      _hover={{
-                        color: "brand.fg",
-                      }}
+                    </div>
+                  </td>
+                  <td>
+                    <Link
+                      className="link link-hover line-clamp-1 max-w-40"
+                      to={`/knowledge/group/${item.group.id}`}
                     >
-                      <Link to={`/knowledge/group/${item.group.id}`}>
-                        {item.group.title ?? "Untitled"}
-                      </Link>
-                    </ChakraLink>
-                  </Table.Cell>
-                  <Table.Cell display={["none", "none", "table-cell"]}>
-                    <Group w="full">
-                      <Text fontSize={"xs"}>
-                        {item.citedNum} / {item.totalCited}
-                      </Text>
-                      <Progress.Root
-                        w="50px"
+                      {item.group.title ?? "Untitled"}
+                    </Link>
+                  </td>
+                  <td className="min-w-38">
+                    <div className="flex gap-2 items-center">
+                      {item.citedNum} / {item.totalCited}
+                      <progress
+                        className="progress w-10"
                         value={item.citationPct}
-                        min={0}
-                        max={100}
-                      >
-                        <Progress.Track>
-                          <Progress.Range />
-                        </Progress.Track>
-                      </Progress.Root>
-                    </Group>
-                  </Table.Cell>
-                  <Table.Cell display={["none", "none", "table-cell"]}>
-                    <Badge variant={"subtle"}>
+                        max="100"
+                      />
+                    </div>
+                  </td>
+                  <td>
+                    <span className="badge badge-soft badge-primary">
                       {loaderData.counts[item.group.id] ?? 0}
-                    </Badge>
-                  </Table.Cell>
-                  <Table.Cell display={["none", "none", "table-cell"]}>
+                    </span>
+                  </td>
+                  <td className="min-w-38">
                     <GroupStatus status={item.group.status} />
-                  </Table.Cell>
-                  <Table.Cell display={["none", "none", "table-cell"]}>
-                    <Text>
+                  </td>
+                  <td className="min-w-38">
+                    <div>
                       {moment(item.group.updatedAt).fromNow()}
                       {item.group.nextUpdateAt && (
-                        <Tooltip
-                          content={`Next update at ${moment(
+                        <div
+                          className="tooltip"
+                          data-tip={`Next update at ${moment(
                             item.group.nextUpdateAt
                           ).format("DD/MM/YYYY HH:mm")}`}
-                          showArrow
                         >
-                          <Badge
-                            ml={1}
-                            colorPalette={"brand"}
-                            variant={"surface"}
-                            as={"span"}
-                          >
+                          <span className="badge badge-soft badge-primary ml-1">
                             <TbAutomation />
-                          </Badge>
-                        </Tooltip>
+                          </span>
+                        </div>
                       )}
-                    </Text>
-                  </Table.Cell>
-                  <Table.Cell>
-                    <Group>
+                    </div>
+                  </td>
+                  <td>
+                    <div className="flex gap-2">
                       {[
                         "scrape_web",
                         "scrape_github",
                         "github_issues",
+                        "notion",
                       ].includes(item.group.type) && (
-                        <ActionButton group={item.group} />
+                        <ActionButton group={item.group} small />
                       )}
-                    </Group>
-                  </Table.Cell>
-                </Table.Row>
+                    </div>
+                  </td>
+                </tr>
               ))}
-            </Table.Body>
-          </Table.Root>
-        </Stack>
+            </tbody>
+          </table>
+        </div>
       )}
     </Page>
   );

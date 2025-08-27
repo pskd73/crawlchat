@@ -1,24 +1,12 @@
-import {
-  Badge,
-  Group,
-  Link as ChakraLink,
-  Stack,
-  Table,
-  Text,
-  Center,
-  Box,
-  Spinner,
-} from "@chakra-ui/react";
 import type { Route } from "./+types/items";
 import { getAuthUser } from "~/auth/middleware";
 import { prisma } from "~/prisma";
-import moment from "moment";
 import { TbCheck, TbRefresh, TbX, TbStack } from "react-icons/tb";
 import { Link, Outlet } from "react-router";
 import { authoriseScrapeUser, getSessionScrapeId } from "~/scrapes/util";
-import { EmptyState } from "~/components/ui/empty-state";
-import { Tooltip } from "~/components/ui/tooltip";
-import { useEffect, useState } from "react";
+import { EmptyState } from "~/components/empty-state";
+import cn from "@meltdownjs/cn";
+import moment from "moment";
 
 export async function loader({ request, params }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -83,106 +71,84 @@ function truncateStart(text: string, maxLength: number) {
 }
 
 export default function ScrapeLinks({ loaderData }: Route.ComponentProps) {
-  const [maxLength, setMaxLength] = useState(0);
-
-  useEffect(() => {
-    const handleResize = () => {
-      setMaxLength(Math.floor(window.innerWidth / 40));
-    };
-
-    handleResize();
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  if (maxLength === 0) {
-    return (
-      <Center h="200px" w="full">
-        <Spinner />
-      </Center>
-    );
-  }
-
   return (
     <>
       {loaderData.items.length === 0 && (
-        <Center w="full" h="full">
+        <div className="flex justify-center items-center flex-1">
           <EmptyState
             title="No items"
             description="Scrape your documents to get started."
             icon={<TbStack />}
           />
-        </Center>
+        </div>
       )}
       {loaderData.items.length > 0 && (
-        <Stack>
-          <Table.Root size="sm">
-            <Table.Header>
-              <Table.Row>
-                <Table.ColumnHeader display={["none", "none", "table-cell"]}>
-                  Key
-                </Table.ColumnHeader>
-                <Table.ColumnHeader>Title</Table.ColumnHeader>
-                <Table.ColumnHeader display={["none", "none", "table-cell"]}>
-                  Status
-                </Table.ColumnHeader>
-                <Table.ColumnHeader>
-                  Updated
-                </Table.ColumnHeader>
-              </Table.Row>
-            </Table.Header>
-            <Table.Body>
-              {loaderData.items.map((item) => (
-                <Table.Row key={item.id}>
-                  <Table.Cell
-                    className="group"
-                    display={["none", "none", "table-cell"]}
-                  >
-                    <Tooltip content={item.url}>
-                      <Text>{truncateEnd(getKey(item), maxLength)}</Text>
-                    </Tooltip>
-                  </Table.Cell>
-
-                  <Table.Cell>
-                    <ChakraLink asChild variant={"underline"}>
-                      <Link to={`/knowledge/item/${item.id}`}>
-                        {truncateStart(item.title?.trim() || "-", maxLength)}
+        <div className="flex flex-col gap-2">
+          <div
+            className={cn(
+              "overflow-x-auto border border-base-300",
+              "rounded-box bg-base-200/50 shadow"
+            )}
+          >
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Key</th>
+                  <th>Title</th>
+                  <th>Status</th>
+                  <th className="text-end">Updated</th>
+                </tr>
+              </thead>
+              <tbody>
+                {loaderData.items.map((item) => (
+                  <tr key={item.id}>
+                    <td className="max-w-64">
+                      <Link
+                        className="link link-hover line-clamp-1"
+                        to={`/knowledge/item/${item.id}`}
+                      >
+                        {getKey(item)}
                       </Link>
-                    </ChakraLink>
-                  </Table.Cell>
+                    </td>
 
-                  <Table.Cell display={["none", "none", "table-cell"]}>
-                    <Badge
-                      variant={"surface"}
-                      colorPalette={
-                        item.status === "completed"
-                          ? "brand"
-                          : item.status === "failed"
-                          ? "red"
-                          : "gray"
-                      }
-                    >
-                      {item.status === "completed" ? (
-                        <TbCheck />
-                      ) : item.status === "failed" ? (
-                        <TbX />
-                      ) : (
-                        <TbRefresh />
-                      )}
-                      {item.status === "completed" ? "Success" : "Failed"}
-                    </Badge>
-                  </Table.Cell>
-                  <Table.Cell>
-                    {moment(item.updatedAt).fromNow()}
-                  </Table.Cell>
-                </Table.Row>
-              ))}
-            </Table.Body>
-          </Table.Root>
+                    <td>
+                      <div className="line-clamp-1">
+                        {truncateStart(item.title?.trim() || "-", 50)}
+                      </div>
+                    </td>
+
+                    <td className="w-24">
+                      <div
+                        className={cn(
+                          "badge badge-soft",
+                          item.status === "completed"
+                            ? "badge-primary"
+                            : item.status === "failed"
+                            ? "badge-error"
+                            : undefined
+                        )}
+                      >
+                        {item.status === "completed" ? (
+                          <TbCheck />
+                        ) : item.status === "failed" ? (
+                          <TbX />
+                        ) : (
+                          <TbRefresh />
+                        )}
+                        {item.status === "completed" ? "Success" : "Failed"}
+                      </div>
+                    </td>
+                    <td className="min-w-38 text-end">
+                      {moment(item.updatedAt).fromNow()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
           <Outlet />
-        </Stack>
+        </div>
       )}
     </>
   );

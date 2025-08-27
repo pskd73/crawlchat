@@ -1,7 +1,4 @@
-import { getAuthUser } from "~/auth/middleware";
 import type { Route } from "./+types/page";
-import { redirect } from "react-router";
-import { prisma } from "libs/prisma";
 import type {
   User,
   KnowledgeGroup,
@@ -9,8 +6,9 @@ import type {
   Message,
   Thread,
 } from "libs/prisma";
-import { Heading, Popover, Portal, Stack, Table, Text } from "@chakra-ui/react";
-import { SingleLineCell } from "~/components/single-line-cell";
+import { getAuthUser } from "~/auth/middleware";
+import { redirect } from "react-router";
+import { prisma } from "libs/prisma";
 import { MarkdownProse } from "~/widget/markdown-prose";
 
 type UserDetail = {
@@ -103,36 +101,36 @@ export async function loader({ request }: Route.LoaderArgs) {
 
 function UsersTable({ userDetails }: { userDetails: UserDetail[] }) {
   return (
-    <Table.Root size="sm">
-      <Table.Header>
-        <Table.Row>
-          <Table.ColumnHeader>Id</Table.ColumnHeader>
-          <Table.ColumnHeader>Email</Table.ColumnHeader>
-          <Table.ColumnHeader>Name</Table.ColumnHeader>
-          <Table.ColumnHeader>Scrapes</Table.ColumnHeader>
-          <Table.ColumnHeader>Groups</Table.ColumnHeader>
-          <Table.ColumnHeader>Scrape credits</Table.ColumnHeader>
-          <Table.ColumnHeader>Message credits</Table.ColumnHeader>
-          <Table.ColumnHeader>Created At</Table.ColumnHeader>
-        </Table.Row>
-      </Table.Header>
-      <Table.Body>
-        {userDetails.map((userDetail) => (
-          <Table.Row key={userDetail.user.id}>
-            <Table.Cell>{userDetail.user.id}</Table.Cell>
-            <Table.Cell>{userDetail.user.email}</Table.Cell>
-            <Table.Cell>{userDetail.user.name}</Table.Cell>
-            <Table.Cell>{userDetail.scrapes.length}</Table.Cell>
-            <Table.Cell>{userDetail.groups.length}</Table.Cell>
-            <Table.Cell>{userDetail.user.plan?.credits?.scrapes}</Table.Cell>
-            <Table.Cell>{userDetail.user.plan?.credits?.messages}</Table.Cell>
-            <Table.Cell>
-              {userDetail.user.createdAt.toLocaleString()}
-            </Table.Cell>
-          </Table.Row>
-        ))}
-      </Table.Body>
-    </Table.Root>
+    <div className="overflow-x-auto">
+      <table className="table">
+        <thead>
+          <tr>
+            <th>Id</th>
+            <th>Email</th>
+            <th>Name</th>
+            <th>Scrapes</th>
+            <th>Groups</th>
+            <th>Scrape credits</th>
+            <th>Message credits</th>
+            <th>Created At</th>
+          </tr>
+        </thead>
+        <tbody>
+          {userDetails.map((userDetail) => (
+            <tr key={userDetail.user.id}>
+              <td>{userDetail.user.id}</td>
+              <td>{userDetail.user.email}</td>
+              <td>{userDetail.user.name}</td>
+              <td>{userDetail.scrapes.length}</td>
+              <td>{userDetail.groups.length}</td>
+              <td>{userDetail.user.plan?.credits?.scrapes}</td>
+              <td>{userDetail.user.plan?.credits?.messages}</td>
+              <td>{userDetail.user.createdAt.toLocaleString()}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
 
@@ -157,24 +155,13 @@ function WithPopover({
   children: React.ReactNode;
 }) {
   return (
-    <Popover.Root>
-      <Popover.Trigger asChild>
-        <Text>{children}</Text>
-      </Popover.Trigger>
-      <Portal>
-        <Popover.Positioner>
-          <Popover.Content>
-            <Popover.Arrow />
-            <Popover.Body>
-              {title && (
-                <Popover.Title fontWeight="medium">{title}</Popover.Title>
-              )}
-              {popoverContent}
-            </Popover.Body>
-          </Popover.Content>
-        </Popover.Positioner>
-      </Portal>
-    </Popover.Root>
+    <div className="dropdown">
+      <div className="btn mb-1">{children}</div>
+      <div className="dropdown-content bg-base-100 rounded-box z-1 w-80 p-2 shadow-sm">
+        <div className="font-bold">{title}</div>
+        {popoverContent}
+      </div>
+    </div>
   );
 }
 
@@ -184,65 +171,59 @@ function MessagesTable({
   messageDetails: MessageDetail[];
 }) {
   return (
-    <Table.Root size="sm">
-      <Table.Header>
-        <Table.Row>
-          <Table.ColumnHeader>Message</Table.ColumnHeader>
-          <Table.ColumnHeader>Scrape</Table.ColumnHeader>
-          <Table.ColumnHeader>User</Table.ColumnHeader>
-          <Table.ColumnHeader>Score</Table.ColumnHeader>
-          <Table.ColumnHeader>Channel</Table.ColumnHeader>
-          <Table.ColumnHeader>Data gap</Table.ColumnHeader>
-          <Table.ColumnHeader>Created At</Table.ColumnHeader>
-        </Table.Row>
-      </Table.Header>
-      <Table.Body>
-        {messageDetails.map((messageDetail) => (
-          <Table.Row key={messageDetail.message.id}>
-            <Table.Cell>
-              <SingleLineCell>
-                {(messageDetail.message.llmMessage as any).content}
-              </SingleLineCell>
-            </Table.Cell>
-            <Table.Cell>{messageDetail.scrape.title}</Table.Cell>
-            <Table.Cell>{messageDetail.user.email}</Table.Cell>
-            <Table.Cell>
-              <Score message={messageDetail.message} />
-            </Table.Cell>
-            <Table.Cell>
-              {messageDetail.message.channel ?? "chatbot"}
-            </Table.Cell>
-            <Table.Cell>
-              {messageDetail.message.analysis?.dataGapTitle && (
-                <WithPopover
-                  title={messageDetail.message.analysis.dataGapTitle}
-                  popoverContent={
-                    <MarkdownProse>
-                      {messageDetail.message.analysis.dataGapDescription}
-                    </MarkdownProse>
-                  }
-                >
-                  yes
-                </WithPopover>
-              )}
-            </Table.Cell>
-            <Table.Cell>
-              {messageDetail.message.createdAt.toLocaleString()}
-            </Table.Cell>
-          </Table.Row>
-        ))}
-      </Table.Body>
-    </Table.Root>
+    <div className="overflow-x-auto">
+      <table className="table">
+        <thead>
+          <tr>
+            <th>Message</th>
+            <th>Scrape</th>
+            <th>User</th>
+            <th>Score</th>
+            <th>Channel</th>
+            <th>Data gap</th>
+            <th>Created At</th>
+          </tr>
+        </thead>
+        <tbody>
+          {messageDetails.map((messageDetail) => (
+            <tr key={messageDetail.message.id}>
+              <td>{(messageDetail.message.llmMessage as any).content}</td>
+              <td>{messageDetail.scrape.title}</td>
+              <td>{messageDetail.user.email}</td>
+              <td>
+                <Score message={messageDetail.message} />
+              </td>
+              <td>{messageDetail.message.channel ?? "chatbot"}</td>
+              <td>
+                {messageDetail.message.analysis?.dataGapTitle && (
+                  <WithPopover
+                    title={messageDetail.message.analysis.dataGapTitle}
+                    popoverContent={
+                      <MarkdownProse>
+                        {messageDetail.message.analysis.dataGapDescription}
+                      </MarkdownProse>
+                    }
+                  >
+                    Yes
+                  </WithPopover>
+                )}
+              </td>
+              <td>{messageDetail.message.createdAt.toLocaleString()}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
 
 export default function Admin({ loaderData }: Route.ComponentProps) {
   return (
-    <Stack p={4}>
-      <Heading>Users</Heading>
+    <div className="flex flex-col gap-2 p-4">
+      <div className="text-2xl font-bold">Users</div>
       <UsersTable userDetails={loaderData.userDetails} />
-      <Heading mt={4}>Messages</Heading>
+      <div className="text-2xl font-bold mt-4">Messages</div>
       <MessagesTable messageDetails={loaderData.messageDetails} />
-    </Stack>
+    </div>
   );
 }

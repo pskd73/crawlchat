@@ -1,13 +1,13 @@
-import { Group, Image, Link, Separator, Stack, Text } from "@chakra-ui/react";
 import type { Route } from "./+types/share";
-import { prisma } from "libs/prisma";
 import type { Scrape, Message, MessageSourceLink } from "libs/prisma";
+import { prisma } from "libs/prisma";
 import { useMemo } from "react";
 import { extractCitations } from "libs/citation";
 import { MarkdownProse } from "./markdown-prose";
 import { RiChatVoiceAiFill } from "react-icons/ri";
-import { MessageCopyButton, SourceLink, Sources } from "~/widget/chat-box";
+import { MessageCopyButton, Sources } from "~/widget/chat-box";
 import { TbAlertCircle } from "react-icons/tb";
+import cn from "@meltdownjs/cn";
 
 export async function loader({ params }: Route.LoaderArgs) {
   const { id } = params;
@@ -72,50 +72,40 @@ export function meta({ data }: Route.MetaArgs) {
 
 function Nav({ scrape }: { scrape: Scrape }) {
   return (
-    <Stack as="nav" p={4}>
-      <Group justifyContent={"space-between"}>
-        <Group>
-          {scrape.logoUrl && (
-            <Image
-              src={scrape.logoUrl}
-              alt={scrape.title ?? ""}
-              maxH={"18px"}
-            />
-          )}
-          <Text fontSize={"lg"} fontWeight={"bold"}>
-            {scrape.title}
-          </Text>
-        </Group>
-        <Text
-          fontSize={"sm"}
-          opacity={0.5}
-          display={"flex"}
-          alignItems={"center"}
-          gap={2}
+    <nav className="flex items-center justify-between p-4 gap-2">
+      <div className="flex items-center gap-2">
+        {scrape.logoUrl && (
+          <img
+            src={scrape.logoUrl}
+            alt={scrape.title ?? ""}
+            className="h-[18px]"
+          />
+        )}
+        <p className="text-lg font-medium">{scrape.title}</p>
+      </div>
+      <p className="text-sm flex items-center gap-2">
+        <span className="text-base-content/50">Powered by</span>{" "}
+        <a
+          className="link link-hover link-primary flex items-center gap-2"
+          href="https://crawlchat.app"
         >
-          Powered by{" "}
-          <Link href="https://crawlchat.app" fontWeight={"bold"}>
-            <RiChatVoiceAiFill />
-            CrawlChat
-          </Link>
-        </Text>
-      </Group>
-    </Stack>
+          <RiChatVoiceAiFill />
+          CrawlChat
+        </a>
+      </p>
+    </nav>
   );
 }
 
 function UserMessage({ content }: { content: string }) {
   return (
-    <Stack className="user-message">
-      <Text
-        fontSize={"xl"}
-        fontWeight={"bolder"}
-        opacity={0.8}
-        whiteSpace={"pre-wrap"}
-      >
-        {content}
-      </Text>
-    </Stack>
+    <div
+      className={cn(
+        "user-message text-xl font-bold opacity-80 whitespace-pre-wrap"
+      )}
+    >
+      {content}
+    </div>
   );
 }
 
@@ -131,7 +121,7 @@ function AssistantMessage({
   }, [links]);
 
   return (
-    <Stack>
+    <div className="flex flex-col gap-2">
       <Sources citation={citation} />
       <MarkdownProse
         size={"md"}
@@ -142,22 +132,14 @@ function AssistantMessage({
       >
         {citation.content}
       </MarkdownProse>
-      <Group>
+      <div>
         <MessageCopyButton content={content} />
-      </Group>
-    </Stack>
+      </div>
+    </div>
   );
 }
 
-function Message({
-  message,
-  last,
-  pullUp,
-}: {
-  message: Message;
-  last: boolean;
-  pullUp?: boolean;
-}) {
+function Message({ message, pullUp }: { message: Message; pullUp?: boolean }) {
   const llmMessage = useMemo(() => {
     return {
       role: (message.llmMessage as any).role as string,
@@ -166,43 +148,48 @@ function Message({
   }, [message]);
 
   return (
-    <Stack p={4} mt={pullUp ? -6 : 0}>
+    <div
+      className={cn(
+        "p-4",
+        pullUp && "-mt-6",
+        llmMessage.role === "user" && "border-t border-base-300 first:border-0"
+      )}
+    >
       {llmMessage.role === "user" ? (
         <UserMessage content={llmMessage.content} />
       ) : (
         <AssistantMessage content={llmMessage.content} links={message.links} />
       )}
-    </Stack>
+    </div>
   );
 }
 
 export default function Share({ loaderData }: Route.ComponentProps) {
   if (!loaderData.thread) {
     return (
-      <Stack alignItems={"center"} justifyContent={"center"} h="100vh" w="full">
+      <div className="flex flex-col items-center justify-center h-screen w-full">
         <TbAlertCircle size={48} />
-        <Text>Conversation not found</Text>
-      </Stack>
+        <p>Conversation not found</p>
+      </div>
     );
   }
   return (
-    <Stack alignItems={"center"}>
-      <Stack maxW={800} w="full">
+    <div className="flex flex-col items-center gap-2">
+      <div className="max-w-prose w-full">
         <Nav scrape={loaderData.thread.scrape} />
-        <Stack gap={0}>
+        <div className="flex flex-col">
           {loaderData.thread.messages.map((message, idx) => (
             <Message
               key={message.id}
               message={message}
-              last={idx === loaderData.thread!.messages.length - 1}
               pullUp={
                 (loaderData.thread?.messages[idx - 1]?.llmMessage as any)
                   ?.role === "user"
               }
             />
           ))}
-        </Stack>
-      </Stack>
-    </Stack>
+        </div>
+      </div>
+    </div>
   );
 }

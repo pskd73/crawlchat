@@ -1,19 +1,19 @@
-import { prisma } from "~/prisma";
 import type { Route } from "./+types/link-item";
+import { prisma } from "~/prisma";
 import { getAuthUser } from "~/auth/middleware";
 import { useEffect, useState } from "react";
 import { redirect, useFetcher } from "react-router";
-import { MarkdownProse } from "~/widget/markdown-prose";
 import { TbBook2, TbRefresh, TbTrash } from "react-icons/tb";
-import { Group, IconButton, Input, Spinner, Stack } from "@chakra-ui/react";
-import { Tooltip } from "~/components/ui/tooltip";
 import { authoriseScrapeUser, getSessionScrapeId } from "~/scrapes/util";
 import { Page } from "~/components/page";
 import { createToken } from "libs/jwt";
-import { toaster } from "~/components/ui/toaster";
 import type { Prisma, ScrapeItem } from "libs/prisma";
 import { SettingsSection } from "~/settings-section";
 import { useFetcherToast } from "~/dashboard/use-fetcher-toast";
+import cn from "@meltdownjs/cn";
+import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import toast from "react-hot-toast";
 
 export async function loader({ params, request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -125,7 +125,9 @@ function NameSection({ item }: { item: ScrapeItem }) {
       fetcher={updateFetcher}
     >
       <input type="hidden" name="intent" value="update" />
-      <Input
+      <input
+        className="input"
+        type="text"
         name="title"
         placeholder="Example: FAQ Document"
         defaultValue={item.title ?? ""}
@@ -149,7 +151,9 @@ function UrlSection({ item }: { item: ScrapeItem }) {
       fetcher={updateFetcher}
     >
       <input type="hidden" name="intent" value="update" />
-      <Input
+      <input
+        className="input"
+        type="url"
         name="url"
         placeholder="Example: https://example.com/faq"
         defaultValue={item.url ?? ""}
@@ -165,10 +169,7 @@ export default function ScrapeItem({ loaderData }: Route.ComponentProps) {
 
   useEffect(() => {
     if (refreshFetcher.data) {
-      toaster.success({
-        title: "Initiated",
-        description: "This item is added to fetch queue",
-      });
+      toast.success("Added to fetch queue");
     }
   }, [refreshFetcher.data]);
 
@@ -195,54 +196,61 @@ export default function ScrapeItem({ loaderData }: Route.ComponentProps) {
       title={loaderData.item?.title ?? "Untitled"}
       icon={<TbBook2 />}
       right={
-        <Group>
+        <>
           {canRefresh && (
             <refreshFetcher.Form method="post">
               <input type="hidden" name="intent" value="refresh" />
-              <Tooltip content={"Refetch"} showArrow>
-                <IconButton
-                  variant={"subtle"}
+              <div className="tooltip tooltip-left" data-content={"Refetch"}>
+                <button
+                  className="btn btn-soft"
                   type={"submit"}
                   disabled={refreshFetcher.state !== "idle"}
                 >
                   <TbRefresh />
-                </IconButton>
-              </Tooltip>
+                </button>
+              </div>
             </refreshFetcher.Form>
           )}
 
           <deleteFetcher.Form method="delete">
-            <Tooltip
-              content={deleteActive ? "Are you sure?" : "Delete"}
-              showArrow
-              open={deleteActive || undefined}
+            <div
+              className={cn(
+                "tooltip tooltip-left",
+                deleteActive && "tooltip-open"
+              )}
+              data-tip={deleteActive ? "Are you sure?" : "Delete"}
             >
-              <IconButton
-                colorPalette={"red"}
-                variant={deleteActive ? "solid" : "subtle"}
+              <button
+                className={cn("btn btn-error", !deleteActive && "btn-soft")}
                 type={deleteActive ? "submit" : "button"}
                 onClick={handleDelete}
                 disabled={deleteFetcher.state !== "idle"}
               >
-                {deleteFetcher.state === "idle" ? <TbTrash /> : <Spinner />}
-              </IconButton>
-            </Tooltip>
+                {deleteFetcher.state === "idle" ? (
+                  <TbTrash />
+                ) : (
+                  <span className="loading loading-spinner" />
+                )}
+              </button>
+            </div>
           </deleteFetcher.Form>
-        </Group>
+        </>
       }
     >
-      <Stack>
-        <Stack maxW={"800px"}>
-          {loaderData.item &&
-            loaderData.item.knowledgeGroup?.type === "upload" && (
-              <>
-                <NameSection item={loaderData.item} />
-                <UrlSection item={loaderData.item} />
-              </>
-            )}
-          <MarkdownProse>{loaderData.item?.markdown}</MarkdownProse>
-        </Stack>
-      </Stack>
+      <div className="flex flex-col gap-2 max-w-2xl">
+        {loaderData.item &&
+          loaderData.item.knowledgeGroup?.type === "upload" && (
+            <>
+              <NameSection item={loaderData.item} />
+              <UrlSection item={loaderData.item} />
+            </>
+          )}
+        <div className="prose">
+          <Markdown remarkPlugins={[remarkGfm]}>
+            {loaderData.item?.markdown}
+          </Markdown>
+        </div>
+      </div>
     </Page>
   );
 }

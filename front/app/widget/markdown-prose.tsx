@@ -1,70 +1,13 @@
-import { Prose } from "~/components/ui/prose";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import hljs from "highlight.js";
-import "highlight.js/styles/vs.css";
-import {
-  Badge,
-  Box,
-  Center,
-  Group,
-  Image,
-  Input,
-  Spinner,
-  Stack,
-  Text,
-  Textarea,
-} from "@chakra-ui/react";
-import { ClipboardIconButton, ClipboardRoot } from "~/components/ui/clipboard";
 import { useState, type PropsWithChildren } from "react";
-import { Tooltip } from "~/components/ui/tooltip";
-import { Button } from "~/components/ui/button";
-import { TbArrowRight } from "react-icons/tb";
+import { TbArrowRight, TbCheck, TbCopy } from "react-icons/tb";
 import { jsonrepair } from "jsonrepair";
-import "./markdown-prose.css";
 const linkifyRegex = require("remark-linkify-regex");
-
-const RichCTA = ({
-  title,
-  description,
-  link,
-  ctaButtonLabel,
-}: {
-  title: string;
-  description: string;
-  link: string;
-  ctaButtonLabel: string;
-}) => {
-  return (
-    <Stack
-      border="4px solid"
-      borderColor={"brand.outline"}
-      p={4}
-      rounded={"2xl"}
-      w="fit"
-      maxW="500px"
-      my={8}
-    >
-      <Text fontWeight={"bold"} m={0}>
-        {title}
-      </Text>
-      <Text m={0}>{description}</Text>
-      <Box>
-        <Button
-          asChild
-          textDecoration={"none"}
-          color={"brand.black"}
-          variant={"subtle"}
-        >
-          <a href={link} target="_blank">
-            {ctaButtonLabel || "Do it"}
-            <TbArrowRight />
-          </a>
-        </Button>
-      </Box>
-    </Stack>
-  );
-};
+import cn from "@meltdownjs/cn";
+import "./markdown-prose.css";
+import "highlight.js/styles/xt256.min.css";
 
 const RichCreateTicket = ({
   title: initialTitle,
@@ -95,63 +38,88 @@ const RichCreateTicket = ({
   }
 
   return (
-    <Stack
-      border="4px solid"
-      borderColor={"brand.outline"}
-      p={4}
-      rounded={"2xl"}
-      maxW="400px"
-      w="full"
-      my={8}
+    <div
+      className={cn(
+        "flex flex-col gap-2 border-4 border-base-300",
+        "p-4 rounded-2xl max-w-[400px] w-full my-8",
+      )}
     >
       {!loading && (
         <>
-          <Text fontWeight={"bold"} m={0}>
-            Create a support ticket
-          </Text>
-          <Input
+          <div className="text-lg font-bold">Create a support ticket</div>
+          <input
+            className="input w-full"
             placeholder="Title"
             defaultValue={title}
             onChange={(e) => setTitle(e.target.value)}
-            size="xs"
             disabled={disabled}
           />
-          <Textarea
+          <textarea
+            className="textarea textarea-bordered w-full"
             placeholder="Message"
             defaultValue={message}
             onChange={(e) => setMessage(e.target.value)}
             rows={4}
             disabled={disabled}
-            size="xs"
           />
-          <Input
+          <input
+            className="input w-full"
             placeholder="Email"
             defaultValue={email}
             onChange={(e) => setEmail(e.target.value)}
-            size="xs"
             disabled={disabled || !!customerEmail}
           />
-          <Group justifyContent={"flex-end"}>
-            <Button
-              variant={"subtle"}
-              size="xs"
-              loading={loading}
+          <div className="flex justify-end">
+            <button
+              className="btn"
               onClick={handleSubmit}
               disabled={disabled}
             >
+              {loading && (
+                <span className="loading loading-spinner loading-xs" />
+              )}
               Create <TbArrowRight />
-            </Button>
-          </Group>
+            </button>
+          </div>
         </>
       )}
       {loading && (
-        <Center>
-          <Spinner />
-        </Center>
+        <div className="flex items-center justify-center">
+          <span className="loading loading-spinner" />
+        </div>
       )}
-    </Stack>
+    </div>
   );
 };
+
+function CodeCopyButton({ code }: { code: string }) {
+  const [copied, setCopied] = useState(false);
+
+  function copyCode(code: string) {
+    navigator.clipboard.writeText(code);
+    setCopied(true);
+    setTimeout(() => {
+      setCopied(false);
+    }, 2000);
+  }
+
+  return (
+    <div
+      className={cn(
+        "absolute top-1 right-1 opacity-0 group-hover:opacity-100",
+        "transition-opacity duration-100",
+        copied && "opacity-100"
+      )}
+    >
+      <button
+        className={cn("btn btn-xs btn-square")}
+        onClick={() => copyCode(code)}
+      >
+        {copied ? <TbCheck /> : <TbCopy />}
+      </button>
+    </div>
+  );
+}
 
 export function MarkdownProse({
   children,
@@ -177,7 +145,7 @@ export function MarkdownProse({
   };
 }>) {
   return (
-    <Prose maxW="full" size={size} className="markdown-prose">
+    <div className="prose markdown-prose">
       <Markdown
         remarkPlugins={[remarkGfm, linkifyRegex(/\!\![0-9a-zA-Z]+!!/)]}
         components={{
@@ -193,9 +161,6 @@ export function MarkdownProse({
             if (language.startsWith("json|")) {
               try {
                 const json = JSON.parse(jsonrepair(children as string));
-                if (language === "json|cta") {
-                  return <RichCTA {...json} />;
-                }
                 if (
                   language === "json|create-ticket" &&
                   options?.onTicketCreate
@@ -226,26 +191,11 @@ export function MarkdownProse({
             }).value;
 
             return (
-              <Box className="group">
-                <Box dangerouslySetInnerHTML={{ __html: highlighted }} />
-                <Box
-                  position={"absolute"}
-                  top={1}
-                  right={1}
-                  opacity={0}
-                  _groupHover={{ opacity: 1 }}
-                  transition={"opacity 100ms ease-in-out"}
-                >
-                  <ClipboardRoot value={code}>
-                    <ClipboardIconButton />
-                  </ClipboardRoot>
-                </Box>
-              </Box>
+              <div className="group">
+                <div dangerouslySetInnerHTML={{ __html: highlighted }} />
+                <CodeCopyButton code={code} />
+              </div>
             );
-          },
-          img: ({ node, ...props }) => {
-            const { src, alt, ...rest } = props;
-            return <Image src={src} alt={alt} boxShadow={"none"} {...rest} />;
           },
           pre: ({ node, ...props }) => {
             const { children, ...rest } = props;
@@ -253,12 +203,13 @@ export function MarkdownProse({
             if (
               (children as any).props.className?.startsWith("language-json|")
             ) {
-              return <Box my={2}>{children}</Box>;
+              return <div className="my-2">{children}</div>;
             }
 
             return (
               <pre
                 {...rest}
+                className="no-scrollbar"
                 style={{
                   margin: noMarginCode ? 0 : undefined,
                   position: "relative",
@@ -287,28 +238,33 @@ export function MarkdownProse({
             const source = sources[index];
 
             return (
-              <Tooltip content={source?.title ?? "Loading..."} showArrow>
-                <Badge
-                  transform={"translateY(-6px)"}
-                  asChild
-                  onMouseEnter={() => options?.onSourceMouseEnter?.(index)}
-                  onMouseLeave={() => options?.onSourceMouseLeave?.()}
-                >
-                  {source?.url ? (
-                    <a href={source.url} target="_blank">
-                      {index + 1}
-                    </a>
-                  ) : (
-                    <span>{index + 1}</span>
-                  )}
-                </Badge>
-              </Tooltip>
+              <span
+                className={cn(
+                  "badge badge-soft px-1 translate-y-[-6px]",
+                  "text-[10px] leading-4 h-fit"
+                )}
+                onMouseEnter={() => options?.onSourceMouseEnter?.(index)}
+                onMouseLeave={() => options?.onSourceMouseLeave?.()}
+              >
+                {source?.url ? (
+                  <a
+                    href={source.url}
+                    target="_blank"
+                    className="no-underline"
+                    title={source?.title}
+                  >
+                    {index + 1}
+                  </a>
+                ) : (
+                  <span>{index + 1}</span>
+                )}
+              </span>
             );
           },
         }}
       >
         {children as string}
       </Markdown>
-    </Prose>
+    </div>
   );
 }

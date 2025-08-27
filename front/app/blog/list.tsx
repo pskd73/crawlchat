@@ -37,7 +37,7 @@ export default function BlogPage({ loaderData }: Route.ComponentProps) {
             <a
               key={post.slug}
               href={`/blog/${post.slug}`}
-              className="flex flex-col bg-canvas rounded-2xl shadow-sm overflow-hidden hover:shadow-md transition-all duration-300"
+              className="flex flex-col bg-base-200 rounded-2xl shadow-sm overflow-hidden hover:shadow-md transition-all duration-300"
             >
               <div className="flex items-center gap-2">
                 <img

@@ -1,14 +1,7 @@
-import {
-  Group,
-  Heading,
-  Stack,
-  Text,
-  Link as ChakraLink,
-} from "@chakra-ui/react";
+import cn from "@meltdownjs/cn";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { TbCheck } from "react-icons/tb";
 import { Link, useLocation, type FetcherWithComponents } from "react-router";
-import { Button } from "~/components/ui/button";
 
 export function SettingsSection({
   id,
@@ -58,57 +51,59 @@ export function SettingsSection({
 
   function render() {
     return (
-      <Stack
-        border={"1px solid"}
-        borderColor={danger ? "red.300" : "brand.outline"}
-        borderRadius={"md"}
-        overflow={"hidden"}
+      <div
+        className={cn(
+          "border border-base-300 rounded-box flex flex-col",
+          "outline-primary outline-offset-3 bg-base-200/50 shadow-sm",
+          danger && "border-red-200 bg-red-50 text-error",
+          targeted && "outline-2"
+        )}
         ref={ref}
-        outline={targeted ? "3px solid" : "none"}
-        outlineColor={"brand.fg"}
-        outlineOffset={"2px"}
-        gap={0}
       >
-        <Stack p={4} gap={4} bg={danger ? "brand.danger.subtle" : undefined}>
-          <Stack>
-            {title && <Heading size={"md"}>{title}</Heading>}
+        <div className={cn("flex flex-col gap-4 p-4")}>
+          <div className="flex flex-col gap-2">
+            {title && <div className="text-md font-medium">{title}</div>}
             {description && (
-              <Text opacity={0.5} fontSize={"sm"}>
+              <div
+                className={cn(
+                  "text-sm text-base-content/50",
+                  danger && "text-error/50"
+                )}
+              >
                 {description}
-              </Text>
+              </div>
             )}
-          </Stack>
+          </div>
           {children}
-        </Stack>
+        </div>
         {(actionRight || fetcher) && (
-          <Group
-            p={4}
-            py={3}
-            borderTop={"1px solid"}
-            borderColor={"brand.outline"}
-            bg={"brand.gray.50"}
-            w="full"
-            justifyContent={"space-between"}
+          <div
+            className={cn(
+              "flex justify-between p-4 py-3 border-t border-base-300",
+              "bg-base-200 w-full justify-between rounded-b-box",
+              danger && "bg-red-100 border-red-200"
+            )}
           >
-            <Group></Group>
-            <Group>
+            <div></div>
+            <div className="flex gap-2">
               {actionRight}
               {fetcher && (
-                <Button
+                <button
                   type="submit"
-                  size={"xs"}
-                  loading={fetcher.state !== "idle"}
-                  variant={"surface"}
-                  colorPalette={danger ? "red" : undefined}
+                  className={cn("btn", danger && "btn-error")}
+                  disabled={fetcher.state !== "idle"}
                 >
+                  {fetcher.state !== "idle" && (
+                    <span className="loading loading-spinner" />
+                  )}
                   Save
                   <TbCheck />
-                </Button>
+                </button>
               )}
-            </Group>
-          </Group>
+            </div>
+          </div>
         )}
-      </Stack>
+      </div>
     );
   }
 
@@ -132,37 +127,28 @@ export function SettingsContainer({ children }: { children: React.ReactNode }) {
   }, [location.hash]);
 
   return (
-    <Group gap={8} alignItems={"flex-start"} w="full">
-      <Stack gap={4} flex={1}>
-        {children}
-      </Stack>
-      <Stack
-        w={"200px"}
-        h="full"
-        position={"sticky"}
-        top={"80px"}
-        display={["none", "none", "block"]}
-      >
-        <Heading size={"sm"}>On this page</Heading>
-        <Stack>
+    <div className="flex gap-8 items-start w-full">
+      <div className="flex flex-col gap-4 flex-1">{children}</div>
+      <div className="w-[200px] sticky top-[80px] hidden md:flex flex-col gap-2">
+        <div className="text-sm font-medium">On this page</div>
+        <div className="flex flex-col gap-2">
           {sections.map((section) => (
-            <ChakraLink
+            <Link
               key={section.id}
-              asChild
-              fontSize={"sm"}
-              outline={"none"}
-              opacity={activeId === section.id ? 1 : 0.5}
-              fontWeight={activeId === section.id ? "medium" : undefined}
-              color={activeId === section.id ? "brand.fg" : undefined}
+              className={cn(
+                "text-sm opacity-50 hover:opacity-100",
+                activeId === section.id &&
+                  "font-medium text-primary opacity-100"
+              )}
+              to={`#${section.id}`}
+              preventScrollReset
             >
-              <Link to={`#${section.id}`} preventScrollReset>
-                {section.title}
-              </Link>
-            </ChakraLink>
+              {section.title}
+            </Link>
           ))}
-        </Stack>
-      </Stack>
-    </Group>
+        </div>
+      </div>
+    </div>
   );
 }
 

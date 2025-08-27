@@ -1,4 +1,3 @@
-import { prisma } from "libs/prisma";
 import type {
   Prisma,
   Scrape,
@@ -8,19 +7,6 @@ import type {
 } from "libs/prisma";
 import type { Route } from "./+types/ticket";
 import {
-  Badge,
-  Box,
-  Group,
-  Heading,
-  IconButton,
-  Image,
-  Link,
-  Separator,
-  Stack,
-  Text,
-  Textarea,
-} from "@chakra-ui/react";
-import {
   TbAlertCircle,
   TbArrowRight,
   TbCheck,
@@ -28,17 +14,18 @@ import {
   TbMessage,
   TbUser,
 } from "react-icons/tb";
+import { prisma } from "libs/prisma";
 import { RiChatVoiceAiFill } from "react-icons/ri";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useFetcher } from "react-router";
-import { Button } from "~/components/ui/button";
-import moment from "moment";
 import { getAuthUser } from "~/auth/middleware";
 import { MarkdownProse } from "./markdown-prose";
 import { sendReactEmail } from "~/email";
+import toast, { Toaster } from "react-hot-toast";
+import cn from "@meltdownjs/cn";
+import moment from "moment";
 import TicketUserMessageEmail from "emails/ticket-user-message";
 import TicketAdminMessageEmail from "emails/ticket-admin-message";
-import { Toaster, toaster } from "~/components/ui/toaster";
 
 function getRole(thread?: Thread | null, scrapeUsers?: ScrapeUser[] | null) {
   const role: "agent" | "user" =
@@ -195,35 +182,28 @@ export async function action({ params, request }: Route.ActionArgs) {
 
 function Nav({ scrape }: { scrape: Scrape }) {
   return (
-    <Stack as="nav" pt={4}>
-      <Group justifyContent={"space-between"}>
-        <Group>
-          {scrape.logoUrl && (
-            <Image
-              src={scrape.logoUrl}
-              alt={scrape.title ?? ""}
-              maxH={"18px"}
-            />
-          )}
-          <Text fontSize={"lg"} fontWeight={"bold"}>
-            {scrape.title}
-          </Text>
-        </Group>
-        <Text
-          fontSize={"sm"}
-          opacity={0.5}
-          display={"flex"}
-          alignItems={"center"}
-          gap={2}
+    <nav className="flex items-center pt-4 gap-2 justify-between">
+      <div className="flex items-center gap-2">
+        {scrape.logoUrl && (
+          <img
+            className="max-h-[18px]"
+            src={scrape.logoUrl}
+            alt={scrape.title ?? ""}
+          />
+        )}
+        <div className="text-lg font-medium">{scrape.title}</div>
+      </div>
+      <div className="text-sm text-base-content/50 flex items-center gap-2">
+        Powered by{" "}
+        <a
+          className="link link-hover link-primary flex items-center gap-1"
+          href="https://crawlchat.app"
         >
-          Powered by{" "}
-          <Link href="https://crawlchat.app">
-            <RiChatVoiceAiFill />
-            CrawlChat
-          </Link>
-        </Text>
-      </Group>
-    </Stack>
+          <RiChatVoiceAiFill />
+          CrawlChat
+        </a>
+      </div>
+    </nav>
   );
 }
 
@@ -248,38 +228,33 @@ function Message({
     role === "agent" ? message.role === "user" : message.role === "agent";
 
   return (
-    <Stack
-      border={"2px solid"}
-      borderColor={shouldHighlight ? "brand.emphasized" : "brand.outline"}
-      rounded={"md"}
-      gap={0}
+    <div
+      className={cn(
+        "flex flex-col gap-0 border border-base-300 rounded-box overflow-hidden",
+        "bg-base-200/50",
+        shouldHighlight && "border-primary border-2"
+      )}
     >
-      <Group
-        px={4}
-        py={2}
-        borderBottom={"1px solid"}
-        borderColor={"brand.outline"}
-        bg="brand.gray"
-      >
+      <div className="flex items-center gap-2 p-2 px-4 border-b border-base-300">
         {message.role === "agent" && (
-          <Image
+          <img
+            className="max-h-[18px]"
             src={scrape.logoUrl ?? "/logo.png"}
             alt={scrape.title ?? ""}
-            maxH={"18px"}
           />
         )}
         {message.role === "user" && <TbUser />}
-        <Text fontWeight={"bold"}>
+        <div className="font-medium">
           {message.role === "user" ? youTag : scrape.title}
-        </Text>
-        <Text opacity={0.5} fontSize={"sm"}>
+        </div>
+        <div className="text-sm text-base-content/50">
           {moment(message.createdAt).fromNow()}
-        </Text>
-      </Group>
-      <Stack p={4}>
+        </div>
+      </div>
+      <div className="flex flex-col gap-2 p-4">
         <MarkdownProse>{message.content}</MarkdownProse>
-      </Stack>
-    </Stack>
+      </div>
+    </div>
   );
 }
 
@@ -325,72 +300,63 @@ export default function Ticket({ loaderData }: Route.ComponentProps) {
 
   function copyToClipboard(value: string) {
     navigator.clipboard.writeText(value);
-    toaster.success({
-      title: "Copied to clipboard",
-    });
+    toast.success("Copied to clipboard");
   }
 
   if (!loaderData.thread) {
     return (
-      <Stack alignItems={"center"} justifyContent={"center"} h="100vh" w="full">
+      <div className="flex flex-col items-center justify-center h-screen w-full gap-4">
         <TbAlertCircle size={48} />
-        <Text>Ticket not found</Text>
-      </Stack>
+        <div className="text-lg font-medium">Ticket not found</div>
+      </div>
     );
   }
 
   return (
-    <Stack alignItems={"center"}>
-      <Stack maxW={800} w="full" gap={8} p={4}>
+    <div className="flex flex-col gap-2 items-center bg-base-100 min-h-screen">
+      <div className="flex flex-col gap-8 p-4 max-w-3xl w-full">
         <Nav scrape={loaderData.thread.scrape} />
         {loaderData.thread.title && (
-          <Stack>
-            <Heading size={"2xl"} as="h1">
-              <Text as="span" opacity={0.2}>
+          <div className="flex flex-col gap-2">
+            <h1 className="text-2xl font-bold">
+              <span className="text-base-content/20">
                 #{loaderData.thread.ticketNumber}
-              </Text>{" "}
+              </span>{" "}
               {loaderData.thread.title}
-            </Heading>
-            <Group>
-              <Badge
-                colorPalette={
+            </h1>
+            <div className="flex flex-col md:flex-row md:items-center gap-2">
+              <div
+                className={cn(
+                  "badge badge-soft",
                   loaderData.thread.ticketStatus === "open"
-                    ? "green"
+                    ? "badge-success"
                     : undefined
-                }
-                variant={"surface"}
+                )}
               >
                 {loaderData.thread.ticketStatus!.toUpperCase()}
-              </Badge>
-              <Separator h="4" orientation="vertical" />
-              <Text opacity={0.8} fontSize="sm">
+              </div>
+              <div className="text-sm text-base-content/80">
                 Opened {moment(openedAt).fromNow()}
-              </Text>
+              </div>
               {loaderData.role === "agent" && (
-                <>
-                  <Separator h="4" orientation="vertical" />
-                  <Group>
-                    <Text opacity={0.8} fontSize="sm">
-                      {loaderData.thread.ticketUserEmail}
-                    </Text>
-                    <IconButton
-                      size={"xs"}
-                      variant={"ghost"}
-                      onClick={() =>
-                        copyToClipboard(
-                          loaderData.thread!.ticketUserEmail ?? ""
-                        )
-                      }
-                    >
-                      <TbCopy />
-                    </IconButton>
-                  </Group>
-                </>
+                <div className="flex items-center gap-2">
+                  <div className="text-sm text-base-content/80">
+                    {loaderData.thread.ticketUserEmail}
+                  </div>
+                  <button
+                    className="btn btn-square btn-xs"
+                    onClick={() =>
+                      copyToClipboard(loaderData.thread!.ticketUserEmail ?? "")
+                    }
+                  >
+                    <TbCopy />
+                  </button>
+                </div>
               )}
-            </Group>
-          </Stack>
+            </div>
+          </div>
         )}
-        <Stack gap={4}>
+        <div className="flex flex-col gap-4">
           {ticketMessages.map((message, idx) => (
             <Message
               key={message.id}
@@ -400,49 +366,43 @@ export default function Ticket({ loaderData }: Route.ComponentProps) {
             />
           ))}
           {loaderData.thread.ticketStatus === "closed" && (
-            <Stack gap={4}>
+            <div className="flex flex-col gap-4">
               {loaderData.thread.scrape.resolveYesConfig && (
-                <Stack
-                  border={"2px solid"}
-                  borderColor={"brand.outline"}
-                  rounded={"md"}
-                  p={4}
-                >
-                  <Text fontWeight={"bold"}>
+                <div className="flex flex-col gap-2 border border-base-300 rounded-box p-4">
+                  <span className="font-medium">
                     {loaderData.thread.scrape.resolveYesConfig.title}
-                  </Text>
-                  <Text>
+                  </span>
+                  <span>
                     {loaderData.thread.scrape.resolveYesConfig.description}
-                  </Text>
-                  <Box>
-                    <Button asChild>
-                      <a
-                        href={loaderData.thread.scrape.resolveYesConfig.link}
-                        target="_blank"
-                      >
-                        {loaderData.thread.scrape.resolveYesConfig.btnLabel}
-                        <TbArrowRight />
-                      </a>
-                    </Button>
-                  </Box>
-                </Stack>
+                  </span>
+                  <div>
+                    <a
+                      className="btn btn-primary"
+                      href={loaderData.thread.scrape.resolveYesConfig.link}
+                      target="_blank"
+                    >
+                      {loaderData.thread.scrape.resolveYesConfig.btnLabel}
+                      <TbArrowRight />
+                    </a>
+                  </div>
+                </div>
               )}
-              <Group px={[0, 10]} opacity={0.5}>
+              <div className="flex items-center gap-2 opacity-50">
                 <TbCheck />
-                <Text fontSize={"sm"}>
+                <div className="text-sm text-base-content/50">
                   This ticket has been resolved and closed{" "}
-                  <Text as="span" fontWeight={"medium"}>
+                  <span className="font-medium">
                     {moment(loaderData.thread.ticketClosedAt).fromNow()}
-                  </Text>
-                </Text>
-              </Group>
-            </Stack>
+                  </span>
+                </div>
+              </div>
+            </div>
           )}
-        </Stack>
+        </div>
 
         {loaderData.thread.ticketStatus !== "closed" && (
           <commentFetcher.Form method="post">
-            <Stack>
+            <div className="flex flex-col gap-2">
               <input type="hidden" name="intent" value={"comment"} />
               <input type="hidden" name="resolve" value={resolve.toString()} />
               <input
@@ -450,40 +410,46 @@ export default function Ticket({ loaderData }: Route.ComponentProps) {
                 name="key"
                 value={loaderData.passedKey ?? ""}
               />
-              <Text fontWeight={"medium"}>Add a message</Text>
-              <Textarea
+              <div className="font-medium">Add a message</div>
+              <textarea
+                className="textarea textarea-bordered w-full"
                 ref={commentRef}
                 name="content"
                 placeholder="Type your message here..."
                 rows={3}
                 required
               />
-              <Group justifyContent={"flex-end"}>
-                <Button
-                  loading={commentFetcher.state !== "idle" && resolve}
-                  variant={"subtle"}
+              <div className="flex items-center gap-2 justify-end">
+                <button
+                  className="btn"
                   onClick={handleResolve}
                   disabled={commentFetcher.state !== "idle"}
                 >
+                  {commentFetcher.state !== "idle" && resolve && (
+                    <span className="loading loading-spinner loading-xs" />
+                  )}
                   Resolve & Close
                   <TbCheck />
-                </Button>
-                <Button
+                </button>
+                <button
+                  className="btn btn-primary"
                   ref={commentSubmitRef}
                   type="submit"
-                  loading={commentFetcher.state !== "idle" && !resolve}
                   disabled={commentFetcher.state !== "idle"}
                 >
+                  {commentFetcher.state !== "idle" && !resolve && (
+                    <span className="loading loading-spinner loading-xs" />
+                  )}
                   Comment
                   <TbMessage />
-                </Button>
-              </Group>
-            </Stack>
+                </button>
+              </div>
+            </div>
           </commentFetcher.Form>
         )}
-      </Stack>
+      </div>
 
-      <Toaster />
-    </Stack>
+      <Toaster position="bottom-right" />
+    </div>
   );
 }

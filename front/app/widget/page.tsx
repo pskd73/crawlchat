@@ -1,22 +1,21 @@
-import { prisma } from "~/prisma";
 import type { Route } from "./+types/page";
-import { Stack } from "@chakra-ui/react";
+import type { Message, MessageRating, Scrape, Thread } from "libs/prisma";
+import { prisma } from "~/prisma";
 import { createToken } from "libs/jwt";
-import ChatBox, { ChatboxContainer } from "~/widget/chat-box";
 import { commitSession, getSession } from "~/session";
 import { data, redirect, type Session } from "react-router";
-import type { Message, MessageRating, Scrape, Thread } from "libs/prisma";
-import { randomUUID } from "crypto";
 import { getNextNumber } from "libs/mongo-counter";
 import { sendReactEmail } from "~/email";
-import TicketUserCreateEmail from "emails/ticket-user-create";
-import { Toaster } from "~/components/ui/toaster";
-import TicketAdminCreateEmail from "emails/ticket-admin-create";
 import { fetchIpDetails, getClientIp } from "~/client-ip";
 import { ChatBoxProvider } from "~/widget/use-chat-box";
 import { sanitizeScrape } from "~/scrapes/util";
-import "highlight.js/styles/vs.css";
 import { getAuthUser } from "~/auth/middleware";
+import { Toaster } from "react-hot-toast";
+import { randomUUID } from "crypto";
+import cn from "@meltdownjs/cn";
+import TicketUserCreateEmail from "emails/ticket-user-create";
+import TicketAdminCreateEmail from "emails/ticket-admin-create";
+import ChatBox, { ChatboxContainer } from "~/widget/chat-box";
 
 function isMongoObjectId(id: string) {
   return /^[0-9a-fA-F]{24}$/.test(id);
@@ -333,15 +332,17 @@ export default function ScrapeWidget({ loaderData }: Route.ComponentProps) {
       token={loaderData.userToken}
       fullscreen={loaderData.fullscreen}
     >
-      <Stack
-        h="100dvh"
-        bg={loaderData.embed ? "blackAlpha.700" : "brand.gray.100"}
+      <div
+        className={cn(
+          "h-screen",
+          loaderData.embed ? "bg-black/50" : "bg-base-300"
+        )}
       >
         <Toaster />
-        <ChatboxContainer width={loaderData.width} height={loaderData.height}>
+        <ChatboxContainer>
           <ChatBox />
         </ChatboxContainer>
-      </Stack>
+      </div>
     </ChatBoxProvider>
   );
 }

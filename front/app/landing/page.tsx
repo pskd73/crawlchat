@@ -1,7 +1,6 @@
-import { useState, type PropsWithChildren, type ReactNode } from "react";
-import cn from "@meltdownjs/cn";
-import "../tailwind.css";
-import "../fonts.css";
+import type { Route } from "./+types/page";
+import type { PropsWithChildren, ReactNode } from "react";
+import { useState } from "react";
 import {
   TbArrowRight,
   TbArrowsShuffle,
@@ -30,12 +29,10 @@ import {
   TbWorld,
 } from "react-icons/tb";
 import { prisma } from "libs/prisma";
-import type { Route } from "./+types/page";
-import { Badge, Box, Text } from "@chakra-ui/react";
-import { Tooltip } from "~/components/ui/tooltip";
 import { track } from "~/pirsch";
 import { PLAN_FREE, PLAN_PRO, PLAN_STARTER } from "libs/user-plan";
 import { useLoaderData } from "react-router";
+import cn from "@meltdownjs/cn";
 
 export function meta() {
   return [
@@ -116,7 +113,9 @@ export function Logo() {
   return (
     <a className="flex items-center gap-2" href="/">
       <img src="/logo.png" alt="CrawlChat" width={38} height={38} />
-      <span className="text-2xl font-radio-grotesk text-brand">CrawlChat</span>
+      <span className="text-2xl font-radio-grotesk text-primary">
+        CrawlChat
+      </span>
     </a>
   );
 }
@@ -130,19 +129,15 @@ function NavLink({
     <a href={href} className="font-medium hover:underline relative">
       {children}
       {tooltip && (
-        <Tooltip content="New" positioning={{ placement: "top" }}>
-          <Badge
-            position={"absolute"}
-            top={0}
-            right={0}
-            colorPalette={"red"}
-            variant={"solid"}
-            size={"xs"}
-            transform={"translate(20%, -80%)"}
-          >
-            {tooltip}
-          </Badge>
-        </Tooltip>
+        <div
+          className={cn(
+            "absolute top-0 right-0 text-[8px]",
+            "bg-secondary text-secondary-content px-2 py-[2px] rounded-full",
+            "translate-x-[20%] -translate-y-[80%]"
+          )}
+        >
+          {tooltip}
+        </div>
       )}
     </a>
   );
@@ -163,9 +158,9 @@ function Button({
   return (
     <a
       className={cn(
-        "font-medium border text-brand border-brand rounded-xl px-6 py-1 flex items-center justify-center gap-2",
-        "cursor-pointer hover:bg-brand hover:text-canvas transition-all",
-        variant === "solid" && "bg-brand text-canvas",
+        "font-medium border text-primary border-primary rounded-xl px-6 py-1 flex items-center justify-center gap-2",
+        "cursor-pointer hover:bg-primary hover:text-primary-content transition-all",
+        variant === "solid" && "bg-primary text-primary-content",
         className
       )}
       href={href}
@@ -178,7 +173,7 @@ function Button({
 
 function StatsItem({ label, value }: { label: string; value: number }) {
   return (
-    <div className="flex gap-4 py-6 px-6 items-center border-b border-outline last:border-b-0">
+    <div className="flex gap-4 py-6 px-6 items-center border-b border-base-300 last:border-b-0">
       <div className="flex-1 flex">{label}</div>
       <div className="text-5xl md:text-6xl font-bold font-radio-grotesk">
         {value}
@@ -199,18 +194,18 @@ function Stats({
   return (
     <div className="flex flex-col md:flex-row gap-8 w-full mt-16 md:items-center">
       <div className="flex-1 flex flex-col gap-10">
-        <div className="text-md md:text-xl font-medium px-6 py-3 shadow-md rounded-2xl bg-canvas w-fit flex items-center gap-4 -rotate-[4deg]">
-          <div className="w-3 h-3 bg-green-500 rounded-full outline-2 outline-green-300 outline" />
+        <div className="text-md md:text-xl font-medium px-6 py-3 shadow-md rounded-2xl bg-base-100 w-fit flex items-center gap-4 -rotate-[4deg]">
+          <div className="w-3 h-3 bg-green-500 rounded-full outline-2 outline-green-300" />
           Serving the community
         </div>
         <h3 className="text-4xl md:text-5xl font-radio-grotesk font-bold leading-[1.2]">
           Answering <br />
-          <span className="text-brand">questions</span> <br />
+          <span className="text-primary">questions</span> <br />
           continuously
         </h3>
       </div>
 
-      <div className="flex-1 shadow-md bg-canvas rounded-2xl">
+      <div className="flex-1 shadow-md bg-base-100 rounded-2xl">
         <StatsItem label="Today" value={messagesDay} />
         <StatsItem label="In the last week" value={messagesThisWeek} />
         <StatsItem label="In the last month" value={messagesMonth} />
@@ -301,7 +296,7 @@ export function Heading({ children }: PropsWithChildren) {
 
 function HeadingHighlight({ children }: PropsWithChildren) {
   return (
-    <span className="text-brand bg-brand-subtle px-4 rounded-lg md:leading-[1.4]">
+    <span className="text-primary bg-primary-subtle px-4 rounded-lg md:leading-[1.4]">
       {children}
     </span>
   );
@@ -328,7 +323,7 @@ function WorksStep({
       <div
         className={cn(
           "max-w-[300px] mx-auto rounded-2xl overflow-hidden",
-          "border border-brand mb-4"
+          "border border-primary mb-4"
         )}
       >
         <img src={img} alt={title} className="w-full h-full" />
@@ -450,9 +445,9 @@ function ChatWidgetFeature({
   return (
     <div
       className={cn(
-        "rounded-2xl p-4 border border-transparent hover:border-outline gap-2 flex flex-col",
+        "rounded-2xl p-4 border border-transparent hover:border-base-300 gap-2 flex flex-col",
         "cursor-pointer",
-        active && "bg-canvas shadow-md hover:border-transparent"
+        active && "bg-base-100 shadow-md hover:border-transparent"
       )}
       onClick={onClick}
     >
@@ -511,7 +506,7 @@ function ChatWidget() {
             onClick={() => handleClick("pin")}
           />
         </div>
-        <div className="flex-1 bg-ash-strong rounded-2xl shadow-md border border-outline aspect-square overflow-hidden">
+        <div className="flex-1 bg-ash-strong rounded-2xl shadow-md border border-base-300 aspect-square overflow-hidden">
           <img
             src={`/new-landing/widget-${activeTab}.png`}
             className="w-full h-full aspect-square"
@@ -538,7 +533,7 @@ function ToolItem({
   return (
     <div
       className={cn(
-        "flex-1 flex flex-col gap-2 p-6 border-opacity-60 border-outline",
+        "flex-1 flex flex-col gap-2 p-6 border-opacity-60 border-base-300",
         "md:border-r border-b no-border-last-3 no-border-every-3 last:border-b-0"
       )}
     >
@@ -546,18 +541,11 @@ function ToolItem({
         {typeof icon === "string" ? (
           <img src={icon} alt={title} className="w-6 h-6" />
         ) : (
-          <Box>
-            <Text
-              fontSize={"32px"}
-              color={"brand.fg"}
-              bg={"brand.subtle"}
-              w="fit"
-              p={4}
-              rounded={"full"}
-            >
+          <div>
+            <div className="text-3xl bg-primary-subtle p-4 rounded-full">
               {icon}
-            </Text>
-          </Box>
+            </div>
+          </div>
         )}
         <h3 className="text-xl font-radio-grotesk">{title}</h3>
       </div>
@@ -580,7 +568,7 @@ function Tools() {
         Discord, or Slack.
       </HeadingDescription>
 
-      <div className="bg-canvas rounded-2xl border border-outline">
+      <div className="bg-base-100 rounded-2xl border border-base-300">
         <ToolsRow>
           <ToolItem
             title="Instant answers"
@@ -643,15 +631,15 @@ function PricingBox({
   return (
     <div
       className={cn(
-        "flex-1 bg-canvas shadow-md border border-outline rounded-2xl relative",
-        popular && "bg-brand-subtle bg-opacity-60 rounded-tl-none"
+        "flex-1 bg-base-100 shadow-md border border-base-300 rounded-2xl relative",
+        popular && "rounded-tl-none"
       )}
     >
       {popular && (
         <div
           className={cn(
-            "bg-brand-subtle border border-outline absolute top-0 left-[-1px] translate-y-[-100%]",
-            "text-sm text-brand px-2 py-1 rounded-t-lg font-medium flex items-center gap-2"
+            "bg-primary-subtle border border-base-300 absolute top-0 left-[-1px] translate-y-[-100%]",
+            "text-sm text-primary px-2 py-1 rounded-t-lg font-medium flex items-center gap-2"
           )}
         >
           <img src="/new-landing/crown.png" alt="Popular" className="w-4 h-4" />
@@ -659,12 +647,7 @@ function PricingBox({
         </div>
       )}
 
-      <div
-        className={cn(
-          "p-6 border-b border-outline",
-          popular && "border-brand border-opacity-10"
-        )}
-      >
+      <div className={cn("p-6 border-b border-base-300")}>
         <h4 className="text-2xl font-bold font-radio-grotesk">{title}</h4>
         <p className="opacity-50 font-medium">{description}</p>
       </div>
@@ -779,7 +762,7 @@ export function Pricing() {
 export function CTA({ text }: { text?: string }) {
   return (
     <div className="mt-32" id="cta">
-      <div className="w-full bg-gradient-to-b from-canvas to-ash shadow-md rounded-2xl py-20 px-10 relative">
+      <div className="w-full bg-gradient-to-b from-base-100 to-base-200 shadow-md rounded-2xl py-20 px-10 relative">
         <h2 className="font-radio-grotesk text-[42px] md:text-[42px] leading-[1.2] font-medium text-center max-w-[800px] mx-auto">
           {text || "Reduce your support queries and make your users happy now!"}
         </h2>
@@ -805,7 +788,7 @@ function FooterLink({ children, href }: PropsWithChildren<{ href: string }>) {
 
 export function Footer() {
   return (
-    <footer className="bg-canvas mt-32 border-t border-outline">
+    <footer className="bg-base-100 mt-32 border-t border-base-300">
       <Container>
         <div className="py-8 flex flex-col md:flex-row gap-10">
           <div className="flex-[2] flex flex-col gap-4">
@@ -964,9 +947,9 @@ export function Nav({ changeLogDate }: { changeLogDate?: string }) {
 
 export function ctaClassNames(primary: boolean) {
   return cn(
-    "text-2xl border-2 border-brand px-8 py-4 rounded-xl font-medium flex items-center gap-2 transition-all hover:translate-y-[-2px]",
-    !primary && "text-brand hover:bg-brand-subtle",
-    primary && "bg-brand text-canvas"
+    "text-2xl border-2 border-primary px-8 py-4 rounded-xl font-medium flex items-center gap-2 transition-all hover:translate-y-[-2px]",
+    !primary && "text-primary hover:bg-primary-subtle",
+    primary && "bg-primary text-primary-content"
   );
 }
 
@@ -998,8 +981,8 @@ function Hero() {
       </a>
 
       <h1 className="font-radio-grotesk text-[42px] md:text-[64px] leading-[1.2] text-center max-w-[800px] mx-auto">
-        <span className="text-brand">AI Chatbot</span> for your documentation
-        and <span className="text-brand">support</span>
+        <span className="text-primary">AI Chatbot</span> for your documentation
+        and <span className="text-primary">support</span>
       </h1>
 
       <h2 className="text-center text-xl max-w-[600px] mx-auto mt-8">
@@ -1043,9 +1026,15 @@ function Hero() {
 
 export function LandingPage({ children }: PropsWithChildren) {
   return (
-    <div className="bg-ash font-aeonik">
-      <div className="hidden md:block aspect-[1440/960] w-full bg-[url('/new-landing/clouds.png')] dark:bg-[url('/new-landing/clouds-dark.png')] bg-contain bg-no-repeat absolute top-0 left-0">
-        <div className="w-full h-full bg-gradient-to-b from-[rgba(246,246,245,0)] to-ash"></div>
+    <div data-theme="brand" className="bg-base-200 font-aeonik">
+      <div
+        className={cn(
+          "hidden md:block aspect-[1440/960] w-full bg-[url('/new-landing/clouds.png')]",
+          // "dark:bg-[url('/new-landing/clouds-dark.png')]",
+          "bg-contain bg-no-repeat absolute top-0 left-0"
+        )}
+      >
+        <div className="w-full h-full bg-gradient-to-b from-[rgba(246,246,245,0)] to-base-200"></div>
       </div>
 
       <div className="relative">{children}</div>
@@ -1069,7 +1058,7 @@ function FlowCard({
   return (
     <div
       className={cn(
-        "rounded-2xl bg-canvas border border-outline p-6 flex flex-col justify-between gap-4",
+        "rounded-2xl bg-base-100 border border-base-300 p-6 flex flex-col justify-between gap-4",
         cols === 1 && "md:col-span-1",
         cols === 2 && "md:col-span-2",
         cols === 3 && "md:col-span-3",
@@ -1086,7 +1075,7 @@ function FlowCard({
         <img
           src={img}
           alt={title}
-          className="border border-outline rounded-lg"
+          className="border border-base-300 rounded-lg"
         />
       </div>
     </div>
@@ -1158,7 +1147,7 @@ export function CustomTestimonial({
   authorCompany: string;
 }) {
   return (
-    <div className="border-r-0 md:border-r border-b md:border-b-0 border-outline p-6 last:border-r-0 last:border-b-0">
+    <div className="border-r-0 md:border-r border-b md:border-b-0 border-base-300 p-6 last:border-r-0 last:border-b-0">
       <p className="text-xl font-radio-grotesk text-center italic">{text}</p>
 
       <div className="flex flex-col justify-center gap-2 mt-8">
@@ -1166,7 +1155,7 @@ export function CustomTestimonial({
           <img
             src={authorImage}
             alt={author}
-            className="w-16 h-16 rounded-full border border-outline"
+            className="w-16 h-16 rounded-full border border-base-300"
           />
           <span className="font-medium">{author}</span>
           <span className="text-sm text-gray-500">{authorCompany}</span>
@@ -1181,19 +1170,19 @@ export function CustomTestimonial({
 
 function CTH({ children }: PropsWithChildren) {
   return (
-    <span className="bg-brand-subtle text-brand px-2 mx-1 whitespace-nowrap">
+    <span className="bg-primary-subtle text-primary px-2 mx-1 whitespace-nowrap">
       {children}
     </span>
   );
 }
 
 function CTHS({ children }: PropsWithChildren) {
-  return <span className="text-brand font-bold">{children}</span>;
+  return <span className="text-primary font-bold">{children}</span>;
 }
 
 export function CustomTestimonials() {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 border border-outline rounded-2xl mt-32 bg-canvas">
+    <div className="grid grid-cols-1 md:grid-cols-3 border border-base-300 rounded-2xl mt-32 bg-base-100">
       <CustomTestimonial
         text={
           <div>
@@ -1307,7 +1296,7 @@ function FAQ() {
           You can signup without paying anything and try out adding your
           knowledge base, integrating the chatbot to your website. You can check
           the{" "}
-          <a href="/#pricing" className="text-brand">
+          <a href="/#pricing" className="text-primary">
             pricing
           </a>{" "}
           section for more details about the credits.
@@ -1333,11 +1322,11 @@ function FAQ() {
           integrated with your Discord or Slack server. You can find the
           instructions to integrate the chatbot to your Discord or Slack server
           in the{" "}
-          <a href="/discord-bot" className="text-brand">
+          <a href="/discord-bot" className="text-primary">
             Discord bot
           </a>{" "}
           and Slack app pages. Once added to the channel or server, your
-          community can tag <span className="text-brand">@CrawlChat</span> to
+          community can tag <span className="text-primary">@CrawlChat</span> to
           ask questions to get the answers.
         </p>
       ),
@@ -1419,12 +1408,12 @@ function FAQ() {
 
       <div className="mt-20">
         {questions.map((question, index) => (
-          <div key={index} className="border-b border-outline last:border-b-0">
+          <div key={index} className="border-b border-base-300 last:border-b-0">
             <div
               className={cn(
                 "flex justify-between gap-4 text-2xl cursor-pointer py-8",
-                "hover:text-brand",
-                active === index && "text-brand"
+                "hover:text-primary",
+                active === index && "text-primary"
               )}
               onClick={() => handleClick(index)}
             >
@@ -1524,14 +1513,14 @@ function Gallery() {
       <div
         className={cn(
           "flex justify-center items-center",
-          "bg-canvas aspect-video rounded-xl shadow-xl",
+          "bg-base-100 aspect-video rounded-xl shadow-xl",
           "overflow-hidden mb-4 relative"
         )}
       >
         {isLoading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-canvas bg-opacity-50 z-10">
+          <div className="absolute inset-0 flex items-center justify-center bg-base-100 bg-opacity-50 z-10">
             <div className="flex flex-col items-center gap-4">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
               <p className="text-lg font-medium opacity-70">Loading...</p>
             </div>
           </div>
@@ -1548,8 +1537,8 @@ function Gallery() {
 
       <div
         className={cn(
-          "border border-outline rounded-xl p-2",
-          "flex gap-2 bg-canvas justify-center lg:justify-between",
+          "border border-base-300 rounded-xl p-2",
+          "flex gap-2 bg-base-100 justify-center lg:justify-between",
           "flex-wrap"
         )}
       >
@@ -1558,8 +1547,9 @@ function Gallery() {
             key={index}
             className={cn(
               "flex items-center p-1 rounded-md w-fit px-3 text-sm gap-1",
-              "transition-all duration-200",
-              activeStep === index && "bg-brand text-canvas",
+              "transition-all duration-200 cursor-pointer",
+              activeStep === index && "bg-primary text-primary-content",
+              activeStep !== index && "hover:bg-base-300",
               isLoading && "opacity-50 cursor-not-allowed"
             )}
             onClick={() => handleStepChange(index)}

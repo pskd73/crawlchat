@@ -1,34 +1,17 @@
-import {
-  TbChevronLeft,
-  TbChevronRight,
-  TbCopy,
-  TbSettings,
-  TbTicket,
-} from "react-icons/tb";
+import type { Route } from "./+types/list";
+import type { Thread, Prisma, TicketStatus } from "libs/prisma";
+import { TbChevronLeft, TbChevronRight, TbTicket } from "react-icons/tb";
 import { Page } from "~/components/page";
 import { getAuthUser } from "~/auth/middleware";
-import type { Route } from "./+types/list";
 import { prisma } from "libs/prisma";
-import type { Thread, Prisma, TicketStatus } from "libs/prisma";
 import { authoriseScrapeUser, getSessionScrapeId } from "~/scrapes/util";
-import {
-  Badge,
-  Box,
-  EmptyState,
-  Flex,
-  Group,
-  IconButton,
-  Link,
-  Stack,
-  Text,
-  VStack,
-} from "@chakra-ui/react";
-import moment from "moment";
-import { Button } from "~/components/ui/button";
 import { redirect } from "react-router";
 import { Link as RouterLink } from "react-router";
 import { useMemo } from "react";
-import { toaster } from "~/components/ui/toaster";
+import { EmptyState } from "~/components/empty-state";
+import moment from "moment";
+import cn from "@meltdownjs/cn";
+import toast from "react-hot-toast";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -118,79 +101,47 @@ function Ticket({ thread }: { thread: Thread }) {
 
   function copyToClipboard(value: string) {
     navigator.clipboard.writeText(value);
-    toaster.success({
-      title: "Copied to clipboard",
-    });
+    toast.success("Copied to clipboard");
   }
 
   return (
-    <Stack
-      borderBottom={"1px solid"}
-      borderColor={"brand.outline"}
-      p={4}
-      gap={1}
-      _last={{
-        borderBottom: "none",
-      }}
-    >
-      <Text fontWeight={"medium"}>
-        <Link
-          target="_blank"
-          href={`/ticket/${thread.ticketNumber}`}
-          outline={"none"}
-        >
-          {thread.title}
-        </Link>
-      </Text>
-      <Text fontSize={"sm"} opacity={0.5}>
+    <div className="flex flex-col gap-1 p-4 border-b border-base-300 last:border-b-0">
+      <RouterLink
+        target="_blank"
+        to={`/ticket/${thread.ticketNumber}`}
+        className="font-medium link link-hover"
+      >
+        {thread.title}
+      </RouterLink>
+
+      <div className="text-sm text-base-content/50">
         {thread.ticketUserEmail}
-      </Text>
-      <Group>
-        <Badge
-          colorPalette={thread.ticketStatus === "open" ? "green" : "red"}
-          variant={"surface"}
+      </div>
+      <div className="flex items-center gap-2">
+        <div
+          className={cn(
+            "badge badge-soft",
+            thread.ticketStatus === "open" && "badge-success"
+          )}
         >
           {thread.ticketStatus?.toUpperCase()}
-        </Badge>
-        <Text fontSize={"sm"} opacity={0.5}>
+        </div>
+        <div className="text-sm text-base-content/50">
           #{thread.ticketNumber}
-        </Text>
-        <Text fontSize={"sm"} opacity={0.5}>
+        </div>
+        <div className="text-sm text-base-content/50">
           {moment(thread.lastMessageAt).format("MMM D, YYYY h:mm A")}
-        </Text>
-      </Group>
-      <Stack gap={0}>
+        </div>
+      </div>
+      <div className="flex flex-col">
         {thread.customTags &&
           customTags.map((tag) => (
-            <Flex
-              key={tag.key}
-              fontSize={"sm"}
-              _hover={{ opacity: 1 }}
-              alignItems={"center"}
-              gap={2}
-            >
-              {tag.key}:{" "}
-              <Link
-                href={tag.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                textDecor={!tag.link ? "none" : undefined}
-                cursor={!tag.link ? "default" : "pointer"}
-              >
-                {tag.value}
-              </Link>
-              <Box
-                opacity={0.5}
-                _hover={{ opacity: 1 }}
-                cursor={"pointer"}
-                onClick={() => copyToClipboard(tag.value)}
-              >
-                <TbCopy />
-              </Box>
-            </Flex>
+            <div className="flex text-sm gap-2" key={tag.key}>
+              {tag.key}: {tag.value}
+            </div>
           ))}
-      </Stack>
-    </Stack>
+      </div>
+    </div>
   );
 }
 
@@ -206,32 +157,25 @@ function StatusButton({
   label: string;
 }) {
   return (
-    <Button variant={active ? "subtle" : "ghost"} asChild>
-      <RouterLink to={`/tickets?status=${status}`}>
-        {label}
-        <Badge variant={"surface"}>{count}</Badge>
-      </RouterLink>
-    </Button>
+    <RouterLink
+      className={cn("btn join-item", active && "btn-neutral")}
+      to={`/tickets?status=${status}`}
+    >
+      {label}
+      <div className="badge rounded-full px-2">{count}</div>
+    </RouterLink>
   );
 }
 
 function NoTickets() {
   return (
-    <Stack>
-      <EmptyState.Root>
-        <EmptyState.Content>
-          <EmptyState.Indicator>
-            <TbTicket />
-          </EmptyState.Indicator>
-          <VStack textAlign="center">
-            <EmptyState.Title>No tickets found</EmptyState.Title>
-            <EmptyState.Description>
-              Hope your customers are enjoying without any need for support.
-            </EmptyState.Description>
-          </VStack>
-        </EmptyState.Content>
-      </EmptyState.Root>
-    </Stack>
+    <div className="flex justify-center items-center h-full">
+      <EmptyState
+        icon={<TbTicket />}
+        title="No tickets found"
+        description="Hope your customers are enjoying without any need for support."
+      />
+    </div>
   );
 }
 
@@ -243,21 +187,11 @@ export default function Tickets({ loaderData }: Route.ComponentProps) {
   }
 
   return (
-    <Page
-      title="Tickets"
-      icon={<TbTicket />}
-      right={
-        <IconButton variant={"subtle"} asChild>
-          <RouterLink to={"/tickets/settings"}>
-            <TbSettings />
-          </RouterLink>
-        </IconButton>
-      }
-    >
-      <Stack>
-        <Group justifyContent={"space-between"}>
-          <Group />
-          <Group>
+    <Page title="Tickets" icon={<TbTicket />}>
+      <div className="flex flex-col gap-4 h-full">
+        <div className="flex items-center gap-2 justify-between">
+          <div />
+          <div className="join">
             <StatusButton
               status="all"
               count={loaderData.total}
@@ -276,46 +210,48 @@ export default function Tickets({ loaderData }: Route.ComponentProps) {
               active={loaderData.status === "open"}
               label="Open"
             />
-          </Group>
-        </Group>
+          </div>
+        </div>
+
         {loaderData.threads.length === 0 ? (
           <NoTickets />
         ) : (
-          <Stack
-            gap={0}
-            border={"1px solid"}
-            borderColor={"brand.outline"}
-            rounded={"md"}
-            w={"full"}
+          <div
+            className={cn(
+              "flex flex-col border border-base-300 w-full",
+              "rounded-box bg-base-200/50 shadow"
+            )}
           >
             {loaderData.threads.map((thread) => (
               <Ticket key={thread.id} thread={thread} />
             ))}
-          </Stack>
+          </div>
         )}
 
-        <Group justifyContent={"space-between"}>
-          <Group />
-          <Group>
+        <div className="flex items-center justify-between">
+          <div />
+          <div className="join">
             {loaderData.hasPrevious && (
-              <Button variant={"subtle"} asChild>
-                <RouterLink to={getUrl({ page: loaderData.page - 1 })}>
-                  <TbChevronLeft />
-                  Older
-                </RouterLink>
-              </Button>
+              <RouterLink
+                className="btn join-item"
+                to={getUrl({ page: loaderData.page - 1 })}
+              >
+                <TbChevronLeft />
+                Older
+              </RouterLink>
             )}
             {loaderData.hasNext && (
-              <Button variant={"subtle"} asChild>
-                <RouterLink to={getUrl({ page: loaderData.page + 1 })}>
-                  Newer
-                  <TbChevronRight />
-                </RouterLink>
-              </Button>
+              <RouterLink
+                className="btn join-item"
+                to={getUrl({ page: loaderData.page + 1 })}
+              >
+                Newer
+                <TbChevronRight />
+              </RouterLink>
             )}
-          </Group>
-        </Group>
-      </Stack>
+          </div>
+        </div>
+      </div>
     </Page>
   );
 }

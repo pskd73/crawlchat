@@ -1,28 +1,19 @@
-import {
-  Alert,
-  Center,
-  Flex,
-  Group,
-  Input,
-  Stack,
-  Text,
-  Textarea,
-} from "@chakra-ui/react";
-import { TbArrowRight, TbCheck, TbSettingsBolt } from "react-icons/tb";
-import { Page } from "~/components/page";
-import ChatBox, { ChatboxContainer } from "~/widget/chat-box";
 import type { Route } from "./+types/fix";
+import type { ScrapeItem } from "@prisma/client";
+import {
+  TbAlertTriangle,
+  TbArrowRight,
+  TbCheck,
+  TbSettingsBolt,
+} from "react-icons/tb";
+import { Page } from "~/components/page";
 import { prisma } from "~/prisma";
 import { getAuthUser } from "~/auth/middleware";
 import { authoriseScrapeUser, getSessionScrapeId } from "~/scrapes/util";
 import { Link, redirect, useFetcher } from "react-router";
 import { createToken } from "libs/jwt";
-import { Button } from "~/components/ui/button";
-import { Field } from "~/components/ui/field";
-import type { ScrapeItem } from "@prisma/client";
 import { useEffect } from "react";
-import { toaster } from "~/components/ui/toaster";
-import { ChatBoxProvider } from "~/widget/use-chat-box";
+import toast from "react-hot-toast";
 
 export async function loader({ params, request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -153,104 +144,110 @@ export default function FixMessage({ loaderData }: Route.ComponentProps) {
 
   useEffect(() => {
     if (summarizeFetcher.data?.error) {
-      toaster.error({
-        title: "Error",
-        description: summarizeFetcher.data.error,
-      });
+      toast.error(summarizeFetcher.data.error);
     }
   }, [summarizeFetcher.data]);
 
   useEffect(() => {
     if (saveFetcher.data?.error) {
-      toaster.error({
-        title: "Error",
-        description: saveFetcher.data.error,
-      });
+      toast.error(saveFetcher.data.error);
     }
   }, [saveFetcher.data]);
 
   return (
-    <Page title="Fix message" icon={<TbSettingsBolt />} noPadding>
-      <Stack gap={4} p={4}>
-        <Text opacity={0.5}>
+    <Page title="Fix message" icon={<TbSettingsBolt />}>
+      <div className="flex flex-col gap-4">
+        <div className="text-base-content/50">
           You can attach your answer below and the AI will summarise the fix. It
           finally adds it to the knowledge base so that this will be considered
-          for further answers.
-        </Text>
-
-        <Text opacity={0.5}>Uses 1 message credit & 1 scrape credit.</Text>
+          for further answers. Uses 1 message credit and 1 scrape credit.
+        </div>
 
         {loaderData.message.correctionItemId && (
-          <Alert.Root status="info" title="This is the alert title">
-            <Alert.Indicator />
-            <Alert.Title>
+          <div role="alert" className="alert alert-warning">
+            <TbAlertTriangle />
+            <span>
               This message is already corrected{" "}
               <Link
+                className="link link-primary link-hover"
                 to={`/knowledge/item/${loaderData.message.correctionItemId}`}
-                style={{
-                  display: "inline-block",
-                  textDecoration: "underline",
-                }}
               >
                 here
               </Link>
-            </Alert.Title>
-          </Alert.Root>
+            </span>
+          </div>
         )}
 
         {summarizeFetcher.data?.title && summarizeFetcher.data?.content ? (
           <saveFetcher.Form method="post">
-            <Stack>
+            <div className="flex flex-col gap-2">
               <input type="hidden" name="intent" value={"save"} />
-              <Field label="Title">
-                <Input
+
+              <fieldset className="fieldset">
+                <legend className="fieldset-legend">Title</legend>
+                <input
+                  type="text"
+                  placeholder="Ex: Price details"
+                  className="input w-full"
                   name="title"
                   defaultValue={summarizeFetcher.data.title}
                   disabled={saveFetcher.state !== "idle"}
                 />
-              </Field>
-              <Field label="Answer">
-                <Textarea
+              </fieldset>
+              <fieldset className="fieldset">
+                <legend className="fieldset-legend">Answer</legend>
+                <textarea
+                  className="textarea textarea-bordered w-full"
                   placeholder="Answer to add as knowledge"
                   rows={4}
-                  autoresize
                   name="content"
                   defaultValue={summarizeFetcher.data.content}
                   disabled={saveFetcher.state !== "idle"}
                 />
-              </Field>
-              <Group justifyContent={"flex-end"} w="full">
-                <Button type="submit" loading={saveFetcher.state !== "idle"}>
+              </fieldset>
+              <div className="flex items-center justify-end w-full">
+                <button
+                  className="btn btn-primary"
+                  type="submit"
+                  disabled={saveFetcher.state !== "idle"}
+                >
+                  {saveFetcher.state !== "idle" && (
+                    <span className="loading loading-spinner loading-sm" />
+                  )}
                   Save
                   <TbCheck />
-                </Button>
-              </Group>
-            </Stack>
+                </button>
+              </div>
+            </div>
           </saveFetcher.Form>
         ) : (
           <summarizeFetcher.Form method="post">
-            <Stack>
+            <div className="flex flex-col gap-2">
               <input type="hidden" name="intent" value={"summarise"} />
-              <Textarea
+              <textarea
+                className="textarea textarea-bordered w-full"
                 placeholder="Enter the correct answer/fix here"
                 rows={4}
-                autoresize
                 name="answer"
                 disabled={saveFetcher.state !== "idle"}
               />
-              <Group justifyContent={"flex-end"} w="full">
-                <Button
+              <div className="flex items-center justify-end w-full">
+                <button
+                  className="btn btn-primary"
                   type="submit"
-                  loading={summarizeFetcher.state !== "idle"}
+                  disabled={summarizeFetcher.state !== "idle"}
                 >
+                  {summarizeFetcher.state !== "idle" && (
+                    <span className="loading loading-spinner loading-sm" />
+                  )}
                   Summarise
                   <TbArrowRight />
-                </Button>
-              </Group>
-            </Stack>
+                </button>
+              </div>
+            </div>
           </summarizeFetcher.Form>
         )}
-      </Stack>
+      </div>
     </Page>
   );
 }

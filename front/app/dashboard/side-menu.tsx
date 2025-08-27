@@ -1,75 +1,44 @@
-import {
-  Badge,
-  Box,
-  createListCollection,
-  Group,
-  IconButton,
-  Progress,
-  Spinner,
-  Stack,
-  Text,
-  Avatar,
-} from "@chakra-ui/react";
+import type { Scrape, User } from "libs/prisma";
+import type { Plan } from "libs/user-plan";
+import type { FetcherWithComponents } from "react-router";
 import {
   TbArrowDown,
   TbArrowRight,
   TbBook,
   TbChartBarOff,
-  TbChevronRight,
+  TbChevronDown,
+  TbChevronUp,
   TbCreditCard,
-  TbCrown,
   TbHome,
-  TbLock,
   TbLogout,
   TbMessage,
   TbPlug,
   TbPointer,
   TbSettings,
-  TbThumbDown,
   TbTicket,
   TbUser,
   TbUsers,
-  TbWorld,
   TbX,
 } from "react-icons/tb";
-import {
-  Link,
-  NavLink,
-  useFetcher,
-  type FetcherWithComponents,
-} from "react-router";
-import {
-  MenuContent,
-  MenuItem,
-  MenuRoot,
-  MenuTrigger,
-} from "~/components/ui/menu";
-import type { Scrape, User } from "libs/prisma";
-import type { Plan } from "libs/user-plan";
+import { Link, NavLink, useFetcher } from "react-router";
 import { numberToKMB } from "~/number-util";
-import {
-  SelectContent,
-  SelectItem,
-  SelectRoot,
-  SelectTrigger,
-  SelectValueText,
-} from "~/components/ui/select";
-import { useContext, useEffect, useMemo, useRef, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import {
   getPendingActions,
   getSkippedActions,
   setSkippedActions,
   type SetupProgressInput,
 } from "./setup-progress";
-import { LogoChakra } from "./logo-chakra";
-import { Tooltip } from "~/components/ui/tooltip";
-import { Button } from "~/components/ui/button";
+import { Logo } from "./logo";
 import { AppContext } from "./context";
 import { track } from "~/pirsch";
+import { ScrapePrivacyBadge } from "~/components/scrape-type-badge";
+import { PlanIconBadge } from "~/components/plan-icon-badge";
+import cn from "@meltdownjs/cn";
 
 function SideMenuItem({
   link,
-  number,
+  badge,
 }: {
   link: {
     label: string;
@@ -77,40 +46,28 @@ function SideMenuItem({
     icon: React.ReactNode;
     external?: boolean;
   };
-  number?: {
-    value: number;
-    color?: string;
-    icon?: React.ReactNode;
-  };
+  badge?: React.ReactNode;
 }) {
   return (
     <NavLink to={link.to} target={link.external ? "_blank" : undefined}>
       {({ isPending, isActive }) => (
-        <Group
-          px={3}
-          py={1}
-          w="full"
-          bg={isActive ? "brand.fg" : undefined}
-          color={isActive ? "brand.contrast" : undefined}
-          borderRadius={"md"}
-          transition={"all 100ms ease"}
-          _hover={{ bg: !isActive ? "brand.gray.100" : undefined }}
-          justify="space-between"
+        <div
+          className={cn(
+            "flex pl-3 pr-2 py-1 w-full justify-between rounded-box",
+            "transition-all hover:bg-accent hover:text-accent-content",
+            isActive && "bg-accent text-accent-content"
+          )}
         >
-          <Group>
-            <Text>{link.icon}</Text>
-            <Text truncate>{link.label}</Text>
-            <Text>{isPending && <Spinner size="xs" />}</Text>
-          </Group>
-          <Group>
-            {number && (
-              <Badge colorPalette={number.color} variant={"surface"}>
-                {number.icon}
-                {number.value}
-              </Badge>
+          <div className="flex gap-2 items-center">
+            {link.icon}
+            {link.label}
+            {isPending && (
+              <span className="loading loading-spinner loading-xs" />
             )}
-          </Group>
-        </Group>
+          </div>
+
+          {badge}
+        </div>
       )}
     </NavLink>
   );
@@ -125,41 +82,30 @@ function CreditProgress({
   used: number;
   total: number;
 }) {
-  function getProgressColor(used: number) {
-    if (used < 50) {
-      return "brand";
-    }
-    return "black";
-  }
-
   const value = Math.max(0, Math.min(used, total));
   const percentage = (value / total) * 100;
+  const tip = `Used ${used} of ${total}`;
 
   return (
-    <Stack gap={1}>
-      <Group justify="space-between" fontSize={"sm"}>
-        <Text>{title}</Text>
-        <Tooltip
-          content={`Used ${used} of ${total}`}
-          showArrow
-          positioning={{ placement: "top" }}
-        >
-          <Text>
-            {numberToKMB(used)} / {numberToKMB(total)}
-          </Text>
-        </Tooltip>
-      </Group>
-      <Progress.Root
+    <div className="flex flex-col gap-1">
+      <div className="flex justify-between text-sm">
+        {title}
+        <div className="tooltip tooltip-left" data-tip={tip}>
+          {numberToKMB(used)} / {numberToKMB(total)}
+        </div>
+      </div>
+      <progress
+        className={cn(
+          "progress",
+          percentage > 80 && "progress-error",
+          percentage > 60 && "progress-warning",
+          percentage > 40 && "progress-info",
+          percentage > 20 && "progress-success"
+        )}
         value={value}
         max={total}
-        size={"sm"}
-        colorPalette={getProgressColor(percentage)}
-      >
-        <Progress.Track rounded="full">
-          <Progress.Range />
-        </Progress.Track>
-      </Progress.Root>
-    </Stack>
+      ></progress>
+    </div>
   );
 }
 
@@ -208,50 +154,41 @@ function SetupProgress({ scrapeId }: { scrapeId: string }) {
   }
 
   return (
-    <Stack gap={1}>
-      <Group fontSize={"xs"} opacity={0.5} gap={1}>
-        <Text>Next step</Text>
+    <div className="flex flex-col gap-1 w-full">
+      <div className="flex gap-1 text-xs opacity-50">
+        Next step
         <TbArrowDown />
-      </Group>
-      <Group>
+      </div>
+      <div className="flex gap-1 w-full">
         {action.canSkip && (
-          <Tooltip content="Skip" positioning={{ placement: "top" }} showArrow>
-            <IconButton
-              variant={"outline"}
-              onClick={handleSkip}
-              colorPalette={"brand"}
-            >
+          <div className="tooltip" data-tip="Skip">
+            <button onClick={handleSkip} className="btn btn-square">
               <TbX />
-            </IconButton>
-          </Tooltip>
+            </button>
+          </div>
         )}
-        <Tooltip
-          content={action.description}
-          positioning={{ placement: "top" }}
-          showArrow
+        <div
+          className="tooltip tooltip-right w-full"
+          data-tip={action.description}
         >
-          <Button variant={"solid"} flex={1} colorPalette={"brand"} asChild>
-            <Link
-              to={fetcher.data ? action.url(fetcher.data.input) : ""}
-              target={action.external ? "_blank" : undefined}
-              onClick={() => track("progress-next", { id: action.id })}
-            >
-              {action.title}
-              {action.icon ?? <TbArrowRight />}
-            </Link>
-          </Button>
-        </Tooltip>
-      </Group>
-    </Stack>
+          <Link
+            className="btn btn-primary btn-block"
+            to={fetcher.data ? action.url(fetcher.data.input) : ""}
+            target={action.external ? "_blank" : undefined}
+            onClick={() => track("progress-next", { id: action.id })}
+          >
+            {action.title}
+            {action.icon ?? <TbArrowRight />}
+          </Link>
+        </div>
+      </div>
+    </div>
   );
 }
 
 export function SideMenu({
-  fixed,
-  width,
   scrapeOwner,
   loggedInUser,
-  contentRef,
   plan,
   scrapes,
   scrapeId,
@@ -261,8 +198,6 @@ export function SideMenu({
   scrape,
   dataGapMessages,
 }: {
-  fixed: boolean;
-  width: number;
   scrapeOwner: User;
   loggedInUser: User;
   contentRef?: React.RefObject<HTMLDivElement | null>;
@@ -334,17 +269,6 @@ export function SideMenu({
       .filter((link) => !link.forScrape || scrapeId)
       .filter((link) => !link.ticketingEnabled || scrape?.ticketingEnabled);
   }, []);
-  const formRef = useRef<HTMLFormElement>(null);
-  const collections = useMemo(
-    () =>
-      createListCollection({
-        items: scrapes.map((scrape) => ({
-          label: scrape.title ?? "Untitled",
-          value: scrape.id,
-        })),
-      }),
-    [scrapes]
-  );
 
   const totalMessages = plan.credits.messages;
   const totalScrapes = plan.credits.scrapes;
@@ -357,142 +281,112 @@ export function SideMenu({
     scrapeOwner?.plan?.credits?.scrapes ?? plan.credits.scrapes;
   const usedScrapes = totalScrapes - availableScrapes;
 
-  function getLinkNumber(label: string) {
+  function getMenuBadge(label: string) {
     if (label === "Tickets" && openTickets > 0) {
-      return {
-        value: openTickets,
-        icon: <TbTicket />,
-        color: "blue",
-      };
+      return (
+        <span className="badge badge-primary px-2 badge-soft">
+          {openTickets}
+        </span>
+      );
     }
     if (label === "Messages" && toBeFixedMessages > 0) {
-      return {
-        value: toBeFixedMessages,
-        icon: <TbThumbDown />,
-        color: "orange",
-      };
+      return (
+        <span className="badge badge-error px-2 badge-soft">
+          {toBeFixedMessages}
+        </span>
+      );
     }
     if (label === "Data gaps" && dataGapMessages > 0) {
-      return {
-        value: dataGapMessages,
-        icon: <TbChartBarOff />,
-        color: "orange",
-      };
+      return (
+        <span className="badge badge-error px-2 badge-soft">
+          {dataGapMessages}
+        </span>
+      );
     }
-    return undefined;
+  }
+
+  function handleChangeScrape(scrapeId: string) {
+    scrapeIdFetcher.submit(
+      { intent: "set-scrape-id", scrapeId },
+      {
+        method: "post",
+        action: "/app",
+      }
+    );
+    (document.activeElement as HTMLElement)?.blur();
   }
 
   const planId = scrapeOwner?.plan?.planId;
+  const visibleName = loggedInUser.name || loggedInUser.email;
 
   return (
-    <Stack
-      h="100dvh"
-      w={fixed ? [0, 0, width] : "full"}
-      borderRight="1px solid"
-      borderColor="brand.outline"
-      bg="brand.gray"
-      gap={0}
-      justify="space-between"
-      position={fixed ? "fixed" : undefined}
-      left={0}
-      top={0}
-      overflow="hidden"
+    <div
+      className={cn(
+        "flex flex-col min-h-screen",
+        "gap-0 justify-between fixed left-0 top-0 w-full"
+      )}
     >
-      <Stack py={4} gap={4}>
-        <Stack px={4}>
-          <Group justify="space-between">
-            <LogoChakra />
-            <Group gap={1}>
-              <Tooltip
-                content={
-                  scrape?.widgetConfig?.private
-                    ? "Private collection. Only secured channels such as Discord, Slack can be used."
-                    : "Public collection. Anyone can chat with it."
-                }
-                positioning={{ placement: "right" }}
-                showArrow
-              >
-                <Badge colorPalette={"blue"} variant={"surface"}>
-                  {scrape?.widgetConfig?.private ? <TbLock /> : <TbWorld />}
-                </Badge>
-              </Tooltip>
-              {["pro", "starter"].includes(planId ?? "") && (
-                <Tooltip
-                  content={`Collection on ${planId} plan`}
-                  positioning={{ placement: "right" }}
-                  showArrow
-                >
-                  <Badge colorPalette={"orange"} variant={"surface"}>
-                    <TbCrown />
-                  </Badge>
-                </Tooltip>
+      <div className="flex flex-col py-4 gap-4">
+        <div className="flex flex-col px-4 mb-4">
+          <div className="flex justify-between">
+            <Logo />
+            <div className="flex gap-1">
+              {scrape && (
+                <ScrapePrivacyBadge
+                  private={scrape?.widgetConfig?.private ?? false}
+                />
               )}
-            </Group>
-          </Group>
-        </Stack>
+              <PlanIconBadge planId={planId} />
+            </div>
+          </div>
+        </div>
 
-        <Box px={3}>
-          <scrapeIdFetcher.Form ref={formRef} method="post" action="/app">
-            <input type="hidden" name="intent" value="set-scrape-id" />
-            <SelectRoot
-              value={scrapeId ? [scrapeId] : []}
-              collection={collections}
-              name="scrapeId"
-              onValueChange={(e) => {
-                formRef.current?.submit();
-              }}
-              disabled={collections.items.length === 0}
-              size={"sm"}
-            >
-              <SelectTrigger bg="brand.white">
-                <SelectValueText placeholder="Select collection" />
-              </SelectTrigger>
-              <SelectContent>
-                {collections.items.map((item) => (
-                  <SelectItem item={item} key={item.value}>
-                    {item.label}
-                  </SelectItem>
+        {scrape && (
+          <div className="px-3 w-full">
+            <div className="dropdown w-full">
+              <button
+                tabIndex={0}
+                role="button"
+                className="btn bg-base-200 mb-1 w-full flex justify-between"
+              >
+                {scrapeId ? scrape?.title : "Select collection"}
+                <TbChevronDown />
+              </button>
+              <ul
+                tabIndex={0}
+                className="menu dropdown-content bg-base-100 rounded-box z-1 w-full shadow"
+              >
+                {scrapes.map((scrape) => (
+                  <li key={scrape.id}>
+                    <a onClick={() => handleChangeScrape(scrape.id)}>
+                      {scrape.title ?? "Untitled"}
+                    </a>
+                  </li>
                 ))}
-              </SelectContent>
-            </SelectRoot>
-          </scrapeIdFetcher.Form>
-        </Box>
+              </ul>
+            </div>
+          </div>
+        )}
 
-        <Stack gap={1} w="full" px={3}>
+        <div className="flex flex-col gap-1 px-3 w-full">
           {links.map((link, index) => (
             <SideMenuItem
               key={index}
               link={link}
-              number={getLinkNumber(link.label)}
+              badge={getMenuBadge(link.label)}
             />
           ))}
-        </Stack>
+        </div>
+      </div>
 
-        {/* <Separator />
-
-        <Stack gap={1} w="full" px={3}>
-          <SideMenuItem
-            link={{
-              label: "Roadmap",
-              to: "https://crawlchat.features.vote/roadmap",
-              icon: <TbRoad />,
-              external: true,
-            }}
-          />
-          <SideMenuItem
-            link={{
-              label: "Guides",
-              to: "https://guides.crawlchat.app",
-              icon: <TbBook />,
-              external: true,
-            }}
-          />
-        </Stack> */}
-      </Stack>
-
-      <Stack p={4} gap={4}>
+      <div className="p-4 flex flex-col gap-4">
         {scrapeId && <SetupProgress scrapeId={scrapeId} />}
-        <Stack bg="brand.gray.100" rounded="md" px={3} py={2}>
+        <div
+          className={cn(
+            "flex flex-col gap-2 bg-base-200 rounded-box",
+            "p-4 border border-base-300"
+          )}
+        >
           <CreditProgress
             title="Messages"
             used={usedMessages}
@@ -503,45 +397,56 @@ export function SideMenu({
             used={usedScrapes}
             total={totalScrapes}
           />
-        </Stack>
-        <Group
-          rounded="md"
-          transition={"all 100ms ease"}
-          justify="space-between"
-        >
-          <Group flex={1} maxW="80%">
-            <Avatar.Root shape="full" size="sm">
-              <Avatar.Fallback>
-                {loggedInUser.name?.charAt(0) ?? loggedInUser.email.charAt(0)}
-              </Avatar.Fallback>
-              {loggedInUser.photo && <Avatar.Image src={loggedInUser.photo} />}
-            </Avatar.Root>
-            <Text truncate>{loggedInUser.name ?? loggedInUser.email}</Text>
-          </Group>
+        </div>
+        <div className="flex justify-between gap-2">
+          <div className="flex gap-2 items-center">
+            {loggedInUser.photo ? (
+              <div className="avatar">
+                <div className="w-8 rounded-full">
+                  <img src={loggedInUser.photo} />
+                </div>
+              </div>
+            ) : (
+              <div className="avatar avatar-placeholder">
+                <div className="bg-neutral text-neutral-content w-10 rounded-full">
+                  <span className="text-3xl">{visibleName[0]}</span>
+                </div>
+              </div>
+            )}
 
-          <MenuRoot positioning={{ placement: "right-end" }}>
-            <MenuTrigger asChild>
-              <IconButton size="xs" variant={"ghost"} colorPalette={"brand"}>
-                <TbChevronRight />
-              </IconButton>
-            </MenuTrigger>
-            <MenuContent portalRef={contentRef as React.RefObject<HTMLElement>}>
-              <MenuItem value="billing" asChild>
-                <Link to="/profile#billing">
+            <div className="truncate w-30">{visibleName}</div>
+          </div>
+
+          <div className="dropdown dropdown-top dropdown-end">
+            <button
+              tabIndex={0}
+              className="btn btn-sm btn-circle mt-1 btn-square bg-base-200"
+            >
+              <TbChevronUp />
+            </button>
+            <ul
+              tabIndex={0}
+              className="menu dropdown-content bg-base-100 rounded-box z-1 p-2 shadow-sm"
+            >
+              <li>
+                <Link
+                  to="/profile#billing"
+                  onClick={() => (document.activeElement as any).blur()}
+                >
                   <TbCreditCard />
                   Billing
                 </Link>
-              </MenuItem>
-              <MenuItem value="logout" asChild>
-                <Link to="/logout">
+              </li>
+              <li>
+                <a href="/logout">
                   <TbLogout />
                   Logout
-                </Link>
-              </MenuItem>
-            </MenuContent>
-          </MenuRoot>
-        </Group>
-      </Stack>
-    </Stack>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

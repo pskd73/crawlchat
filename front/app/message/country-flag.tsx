@@ -1,6 +1,4 @@
-import { Tooltip } from "~/components/ui/tooltip";
 import type { Location } from "libs/prisma";
-import { Image } from "@chakra-ui/react";
 
 export function CountryFlag({ location }: { location: Location }) {
   if (!location.country) {
@@ -8,19 +6,17 @@ export function CountryFlag({ location }: { location: Location }) {
   }
 
   return (
-    <Tooltip
-      content={[location.city, location.region, location.country]
+    <div
+      className="tooltip"
+      data-tip={[location.city, location.region, location.country]
         .filter(Boolean)
         .join(", ")}
-      positioning={{ placement: "top" }}
-      showArrow
     >
-      <Image
+      <img
         src={`https://purecatamphetamine.github.io/country-flag-icons/3x2/${location.country.toUpperCase()}.svg`}
         alt={location.country}
-        h={3}
-        aspectRatio={"3/2"}
+        className="h-5 rounded-box"
       />
-    </Tooltip>
+    </div>
   );
 }

@@ -1,8 +1,7 @@
-import { Group, IconButton } from "@chakra-ui/react";
 import { useMemo } from "react";
 import { TbMessage, TbMessages } from "react-icons/tb";
 import { Link, useMatches } from "react-router";
-import { Tooltip } from "~/components/ui/tooltip";
+import cn from "@meltdownjs/cn";
 
 export function ViewSwitch() {
   const matches = useMatches();
@@ -15,29 +14,29 @@ export function ViewSwitch() {
   }, [matches]);
 
   return (
-    <Group gap={0}>
-      <Tooltip content="View as messages">
-        <IconButton
-          variant={view === "messages" ? "subtle" : "outline"}
-          roundedRight={0}
-          borderRight={0}
-          asChild
+    <div className="join hidden md:flex">
+      <div className="tooltip tooltip-left" data-tip="Messages">
+        <Link
+          to={"/messages"}
+          className={cn(
+            "btn btn-square join-item",
+            view === "messages" && "btn-disabled"
+          )}
         >
-          <Link to="/messages">
-            <TbMessage />
-          </Link>
-        </IconButton>
-      </Tooltip>
-      <Tooltip content="View as conversations">
-        <IconButton
-          variant={view === "conversations" ? "subtle" : "outline"}
-          roundedLeft={0}
+          <TbMessage />
+        </Link>
+      </div>
+      <div className="tooltip tooltip-left" data-tip="Conversations">
+        <Link
+          to={"/messages/conversations"}
+          className={cn(
+            "btn btn-square join-item",
+            view === "conversations" && "btn-disabled"
+          )}
         >
-          <Link to="/messages/conversations">
-            <TbMessages />
-          </Link>
-        </IconButton>
-      </Tooltip>
-    </Group>
+          <TbMessages />
+        </Link>
+      </div>
+    </div>
   );
 }

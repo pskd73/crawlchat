@@ -1,3 +1,4 @@
+import type { Route } from "./+types/root";
 import {
   isRouteErrorResponse,
   Links,
@@ -8,14 +9,9 @@ import {
   useLocation,
   useMatches,
 } from "react-router";
-
-import type { Route } from "./+types/root";
-import stylesheet from "./app.css?url";
-import fontsStylesheet from "./fonts.css?url";
-import { Provider } from "./components/ui/provider";
-import { PiArrowBendRightDown } from "react-icons/pi";
 import { useMemo } from "react";
 import { VemetricScript } from "@vemetric/react";
+import stylesheet from "./app.css?url";
 
 declare global {
   interface Window {
@@ -37,7 +33,6 @@ export const links: Route.LinksFunction = () => [
     href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Mynerve&family=Courier+Prime:ital,wght@0,400;0,700;1,400;1,700&family=Dawning+of+a+New+Day&display=swap",
   },
   { rel: "stylesheet", href: stylesheet },
-  { rel: "stylesheet", href: fontsStylesheet },
 ];
 
 export function loader() {
@@ -46,42 +41,6 @@ export function loader() {
       VITE_SERVER_WS_URL: process.env.VITE_SERVER_WS_URL,
     },
   };
-}
-
-function WidgetHighligter() {
-  return (
-    <div
-      className="widget-highlighter"
-      style={{
-        position: "fixed",
-        bottom: 60,
-        right: 10,
-      }}
-    >
-      <div
-        style={{
-          transform: "rotate(10deg)",
-          fontFamily: `"Dawning of a New Day", cursive`,
-          fontSize: "30px",
-          marginTop: "-40px",
-          lineHeight: "1",
-          textAlign: "center",
-        }}
-      >
-        try it out <br />
-        now
-      </div>
-      <div
-        style={{
-          fontSize: "40px",
-          marginTop: "10px",
-          transform: "rotate(20deg)",
-        }}
-      >
-        <PiArrowBendRightDown />
-      </div>
-    </div>
-  );
 }
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -179,14 +138,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export default function App({ loaderData }: Route.ComponentProps) {
   return (
-    <Provider>
+    <>
       <Outlet />
       <script
         dangerouslySetInnerHTML={{
           __html: `window.ENV = ${JSON.stringify(loaderData.ENV)}`,
         }}
       />
-    </Provider>
+    </>
   );
 }
 

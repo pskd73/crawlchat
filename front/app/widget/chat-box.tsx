@@ -1,18 +1,3 @@
-import {
-  Accordion,
-  Badge,
-  Box,
-  Flex,
-  Group,
-  Heading,
-  Icon,
-  IconButton,
-  Input,
-  Link,
-  Skeleton,
-  Textarea,
-} from "@chakra-ui/react";
-import { Stack, Text } from "@chakra-ui/react";
 import type { MessageSourceLink, MessageRating, WidgetSize } from "libs/prisma";
 import {
   useEffect,
@@ -33,7 +18,6 @@ import {
   TbThumbDown,
   TbShare2,
   TbX,
-  TbTicket,
   TbArrowRight,
   TbTrash,
   TbFileDescription,
@@ -42,24 +26,15 @@ import {
   TbCopy,
   TbCheck,
   TbMenu2,
+  TbChartBar,
 } from "react-icons/tb";
 import { MarkdownProse } from "~/widget/markdown-prose";
-import { InputGroup } from "~/components/ui/input-group";
-import { Tooltip } from "~/components/ui/tooltip";
-import {
-  MenuContent,
-  MenuItem,
-  MenuRoot,
-  MenuTrigger,
-} from "~/components/ui/menu";
 import { track } from "~/pirsch";
 import { extractCitations } from "libs/citation";
-import { Button } from "~/components/ui/button";
 import { makeCursorMcpJson, makeMcpCommand, makeMcpName } from "~/mcp/setup";
-import { getScoreColor } from "~/score";
-import { Field } from "~/components/ui/field";
-import { toaster } from "~/components/ui/toaster";
 import { useChatBoxContext } from "./use-chat-box";
+import cn from "@meltdownjs/cn";
+import toast from "react-hot-toast";
 
 export function useChatBoxDimensions(
   size: WidgetSize | null,
@@ -108,12 +83,27 @@ function ChatInput() {
     useChatBoxContext();
 
   const [query, setQuery] = useState("");
-  const [height, setHeight] = useState(60);
+  const [height, setHeight] = useState(64);
   const cleanedQuery = useMemo(() => {
     return query.trim();
   }, [query]);
 
   useEffect(adjustHeight, [query]);
+
+  useEffect(() => {
+    if (!inputRef.current) return;
+
+    const handleInput: EventListener = () => {
+      inputRef.current!.style.height = "auto";
+      inputRef.current!.style.height = `${inputRef.current!.scrollHeight}px`;
+    };
+
+    inputRef.current.addEventListener("input", handleInput);
+
+    return () => {
+      inputRef.current?.removeEventListener("input", handleInput);
+    };
+  }, []);
 
   useEffect(
     function () {
@@ -180,49 +170,42 @@ function ChatInput() {
     : undefined;
 
   return (
-    <Group
-      h={`${height}px`}
-      borderTop={"1px solid"}
-      borderColor={"brand.outline"}
-      justify={"space-between"}
-      p={4}
+    <div
+      className="flex gap-2 border-t border-base-300 justify-between p-4"
+      style={{ height: `${height}px` }}
     >
-      <Group flex={1}>
-        <InputGroup flex="1">
-          <Textarea
-            ref={inputRef}
-            placeholder={getPlaceholder()}
-            truncate={!query}
-            size={"xl"}
-            p={0}
-            outline={"none"}
-            border="none"
-            fontSize={"lg"}
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            rows={1}
-            autoresize
-            onKeyDown={handleKeyDown}
-            disabled={isDisabled}
-            maxHeight={"240px"}
-            overflowY={"auto"}
-          />
-        </InputGroup>
-      </Group>
-      <Group>
-        <IconButton
-          rounded={"full"}
-          onClick={handleAsk}
-          size={"xs"}
+      <div className="flex-1">
+        <textarea
+          ref={inputRef}
+          placeholder={getPlaceholder()}
+          className={cn(
+            "text-lg p-0 max-h-[240px] overflow-y-auto resize-none",
+            "outline-none w-full",
+            !query && "truncate"
+          )}
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          rows={1}
+          onKeyDown={handleKeyDown}
           disabled={isDisabled}
-          variant={cleanedQuery.length > 0 ? "solid" : "subtle"}
-          bg={bg ?? undefined}
-          color={color ?? undefined}
-        >
-          <TbArrowUp />
-        </IconButton>
-      </Group>
-    </Group>
+        />
+      </div>
+
+      <button
+        className={cn(
+          "btn btn-sm btn-circle text-lg shadow-none border-0",
+          cleanedQuery.length > 0 ? "btn-primary" : "btn-soft"
+        )}
+        onClick={handleAsk}
+        disabled={isDisabled}
+        style={{
+          backgroundColor: !isDisabled ? bg ?? undefined : undefined,
+          color: !isDisabled ? color ?? undefined : undefined,
+        }}
+      >
+        <TbArrowUp />
+      </button>
+    </div>
   );
 }
 
@@ -236,166 +219,35 @@ export function SourceLink({
   color?: string;
 }) {
   return (
-    <Link
-      transition={"all 200ms ease-in-out"}
+    <a
+      className={cn(
+        "flex items-center gap-1",
+        "transition-all decoration-0 opacity-70",
+        "hover:opacity-100 w-fit text-sm group",
+        link.url && "cursor-pointer"
+      )}
       href={link.url ?? undefined}
-      cursor={!link.url ? "default" : "pointer"}
       target="_blank"
-      textDecoration={"none"}
-      outline={"none"}
-      opacity={0.7}
-      _hover={{
-        opacity: 1,
+      style={{
+        color: color ?? undefined,
       }}
-      w="fit"
-      fontSize={"sm"}
-      className="group"
-      color={color}
     >
       <TbFileDescription />
       {link.title}
       {link.url && (
-        <Icon display={"none"} _groupHover={{ display: "inline-block" }}>
+        <span className="hidden group-hover:inline-block">
           <TbArrowRight />
-        </Icon>
+        </span>
       )}
-    </Link>
-  );
-}
-
-export function Resolved({
-  onRate,
-}: {
-  onRate: (rating: MessageRating) => void;
-}) {
-  const { scrape, setScreen } = useChatBoxContext();
-  const [view, setView] = useState<"default" | "yes" | "no">("default");
-
-  function resolved(resolved: boolean | null) {
-    if (resolved === false) {
-      if (scrape.resolveNoConfig?.link) {
-        window.open(scrape.resolveNoConfig.link, "_blank");
-      } else {
-        setScreen("ticket-create");
-      }
-    } else if (resolved === true) {
-      if (scrape.resolveYesConfig?.link) {
-        window.open(scrape.resolveYesConfig.link, "_blank");
-      }
-    }
-  }
-
-  function handleYes() {
-    if (scrape.resolveYesConfig) {
-      return setView("yes");
-    }
-    resolved(true);
-    onRate("up");
-  }
-
-  function handleNo() {
-    if (scrape.resolveNoConfig) {
-      return setView("no");
-    }
-    resolved(false);
-    onRate("down");
-  }
-
-  function handleCancel() {
-    if (view !== "default") {
-      return setView("default");
-    }
-    resolved(null);
-    onRate("none");
-  }
-
-  function getTitleDescription() {
-    if (view === "yes") {
-      return [
-        scrape.resolveYesConfig?.title,
-        scrape.resolveYesConfig?.description,
-      ];
-    }
-    if (view === "no") {
-      return [
-        scrape.resolveNoConfig?.title,
-        scrape.resolveNoConfig?.description,
-      ];
-    }
-    return [
-      scrape.resolveQuestion || "Issue solved?",
-      scrape.resolveDescription || "Confirm if your issue is solved.",
-    ];
-  }
-
-  const [title, description] = getTitleDescription();
-
-  return (
-    <Stack borderBottom={"1px solid"} borderColor={"brand.outline"}>
-      <Stack px={4} py={3} w="full">
-        <Group justify={"space-between"} w="full">
-          <Stack gap={0}>
-            <Text fontSize={"xs"} lineClamp={1}>
-              {title}
-            </Text>
-            <Text fontSize={"xs"} opacity={0.5} lineClamp={1}>
-              {description}
-            </Text>
-          </Stack>
-          <Group>
-            {view === "default" && (
-              <Button size={"xs"} variant={"outline"} onClick={handleYes}>
-                <TbThumbUp /> Yes
-              </Button>
-            )}
-            {view === "default" && (
-              <Button size={"xs"} variant={"subtle"} onClick={handleNo}>
-                <TbThumbDown /> No
-              </Button>
-            )}
-            {view === "yes" && (
-              <Button
-                size={"xs"}
-                onClick={() => resolved(true)}
-                variant={"outline"}
-              >
-                {scrape.resolveYesConfig?.btnLabel || "Go"}
-                <TbArrowRight />
-              </Button>
-            )}
-            {view === "no" && (
-              <Button
-                size={"xs"}
-                onClick={() => resolved(false)}
-                variant={"outline"}
-              >
-                {scrape.resolveNoConfig?.btnLabel || "Go"}
-                <TbArrowRight />
-              </Button>
-            )}
-
-            <IconButton size={"xs"} variant={"subtle"} onClick={handleCancel}>
-              <TbX />
-            </IconButton>
-          </Group>
-        </Group>
-      </Stack>
-    </Stack>
+    </a>
   );
 }
 
 export function UserMessage({ content }: { content: string }) {
   return (
-    <Stack className="user-message">
-      <Text
-        fontSize={"xl"}
-        fontWeight={"bolder"}
-        opacity={0.8}
-        whiteSpace={"pre-wrap"}
-      >
-        {content}
-      </Text>
-    </Stack>
+    <div className="user-message text-xl font-bold opacity-80 whitespace-pre-wrap">
+      {content}
+    </div>
   );
 }
 
@@ -419,29 +271,56 @@ export function Sources({
   }
 
   return (
-    <Stack mb={showSources ? 2 : 0}>
-      <Group
-        opacity={showSources ? 1 : 0.7}
-        _hover={{
-          opacity: 1,
-        }}
-        cursor={"pointer"}
-        fontSize={"sm"}
-        transition={"opacity 200ms ease-in-out"}
+    <div className={cn("flex flex-col gap-2", showSources && "mb-2")}>
+      <div
+        className={cn(
+          "flex items-center gap-2 hover:opacity-100 opacity-70 cursor-pointer text-sm",
+          "transition-all",
+          showSources && "opacity-100"
+        )}
         onClick={() => setShowSources(!showSources)}
-        color={color}
+        style={{
+          color: color ?? undefined,
+        }}
       >
-        <Text>
-          {citedLinks.length} Source{citedLinks.length > 1 ? "s" : ""}
-        </Text>
+        {citedLinks.length} Source{citedLinks.length > 1 ? "s" : ""}
         {showSources ? <TbChevronUp /> : <TbChevronDown />}
-      </Group>
+      </div>
 
       {showSources &&
         citedLinks.map(({ index, link }) => (
           <SourceLink key={index} link={link} index={index} color={color} />
         ))}
-    </Stack>
+    </div>
+  );
+}
+
+function MessageButton({
+  tip,
+  onClick,
+  disabled,
+  children,
+  active,
+}: {
+  tip: string;
+  onClick?: () => void;
+  disabled?: boolean;
+  children: React.ReactNode;
+  active?: boolean;
+}) {
+  return (
+    <div className="tooltip" data-tip={tip}>
+      <button
+        className={cn(
+          "btn btn-circle btn-sm shadow-none",
+          active && "btn-primary"
+        )}
+        onClick={onClick}
+        disabled={disabled}
+      >
+        {children}
+      </button>
+    </div>
   );
 }
 
@@ -455,17 +334,9 @@ export function MessageCopyButton({ content }: { content: string }) {
   }
 
   return (
-    <Tooltip content="Copy" showArrow>
-      <IconButton
-        size={"xs"}
-        rounded={"full"}
-        variant={"subtle"}
-        onClick={handleCopy}
-        disabled={copied}
-      >
-        {copied ? <TbCheck /> : <TbCopy />}
-      </IconButton>
-    </Tooltip>
+    <MessageButton tip="Copy" onClick={handleCopy} disabled={copied}>
+      {copied ? <TbCheck /> : <TbCopy />}
+    </MessageButton>
   );
 }
 
@@ -521,10 +392,10 @@ export function AssistantMessage({
     : undefined;
 
   return (
-    <Stack mt={pullUp ? -6 : 0}>
+    <div className={cn("flex flex-col gap-2", pullUp && "-mt-6")}>
       <Sources citation={citation} color={color ?? undefined} />
 
-      <Stack gap={4}>
+      <div className="flex flex-col gap-4">
         <MarkdownProse
           size={scrape.widgetConfig?.size === "large" ? "lg" : "md"}
           sources={Object.values(citation.citedLinks).map((link) => ({
@@ -541,63 +412,44 @@ export function AssistantMessage({
           {citation.content}
         </MarkdownProse>
 
-        <Group>
+        <div className="flex items-center gap-2">
           <MessageCopyButton content={content} />
 
-          <Tooltip content="Refresh" showArrow>
-            <IconButton
-              size={"xs"}
-              rounded={"full"}
-              variant={"subtle"}
-              onClick={() => refresh(questionId, id)}
-              disabled={readOnly}
-            >
-              <TbRefresh />
-            </IconButton>
-          </Tooltip>
+          <MessageButton
+            tip="Refresh"
+            onClick={() => refresh(questionId, id)}
+            disabled={readOnly}
+          >
+            <TbRefresh />
+          </MessageButton>
 
-          <Tooltip content="Helpful" showArrow>
-            <IconButton
-              size={"xs"}
-              rounded={"full"}
-              variant={currentRating === "up" ? "solid" : "subtle"}
-              onClick={() => handleRate("up")}
-              disabled={readOnly}
-            >
-              <TbThumbUp />
-            </IconButton>
-          </Tooltip>
+          <MessageButton
+            tip="Helpful"
+            onClick={() => handleRate("up")}
+            disabled={readOnly}
+            active={currentRating === "up"}
+          >
+            <TbThumbUp />
+          </MessageButton>
 
-          <Tooltip content="Not helpful" showArrow>
-            <IconButton
-              size={"xs"}
-              rounded={"full"}
-              variant={currentRating === "down" ? "solid" : "subtle"}
-              onClick={() => handleRate("down")}
-              disabled={readOnly}
-            >
-              <TbThumbDown />
-            </IconButton>
-          </Tooltip>
+          <MessageButton
+            tip="Not helpful"
+            onClick={() => handleRate("down")}
+            disabled={readOnly}
+            active={currentRating === "down"}
+          >
+            <TbThumbDown />
+          </MessageButton>
 
           {admin && (
-            <Tooltip content="Score of this message" showArrow>
-              <Badge colorPalette={getScoreColor(score)} variant={"surface"}>
-                {score.toFixed(2)}
-              </Badge>
-            </Tooltip>
+            <div className="badge badge-soft badge-primary">
+              <TbChartBar />
+              {score.toFixed(2)}
+            </div>
           )}
-        </Group>
-      </Stack>
-
-      {/* <Stack gap={0}>
-        <Stack borderTop="1px solid" borderColor={"brand.outline"} gap={0}>
-          {last && !readOnly && scrape.ticketingEnabled && !currentRating && (
-            <Resolved onRate={handleRate} />
-          )}
-        </Stack>
-      </Stack> */}
-    </Stack>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -605,60 +457,46 @@ function NoMessages() {
   const { ask, scrape } = useChatBoxContext();
 
   return (
-    <Stack p={4} gap={4} flex={1}>
-      <Stack w="full">
-        <MarkdownProse size="lg">
-          {scrape.widgetConfig?.welcomeMessage ||
-            "Ask your queries here. Remember, I am an AI assistant and refer to the sources to confirm the answer."}
-        </MarkdownProse>
-      </Stack>
+    <div className="flex flex-col gap-4 p-4 flex-1">
+      <MarkdownProse size="lg">
+        {scrape.widgetConfig?.welcomeMessage ||
+          "Ask your queries here. Remember, I am an AI assistant and refer to the sources to confirm the answer."}
+      </MarkdownProse>
 
       {scrape.widgetConfig?.questions &&
         scrape.widgetConfig.questions.length > 0 && (
-          <Stack w="full">
-            <Heading size={"xs"} opacity={0.5}>
-              QUICK QUESTIONS
-            </Heading>
-            <Stack w="full">
+          <div className="w-full flex flex-col gap-2">
+            <div className="text-xs opacity-50">QUICK QUESTIONS</div>
+            <div className="w-full flex flex-col gap-2">
               {scrape.widgetConfig?.questions
                 .filter((q) => q.text)
                 .map((question, i) => (
-                  <Group
+                  <div
                     key={i}
-                    border={"1px solid"}
-                    borderColor={"brand.outline"}
-                    rounded={"md"}
-                    p={2}
-                    px={3}
-                    w="full"
-                    _hover={{
-                      bg: "brand.gray.100",
-                    }}
-                    transition={"background-color 200ms ease-in-out"}
-                    cursor={"pointer"}
-                    alignItems={"flex-start"}
+                    className={cn(
+                      "border border-base-300 rounded-box flex items-center gap-2",
+                      "p-2 px-3 w-full hover:bg-base-200 transition-all cursor-pointer"
+                    )}
                     onClick={() => ask(question.text)}
                   >
-                    <Box mt={1}>
-                      <TbHelp />
-                    </Box>
-                    <Text>{question.text}</Text>
-                  </Group>
+                    <TbHelp />
+                    {question.text}
+                  </div>
                 ))}
-            </Stack>
-          </Stack>
+            </div>
+          </div>
         )}
-    </Stack>
+    </div>
   );
 }
 
 function LoadingMessage() {
   return (
-    <Stack>
-      <Skeleton h={"20px"} w={"100%"} />
-      <Skeleton h={"20px"} w={"100%"} />
-      <Skeleton h={"20px"} w={"60%"} />
-    </Stack>
+    <div className="flex flex-col gap-2">
+      <div className="skeleton h-[20px] w-full" />
+      <div className="skeleton h-[20px] w-full" />
+      <div className="skeleton h-[20px] w-[60%]" />
+    </div>
   );
 }
 
@@ -686,69 +524,33 @@ function MCPSetup() {
   );
 
   return (
-    <Stack h="full" p={4}>
-      <Stack align={"center"}>
-        <Stack w="full" gap={8}>
-          <Stack>
-            <Heading>
-              <Group>
-                <TbRobotFace />
-                <Text>Setup MCP client</Text>
-              </Group>
-            </Heading>
-            <Text opacity={0.5} fontSize={"sm"}>
-              <Text as="span" fontWeight={"bold"}>
-                Model Context Protocol
-              </Text>{" "}
-              is a standard way for AI apps to extend the ability to do custom
-              actions. You can also use your own AI applications to interact
-              with the documentation such as Cursor, Windsurf, Claude or ever
-              growing list.
-            </Text>
-          </Stack>
-          <Stack>
-            <Group justify={"end"}>
-              <Link
-                fontSize={"sm"}
-                href="https://guides.crawlchat.app/walkthrough/67db0080600010f091e529b7/read"
-                target="_blank"
-              >
-                <TbHelp /> Help
-              </Link>
-            </Group>
-            <Accordion.Root
-              value={[section]}
-              onValueChange={(e) => setSection(e.value[0])}
-              variant={"enclosed"}
-            >
-              {sections.map((item) => (
-                <Accordion.Item key={item.value} value={item.value}>
-                  <Accordion.ItemTrigger>
-                    <Group justify={"space-between"} w="full">
-                      <Group>
-                        <Icon fontSize="lg" color="fg.subtle">
-                          {item.icon}
-                        </Icon>
-                        <Text>{item.title}</Text>
-                      </Group>
+    <div className="flex flex-col gap-2 w-full h-full p-4">
+      <div className="text-lg font-bold flex items-center gap-2">
+        <TbRobotFace />
+        Setup MCP client
+      </div>
 
-                      <Group></Group>
-                    </Group>
-                  </Accordion.ItemTrigger>
-                  <Accordion.ItemContent>
-                    <Accordion.ItemBody>
-                      <MarkdownProse noMarginCode>
-                        {`\`\`\`${item.language}\n${item.script}\n\`\`\``}
-                      </MarkdownProse>
-                    </Accordion.ItemBody>
-                  </Accordion.ItemContent>
-                </Accordion.Item>
-              ))}
-            </Accordion.Root>
-          </Stack>
-        </Stack>
-      </Stack>
-    </Stack>
+      <div className="text-base-content/50 mb-4">
+        Model Context Protocol is a standard way for AI apps to extend the
+        ability to do custom actions. You can also use your own AI applications
+        to interact with the documentation such as Cursor, Windsurf, Claude or
+        ever growing list.
+      </div>
+
+      <div className="join join-vertical">
+        {sections.map((item) => (
+          <div className="collapse collapse-arrow join-item bg-base-100 border border-base-300">
+            <input type="radio" name={"mcp-section"} />
+            <div className="collapse-title font-semibold">{item.title}</div>
+            <div className="collapse-content text-sm">
+              <MarkdownProse noMarginCode>
+                {`\`\`\`${item.language}\n${item.script}\n\`\`\``}
+              </MarkdownProse>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -764,18 +566,14 @@ const ToolbarButton = forwardRef<
     : undefined;
 
   return (
-    <IconButton
+    <button
+      className="btn btn-sm btn-ghost btn-plain btn-square text-lg mb-1"
+      tabIndex={0}
       ref={ref}
-      variant={"plain"}
-      color={color ?? undefined}
-      opacity={0.6}
-      _hover={{
-        opacity: 1,
-      }}
       onClick={onClick}
     >
       {children}
-    </IconButton>
+    </button>
   );
 });
 
@@ -808,16 +606,11 @@ function Toolbar() {
 
   function handleShare() {
     navigator.clipboard.writeText(`${window.location.origin}/s/${thread?.id}`);
-    toaster.create({
-      title: "Copied!",
-      description: "Share link copied to clipboard",
-    });
+    toast.success("Share link copied to clipboard");
   }
 
   function handleMenuSelect(value: string) {
-    if (value === "clear") {
-      return erase();
-    }
+    (document.activeElement as HTMLElement).blur();
     if (value === "share") {
       return handleShare();
     }
@@ -835,177 +628,93 @@ function Toolbar() {
     : undefined;
 
   return (
-    <Group
-      h="60px"
-      borderBottom={"1px solid"}
-      borderColor={"brand.outline/50"}
-      p={4}
-      w={"full"}
-      justify={"space-between"}
-      bg={bg ?? "brand.gray.50/50"}
-      color={color ?? undefined}
+    <div
+      className={cn(
+        "flex h-[60px] gap-2 border-b border-base-300",
+        "p-4 w-full justify-between bg-base-200 items-center",
+        "items-center"
+      )}
+      style={{
+        backgroundColor: bg ?? undefined,
+        color: color ?? undefined,
+      }}
     >
-      <Group flex="1">
-        <Group w="full">
-          {fullscreen && (
-            <ToolbarButton onClick={() => close()}>
-              <TbX />
-            </ToolbarButton>
+      <div className="flex flex-1 gap-2 items-center">
+        {fullscreen && (
+          <button className="btn btn-square btn-soft" onClick={() => close()}>
+            <TbX />
+          </button>
+        )}
+        {scrape.widgetConfig?.logoUrl && (
+          <img
+            src={scrape.widgetConfig.logoUrl}
+            alt="Logo"
+            style={{ maxWidth: "24px", maxHeight: "24px" }}
+          />
+        )}
+
+        <div className="text-xl font-bold">{scrape.title ?? "Ask AI"}</div>
+
+        {admin &&
+          overallScore !== undefined &&
+          Number.isFinite(overallScore) && (
+            <div className="tooltip tooltip-right" data-tip="Avg score">
+              <span className="badge badge-primary badge-soft">
+                {overallScore.toFixed(2)}
+              </span>
+            </div>
           )}
-          {scrape.widgetConfig?.logoUrl && (
-            <img
-              src={scrape.widgetConfig.logoUrl}
-              alt="Logo"
-              style={{ maxWidth: "24px", maxHeight: "24px" }}
-            />
-          )}
-          <Stack gap={0.6}>
-            <Text fontWeight={"bold"} lineHeight={1} fontSize={"xl"}>
-              {screen === "ticket-create"
-                ? "Create support ticket"
-                : scrape.title ?? "Ask AI"}
-            </Text>
-          </Stack>
-          {admin &&
-            overallScore !== undefined &&
-            Number.isFinite(overallScore) && (
-              <Tooltip content="Avg score of all messages" showArrow>
-                <Badge
-                  colorPalette={getScoreColor(overallScore)}
-                  variant={"surface"}
-                >
-                  {overallScore.toFixed(2)}
-                </Badge>
-              </Tooltip>
-            )}
-        </Group>
-      </Group>
-      <Group>
+      </div>
+
+      <div className="flex gap-2">
         {screen === "mcp" && (
-          <ToolbarButton onClick={() => setScreen("chat")}>
-            Switch to chat
-            <TbMessage />
-          </ToolbarButton>
+          <div className="tooltip tooltip-left" data-tip="Switch to chat">
+            <ToolbarButton onClick={() => setScreen("chat")}>
+              <TbMessage />
+            </ToolbarButton>
+          </div>
         )}
 
         {chat.allMessages.length > 0 && (
-          <Tooltip content="Clear & start new conversation" showArrow>
+          <div
+            className="tooltip tooltip-left"
+            data-tip="Clear & start new conversation"
+          >
             <ToolbarButton onClick={() => erase()}>
               <TbTrash />
             </ToolbarButton>
-          </Tooltip>
+          </div>
         )}
 
-        <MenuRoot
-          positioning={{ placement: "bottom-end" }}
-          onSelect={(e) => handleMenuSelect(e.value)}
-        >
-          <MenuTrigger asChild>
-            <IconButton
-              variant={"plain"}
-              color={color ?? undefined}
-              opacity={0.6}
-              _hover={{
-                opacity: 1,
-              }}
-            >
-              <TbMenu2 />
-            </IconButton>
-          </MenuTrigger>
-          <MenuContent>
-            <MenuItem value={"share"}>
-              <TbShare2 />
-              Share chat
-            </MenuItem>
-
-            {(scrape.widgetConfig?.showMcpSetup ?? true) && (
-              <MenuItem value={"mcp"}>
-                <TbRobotFace />
-                As MCP
-              </MenuItem>
+        <div className="dropdown dropdown-end">
+          <ToolbarButton>
+            <TbMenu2 />
+          </ToolbarButton>
+          <ul
+            tabIndex={0}
+            className={cn(
+              "menu dropdown-content bg-base-100 rounded-box",
+              "z-1 w-34 p-2 shadow-sm text-base-content"
             )}
-          </MenuContent>
-        </MenuRoot>
-      </Group>
-    </Group>
-  );
-}
-
-function TicketCreate() {
-  const {
-    cancelTicketCreate,
-    createTicket,
-    ticketCreateFetcher,
-    customerEmail,
-  } = useChatBoxContext();
-  const [email, setEmail] = useState(customerEmail ?? "");
-  const [message, setMessage] = useState("");
-  const [title, setTitle] = useState("");
-
-  function handleSubmit() {
-    createTicket(email, title, message);
-  }
-
-  const loading = ticketCreateFetcher.state !== "idle";
-
-  return (
-    <Stack p={4} flex="1">
-      <Stack flex="1">
-        <Text opacity={0.5} mb={4}>
-          Our team will work on the issue and get back with a resolution. We'll
-          send you an email with a link to the ticket.
-        </Text>
-        <Field label="Email">
-          <Input
-            type="email"
-            placeholder="youremail@example.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            disabled={loading || !!customerEmail}
-          />
-        </Field>
-        <Field label="Title">
-          <Input
-            type="text"
-            placeholder="Title of your issue"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            disabled={loading}
-          />
-        </Field>
-        <Field label="Message">
-          <Textarea
-            placeholder="Explain your issue in detail"
-            rows={4}
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            disabled={loading}
-          />
-        </Field>
-        <Text opacity={0.5} mb={4}>
-          This chat will be turned into a ticket and you cannot continue the AI
-          help on the same thread. A new thread will be created for you.
-        </Text>
-      </Stack>
-      <Group justify={"flex-end"}>
-        <Button
-          variant={"subtle"}
-          onClick={cancelTicketCreate}
-          disabled={loading}
-        >
-          Cancel
-          <TbX />
-        </Button>
-        <Button
-          onClick={handleSubmit}
-          loading={loading}
-          disabled={!email || !title || !message}
-        >
-          Create ticket
-          <TbTicket />
-        </Button>
-      </Group>
-    </Stack>
+          >
+            <li>
+              <a onClick={() => handleMenuSelect("share")}>
+                <TbShare2 />
+                Share chat
+              </a>
+            </li>
+            {(scrape.widgetConfig?.showMcpSetup ?? true) && (
+              <li>
+                <a onClick={() => handleMenuSelect("mcp")}>
+                  <TbRobotFace />
+                  As MCP
+                </a>
+              </li>
+            )}
+          </ul>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -1013,36 +722,28 @@ function PoweredBy() {
   const { titleSlug } = useChatBoxContext();
 
   return (
-    <Text fontSize={"xs"}>
-      <Text as="span" opacity={0.4}>
-        Powered by{" "}
-      </Text>
-      <Link
+    <div className="text-xs">
+      <span className="opacity-40">Powered by </span>
+      <a
+        className="link link-primary link-hover"
         href={`https://crawlchat.app?ref=powered-by-${titleSlug}`}
         target="_blank"
-        color={"brand.fg"}
       >
         CrawlChat
-      </Link>
-    </Text>
+      </a>
+    </div>
   );
 }
 
 export function ChatboxContainer({
   children,
-  width,
-  height,
+  noShadow,
 }: {
   children: React.ReactNode;
-  width?: string | null;
-  height?: string | null;
+  noShadow?: boolean;
 }) {
-  const { close, scrape } = useChatBoxContext();
+  const { close, scrape, theme } = useChatBoxContext();
   const containerRef = useRef<HTMLDivElement>(null);
-  const boxDimensions = useChatBoxDimensions(
-    scrape.widgetConfig?.size ?? null,
-    containerRef
-  );
 
   function handleBgClick(event: React.MouseEvent<HTMLDivElement>) {
     if (event.target === event.currentTarget) {
@@ -1050,37 +751,34 @@ export function ChatboxContainer({
     }
   }
 
-  const cover = width || height;
   const borderColor = scrape.widgetConfig?.applyColorsToChatbox
     ? scrape.widgetConfig.primaryColor
     : undefined;
 
   return (
-    <Flex
-      w="full"
-      h="full"
+    <div
+      className={cn("flex w-full h-full", "md:justify-center md:items-center")}
       onClick={handleBgClick}
       ref={containerRef}
-      justify={cover ? "flex-start" : "center"}
-      align={cover ? "flex-start" : "center"}
     >
-      <Stack
-        border={cover ? "none" : "1px solid"}
-        borderWidth={[0, 0, cover ? 0 : 1]}
-        borderColor={borderColor ?? "brand.outline"}
-        rounded={["none", "none", cover ? "none" : "xl"]}
-        boxShadow={cover ? "none" : "rgba(100, 100, 111, 0.2) 0px 7px 29px 0px"}
-        bg="brand.white"
-        gap={0}
-        position={"relative"}
-        overflow={"hidden"}
-        w={["full", "full", boxDimensions.width]}
-        h={["full", "full", "auto"]}
-        maxH={["full", "full", boxDimensions.height]}
+      <div
+        data-theme={theme}
+        className={cn(
+          "flex flex-col bg-base-100 relative md:rounded-xl overflow-hidden",
+          "md:border w-full h-full md:h-auto border-base-300",
+          scrape.widgetConfig?.size !== "large" &&
+            "md:w-[520px] md:max-h-[460px]",
+          scrape.widgetConfig?.size === "large" &&
+            "md:w-[700px] md:max-h-[600px]",
+          !noShadow && "md:shadow-2xl"
+        )}
+        style={{
+          borderColor: borderColor ?? undefined,
+        }}
       >
         {children}
-      </Stack>
-    </Flex>
+      </div>
+    </div>
   );
 }
 
@@ -1090,21 +788,18 @@ export default function ScrapeWidget() {
   return (
     <>
       <Toolbar />
-      <Stack flex="1" overflow={"auto"} gap={0}>
+      <div className="flex flex-col flex-1 overflow-auto">
         {screen === "chat" && (
           <>
             {chat.allMessages.length === 0 && <NoMessages />}
             {chat.allMessages.map((message, index) => (
-              <Stack
+              <div
                 key={index}
                 id={`message-${message.id}`}
-                borderTop={message.role === "user" ? "1px solid" : "none"}
-                borderColor={"brand.outline"}
-                _first={{
-                  borderTop: "none",
-                }}
-                p={4}
-                className="message"
+                className={cn(
+                  "message flex flex-col gap-2 first:border-t-0 p-4",
+                  message.role === "user" && "border-t border-base-300"
+                )}
               >
                 {message.role === "user" ? (
                   <UserMessage content={message.content} />
@@ -1125,25 +820,18 @@ export default function ScrapeWidget() {
                   index === chat.allMessages.length - 1 && <LoadingMessage />}
                 {chat.askStage !== "idle" &&
                   index === chat.allMessages.length - 1 && (
-                    <Box h={"2000px"} w="full" />
+                    <div className="h-[2000px] w-full" />
                   )}
-              </Stack>
+              </div>
             ))}
           </>
         )}
         {screen === "mcp" && <MCPSetup />}
-        {screen === "ticket-create" && <TicketCreate />}
-      </Stack>
+      </div>
       {screen === "chat" && <ChatInput />}
-      <Group
-        px={4}
-        py={2}
-        bg="brand.gray.50/50"
-        borderTop={"1px solid"}
-        borderColor={"brand.outline/50"}
-      >
+      <div className="px-4 py-2 bg-base-300/80 border-t border-base-300">
         <PoweredBy />
-      </Group>
+      </div>
     </>
   );
 }

@@ -1,9 +1,7 @@
 import { useContext } from "react";
 import { EditActionContext } from "./use-edit-action";
-import { NavLink, type FetcherWithComponents } from "react-router";
-import { Button } from "~/components/ui/button";
-import { IconButton, Spinner, Text } from "@chakra-ui/react";
-import { TbCheck, TbTrash, TbX } from "react-icons/tb";
+import { type FetcherWithComponents } from "react-router";
+import { TbCheck, TbTrash } from "react-icons/tb";
 
 export function SaveForm({
   fetcher,
@@ -17,26 +15,16 @@ export function SaveForm({
 
   return (
     <>
-      <Button variant={"subtle"} asChild>
-        <NavLink to="/actions" prefetch="intent" replace>
-          {({ isPending }) => (
-            <>
-              {isPending ? <Spinner /> : <TbX />}
-              <Text>Cancel</Text>
-            </>
-          )}
-        </NavLink>
-      </Button>
       {deleteFetcher && (
         <deleteFetcher.Form method="post">
           <input type="hidden" name="intent" value="delete" />
-          <IconButton
-            colorPalette={"red"}
+          <button
+            className="btn btn-soft btn-square btn-error"
             type="submit"
             disabled={deleteFetcher.state !== "idle"}
           >
             <TbTrash />
-          </IconButton>
+          </button>
         </deleteFetcher.Form>
       )}
       <fetcher.Form method="post">
@@ -53,15 +41,17 @@ export function SaveForm({
             description,
           })}
         />
-        <Button
-          colorPalette={"brand"}
-          disabled={!canSubmit}
+        <button
+          className="btn btn-primary"
+          disabled={fetcher.state !== "idle" || !canSubmit}
           type="submit"
-          loading={fetcher.state !== "idle"}
         >
+          {fetcher.state !== "idle" && (
+            <span className="loading loading-spinner loading-xs"></span>
+          )}
           Save
           <TbCheck />
-        </Button>
+        </button>
       </fetcher.Form>
     </>
   );

@@ -1,7 +1,68 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+@plugin "daisyui";
+
+@plugin "daisyui/theme" {
+  name: "brand";
+  default: true;
+  prefersdark: false;
+  color-scheme: "light";
+  --color-base-100: oklch(97% 0.001 106.424);
+  --color-base-200: oklch(100% 0 0);
+  --color-base-300: oklch(92% 0.003 48.717);
+  --color-base-content: oklch(20% 0 0);
+  --color-primary: oklch(55% 0.288 302.321);
+  --color-primary-content: oklch(97% 0.014 308.299);
+  --color-secondary: oklch(64% 0.222 41.116);
+  --color-secondary-content: oklch(98% 0.016 73.684);
+  --color-accent: oklch(60% 0.118 184.704);
+  --color-accent-content: oklch(98% 0.014 180.72);
+  --color-neutral: oklch(43% 0 0);
+  --color-neutral-content: oklch(98% 0 0);
+  --color-info: oklch(62% 0.214 259.815);
+  --color-info-content: oklch(97% 0.014 254.604);
+  --color-success: oklch(70% 0.14 182.503);
+  --color-success-content: oklch(98% 0.014 180.72);
+  --color-warning: oklch(79% 0.184 86.047);
+  --color-warning-content: oklch(98% 0.026 102.212);
+  --color-error: oklch(64% 0.246 16.439);
+  --color-error-content: oklch(96% 0.015 12.422);
+  --radius-selector: 1rem;
+  --radius-field: 1rem;
+  --radius-box: 1rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 2px;
+  --depth: 1;
+  --noise: 1;
+}
+
+@plugin "daisyui/theme" {
+  name: "light";
+  default: false;
+  --color-primary: oklch(55% 0.288 302.321);
+  --color-primary-content: oklch(97% 0.014 308.299);
+  --color-secondary: oklch(64% 0.222 41.116);
+  --color-secondary-content: oklch(98% 0.016 73.684);
+}
+
+@plugin "daisyui/theme" {
+  name: "dark";
+  default: false;
+  --color-primary: oklch(55% 0.288 302.321);
+  --color-primary-content: oklch(97% 0.014 308.299);
+  --color-secondary: oklch(64% 0.222 41.116);
+  --color-secondary-content: oklch(98% 0.016 73.684);
+}
+
 .gradient-text {
   background-clip: text;
   -webkit-background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
+}
+
+.font-radio-grotesk {
+  font-family: "Radio Grotesk", sans-serif;
 }
 
 .widget-highlighter {
@@ -67,4 +128,189 @@
   *::-webkit-scrollbar-thumb {
     background-color: #888;
   }
+}
+
+@font-face {
+  font-family: "Aeonik-";
+  src: url("/fonts/Aeonik-/Aeonik-Air.otf") format("opentype");
+  font-weight: 100;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Aeonik-";
+  src: url("/fonts/Aeonik-/Aeonik-AirItalic.otf") format("opentype");
+  font-weight: 100;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "Aeonik-";
+  src: url("/fonts/Aeonik-/Aeonik-Thin.otf") format("opentype");
+  font-weight: 200;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Aeonik-";
+  src: url("/fonts/Aeonik-/Aeonik-ThinItalic.otf") format("opentype");
+  font-weight: 200;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "Aeonik-";
+  src: url("/fonts/Aeonik-/Aeonik-Light.otf") format("opentype");
+  font-weight: 300;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Aeonik-";
+  src: url("/fonts/Aeonik-/Aeonik-LightItalic.otf") format("opentype");
+  font-weight: 300;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "Aeonik-";
+  src: url("/fonts/Aeonik-/Aeonik-Regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Aeonik-";
+  src: url("/fonts/Aeonik-/Aeonik-RegularItalic.otf") format("opentype");
+  font-weight: 400;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "Aeonik-";
+  src: url("/fonts/Aeonik-/Aeonik-Medium.otf") format("opentype");
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Aeonik-";
+  src: url("/fonts/Aeonik-/Aeonik-MediumItalic.otf") format("opentype");
+  font-weight: 500;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "Aeonik-";
+  src: url("/fonts/Aeonik-/Aeonik-Bold.otf") format("opentype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Aeonik-";
+  src: url("/fonts/Aeonik-/Aeonik-BoldItalic.otf") format("opentype");
+  font-weight: 700;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "Aeonik-";
+  src: url("/fonts/Aeonik-/Aeonik-Black.otf") format("opentype");
+  font-weight: 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Aeonik-";
+  src: url("/fonts/Aeonik-/Aeonik-BlackItalic.otf") format("opentype");
+  font-weight: 900;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "Radio Grotesk";
+  src: url("/fonts/Radio Grotesk/PPRadioGrotesk-Ultralight.woff2")
+      format("woff2"),
+    url("/fonts/Radio Grotesk/PPRadioGrotesk-Ultralight.woff") format("woff");
+  font-weight: 200;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Radio Grotesk";
+  src: url("/fonts/Radio Grotesk/PPRadioGrotesk-UltralightItalic.woff2")
+      format("woff2"),
+    url("/fonts/Radio Grotesk/PPRadioGrotesk-UltralightItalic.woff")
+      format("woff");
+  font-weight: 200;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "Radio Grotesk";
+  src: url("/fonts/Radio Grotesk/PPRadioGrotesk-Light.woff2") format("woff2"),
+    url("/fonts/Radio Grotesk/PPRadioGrotesk-Light.woff") format("woff");
+  font-weight: 300;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Radio Grotesk";
+  src: url("/fonts/Radio Grotesk/PPRadioGrotesk-LightItalic.woff2")
+      format("woff2"),
+    url("/fonts/Radio Grotesk/PPRadioGrotesk-LightItalic.woff") format("woff");
+  font-weight: 300;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "Radio Grotesk";
+  src: url("/fonts/Radio Grotesk/PPRadioGrotesk-Regular.woff2") format("woff2"),
+    url("/fonts/Radio Grotesk/PPRadioGrotesk-Regular.woff") format("woff");
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Radio Grotesk";
+  src: url("/fonts/Radio Grotesk/PPRadioGrotesk-RegularItalic.woff2")
+      format("woff2"),
+    url("/fonts/Radio Grotesk/PPRadioGrotesk-RegularItalic.woff") format("woff");
+  font-weight: 400;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "Radio Grotesk";
+  src: url("/fonts/Radio Grotesk/PPRadioGrotesk-Bold.woff2") format("woff2"),
+    url("/fonts/Radio Grotesk/PPRadioGrotesk-Bold.woff") format("woff");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Radio Grotesk";
+  src: url("/fonts/Radio Grotesk/PPRadioGrotesk-BoldItalic.woff2")
+      format("woff2"),
+    url("/fonts/Radio Grotesk/PPRadioGrotesk-BoldItalic.woff") format("woff");
+  font-weight: 700;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "Radio Grotesk";
+  src: url("/fonts/Radio Grotesk/PPRadioGrotesk-Black.woff2") format("woff2"),
+    url("/fonts/Radio Grotesk/PPRadioGrotesk-Black.woff") format("woff");
+  font-weight: 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Radio Grotesk";
+  src: url("/fonts/Radio Grotesk/PPRadioGrotesk-BlackItalic.woff2")
+      format("woff2"),
+    url("/fonts/Radio Grotesk/PPRadioGrotesk-BlackItalic.woff") format("woff");
+  font-weight: 900;
+  font-style: italic;
 }

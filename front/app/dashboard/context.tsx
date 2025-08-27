@@ -1,4 +1,4 @@
-import type { Scrape, User } from "libs/prisma";
+import type { User } from "libs/prisma";
 import { createContext, useState } from "react";
 import type { SetupProgressAction } from "./setup-progress";
 
@@ -9,7 +9,6 @@ export const useApp = ({
   user: User;
   scrapeId?: string;
 }) => {
-  const [menuOpen, setMenuOpen] = useState(false);
   const [containerWidth, setContainerWidth] = useState<number>();
   const [progressActions, setProgressActions] = useState<SetupProgressAction[]>(
     []
@@ -17,8 +16,6 @@ export const useApp = ({
 
   return {
     user,
-    menuOpen,
-    setMenuOpen,
     containerWidth,
     setContainerWidth,
     scrapeId,

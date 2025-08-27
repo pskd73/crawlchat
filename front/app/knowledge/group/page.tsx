@@ -1,7 +1,7 @@
+import type { Route } from "./+types/page";
 import { prisma } from "libs/prisma";
 import { getAuthUser } from "~/auth/middleware";
 import { authoriseScrapeUser, getSessionScrapeId } from "~/scrapes/util";
-import type { Route } from "./+types/page";
 import { Page } from "~/components/page";
 import {
   TbBook2,
@@ -10,12 +10,11 @@ import {
   TbSettings,
   TbWorld,
 } from "react-icons/tb";
-import { Box, Group, HStack, Stack } from "@chakra-ui/react";
-import { SegmentedControl } from "~/components/ui/segmented-control";
-import { Outlet, useLocation, useNavigate } from "react-router";
+import { Link, Outlet, useLocation, useNavigate } from "react-router";
 import { useMemo } from "react";
 import { createToken } from "libs/jwt";
 import { ActionButton } from "./action-button";
+import cn from "@meltdownjs/cn";
 
 export async function loader({ request, params }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -87,7 +86,7 @@ export async function action({ request, params }: Route.ActionArgs) {
 
     return { success: true };
   }
-  
+
   if (intent === "stop") {
     const knowledgeGroupId = params.groupId;
 
@@ -109,9 +108,10 @@ export default function KnowledgeGroupPage({
 }: Route.ComponentProps) {
   const location = useLocation();
   const navigate = useNavigate();
-  const tab = useMemo(() => {
+  const activeTab = useMemo(() => {
     return location.pathname;
   }, [location.pathname]);
+
   const tabs = useMemo(() => {
     return [
       {
@@ -151,31 +151,28 @@ export default function KnowledgeGroupPage({
     <Page
       title={loaderData.knowledgeGroup.title ?? "Untitled"}
       icon={getIcon()}
-      right={
-        <Group>
-          <ActionButton group={loaderData.knowledgeGroup} buttonSize="md" />
-        </Group>
-      }
+      right={<ActionButton group={loaderData.knowledgeGroup} />}
     >
-      <Stack gap={6}>
-        <Box>
-          <SegmentedControl
-            value={tab || tabs[0].value}
-            onValueChange={(e) => handleTabChange(e.value)}
-            items={tabs.map((tab) => ({
-              ...tab,
-              label: (
-                <HStack>
-                  {tab.icon}
-                  {tab.label}
-                </HStack>
-              ),
-            }))}
-          />
-        </Box>
+      <div className="flex flex-col gap-6 flex-1">
+        <div role="tablist" className="tabs tabs-lift w-fit shadow-none p-0">
+          {tabs.map((tab) => (
+            <Link
+              to={tab.value}
+              role="tab"
+              className={cn(
+                "tab gap-2",
+                tab.value === activeTab && "tab-active"
+              )}
+              key={tab.value}
+            >
+              {tab.icon}
+              {tab.label}
+            </Link>
+          ))}
+        </div>
 
         <Outlet />
-      </Stack>
+      </div>
     </Page>
   );
 }

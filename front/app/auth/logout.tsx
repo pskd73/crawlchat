@@ -1,4 +1,3 @@
-import { Center, Spinner } from "@chakra-ui/react";
 import { vemetric } from "@vemetric/react";
 import { useEffect } from "react";
 import { type LoaderFunctionArgs } from "react-router";
@@ -25,8 +24,8 @@ export default function LogoutPage() {
   }, []);
 
   return (
-    <Center w="100dvw" h="100dvh">
-      <Spinner />
-    </Center>
+    <div className="flex items-center justify-center w-screen h-screen">
+      <span className="loading loading-spinner loading-lg" />
+    </div>
   );
 }

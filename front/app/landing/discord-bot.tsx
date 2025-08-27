@@ -1,17 +1,5 @@
-import {
-  Badge,
-  Box,
-  Button,
-  Flex,
-  Group,
-  Heading,
-  Image,
-  List,
-  Stack,
-  Text,
-} from "@chakra-ui/react";
 import { useMemo } from "react";
-import { TbArrowRight, TbBrandDiscordFilled, TbCheckbox } from "react-icons/tb";
+import { TbArrowRight, TbBrandDiscordFilled, TbCheck } from "react-icons/tb";
 
 export function meta() {
   return [
@@ -45,83 +33,71 @@ export default function DiscordBotPage() {
   }, []);
 
   return (
-    <Stack minH={"100vh"} justify={"center"} align={"center"} p={6}>
-      <Flex gap={6} direction={["column", "row"]}>
-        <Stack>
-          <Image
-            src="/discord-logo.png"
-            alt="Discord Bot"
-            w={160}
-            h={160}
-            border="1px solid"
-            borderColor={"brand.outline"}
-            rounded={"2xl"}
-          />
-        </Stack>
-        <Stack>
-          <Group>
-            <Badge colorPalette={"brand"} variant={"surface"}>
+    <div className="flex flex-col gap-2 p-6 min-h-screen justify-center items-center">
+      <div className="flex flex-col md:flex-row gap-6">
+        <img
+          className="w-[160px] h-[160px] border border-base-300 rounded-box"
+          src="/discord-logo.png"
+          alt="Discord Bot"
+        />
+
+        <div className="flex flex-col gap-2">
+          <div className="flex gap-2">
+            <div className="badge badge-primary">
               <TbBrandDiscordFilled />
               Discord Bot
-            </Badge>
-            <Text fontWeight={"bold"} opacity={0.4}>
+            </div>
+            <div className="text-base-content/40 font-bold">
               {details.handle}
-            </Text>
-          </Group>
-          <Heading size={"2xl"}>
+            </div>
+          </div>
+          <h2 className="text-2xl">
             CrawlChat - AI Chatbot for your documents
-          </Heading>
-          <Text>
+          </h2>
+          <p>
             Discord bot that can answer your community queries with the
             knowledge base made on CrawlChat.
-          </Text>
-          <Flex direction={["column", "row"]} gap={2}>
-            <Button colorPalette={"brand"} variant={"subtle"} asChild>
-              <a href={"/login"}>Setup knowledge base</a>
-            </Button>
-            <Button colorPalette={"brand"} asChild>
-              <a href={details.installLink}>
-                Add to your server
-                <TbArrowRight />
-              </a>
-            </Button>
-          </Flex>
-          <Stack my={4}>
-            <Heading size={"md"} opacity={0.5}>
-              Features
-            </Heading>
-            <List.Root gap="2" variant="plain" align="center">
+          </p>
+          <div className="flex flex-col md:flex-row gap-2">
+            <a className="btn" href={"/login"}>
+              Setup knowledge base
+            </a>
+
+            <a className="btn btn-primary" href={details.installLink}>
+              Add to your server
+              <TbArrowRight />
+            </a>
+          </div>
+          <div className="flex flex-col gap-2 my-4">
+            <h3 className="text-md text-base-content/50">Features</h3>
+            <ul className="flex flex-col gap-2">
               {features.map((feature) => (
-                <List.Item key={feature}>
-                  <List.Indicator asChild color="brand.fg">
-                    <TbCheckbox />
-                  </List.Indicator>
+                <li key={feature} className="flex items-center gap-2">
+                  <div className="bg-primary text-primary-content rounded-full p-1">
+                    <TbCheck />
+                  </div>
                   {feature}
-                </List.Item>
+                </li>
               ))}
-            </List.Root>
-            <Flex gap={2}>
+            </ul>
+            <div className="flex gap-2 flex-wrap">
               {tags.map((tag) => (
-                <Badge key={tag} variant={"surface"}>
+                <div key={tag} className="badge badge-primary badge-soft text-nowrap">
                   {tag}
-                </Badge>
+                </div>
               ))}
-            </Flex>
-          </Stack>
-          <Stack>
-            <Heading size={"md"} opacity={0.5}>
-              Screenshots
-            </Heading>
-            <Image
+            </div>
+          </div>
+          <div className="flex flex-col gap-2">
+            <h3 className="text-md text-base-content/50">Screenshots</h3>
+            <img
+              className="w-[600px] border border-base-300 rounded-box"
               src="/discord-sample.png"
               alt="Discord Bot"
-              maxW={600}
-              w={"full"}
-              rounded={"2xl"}
             />
-          </Stack>
-        </Stack>
-      </Flex>
-    </Stack>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
