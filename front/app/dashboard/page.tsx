@@ -422,7 +422,7 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
 
           <div className="flex gap-4">
             <div className="flex flex-col gap-2">
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
                 <TbMessage />
                 <span className="text-lg font-medium">Messages</span>
               </div>
