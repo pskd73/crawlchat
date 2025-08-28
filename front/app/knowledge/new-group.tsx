@@ -252,17 +252,19 @@ export default function NewScrape({ loaderData }: Route.ComponentProps) {
     <Page title="New knowledge group" icon={<TbBook2 />}>
       <scrapeFetcher.Form method="post" encType="multipart/form-data">
         <div className="flex flex-col gap-2">
-          <RadioCard
-            name="type"
-            value={type}
-            onChange={(value) => setType(value)}
-            options={types.map((item) => ({
-              label: item.title,
-              value: item.value,
-              description: item.description,
-              icon: item.icon,
-            }))}
-          />
+          <div className="p-4 bg-base-200/50 rounded-box border border-base-300">
+            <RadioCard
+              name="type"
+              value={type}
+              onChange={(value) => setType(value)}
+              options={types.map((item) => ({
+                label: item.title,
+                value: item.value,
+                description: item.description,
+                icon: item.icon,
+              }))}
+            />
+          </div>
 
           <p className="text-base-content/50 mt-2">{getDescription(type)}</p>
 

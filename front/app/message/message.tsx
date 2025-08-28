@@ -22,6 +22,7 @@ import { ChannelBadge } from "~/components/channel-badge";
 import toast from "react-hot-toast";
 import cn from "@meltdownjs/cn";
 import moment from "moment";
+import { ScoreBadge } from "~/components/score-badge";
 
 export async function loader({ request, params }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -145,10 +146,7 @@ function AssistantMessage({
                     </td>
                     <td className="w-18 md:w-56">{link.searchQuery ?? "-"}</td>
                     <td className="w-24">
-                      <div className="badge badge-primary badge-soft">
-                        <TbChartBar />
-                        {link.score?.toFixed(2)}
-                      </div>
+                      {link.score && <ScoreBadge score={link.score} />}
                     </td>
                   </tr>
                 ))}

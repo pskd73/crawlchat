@@ -177,7 +177,7 @@ function ChatInput() {
 
   return (
     <div className="flex gap-2 border-t border-base-300 justify-between p-4">
-      <div className="flex-1">
+      <div className="flex-1 flex items-center">
         <textarea
           ref={inputRef}
           placeholder={getPlaceholder()}
