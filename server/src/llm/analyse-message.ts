@@ -122,6 +122,8 @@ export async function analyseMessage(question: string, answer: string) {
           It should be one of the following: ${Object.values(
             QuestionSentiment
           ).join(", ")}
+
+          Assume there is data gap and provide the details mentioned.
         `
       ),
       dataGapTitle: z.string().describe(
