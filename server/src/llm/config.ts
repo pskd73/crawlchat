@@ -61,6 +61,14 @@ export const getConfig = (model?: LlmModel | null): LlmConfig => {
       creditsPerMessage: 2,
     };
   }
+  if (model === LlmModel.gpt_5_nano) {
+    return {
+      model: "gpt-5-nano",
+      apiKey: process.env.OPENAI_API_KEY!,
+      ragTopN: 6,
+      creditsPerMessage: 1,
+    };
+  }
   return {
     model: "gpt-4o-mini",
     apiKey: process.env.OPENAI_API_KEY!,

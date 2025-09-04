@@ -178,10 +178,10 @@ function AiModelSettings({ scrape, user }: { scrape: Scrape; user: User }) {
             disabled: !isAllowed(["free", "starter", "pro"]),
           },
           {
-            label: "Gemini 2.5-flash",
-            value: "gemini_2_5_flash",
+            label: "OpenAI GPT 5-nano",
+            value: "gpt_5_nano",
 
-            description: "Good for most of the use cases.",
+            description: "Better than 4o-mini, fast, can take more context.",
             summary: "1 credit / message",
             disabled: !isAllowed(["starter", "pro"]),
             content: (

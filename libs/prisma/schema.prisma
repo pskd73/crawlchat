@@ -107,6 +107,8 @@ enum LlmModel {
   gemini_2_5_flash
   gemini_2_5_flash_lite
   o4_mini
+
+  gpt_5_nano
 }
 
 type RichBlockConfig {
