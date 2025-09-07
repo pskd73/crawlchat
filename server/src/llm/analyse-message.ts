@@ -10,6 +10,7 @@ import { SimpleAgent } from "./agentic";
 import { z } from "zod";
 import { Flow } from "./flow";
 import { makeIndexer } from "../indexer/factory";
+import { getConfig } from "./config";
 
 const friction = {
   low: {
@@ -100,6 +101,64 @@ export async function getRelevantScore(
   return result;
 }
 
+async function getDataGap(question: string, answer: string) {
+  const llmConfig = getConfig("gpt_5");
+
+  const agent = new SimpleAgent({
+    id: "data-gap-detector",
+    prompt: `
+    You are a helpful assistant that detects data gaps in the answer provided for the question.
+    You may leave title and description empty if there is no data gap.
+    `,
+    schema: z.object({
+      title: z.string({
+        description: `
+          Make a title for the data gap (if any). It should be under 10 words and respresent the gap clearly.
+          It is used to represent the data gap from the sources for the given question.
+        `,
+      }),
+      description: z.string({
+        description: `
+          Make a description for the data gap (if any). It should be in markdown format.
+          It should explain the details to be filled for the data gap.
+          Make it descriptive, mention topics to fill as bullet points.
+        `,
+      }),
+    }),
+    ...llmConfig,
+  });
+
+  const flow = new Flow([agent], {
+    messages: [
+      {
+        llmMessage: {
+          role: "user",
+          content: `
+            <question>
+            ${question}
+            </question>
+            
+            <answer>
+            ${answer}
+            </answer>
+          `,
+        },
+      },
+    ],
+  });
+
+  flow.addNextAgents(["data-gap-detector"]);
+
+  await flow.stream();
+
+  const content = flow.getLastMessage().llmMessage.content;
+
+  return JSON.parse(content as string) as {
+    title: string;
+    description: string;
+  };
+}
+
 export async function analyseMessage(question: string, answer: string) {
   const agent = new SimpleAgent({
     id: "analyser",
@@ -122,21 +181,6 @@ export async function analyseMessage(question: string, answer: string) {
           It should be one of the following: ${Object.values(
             QuestionSentiment
           ).join(", ")}
-
-          Assume there is data gap and provide the details mentioned.
-        `
-      ),
-      dataGapTitle: z.string().describe(
-        `
-          Make a title for the data gap (if any). It should be under 10 words and respresent the gap clearly.
-          It is used to represent the data gap from the sources for the given question.
-        `
-      ),
-      dataGapDescription: z.string().describe(
-        `
-          Make a description for the data gap (if any). It should be in markdown format.
-          It should explain the details to be filled for the data gap.
-          Make it descriptive, mention topics to fill as bullet points.
         `
       ),
     }),
@@ -215,9 +259,11 @@ export async function fillMessageAnalysis(
       const dataGap = isDataGap(questionRelevanceScore.halfMaxavg);
 
       if (dataGap) {
-        analysis.dataGapTitle = partialAnalysis?.dataGapTitle ?? null;
-        analysis.dataGapDescription =
-          partialAnalysis?.dataGapDescription ?? null;
+        const dataGap = await getDataGap(question, answer);
+        if (dataGap.title && dataGap.description) {
+          analysis.dataGapTitle = dataGap.title;
+          analysis.dataGapDescription = dataGap.description;
+        }
       }
 
       console.log({ dataGap, analysis });
