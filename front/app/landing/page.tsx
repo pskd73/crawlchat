@@ -286,7 +286,11 @@ export function UsedBy() {
         </div>
 
         <div className="bg-gray-900 rounded-full p-4 px-6 pb-3">
-          <img src="/used-by/postiz.svg" alt="Postiz" className="max-h-[24px]" />
+          <img
+            src="/used-by/postiz.svg"
+            alt="Postiz"
+            className="max-h-[24px]"
+          />
         </div>
       </div>
     </div>
@@ -825,6 +829,11 @@ export function Footer() {
           <div className="flex-[2]">
             <ul className="flex flex-col gap-4">
               <li>
+                <FooterLink href="/blog/actions-on-crawlchat">
+                  Introducing Actions
+                </FooterLink>
+              </li>
+              <li>
                 <FooterLink href="/blog/how-polotno-uses-crawlchat">
                   How Polotno uses CrawlChat
                 </FooterLink>
@@ -1108,7 +1117,9 @@ export function Flow() {
       </HeadingDescription>
 
       <div
-        className={cn(`grid grid-cols-1 grid-rows-4 md:grid-cols-3 md:grid-rows-2 gap-6`)}
+        className={cn(
+          `grid grid-cols-1 grid-rows-4 md:grid-cols-3 md:grid-rows-2 gap-6`
+        )}
       >
         <FlowCard
           title="Knowledge base with your documentation"
