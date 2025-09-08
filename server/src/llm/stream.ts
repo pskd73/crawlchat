@@ -51,7 +51,9 @@ export async function handleStream(
           ] as any;
           toolCall.tool_calls[index].function.arguments = "";
         }
-        toolCall.tool_calls[index].function.arguments += argChunk;
+        if (argChunk !== toolCall.tool_calls[index].function.arguments) {
+          toolCall.tool_calls[index].function.arguments += argChunk;
+        }
       }
     }
 
