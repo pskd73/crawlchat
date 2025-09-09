@@ -338,6 +338,8 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
     }
   }, [newCollectionFetcher.data]);
 
+  const canCreateCollection = loaderData.user?.plan?.planId !== "free";
+
   return (
     <Page
       title="Home"
@@ -347,6 +349,7 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
           <button
             className="btn btn-soft"
             onClick={() => showModal("new-collection-dialog")}
+            disabled={!canCreateCollection}
           >
             <TbPlus />
             Collection
@@ -383,6 +386,7 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
             <button
               className="btn btn-primary"
               onClick={() => showModal("new-collection-dialog")}
+              disabled={!canCreateCollection}
             >
               <TbPlus />
               New collection
