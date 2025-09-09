@@ -320,10 +320,10 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
   }, [containerRef, loaderData]);
 
   useEffect(() => {
-    if (loaderData.noScrapes) {
+    if (loaderData.noScrapes && loaderData.user?.plan?.planId !== "free") {
       showModal("new-collection-dialog");
     }
-  }, [loaderData.noScrapes]);
+  }, [loaderData.noScrapes, loaderData.user]);
 
   useEffect(() => {
     const url = new URL(window.location.href);
