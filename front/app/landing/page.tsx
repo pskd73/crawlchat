@@ -17,18 +17,24 @@ import {
   TbChevronRight,
   TbChevronUp,
   TbCircleCheckFilled,
+  TbCircleFilled,
   TbCircleXFilled,
   TbClock,
   TbCode,
+  TbColorSwatch,
   TbDashboard,
   TbDatabase,
   TbFile,
   TbMail,
   TbMessage,
+  TbPlug,
   TbRobotFace,
   TbScoreboard,
   TbSettings,
+  TbShare,
   TbSpider,
+  TbThumbUp,
+  TbUserHeart,
   TbWorld,
 } from "react-icons/tb";
 import { prisma } from "libs/prisma";
@@ -450,17 +456,30 @@ function Works() {
   );
 }
 
-function ChatWidgetFeature({
+function Badge({ children }: PropsWithChildren) {
+  return (
+    <div className="flex items-center gap-2 justify-center mb-4">
+      <div className="badge badge-secondary badge-soft badge-lg">
+        <TbCircleFilled size={12} />
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function ClickableFeature({
   active,
   title,
   description,
   img,
+  icon,
   onClick,
 }: {
   active: boolean;
   title: string;
   description: string;
-  img: string;
+  icon?: ReactNode;
+  img?: string;
   onClick?: () => void;
 }) {
   return (
@@ -473,7 +492,8 @@ function ChatWidgetFeature({
       onClick={onClick}
     >
       <h3 className="text-2xl font-radio-grotesk flex items-center gap-2">
-        <img src={img} alt={title} className="w-6 h-6" />
+        {icon && <div className="text-2xl">{icon}</div>}
+        {img && <img src={img} alt={title} className="w-6 h-6" />}
         {title}
       </h3>
       <p className="opacity-50 font-medium leading-tight">{description}</p>
@@ -481,20 +501,168 @@ function ChatWidgetFeature({
   );
 }
 
-function ChatWidget() {
-  const [activeTab, setActiveTab] = useState("sources");
+function FeaturesWithImage({
+  trackName,
+  features,
+  left,
+}: {
+  trackName: string;
+  features: {
+    title: string;
+    description: string;
+    img: string;
+    key: string;
+    icon?: ReactNode;
+  }[];
+  left?: ReactNode;
+}) {
+  const [activeTab, setActiveTab] = useState(features[0].key);
 
   function handleClick(tab: string) {
-    track("chat-widget-click", {
+    track(trackName, {
       tab,
     });
     setActiveTab(tab);
   }
 
   return (
+    <div className="flex flex-col md:flex-row gap-10">
+      <div className="flex-1 flex flex-col gap-4">
+        {features.map((feature) => (
+          <ClickableFeature
+            active={activeTab === feature.key}
+            title={feature.title}
+            description={feature.description}
+            icon={feature.icon}
+            onClick={() => handleClick(feature.key)}
+          />
+        ))}
+        {left}
+      </div>
+      <div className="flex-1 bg-ash-strong rounded-2xl shadow-md border border-base-300 aspect-square overflow-hidden">
+        <img
+          src={features.find((feature) => feature.key === activeTab)?.img}
+          className="w-full h-full aspect-square"
+        />
+      </div>
+    </div>
+  );
+}
+
+function ChannelWidget() {
+  return (
     <div className="mt-32">
+      <Badge>Use case</Badge>
+
       <Heading>
-        <HeadingHighlight>Chat</HeadingHighlight> widget
+        <HeadingHighlight>24x7 assistant</HeadingHighlight> on your website
+      </Heading>
+
+      <HeadingDescription>
+        When you are running a global community with a lot of documentation to
+        go through, you need to provide a 24x7 assistant to your community so
+        that they can get the answers they need without waiting for you to
+        respond.
+      </HeadingDescription>
+
+      <FeaturesWithImage
+        trackName="channel-widget"
+        features={[
+          {
+            title: "Embed on your website",
+            description:
+              "You can embed the web chatbot on your website under few minutes. You need to copy the embed code that CrawlChat provides and paste it on your website. You instantly get an AI assistant on your website that can handle most of your support queries.",
+            img: "/channels/4-min.png",
+            key: "embed",
+            icon: <TbPlug />,
+          },
+          {
+            title: "Customise",
+            description:
+              "You can customise the chatbot's look and feel, and also the tone of the responses to match your brand and support style. You can add your own colors, logo of your brand, labels on the chatbot, and you can customise the behaviour of the chatbot using the AI prompts.",
+            img: "/channels/5-min.png",
+            key: "customise",
+            icon: <TbColorSwatch />,
+          },
+          {
+            title: "Human support",
+            description:
+              "CrawlChat respects the user and understands that it might not have answers for all the support queries. Your users can always reach out to you via the support tickets. The chatbot itself prompts the user that it does not have answer and asks to create a support ticket by providing email right from the chat screen.",
+            img: "/channels/6-min.png",
+            key: "human-support",
+            icon: <TbUserHeart />,
+          },
+        ]}
+      />
+    </div>
+  );
+}
+
+function ChannelDiscord() {
+  return (
+    <div className="mt-32">
+      <Badge>Use case</Badge>
+
+      <Heading>
+        Ask AI on <HeadingHighlight>Discord</HeadingHighlight>
+      </Heading>
+
+      <HeadingDescription>
+        It is quite common for most of the tech companies to have a Discord
+        server where their community hangs out. It became a necessity to have an
+        AI bot on Discord to answer community questions. CrawlChat does that out
+        of the box.
+      </HeadingDescription>
+
+      <FeaturesWithImage
+        trackName="channel-discord"
+        features={[
+          {
+            title: "Tag the bot",
+            description:
+              "Once you add the CrawlChat bot to your Discord server, anyone on the Discord server can resolve their queries by just tagging the bot @crawlchat. It uses the same knowledge base you would have in the collection. On the admin side, all the discord messages are tagged with Discord channel.",
+            img: "/channels/1-min.png",
+            key: "sources",
+            icon: <TbBrandDiscord />,
+          },
+          {
+            title: "Sources",
+            description:
+              "The bot attaches the sources it uses to answer the question so that the users can find more help from your documentation. This works the same for the Web chatbot and the Slack bot as well. You can also configure it to reply the answers as a thread for clutter free channels.",
+            img: "/channels/2-min.png",
+            key: "sources",
+            icon: <TbBook />,
+          },
+          {
+            title: "Learn & Rate",
+            description:
+              "It is evident that the bot might get wrong at times and the moderators might give correct answers. You can make the bot learn these correct answers from the Discord server itself. You can react to the correct messages with 🧩 to make the bot learn the message. You users can also react with 👍 and 👎 to rate the message that you can view from the dashboard and take necessary actions.",
+            img: "/channels/3-min.png",
+            key: "learn",
+            icon: <TbThumbUp />,
+          },
+        ]}
+        left={
+          <div className="p-4 text-base-content/50">
+            Learn more about{" "}
+            <a href="/discord-bot" className="link link-primary link-hover">
+              Discord bot
+            </a>
+          </div>
+        }
+      />
+    </div>
+  );
+}
+
+function ChannelMCP() {
+  return (
+    <div className="mt-32">
+      <Badge>Use case</Badge>
+
+      <Heading>
+        You docs on AI apps as an <HeadingHighlight>MCP</HeadingHighlight>{" "}
+        server
       </Heading>
 
       <HeadingDescription>
@@ -503,37 +671,27 @@ function ChatWidget() {
         they want
       </HeadingDescription>
 
-      <div className="flex flex-col md:flex-row gap-10">
-        <div className="flex-1 flex flex-col gap-4">
-          <ChatWidgetFeature
-            active={activeTab === "sources"}
-            title="Custom knowledge base"
-            description="All the answers on the chat widget are provided by the resources that the answer is fetched from so that your community can always go find more help if required."
-            img="/new-landing/archive-active.png"
-            onClick={() => handleClick("sources")}
-          />
-          <ChatWidgetFeature
-            active={activeTab === "code"}
-            title="Code blocks"
-            description="CrawlChat supports showing code blocks and your community can just copy and paste the generated code to their workflow."
-            img="/new-landing/app-programming.png"
-            onClick={() => handleClick("code")}
-          />
-          <ChatWidgetFeature
-            active={activeTab === "pin"}
-            title="Pin & Share"
-            description="Your community can pin and share the important answers so that they can always come back and find the critical help with ease"
-            img="/new-landing/pin.png"
-            onClick={() => handleClick("pin")}
-          />
-        </div>
-        <div className="flex-1 bg-ash-strong rounded-2xl shadow-md border border-base-300 aspect-square overflow-hidden">
-          <img
-            src={`/new-landing/widget-${activeTab}.png`}
-            className="w-full h-full aspect-square"
-          />
-        </div>
-      </div>
+      <FeaturesWithImage
+        trackName="channel-mcp"
+        features={[
+          {
+            title: "Distribute",
+            description:
+              "Any AI model would have a cut off date and most probably would not know about your documentation. It is important to provide the docs as context for AI apps such as Cursor, Claude Code, Windsurf etc. You can share the MCP server with your community that provides tools to search through your docs by eht AI apps. This increase the accuracy of the AI apps significantly.",
+            img: "/channels/8-min.png",
+            key: "sources",
+            icon: <TbShare />,
+          },
+          {
+            title: "Happy developers",
+            description:
+              "Developers these days spend more time asking AI than finding required help browsing through hunders of pages. MCP server makes it even better that they get the help from their favorite AI app without leaving their workspace. CrawlChat enables you to improve your developers efficiency significantly.",
+            img: "/channels/7-min.png",
+            key: "code",
+            icon: <TbCode />,
+          },
+        ]}
+      />
     </div>
   );
 }
@@ -1705,7 +1863,15 @@ export default function Landing({ loaderData }: Route.ComponentProps) {
       </Container>
 
       <Container>
-        <ChatWidget />
+        <ChannelWidget />
+      </Container>
+
+      <Container>
+        <ChannelDiscord />
+      </Container>
+
+      <Container>
+        <ChannelMCP />
       </Container>
 
       <Container>
