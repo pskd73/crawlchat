@@ -233,6 +233,8 @@ expressWs.app.ws("/", (ws: any, req) => {
         return;
       }
 
+      console.log("Socket message", message);
+
       if (message.type === "join-room") {
         const authHeader = message.data.headers.Authorization;
         if (!authHeader?.startsWith("Bearer ")) {
