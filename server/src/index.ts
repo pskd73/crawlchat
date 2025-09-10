@@ -223,7 +223,7 @@ expressWs.app.ws("/", (ws: any, req) => {
 
       if (
         message?.data?.query
-          .toLowerCase()
+          ?.toLowerCase()
           .includes(
             "server side rendering with paremterized videos in a studio"
           )
