@@ -2,7 +2,7 @@ import type { User } from "libs/prisma";
 import { Authenticator } from "remix-auth";
 import { sessionStorage } from "~/session";
 import { EmailLinkStrategy } from "./email-strategy";
-import { sendEmail } from "~/email";
+import { sendLoginEmail } from "~/email";
 import { GoogleStrategy } from "./google-strategy";
 import { signUpNewUser } from "./signup";
 
@@ -29,11 +29,7 @@ authenticator.use(
   new EmailLinkStrategy(
     {
       sendEmail: async ({ emailAddress, magicLink }) => {
-        await sendEmail(
-          emailAddress,
-          "Login to CrawlChat",
-          `Click here to login: ${magicLink}`
-        );
+        await sendLoginEmail(emailAddress, magicLink);
       },
       secret: "secret",
       callbackURL: "/login/verify",

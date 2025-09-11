@@ -28,7 +28,7 @@ Welcome to **CrawlChat**. You are at the right place to add AI support chatbot f
 
 In short here is what you can do with CrawlChat:
 
-- Set up the knowledge base from your website, files, Notions pages, etc.
+- Set up the knowledge base from your website, files, etc.
 - Embed the chatbot on your website
 - Add bot to your Discord server or Slack workspace
 - Set up MCP server for your documentation
@@ -47,7 +47,7 @@ Here are few links to get you started:
 
 Looking forward to see you integrate CrawlChat in your products and services 🚀
 
-CrawlChat Team
+Pramod @ CrawlChat
 `}
       </Markdown>
     </MailTemplate>

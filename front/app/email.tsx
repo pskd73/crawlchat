@@ -3,6 +3,7 @@ import WelcomeEmail from "emails/welcome";
 import InvitationEmail from "emails/invitation";
 import TeamJoinEmail from "emails/team-join";
 import LowCreditsEmail from "emails/low-credits";
+import LoginEmail from "emails/login";
 
 export const sendEmail = async (to: string, subject: string, text: string) => {
   try {
@@ -52,6 +53,9 @@ export const sendInvitationEmail = async (
   );
 };
 
+export const sendLoginEmail = async (to: string, url: string) => {
+  await sendReactEmail(to, "Login to CrawlChat", <LoginEmail url={url} />);
+};
 export const sendTeamJoinEmail = async (
   to: string,
   invitedBy: string,

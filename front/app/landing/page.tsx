@@ -1576,8 +1576,7 @@ function FAQ() {
       question: "Can I try it out first?",
       answer: (
         <p>
-          You can signup without paying anything and try out adding your
-          knowledge base, integrating the chatbot to your website. You can check
+          You can start your 7 days trial and explore the platform. You can check
           the{" "}
           <a href="/#pricing" className="text-primary">
             pricing
