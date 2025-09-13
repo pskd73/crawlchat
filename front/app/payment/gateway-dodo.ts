@@ -21,11 +21,21 @@ const productIdPlanMap: Record<string, Plan> = {
   pdt_IcrpqSx48qoCenz4lnLi1: PLAN_HOBBY,
   pdt_vgCVfRAaCT99LM1Dfk5qF: PLAN_STARTER,
   pdt_P68hLo9a0At8cgn4WbzBe: PLAN_PRO,
-  
+
   // dev
   pdt_CDgenxMUiAKjzBDVROTDr: PLAN_STARTER,
   pdt_7tO1wC3NRoQsCXh8oIFEi: PLAN_PRO,
   pdt_lpFZp5sBEu5bzKwCbE5Y8: PLAN_HOBBY,
+};
+
+const planProductIdMap: Record<string, string> = {
+  [PLAN_HOBBY.id]: "pdt_IcrpqSx48qoCenz4lnLi1",
+  [PLAN_STARTER.id]: "pdt_vgCVfRAaCT99LM1Dfk5qF",
+  [PLAN_PRO.id]: "pdt_P68hLo9a0At8cgn4WbzBe",
+
+  // [PLAN_HOBBY.id]: "pdt_lpFZp5sBEu5bzKwCbE5Y8",
+  // [PLAN_STARTER.id]: "pdt_CDgenxMUiAKjzBDVROTDr",
+  // [PLAN_PRO.id]: "pdt_7tO1wC3NRoQsCXh8oIFEi",
 };
 
 const typeMap: Record<string, PaymentGatewayWebhookType> = {
@@ -41,6 +51,13 @@ const client = new DodoPayments({
     (process.env.DODO_ENVIRONMENT as "live_mode" | "test_mode" | undefined) ??
     "live_mode",
 });
+
+async function getCustomer(email: string) {
+  const list = await client.customers.list({
+    email,
+  });
+  return list.items[0];
+}
 
 export const dodoGateway: PaymentGateway = {
   provider: "DODO",
@@ -75,5 +92,37 @@ export const dodoGateway: PaymentGateway = {
       id: subscriptionId,
       customerPortalUrl: customerPortalSession.link,
     };
+  },
+
+  async getPaymentLink(planId, options) {
+    const body: DodoPayments.CheckoutSessions.CheckoutSessionCreateParams = {
+      product_cart: [
+        {
+          product_id: planProductIdMap[planId],
+          quantity: 1,
+        },
+      ],
+    };
+    if (options?.referralId) {
+      body.metadata = {
+        affonso_referral: options.referralId,
+      };
+    }
+    if (options?.email) {
+      const customer = await getCustomer(options.email);
+      if (customer) {
+        body.customer = {
+          customer_id: customer.customer_id,
+        };
+      } else {
+        body.customer = {
+          name: options.name ?? "",
+          email: options.email ?? "",
+        };
+      }
+    }
+    const checkoutSession = await client.checkoutSessions.create(body);
+
+    return { url: checkoutSession.checkout_url };
   },
 };

@@ -29,6 +29,7 @@ import cn from "@meltdownjs/cn";
 import toast from "react-hot-toast";
 import { makeMeta } from "~/meta";
 import { getQueryString } from "libs/llm-message";
+import { dodoGateway } from "~/payment/gateway-dodo";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -254,6 +255,19 @@ export async function action({ request }: Route.ActionArgs) {
       headers: {
         "Set-Cookie": await commitSession(session),
       },
+    });
+  }
+
+  if (intent === "payment-links") {
+    const referralId = formData.get("referralId") as string;
+    const planId = formData.get("planId") as string;
+
+    const gateway = dodoGateway;
+
+    return await gateway.getPaymentLink(planId, {
+      referralId,
+      email: user!.email,
+      name: user!.name,
     });
   }
 }

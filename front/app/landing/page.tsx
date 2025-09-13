@@ -811,6 +811,7 @@ function PricingBox({
   free,
   href,
   payLabel,
+  onClick,
 }: {
   popular?: boolean;
   title: string;
@@ -820,6 +821,7 @@ function PricingBox({
   free?: boolean;
   href?: string;
   payLabel?: string;
+  onClick?: () => void;
 }) {
   return (
     <div
@@ -889,7 +891,8 @@ function PricingBox({
                 "border-base-100 text-base-100 hover:bg-base-100 hover:text-primary"
             )}
             variant={"outline"}
-            href={href}
+            href={!onClick ? href : undefined}
+            onClick={() => onClick?.()}
           >
             {payLabel ?? (free ? "Try it out" : "Purchase")}
             <TbArrowRight />
@@ -905,11 +908,13 @@ export function PricingBoxes({
   starterPlan,
   proPlan,
   hobbyPlan,
+  onClick,
 }: {
   freePlan: Plan;
   starterPlan: Plan;
   proPlan: Plan;
   hobbyPlan: Plan;
+  onClick?: (planId: string) => void;
 }) {
   return (
     <>
@@ -948,8 +953,11 @@ export function PricingBoxes({
           { text: "GitHub issues", excluded: true },
           { text: "Image inputs", excluded: true },
         ]}
-        href="https://checkout.dodopayments.com/buy/pdt_IcrpqSx48qoCenz4lnLi1?quantity=1&redirect_url=https://crawlchat.app%2Fprofile%23billing"
+        href={
+          "https://checkout.dodopayments.com/buy/pdt_IcrpqSx48qoCenz4lnLi1?quantity=1&redirect_url=https://crawlchat.app%2Fprofile%23billing"
+        }
         payLabel="Start 7 days trial"
+        onClick={onClick ? () => onClick?.(hobbyPlan.id) : undefined}
       />
       <PricingBox
         title="Starter"
@@ -967,7 +975,10 @@ export function PricingBoxes({
           { text: "GitHub issues", excluded: true },
           { text: "Image inputs", excluded: true },
         ]}
-        href="https://checkout.dodopayments.com/buy/pdt_vgCVfRAaCT99LM1Dfk5qF?quantity=1&redirect_url=https://crawlchat.app%2Fprofile%23billing"
+        href={
+          "https://checkout.dodopayments.com/buy/pdt_vgCVfRAaCT99LM1Dfk5qF?quantity=1&redirect_url=https://crawlchat.app%2Fprofile%23billing"
+        }
+        onClick={onClick ? () => onClick?.(starterPlan.id) : undefined}
       />
       <PricingBox
         title="Pro"
@@ -986,7 +997,10 @@ export function PricingBoxes({
           { text: "GitHub issues" },
           { text: "Image inputs" },
         ]}
-        href="https://checkout.dodopayments.com/buy/pdt_P68hLo9a0At8cgn4WbzBe?quantity=1&redirect_url=https://crawlchat.app%2Fprofile%23billing"
+        href={
+          "https://checkout.dodopayments.com/buy/pdt_P68hLo9a0At8cgn4WbzBe?quantity=1&redirect_url=https://crawlchat.app%2Fprofile%23billing"
+        }
+        onClick={onClick ? () => onClick?.(proPlan.id) : undefined}
       />
     </>
   );
@@ -1576,8 +1590,8 @@ function FAQ() {
       question: "Can I try it out first?",
       answer: (
         <p>
-          You can start your 7 days trial and explore the platform. You can check
-          the{" "}
+          You can start your 7 days trial and explore the platform. You can
+          check the{" "}
           <a href="/#pricing" className="text-primary">
             pricing
           </a>{" "}

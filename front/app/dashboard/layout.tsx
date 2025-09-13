@@ -85,8 +85,6 @@ export async function loader({ request }: Route.LoaderArgs) {
   };
 }
 
-const drawerWidth = 260;
-
 export default function DashboardPage({ loaderData }: Route.ComponentProps) {
   const { user } = loaderData;
   const app = useApp({ user, scrapeId: loaderData.scrapeId });

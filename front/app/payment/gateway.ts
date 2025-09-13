@@ -36,4 +36,12 @@ export interface PaymentGateway {
   getSubscription: (
     subscriptionId: string
   ) => Promise<PaymentGatewaySubscription>;
+  getPaymentLink: (
+    planId: string,
+    options?: {
+      name?: string | null;
+      email?: string | null;
+      referralId?: string | null;
+    }
+  ) => Promise<{ url: string }>;
 }
