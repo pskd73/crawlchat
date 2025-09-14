@@ -39,7 +39,7 @@ export function UpgradeModal({
     paymentFetcher.submit(
       {
         intent: "payment-link",
-        referralId: user.id,
+        referralId: (window as any).affonso_referral,
         planId,
       },
       {
