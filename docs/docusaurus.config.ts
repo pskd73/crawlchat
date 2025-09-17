@@ -55,13 +55,30 @@ const config: Config = {
 
   headTags: [
     {
-        "tagName": "script",
-        "attributes": {
-          "src": "https://crawlchat.app/embed.js",
-          "id": "crawlchat-script",
-          "data-id": "67dbfc7258ed87c571a04b83"
-        },
+      "tagName": "script",
+      "attributes": {
+        "src": "https://crawlchat.app/embed.js",
+        "id": "crawlchat-script",
+        "data-id": "67dbfc7258ed87c571a04b83"
       },
+    },
+    {
+      "tagName": "script",
+      "attributes": {
+        "src": "https://cdn.vemetric.com/main.js",
+        "data-token": "MGxpZaWDYdxwChu5"
+      },
+    },
+    {
+      "tagName": "script",
+      "attributes": {
+        "type": "text/javascript"
+      },
+      "innerHTML": `
+        window.vmtrcq = window.vmtrcq || [];
+        window.vmtrc = window.vmtrc || function (){window.vmtrcq.push(Array.prototype.slice.call(arguments))};
+      `
+    },
   ],
   
 
