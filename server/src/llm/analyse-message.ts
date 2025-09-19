@@ -94,6 +94,7 @@ async function getDataGap(question: string, context: string[]) {
     The data gap should be very specific and should not be generic.
     The description should be not more than 5 points.
     The data gap can be absance of data or partial data.
+    You need to find the data gap from the context provided for the question. Don't find gaps in question.
     `,
     schema: z.object({
       title: z.string({
