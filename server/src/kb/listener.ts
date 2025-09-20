@@ -90,6 +90,7 @@ export class BaseKbProcesserListener implements KbProcesserListener {
       context: this.knowledgeGroup.itemContext ?? undefined,
     });
 
+    console.log("Checking credits for", chunks.length);
     if (!(await this.options?.hasCredits(chunks.length))) {
       console.log("Throwing error for not enough credits");
       throw new Error("Not enough credits");
