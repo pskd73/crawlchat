@@ -221,6 +221,12 @@ export function SourceLink({
   index: number;
   color?: string;
 }) {
+  const { internalLinkHosts, handleInternalLinkClick } = useChatBoxContext();
+
+  const internal = link.url
+    ? internalLinkHosts.includes(new URL(link.url).hostname)
+    : false;
+
   return (
     <a
       className={cn(
@@ -229,11 +235,14 @@ export function SourceLink({
         "hover:opacity-100 w-fit text-sm group",
         link.url && "cursor-pointer"
       )}
-      href={link.url ?? undefined}
-      target="_blank"
+      href={internal ? undefined : link.url ?? undefined}
+      target={internal ? undefined : "_blank"}
       style={{
         color: color ?? undefined,
       }}
+      onClick={
+        internal ? () => handleInternalLinkClick(link.url ?? "") : undefined
+      }
     >
       <TbFileDescription />
       {link.title}

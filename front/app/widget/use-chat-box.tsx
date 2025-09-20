@@ -68,6 +68,7 @@ export function useChatBox({
     [thread]
   );
   const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [internalLinkHosts, setInternalLinkHosts] = useState<string[]>([]);
 
   useEffect(() => {
     if (token) {
@@ -93,16 +94,18 @@ export function useChatBox({
   }, []);
 
   useEffect(() => {
-    const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const isDarkMode = window.matchMedia(
+      "(prefers-color-scheme: dark)"
+    ).matches;
     setTheme(isDarkMode ? "dark" : "light");
 
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     const handleThemeChange = (e: MediaQueryListEvent) => {
       setTheme(e.matches ? "dark" : "light");
     };
 
-    mediaQuery.addEventListener('change', handleThemeChange);
-    return () => mediaQuery.removeEventListener('change', handleThemeChange);
+    mediaQuery.addEventListener("change", handleThemeChange);
+    return () => mediaQuery.removeEventListener("change", handleThemeChange);
   }, []);
 
   useEffect(() => {
@@ -187,6 +190,13 @@ export function useChatBox({
       if (event.data === "light-mode") {
         setTheme("light");
       }
+
+      try {
+        const data = JSON.parse(event.data);
+        if (data.type === "internal-link-host") {
+          setInternalLinkHosts((hosts) => [...hosts, data.host]);
+        }
+      } catch {}
     };
 
     window.addEventListener("message", handleMessage);
@@ -278,6 +288,16 @@ export function useChatBox({
     );
   }
 
+  function handleInternalLinkClick(url: string) {
+    window.parent.postMessage(
+      JSON.stringify({
+        type: "internal-link-click",
+        url,
+      }),
+      "*"
+    );
+  }
+
   return {
     scrape,
     thread,
@@ -302,6 +322,7 @@ export function useChatBox({
     titleSlug,
     fullscreen,
     theme,
+    internalLinkHosts,
     close,
     erase,
     deleteMessages,
@@ -314,6 +335,7 @@ export function useChatBox({
     scroll,
     setScreen,
     setTheme,
+    handleInternalLinkClick,
   };
 }
 

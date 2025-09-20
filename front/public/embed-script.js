@@ -130,6 +130,25 @@ class CrawlChatEmbed {
     if (data.type === "embed-ready") {
       this.widgetConfig = data.widgetConfig;
       await this.showAskAIButton();
+
+      const customTags = this.getCustomTags();
+      if (customTags.sidepanel === "true") {
+        const iframe = document.getElementById(this.iframeId);
+        iframe.contentWindow.postMessage(
+          JSON.stringify({
+            type: "internal-link-host",
+            host: window.location.host,
+          }),
+          "*"
+        );
+      }
+    }
+    if (data.type === "internal-link-click") {
+      const link = document.querySelector("a.menu__link");
+      const existingHref = link.getAttribute("href");
+      link.setAttribute("href", data.url);
+      link.click();
+      link.setAttribute("href", existingHref);
     }
   }
 
@@ -216,17 +235,23 @@ class CrawlChatEmbed {
   }
 
   showSidePanel() {
-    document.getElementById("__docusaurus")?.classList.add("crawlchat-sidepanel-open");
+    document
+      .getElementById("__docusaurus")
+      ?.classList.add("crawlchat-sidepanel-open");
     document.getElementById(this.sidepanelId)?.classList.remove("hidden");
   }
 
   hideSidePanel() {
-    document.getElementById("__docusaurus")?.classList.remove("crawlchat-sidepanel-open");
+    document
+      .getElementById("__docusaurus")
+      ?.classList.remove("crawlchat-sidepanel-open");
     document.getElementById(this.sidepanelId)?.classList.add("hidden");
   }
 
   mountSidePanel() {
-    document.getElementById("__docusaurus")?.classList.add("crawlchat-with-sidepanel");
+    document
+      .getElementById("__docusaurus")
+      ?.classList.add("crawlchat-with-sidepanel");
     const sidepanel = document.createElement("div");
     sidepanel.id = this.sidepanelId;
     sidepanel.classList.add("hidden");
@@ -236,6 +261,7 @@ class CrawlChatEmbed {
     iframe.allowTransparency = "true";
     iframe.allow = "clipboard-write";
     iframe.className = "crawlchat-embed";
+    iframe.id = this.iframeId;
 
     sidepanel.appendChild(iframe);
 
