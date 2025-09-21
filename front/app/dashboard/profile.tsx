@@ -80,6 +80,10 @@ export async function action({ request }: Route.ActionArgs) {
     update.settings!.ticketEmailUpdates =
       formData.get("ticketUpdates") === "on";
   }
+  if (formData.has("from-data-gap-updates")) {
+    update.settings!.dataGapEmailUpdates =
+      formData.get("dataGapUpdates") === "on";
+  }
   if (formData.has("name")) {
     update.name = formData.get("name") as string;
   }
@@ -95,6 +99,7 @@ export async function action({ request }: Route.ActionArgs) {
 export default function SettingsPage({ loaderData }: Route.ComponentProps) {
   const weeklyUpdatesFetcher = useFetcher();
   const ticketUpdatesFetcher = useFetcher();
+  const dataGapUpdatesFetcher = useFetcher();
   const nameFetcher = useFetcher();
 
   const credits = loaderData.user.plan!.credits!;
@@ -157,6 +162,26 @@ export default function SettingsPage({ loaderData }: Route.ComponentProps) {
                   }
                 />
                 Receive ticket updates
+              </label>
+            </SettingsSection>
+
+            <SettingsSection
+              id="data-gap-updates"
+              fetcher={dataGapUpdatesFetcher}
+              title="Data Gap Alerts"
+              description="Enable data gap alerts to be sent to your email."
+            >
+              <input type="hidden" name="from-data-gap-updates" value="true" />
+              <label className="label">
+                <input
+                  type="checkbox"
+                  className="toggle"
+                  name="dataGapUpdates"
+                  defaultChecked={
+                    loaderData.user.settings?.dataGapEmailUpdates ?? true
+                  }
+                />
+                Receive data gap alerts
               </label>
             </SettingsSection>
 

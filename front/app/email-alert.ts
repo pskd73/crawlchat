@@ -2,7 +2,7 @@ import { prisma } from "libs/prisma";
 import type { Route } from "./+types/email-alert";
 import { getJwtAuthUser } from "./jwt";
 import { authoriseScrapeUser } from "./scrapes/util";
-import { sendLowCreditsEmail } from "./email";
+import { sendDataGapAlertEmail, sendLowCreditsEmail } from "./email";
 
 export async function action({ request }: Route.LoaderArgs) {
   const user = await getJwtAuthUser(request);
@@ -53,6 +53,39 @@ export async function action({ request }: Route.LoaderArgs) {
       where: { id: scrape.id },
       data: { lowCreditsMailSentAt: new Date() },
     });
+  }
+
+  if (intent === "data-gap-alert") {
+    const message = await prisma.message.findFirstOrThrow({
+      where: { id: body.messageId },
+      include: {
+        scrape: {
+          include: {
+            scrapeUsers: {
+              include: {
+                user: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    for (const scrapeUser of message.scrape.scrapeUsers) {
+      if (
+        scrapeUser.user &&
+        (scrapeUser.user.settings?.dataGapEmailUpdates ?? true) &&
+        message.analysis?.dataGapTitle &&
+        message.analysis?.dataGapDescription
+      ) {
+        await sendDataGapAlertEmail(
+          scrapeUser.user.email!,
+          message.scrape.title ?? "",
+          message.analysis.dataGapTitle,
+          message.analysis.dataGapDescription
+        );
+      }
+    }
   }
 
   return Response.json({ success: true });

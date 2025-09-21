@@ -4,6 +4,7 @@ import InvitationEmail from "emails/invitation";
 import TeamJoinEmail from "emails/team-join";
 import LowCreditsEmail from "emails/low-credits";
 import LoginEmail from "emails/login";
+import DataGapAlertEmail from "emails/data-gap-alert";
 
 export const sendEmail = async (to: string, subject: string, text: string) => {
   try {
@@ -83,6 +84,23 @@ export const sendLowCreditsEmail = async (
       creditType={creditType}
       credits={credits}
       scrapeTitle={scrapeTitle}
+    />
+  );
+};
+
+export const sendDataGapAlertEmail = async (
+  to: string,
+  scrapeTitle: string,
+  title: string,
+  description: string
+) => {
+  await sendReactEmail(
+    to,
+    `Data Gap Found in ${scrapeTitle}`,
+    <DataGapAlertEmail
+      scrapeTitle={scrapeTitle}
+      title={title}
+      description={description}
     />
   );
 };

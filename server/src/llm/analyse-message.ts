@@ -10,6 +10,7 @@ import { z } from "zod";
 import { Flow } from "./flow";
 import { makeIndexer } from "../indexer/factory";
 import { getConfig } from "./config";
+import { createToken } from "libs/jwt";
 
 const MAX_ANSWER_SCORE = 0.3;
 const MIN_QUESTION_SCORE = 0.6;
@@ -252,6 +253,19 @@ export async function fillMessageAnalysis(
         analysis,
       },
     });
+
+    if (analysis.dataGapTitle && analysis.dataGapDescription) {
+      await fetch(`${process.env.FRONT_URL}/email-alert`, {
+        method: "POST",
+        body: JSON.stringify({
+          intent: "data-gap-alert",
+          messageId: messageId,
+        }),
+        headers: {
+          Authorization: `Bearer ${createToken(message.scrape.userId)}`,
+        },
+      });
+    }
   } catch (e) {
     console.error("Failed to analyse message", e);
   }

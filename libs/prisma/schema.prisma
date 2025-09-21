@@ -11,6 +11,7 @@ type UserSettings {
   openaiApiKey String?
   weeklyUpdates Boolean?
   ticketEmailUpdates Boolean?
+  dataGapEmailUpdates Boolean?
 }
 
 model User {
