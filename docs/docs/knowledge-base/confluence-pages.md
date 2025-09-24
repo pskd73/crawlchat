@@ -23,7 +23,7 @@ You need to create an API Key from the **Confluence** dashboard to make it work.
 
 ## Create group
 
-Go to [New Group](/knowledge/group) page to create import your **Confluence** pages to CrawlChat knowledge base. Select Confluence type and fill the form, you will have to provide your **email**, **host** copied above, and the **API Token** generated in above steps.
+Go to [New Group](https://crawlchat.app/knowledge/group) page to create import your **Confluence** pages to CrawlChat knowledge base. Select Confluence type and fill the form, you will have to provide your **email**, **host** copied above, and the **API Token** generated in above steps.
 
 Once you create the group, you can also select the pages to skip if you want. Additionally, you can turn on the **auto update** feature for the group by selected the update frequency.
 
