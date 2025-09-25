@@ -2,12 +2,15 @@ import type { Route } from "./+types/page";
 import type { PropsWithChildren, ReactNode } from "react";
 import { useState } from "react";
 import {
+  TbArrowDown,
   TbArrowRight,
   TbArrowsShuffle,
   TbBook,
   TbBook2,
   TbBrandDiscord,
+  TbBrandGithub,
   TbBrandLinkedin,
+  TbBrandNotion,
   TbBrandSlack,
   TbBrandX,
   TbChartBar,
@@ -35,6 +38,7 @@ import {
   TbShare,
   TbSpider,
   TbThumbUp,
+  TbUpload,
   TbUserHeart,
   TbVideo,
   TbWorld,
@@ -52,6 +56,8 @@ import { useLoaderData } from "react-router";
 import { cache as changelogCache } from "~/changelog/fetch";
 import { makeMeta } from "~/meta";
 import cn from "@meltdownjs/cn";
+import { SiDocusaurus } from "react-icons/si";
+import { FaConfluence } from "react-icons/fa";
 
 export function meta() {
   return makeMeta({
@@ -914,7 +920,7 @@ export function PricingBoxes({
   freePlan?: Plan;
   starterPlan: Plan;
   proPlan: Plan;
-  hobbyPlan?: Plan;
+  hobbyPlan: Plan;
   onClick?: (planId: string) => void;
 }) {
   return (
@@ -940,7 +946,7 @@ export function PricingBoxes({
           href="/login"
         />
       )}
-      {/* <PricingBox
+      <PricingBox
         title="Hobby"
         description="Explore the platform"
         price={`$${hobbyPlan.price}`}
@@ -959,9 +965,9 @@ export function PricingBoxes({
         href={
           "https://checkout.dodopayments.com/buy/pdt_IcrpqSx48qoCenz4lnLi1?quantity=1&redirect_url=https://crawlchat.app%2Fprofile%23billing"
         }
-        payLabel="Start 7 days trial"
+        payLabel="Purchase"
         onClick={onClick ? () => onClick?.(hobbyPlan.id) : undefined}
-      /> */}
+      />
       <PricingBox
         title="Starter"
         description="Start your journey with CrawlChat"
@@ -1021,7 +1027,7 @@ export function Pricing() {
 
       <div className="flex flex-col md:flex-row md:gap-6 gap-10 mt-20">
         <PricingBoxes
-          freePlan={freePlan}
+          // freePlan={freePlan}
           starterPlan={starterPlan}
           proPlan={proPlan}
           hobbyPlan={hobbyPlan}
@@ -1637,8 +1643,8 @@ function FAQ() {
       question: "Can I try it out first?",
       answer: (
         <p>
-          You can start your 7 days trial and explore the platform. You can
-          check the{" "}
+          You can signup and try out the platform with free credits you get on
+          signup. You can check the{" "}
           <a href="/#pricing" className="text-primary">
             pricing
           </a>{" "}
@@ -1942,6 +1948,188 @@ function Gallery() {
   );
 }
 
+function SourcesChannels() {
+  const sources = [
+    {
+      icon: <TbWorld />,
+      title: "Websites",
+      tooltip: "Scrape your documentation website",
+    },
+    {
+      icon: <SiDocusaurus />,
+      title: "Docusaurus",
+      tooltip: "Add your Docusaurus website instantly",
+    },
+    {
+      icon: <TbUpload />,
+      title: "Files",
+      tooltip: "Upload your documentation files",
+    },
+    {
+      icon: <TbBrandGithub />,
+      title: "Github issues",
+      tooltip: "Fetch your GitHub issues instantly",
+    },
+    {
+      icon: <TbBrandNotion />,
+      title: "Notion",
+      tooltip: "Import your Notion pages securely",
+    },
+    {
+      icon: <FaConfluence />,
+      title: "Confluence",
+      tooltip: "Import your Confluence pages securely",
+    },
+  ];
+
+  const channels = [
+    {
+      icon: <TbWorld />,
+      title: "Embed",
+      tooltip: "Embed the chatbot on your website",
+    },
+    {
+      icon: <TbBrandSlack />,
+      title: "Slack",
+      tooltip: "Add the Slack bot and ask questions by tagging @crawlchat",
+    },
+    {
+      icon: <TbBrandDiscord />,
+      title: "Discord",
+      tooltip: "Add the Discord bot and ask questions by tagging @crawlchat",
+    },
+    {
+      icon: (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          width="1em"
+          height="1em"
+          fill="currentColor"
+          fillRule="evenodd"
+          style={{ flex: "none", lineHeight: 1 }}
+          aria-label="ModelContextProtocol"
+        >
+          <path d="M15.688 2.343a2.588 2.588 0 00-3.61 0l-9.626 9.44a.863.863 0 01-1.203 0 .823.823 0 010-1.18l9.626-9.44a4.313 4.313 0 016.016 0 4.116 4.116 0 011.204 3.54 4.3 4.3 0 013.609 1.18l.05.05a4.115 4.115 0 010 5.9l-8.706 8.537a.274.274 0 000 .393l1.788 1.754a.823.823 0 010 1.18.863.863 0 01-1.203 0l-1.788-1.753a1.92 1.92 0 010-2.754l8.706-8.538a2.47 2.47 0 000-3.54l-.05-.049a2.588 2.588 0 00-3.607-.003l-7.172 7.034-.002.002-.098.097a.863.863 0 01-1.204 0 .823.823 0 010-1.18l7.273-7.133a2.47 2.47 0 00-.003-3.537z" />
+          <path d="M14.485 4.703a.823.823 0 000-1.18.863.863 0 00-1.204 0l-7.119 6.982a4.115 4.115 0 000 5.9 4.314 4.314 0 006.016 0l7.12-6.982a.823.823 0 000-1.18.863.863 0 00-1.204 0l-7.119 6.982a2.588 2.588 0 01-3.61 0 2.47 2.47 0 010-3.54l7.12-6.982z" />
+        </svg>
+      ),
+      title: "MCP",
+      tooltip: "Distribute your docs as an MCP server",
+    },
+  ];
+
+  const tools = [
+    {
+      icon: <TbChartLine />,
+      title: "Analytics",
+      tooltip: "View messages, scores, efficiency and more",
+    },
+    {
+      icon: <TbChartBarOff />,
+      title: "Data Gaps",
+      tooltip: "View data gaps and fix them",
+    },
+  ];
+
+  return (
+    <div className="mt-32 flex flex-col gap-4">
+      <Heading>
+        All useful <HeadingHighlight>sources</HeadingHighlight> and{" "}
+        <HeadingHighlight>channels</HeadingHighlight>
+      </Heading>
+
+      <HeadingDescription>
+        CrawlChat supports a wide range of sources for tech documentations and
+        useful channels where you can integrate your chatbot.
+      </HeadingDescription>
+
+      <div className="flex flex-col items-center gap-2">
+        <p className="text-base-content/20">Sources</p>
+        <div className="flex gap-4 justify-center flex-wrap">
+          {sources.map((source, index) => (
+            <div
+              key={index}
+              className="tooltip tooltip-bottom"
+              data-tip={source.tooltip}
+            >
+              <div
+                className={cn(
+                  "flex flex-col items-center gap-2 bg-primary/5 p-4 rounded-box w-fit",
+                  "border border-primary/20 w-36"
+                )}
+              >
+                <div className="text-4xl text-primary">{source.icon}</div>
+                <div className="font-radio-grotesk text-lg text-primary/80 text-center">
+                  {source.title}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="flex justify-center text-2xl opacity-10">
+        <TbArrowDown />
+      </div>
+
+      <div className="flex flex-col items-center gap-2">
+        <p className="text-base-content/20">CrawlChat</p>
+        <div
+          className={cn("bg-primary rounded-box text-primary-content", "flex")}
+        >
+          {tools.map((tool) => (
+            <div
+              key={tool.title}
+              className="tooltip tooltip-bottom"
+              data-tip={tool.tooltip}
+            >
+              <div
+                className={cn("flex flex-col items-center gap-2", "p-4 w-36")}
+              >
+                <div className="text-4xl">{tool.icon}</div>
+                <div className="font-radio-grotesk text-lg text-center">
+                  {tool.title}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="flex justify-center text-2xl opacity-10">
+        <TbArrowDown />
+      </div>
+
+      <div className="flex flex-col items-center gap-2">
+        <div className="flex gap-4 justify-center flex-wrap">
+          {channels.map((channel) => (
+            <div
+              key={channel.title}
+              className="tooltip"
+              data-tip={channel.tooltip}
+            >
+              <div
+                className={cn(
+                  "flex flex-col items-center gap-2 bg-secondary/5 p-4 rounded-box w-fit",
+                  "border border-secondary/20 w-36"
+                )}
+              >
+                <div className="text-4xl text-secondary">{channel.icon}</div>
+                <div className="font-radio-grotesk text-lg text-secondary/80 text-center">
+                  {channel.title}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <p className="text-base-content/20">Channels</p>
+      </div>
+    </div>
+  );
+}
+
 export default function Landing({ loaderData }: Route.ComponentProps) {
   return (
     <>
@@ -1955,6 +2143,10 @@ export default function Landing({ loaderData }: Route.ComponentProps) {
 
       <Container>
         <UsedBy />
+      </Container>
+
+      <Container>
+        <SourcesChannels />
       </Container>
 
       <Container>
