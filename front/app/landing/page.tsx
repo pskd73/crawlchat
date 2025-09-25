@@ -58,6 +58,7 @@ import { makeMeta } from "~/meta";
 import cn from "@meltdownjs/cn";
 import { SiDocusaurus } from "react-icons/si";
 import { FaConfluence } from "react-icons/fa";
+import { Logo } from "~/dashboard/logo";
 
 export function meta() {
   return makeMeta({
@@ -131,19 +132,8 @@ export async function loader() {
 export function Container({ children }: PropsWithChildren) {
   return (
     <div className="flex justify-center">
-      <div className="max-w-[1200px] w-full p-4">{children}</div>
+      <div className="max-w-[1200px] w-full p-4 px-8 md:px-4">{children}</div>
     </div>
-  );
-}
-
-export function Logo() {
-  return (
-    <a className="flex items-center gap-2" href="/">
-      <img src="/logo.png" alt="CrawlChat" width={38} height={38} />
-      <span className="text-2xl font-radio-grotesk text-primary">
-        CrawlChat
-      </span>
-    </a>
   );
 }
 
@@ -1328,11 +1318,11 @@ function Hero() {
 
 export function LandingPage({ children }: PropsWithChildren) {
   return (
-    <div className="bg-base-200 font-aeonik">
+    <div data-theme="brand" className="bg-base-200 font-aeonik">
       <div
         className={cn(
           "hidden md:block aspect-[1440/960] w-full bg-[url('https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/clouds.png')]",
-          "dark:bg-[url('https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/clouds-dark.png')]",
+          // "dark:bg-[url('https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/clouds-dark.png')]",
           "bg-contain bg-no-repeat absolute top-0 left-0"
         )}
       >
@@ -2050,7 +2040,7 @@ function SourcesChannels() {
           {sources.map((source, index) => (
             <div
               key={index}
-              className="tooltip tooltip-bottom"
+              className="tooltip tooltip-bottom before:max-w-36 md:before:max-w-64"
               data-tip={source.tooltip}
             >
               <div
@@ -2081,7 +2071,7 @@ function SourcesChannels() {
           {tools.map((tool) => (
             <div
               key={tool.title}
-              className="tooltip tooltip-bottom"
+              className="tooltip tooltip-bottom before:max-w-36 md:before:max-w-64"
               data-tip={tool.tooltip}
             >
               <div
@@ -2106,7 +2096,7 @@ function SourcesChannels() {
           {channels.map((channel) => (
             <div
               key={channel.title}
-              className="tooltip"
+              className="tooltip before:max-w-36 md:before:max-w-64"
               data-tip={channel.tooltip}
             >
               <div
@@ -2146,28 +2136,28 @@ export default function Landing({ loaderData }: Route.ComponentProps) {
       </Container>
 
       <Container>
-        <SourcesChannels />
-      </Container>
-
-      <Container>
         <CustomTestimonials />
       </Container>
 
-      <Container>
+      {/* <Container>
         <Stats
           messagesThisWeek={loaderData.messagesThisWeek}
           messagesDay={loaderData.messagesDay}
           messagesMonth={loaderData.messagesMonth}
         />
-      </Container>
+      </Container> */}
 
       <Container>
         <Works />
       </Container>
 
       <Container>
-        <Flow />
+        <SourcesChannels />
       </Container>
+
+      {/* <Container>
+        <Flow />
+      </Container> */}
 
       <Container>
         <ChannelWidget />
@@ -2181,9 +2171,9 @@ export default function Landing({ loaderData }: Route.ComponentProps) {
         <ChannelMCP />
       </Container>
 
-      <Container>
+      {/* <Container>
         <Tools />
-      </Container>
+      </Container> */}
 
       <Container>
         <Pricing />

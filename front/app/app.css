@@ -37,24 +37,6 @@
   --noise: 1;
 }
 
-@plugin "daisyui/theme" {
-  name: "light";
-  default: false;
-  --color-primary: oklch(55% 0.288 302.321);
-  --color-primary-content: oklch(97% 0.014 308.299);
-  --color-secondary: oklch(64% 0.222 41.116);
-  --color-secondary-content: oklch(98% 0.016 73.684);
-}
-
-@plugin "daisyui/theme" {
-  name: "dark";
-  default: false;
-  --color-primary: oklch(55% 0.288 302.321);
-  --color-primary-content: oklch(97% 0.014 308.299);
-  --color-secondary: oklch(64% 0.222 41.116);
-  --color-secondary-content: oklch(98% 0.016 73.684);
-}
-
 .gradient-text {
   background-clip: text;
   -webkit-background-clip: text !important;
