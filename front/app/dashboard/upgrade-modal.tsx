@@ -37,7 +37,7 @@ export function UpgradeModal({
 
   return (
     <dialog id="upgrade-modal" className="modal z-90">
-      <div className="modal-box w-11/12 max-w-4xl">
+      <div className="modal-box w-11/12 max-w-5xl">
         <h3 className="font-bold text-xl mb-4 flex items-center gap-2">
           <TbCrown />
           Upgrade
