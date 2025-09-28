@@ -11,4 +11,4 @@ If the **support tickets** module is enabled, it also shows **I want to create a
 
 This feature is available only for paid customers currently.
 
-![Follow up questions](./changelog-images/follow-up-questions.png)
+![Follow up questions](/changelog-images/follow-up-questions.png)
