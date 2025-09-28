@@ -194,6 +194,17 @@ export function meta() {
   });
 }
 
+function parseCookies(cookieHeader: string) {
+  var cookies: Record<string, string> = {};
+  cookieHeader
+      .split(";")
+      .map(str => str.replace("=", "\u0000")
+      .split("\u0000"))
+      .forEach(x => cookies[x[0].trim()] = x[1]); 
+
+  return cookies;
+}
+
 export async function action({ request }: Route.ActionArgs) {
   const user = await getAuthUser(request, { redirectTo: "/login" });
 
@@ -263,12 +274,18 @@ export async function action({ request }: Route.ActionArgs) {
     const referralId = formData.get("referralId") as string;
     const planId = formData.get("planId") as string;
 
+    const cookies = parseCookies(request.headers.get("cookie") ?? "");
+    const datafastVisitorId = cookies["datafast_visitor_id"];
+
     const gateway = dodoGateway;
 
     return await gateway.getPaymentLink(planId, {
       referralId,
       email: user!.email,
       name: user!.name,
+      meta: {
+        datafastVisitorId,
+      },
     });
   }
 }

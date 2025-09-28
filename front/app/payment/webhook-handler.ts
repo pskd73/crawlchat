@@ -17,7 +17,36 @@ export async function handleWebhook(request: Request, gateway: PaymentGateway) {
       return Response.json({ message: "User not found" }, { status: 400 });
     }
 
-    if (webhook.type === "created") {
+    if (
+      webhook.paymentId &&
+      webhook.metadata?.datafastVisitorId &&
+      webhook.paymentAmount &&
+      webhook.paymentCurrency
+    ) {
+      const res = await fetch("https://datafa.st/api/v1/payments", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${process.env.DATAFAST_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          amount: webhook.paymentAmount / 100,
+          currency: webhook.paymentCurrency,
+          transaction_id: webhook.paymentId,
+          datafast_visitor_id: webhook.metadata.datafast_visitor_id,
+        }),
+      });
+
+      if (!res.ok) {
+        console.error(
+          "Error sending payment to Datafast",
+          res.statusText,
+          await res.text()
+        );
+      }
+    }
+
+    if (webhook.type === "created" && webhook.plan) {
       await activatePlan(user.id, webhook.plan, {
         provider: gateway.provider,
         subscriptionId: webhook.subscriptionId,
@@ -27,8 +56,8 @@ export async function handleWebhook(request: Request, gateway: PaymentGateway) {
     }
 
     if (
-      webhook.type === "cancelled" ||
-      webhook.type === "expired"
+      webhook.plan &&
+      (webhook.type === "cancelled" || webhook.type === "expired")
     ) {
       await prisma.user.update({
         where: { id: user.id },
@@ -56,11 +85,13 @@ export async function handleWebhook(request: Request, gateway: PaymentGateway) {
       return Response.json({ message: "Updated plan to expired" });
     }
 
-    if (webhook.type === "renewed") {
+    if (webhook.plan && webhook.type === "renewed") {
       await resetCredits(user.id, webhook.plan.id);
 
       return Response.json({ message: "Updated plan to active" });
     }
+
+    return Response.json({ message: "Default response" });
   } catch (error: any) {
     let errorJson: any = error.message;
     try {

@@ -43,6 +43,7 @@ const typeMap: Record<string, PaymentGatewayWebhookType> = {
   "subscription.cancelled": "cancelled",
   "subscription.expired": "expired",
   "subscription.renewed": "renewed",
+  "payment.succeeded": "payment_success",
 };
 
 const client = new DodoPayments({
@@ -76,12 +77,22 @@ export const dodoGateway: PaymentGateway = {
     const productId = payload.data.product_id;
     const plan = productIdPlanMap[productId];
     const subscriptionId = payload.data.subscription_id;
+    const metadata = payload.data.metadata;
+    const paymentId = payload.data.payment_id;
+    const paymentAmount = payload.data.total_amount;
+    const paymentCurrency = payload.data.currency;
 
-    if (!plan) {
-      throw new Error(JSON.stringify({ error: "Plan not found", status: 401 }));
-    }
-
-    return { email, type: eventName, productId, plan, subscriptionId };
+    return {
+      email,
+      type: eventName,
+      productId,
+      plan,
+      subscriptionId,
+      metadata,
+      paymentId,
+      paymentAmount,
+      paymentCurrency,
+    };
   },
 
   getSubscription: async (subscriptionId) => {
@@ -106,6 +117,12 @@ export const dodoGateway: PaymentGateway = {
     if (options?.referralId) {
       body.metadata = {
         affonso_referral: options.referralId,
+      };
+    }
+    if (options?.meta) {
+      body.metadata = {
+        ...body.metadata,
+        ...options.meta,
       };
     }
     if (options?.email) {

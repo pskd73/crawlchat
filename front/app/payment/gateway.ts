@@ -11,15 +11,20 @@ export type PaymentGatewayWebhookType =
   | "created"
   | "cancelled"
   | "expired"
-  | "renewed";
+  | "renewed"
+  | "payment_success";
 
 export type PaymentGatewayWebhook = {
   email: string;
   type: PaymentGatewayWebhookType;
   subscriptionStatus?: PaymentGatewaySubscriptionStatus;
-  productId: string;
-  plan: Plan;
+  productId?: string;
+  plan?: Plan;
   subscriptionId: string;
+  metadata?: Record<string, string> | null;
+  paymentId?: string | null;
+  paymentAmount?: number | null;
+  paymentCurrency?: string | null;
 };
 
 export type PaymentGatewaySubscription = {
@@ -42,6 +47,7 @@ export interface PaymentGateway {
       name?: string | null;
       email?: string | null;
       referralId?: string | null;
+      meta?: Record<string, string> | null;
     }
   ) => Promise<{ url: string }>;
 }
