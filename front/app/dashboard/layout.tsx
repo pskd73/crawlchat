@@ -125,10 +125,7 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
     <AppContext.Provider value={app}>
       <div
         data-theme="brand"
-        className={cn(
-          "min-h-screen drawer bg-base-100",
-          !loaderData.isWelcome && "md:drawer-open"
-        )}
+        className={cn("min-h-screen drawer md:drawer-open bg-base-100")}
       >
         <input
           type="checkbox"
@@ -141,32 +138,34 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
           </div>
         </div>
 
-        <div className="drawer-side z-20">
-          <label
-            htmlFor="side-menu-drawer"
-            aria-label="close sidebar"
-            className="drawer-overlay"
-          />
-          <div
-            className={cn(
-              "h-full w-68 bg-base-100 overflow-auto",
-              "md:border-r md:border-base-300"
-            )}
-          >
-            <SideMenu
-              loggedInUser={user}
-              scrapeOwner={loaderData.scrape?.user!}
-              plan={loaderData.plan}
-              scrapes={loaderData.scrapes}
-              scrapeId={loaderData.scrapeId}
-              scrapeIdFetcher={scrapeIdFetcher}
-              toBeFixedMessages={loaderData.toBeFixedMessages}
-              openTickets={loaderData.openTickets}
-              dataGapMessages={loaderData.dataGapMessages.length}
-              scrape={loaderData.scrape}
+        {!loaderData.isWelcome && (
+          <div className="drawer-side z-20">
+            <label
+              htmlFor="side-menu-drawer"
+              aria-label="close sidebar"
+              className="drawer-overlay"
             />
+            <div
+              className={cn(
+                "h-full w-68 bg-base-100 overflow-auto",
+                "md:border-r md:border-base-300"
+              )}
+            >
+              <SideMenu
+                loggedInUser={user}
+                scrapeOwner={loaderData.scrape?.user!}
+                plan={loaderData.plan}
+                scrapes={loaderData.scrapes}
+                scrapeId={loaderData.scrapeId}
+                scrapeIdFetcher={scrapeIdFetcher}
+                toBeFixedMessages={loaderData.toBeFixedMessages}
+                openTickets={loaderData.openTickets}
+                dataGapMessages={loaderData.dataGapMessages.length}
+                scrape={loaderData.scrape}
+              />
+            </div>
           </div>
-        </div>
+        )}
       </div>
       <Toaster position="bottom-right" />
       <UpgradeModal
