@@ -41,10 +41,9 @@ export class LinearKbProcesser extends BaseKbProcesser {
       const issue = issues[i];
       const parts: string[] = [];
 
-      const linearPage = await this.client.issue(issue.id);
-      parts.push(`# ${linearPage.title}\n\n${linearPage.description}`);
+      parts.push(`# ${issue.title}\n\n${issue.description}`);
 
-      const comments = await linearPage.comments();
+      const comments = await issue.comments();
       do {
         await comments.fetchNext();
       } while (comments.pageInfo.hasNextPage);

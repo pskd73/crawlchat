@@ -15,12 +15,8 @@ export async function getLinearIssues(
       },
     },
     orderBy: PaginationOrderBy.UpdatedAt,
-    first: 500,
+    first: 250,
   });
-
-  do {
-    await issues.fetchNext();
-  } while (issues.pageInfo.hasNextPage);
 
   return issues.nodes;
 }
@@ -38,7 +34,7 @@ export async function getLinearProjects(
       },
     },
     orderBy: PaginationOrderBy.UpdatedAt,
-    first: 500,
+    first: 250,
   });
   return projects.nodes;
 }
