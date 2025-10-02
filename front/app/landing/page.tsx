@@ -1186,6 +1186,9 @@ export function Footer() {
               <li>
                 <FooterLink href="/policy">Privacy policy</FooterLink>
               </li>
+              <li>
+                <FooterLink href="/data-privacy">Data privacy</FooterLink>
+              </li>
             </ul>
 
             <ul className="flex gap-6 mt-4">

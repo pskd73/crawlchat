@@ -17,6 +17,7 @@ export default [
 
   route("terms", "landing/terms.tsx"),
   route("policy", "landing/policy.tsx"),
+  route("data-privacy", "landing/data-privacy.tsx"),
   route("embed-demo", "landing/embed-demo.tsx"),
 
   route("shopify-app-bot", "landing/shopify-app-bot.tsx"),
