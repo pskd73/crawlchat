@@ -5,8 +5,6 @@ description: CrawlChat powers a GTM internal assistant that unifies docs, ensure
 image: /blog-images/post/internal-assistant-for-gtm-teams.png
 ---
 
-# GTM Internal Assistant
-
 An **internal assistant** trained on your company’s docs can transform how Go-To-Market (**GTM**) teams work. With **CrawlChat**, that knowledge becomes fast, accurate, and permission-aware—right where teams operate. As a polished **gtm internal assistant**, it meets reps in their daily workflows.
 
 > The right answer, in the right place, at the right time.
