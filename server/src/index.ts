@@ -37,6 +37,7 @@ import {
   wsRateLimiter,
 } from "./rate-limiter";
 import { scrape } from "./scrape/crawl";
+import { getConfig } from "./llm/config";
 
 const app: Express = express();
 const expressWs = ws(app);
@@ -746,6 +747,8 @@ app.post("/compose/:scrapeId", authenticate, async (req, res) => {
 
   draftRateLimiter.check();
 
+  const llmConfig = getConfig("gpt_5");
+
   const scrape = await prisma.scrape.findFirstOrThrow({
     where: { id: req.params.scrapeId },
   });
@@ -791,6 +794,7 @@ app.post("/compose/:scrapeId", authenticate, async (req, res) => {
       answer: z.string(),
     }),
     tools: [makeRagTool(scrape.id, scrape.indexer).make()],
+    ...llmConfig,
   });
 
   const flow = new Flow([agent], {
