@@ -22,6 +22,13 @@ import { RadioCard } from "./components/radio-card";
 import cn from "@meltdownjs/cn";
 import toast from "react-hot-toast";
 
+export async function loader({ request }: Route.LoaderArgs) {
+  const scrapeId = await getSessionScrapeId(request);
+  return {
+    scrapeId,
+  };
+}
+
 export async function action({ request }: Route.ActionArgs) {
   const user = await getAuthUser(request);
   const scrapeId = await getSessionScrapeId(request);
@@ -65,8 +72,9 @@ export async function action({ request }: Route.ActionArgs) {
 
 type ComposeFormat = "markdown" | "email" | "tweet" | "linkedin-post";
 
-export default function Compose() {
+export default function Compose({ loaderData }: Route.ComponentProps) {
   const fetcher = useFetcher();
+  const [state, setState] = useState<{ answer: string; messages: any[] }>();
   const [format, setFormat] = useState<ComposeFormat>("markdown");
   const [formatText, setFormatText] = useState<string>("");
   const [formatTextActive, setFormatTextActive] = useState<boolean>(false);
@@ -75,8 +83,30 @@ export default function Compose() {
   useEffect(() => {
     if (fetcher.data && inputRef.current) {
       inputRef.current.value = "";
+
+      setState({
+        answer: fetcher.data.answer,
+        messages: fetcher.data.messages,
+      });
+      localStorage.setItem(
+        `compose-state-${loaderData.scrapeId}`,
+        JSON.stringify(fetcher.data)
+      );
     }
-  }, [fetcher.data]);
+  }, [fetcher.data, loaderData.scrapeId]);
+
+  useEffect(() => {
+    if (
+      loaderData.scrapeId &&
+      localStorage.getItem(`compose-state-${loaderData.scrapeId}`)
+    ) {
+      setState(
+        JSON.parse(
+          localStorage.getItem(`compose-state-${loaderData.scrapeId}`)!
+        )
+      );
+    }
+  }, [loaderData.scrapeId]);
 
   useEffect(() => {
     setFormatText(localStorage.getItem(`compose-format-${format}`) ?? "");
@@ -87,8 +117,13 @@ export default function Compose() {
   }, [formatText]);
 
   function handleCopy() {
-    navigator.clipboard.writeText(fetcher.data?.answer ?? "");
+    navigator.clipboard.writeText(state?.answer ?? "");
     toast.success("Copied to clipboard");
+  }
+
+  function handleClear() {
+    localStorage.removeItem(`compose-state-${loaderData.scrapeId}`);
+    setState(undefined);
   }
 
   return (
@@ -96,9 +131,14 @@ export default function Compose() {
       title="Compose"
       icon={<TbPencil />}
       right={
-        <button className="btn btn-soft btn-primary" onClick={handleCopy}>
-          Copy <TbCopy />
-        </button>
+        <>
+          <button className="btn btn-soft btn-error" onClick={handleClear}>
+            Clear
+          </button>
+          <button className="btn btn-soft btn-primary" onClick={handleCopy}>
+            Copy <TbCopy />
+          </button>
+        </>
       }
     >
       <fetcher.Form method="post" className="flex flex-col gap-4 max-w-prose">
@@ -112,7 +152,7 @@ export default function Compose() {
         <input
           type="hidden"
           name="messages"
-          value={JSON.stringify(fetcher.data?.messages)}
+          value={JSON.stringify(state?.messages)}
         />
         <input type="hidden" name="format" value={format} />
 
@@ -176,7 +216,7 @@ export default function Compose() {
 
         <div className="bg-base-200 p-6 rounded-box border border-base-300 shadow">
           <MarkdownProse sources={[]}>
-            {fetcher.data?.answer || "Start by asking a question below"}
+            {state?.answer || "Start by asking a question below"}
           </MarkdownProse>
         </div>
 
@@ -197,7 +237,7 @@ export default function Compose() {
             {fetcher.state !== "idle" && (
               <span className="loading loading-spinner loading-xs" />
             )}
-            {fetcher.data?.answer ? "Update" : "Compose"}
+            {state?.answer ? "Update" : "Compose"}
             <TbCheck />
           </button>
         </div>

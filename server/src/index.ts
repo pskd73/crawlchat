@@ -787,6 +787,20 @@ app.post("/compose/:scrapeId", authenticate, async (req, res) => {
     Only update the asked items from <answer>.
     Use the search_data tool only if new information is required.
 
+    The query should be very short and should not be complex.
+    Break the complex queries into smaller queries.
+    Example: If the query is 'How to build a site and deploy it on Vercel?', break it into 'How to build a site' and 'Deploy it on Vercel'.
+    Example: If the topic is about a tool called 'Remotion', turn the query 'What is it?' into 'What is Remotion?'
+    These queries are for a vector database. Don't use extra words that do not add any value in vectorisation.
+    Example: If the query is 'How to make a composition?', better you use 'make a composition'
+    The query should not be more than 5 words. Keep only the most important words.
+    Don't repeat the same or similar queries.
+    Break multi level queries as well. For example: 'What is the average score?' should be split into 'score list' and then calculate the average.
+    You need to find indirect questions. For example: 'What is the cheapest pricing plan?' should be converted into 'pricing plans' and then find cheapest
+    Don't use the search_data tool if the latest message is answer for a follow up question. Ex: yes, no.,
+
+    Don't overwrite the answer with delta. Always apply the delta.
+
     <format-type>${format}</format-type>
     <format-text>${formatText}</format-text>
     `,

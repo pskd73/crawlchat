@@ -1093,7 +1093,12 @@ export function Footer() {
           </div>
           <div className="flex-[2]">
             <ul className="flex flex-col gap-4">
-            <li>
+              <li>
+                <FooterLink href="/blog/internal-assistant-for-gtm-teams">
+                  Internal assistant for GTM teams
+                </FooterLink>
+              </li>
+              <li>
                 <FooterLink href="/blog/crawlchat-vs-kapa-ai">
                   CrawlChat vs Kapa.ai
                 </FooterLink>
@@ -1121,11 +1126,6 @@ export function Footer() {
               <li>
                 <FooterLink href="/blog/how-to-embed-ai-chatbot">
                   How to add AI Chatbot for your docs
-                </FooterLink>
-              </li>
-              <li>
-                <FooterLink href="/blog/how-to-setup-mcp-for-your-documentation">
-                  Setup MCP server
                 </FooterLink>
               </li>
               <li>
@@ -1221,9 +1221,7 @@ export function Nav() {
         <div className="items-center gap-8 hidden md:flex">
           <NavLink href="/#pricing">Pricing</NavLink>
           <NavLink href="https://docs.crawlchat.app">Docs</NavLink>
-          <NavLink href="/changelog">
-            Changelog
-          </NavLink>
+          <NavLink href="/changelog">Changelog</NavLink>
           <NavLink href="/blog">Blog</NavLink>
           <NavLink href="/public-bots">Public bots</NavLink>
         </div>
