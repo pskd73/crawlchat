@@ -86,6 +86,17 @@ const removeBotMentions = (content: string) => {
 const makeMessage = (message: DiscordMessage, scrape: Scrape) => {
   let content: any = cleanContent(removeBotMentions(message.content));
 
+  if (message.embeds.length > 0) {
+    for (const embed of message.embeds) {
+      if (embed.title) {
+        content += `\n\n${embed.title}`;
+      }
+      if (embed.description) {
+        content += `\n\n${embed.description}`;
+      }
+    }
+  }
+
   if (scrape.discordConfig?.sendImages && message.attachments.size > 0) {
     const imageUrls = [];
 
@@ -283,7 +294,8 @@ client.on(Events.MessageCreate, async (message) => {
     message.embeds.map((e) => [e.title, e.description])
   );
   if (
-    message.mentions.users.has(process.env.BOT_USER_ID!) &&
+    (message.mentions.users.has(process.env.BOT_USER_ID!) ||
+      message.content.includes("<@&1409463850805231740>")) && // for Postiz
     message.author.id !== process.env.BOT_USER_ID!
   ) {
     const { scrape } = await getDiscordDetails(message.guildId!);
