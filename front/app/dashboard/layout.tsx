@@ -114,7 +114,7 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
         displayName: user.name ?? "Unnamed",
       });
 
-      (window as any)?.datafast("identify", {
+      (window as any)?.datafast?.("identify", {
         user_id: user.id,
         name: user.name,
       });
