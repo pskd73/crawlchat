@@ -3,42 +3,17 @@ import Layout from "@theme-original/Layout";
 import type LayoutType from "@theme/Layout";
 import type { WrapperProps } from "@docusaurus/types";
 import { useHistory } from "@docusaurus/router";
+import { useCrawlChatSidePanel, CrawlChatScript } from "crawlchat-client";
 
 type Props = WrapperProps<typeof LayoutType>;
 
 export default function LayoutWrapper(props: Props): ReactNode {
-  const history = useHistory();
-
-  useEffect(() => {
-    function handleMessage(event: MessageEvent) {
-      try {
-        const data = JSON.parse(event.data);
-        if (data.type === "internal-link-click") {
-          const url = new URL(data.url);
-          history.push(url.pathname);
-        }
-        if (data.type === "embed-ready") {
-          const iframe = document.getElementById(
-            "crawlchat-iframe"
-          ) as HTMLIFrameElement;
-          iframe?.contentWindow.postMessage(
-            JSON.stringify({
-              type: "internal-link-host",
-              host: window.location.host,
-            }),
-            "*"
-          );
-        }
-      } catch {}
-    }
-
-    window.addEventListener("message", handleMessage);
-    return () => window.removeEventListener("message", handleMessage);
-  }, []);
+  useCrawlChatSidePanel({ history: useHistory() });
 
   return (
     <>
       <Layout {...props} />
+      <CrawlChatScript id="67dbfc7258ed87c571a04b83" sidePanel />
     </>
   );
 }

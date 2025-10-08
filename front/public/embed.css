@@ -78,8 +78,6 @@
   --crawlchat-navbar-height: 60px;
 }
 
-
-
 #crawlchat-sidepanel {
   position: fixed;
   top: 0;
@@ -100,6 +98,23 @@
   border: none;
   background: transparent;
   background-color: transparent;
+  opacity: 1;
+}
+
+.crawlchat-sidepanel-resize {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  opacity: 0;
+  cursor: col-resize;
+  z-index: 1000;
+  background-color: #e0e0e0;
+  transition: opacity 0.2s ease;
+}
+
+.crawlchat-sidepanel-resize:hover {
   opacity: 1;
 }
 

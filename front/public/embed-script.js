@@ -29,7 +29,7 @@ class CrawlChatEmbed {
     const style = document.createElement("link");
     style.rel = "stylesheet";
     style.href = `${this.host}/embed.css`;
-    
+
     await new Promise((resolve, reject) => {
       style.onload = resolve;
       style.onerror = reject;
@@ -146,7 +146,7 @@ class CrawlChatEmbed {
   async showAskAIButton() {
     const script = document.getElementById(this.scriptId);
 
-    if (!script || script?.getAttribute("data-hide-ask-ai")) return;
+    if (!script || script?.getAttribute("data-hide-ask-ai") === "true") return;
 
     const text =
       this.widgetConfig.buttonText ??
@@ -241,9 +241,12 @@ class CrawlChatEmbed {
     document
       .getElementById("__docusaurus")
       ?.classList.add("crawlchat-with-sidepanel");
+
     const sidepanel = document.createElement("div");
     sidepanel.id = this.sidepanelId;
     sidepanel.classList.add("hidden");
+
+    sidepanel.appendChild(this.makeResizeDiv());
 
     const iframe = document.createElement("iframe");
     iframe.src = `${this.host}/w/${this.scrapeId}?embed=true&fullscreen=true&sidepanel=true`;
@@ -271,6 +274,39 @@ class CrawlChatEmbed {
     } else {
       this.showSidePanel();
     }
+  }
+
+  makeResizeDiv() {
+    const resize = document.createElement("div");
+    resize.classList.add("crawlchat-sidepanel-resize");
+
+    const handleMouseMove = (e) => {
+      const width = Math.max(Math.min(window.innerWidth - e.clientX, 500), 400);
+      document.documentElement.style.setProperty(
+        "--crawlchat-sidepanel-width",
+        `${width}px`
+      );
+      e.preventDefault();
+      e.stopPropagation();
+    };
+
+    const handleMouseUp = () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+      document.getElementById(this.sidepanelId).style.pointerEvents = "auto";
+    };
+
+    const handleMouseDown = (e) => {
+      window.addEventListener("mousemove", handleMouseMove);
+      window.addEventListener("mouseup", handleMouseUp);
+      document.getElementById(this.sidepanelId).style.pointerEvents = "none";
+      e.preventDefault();
+      e.stopPropagation();
+    };
+
+    resize.addEventListener("mousedown", handleMouseDown);
+
+    return resize;
   }
 
   isSidePanelOpen() {

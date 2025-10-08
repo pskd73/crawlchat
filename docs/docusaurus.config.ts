@@ -57,16 +57,6 @@ const config: Config = {
     {
       "tagName": "script",
       "attributes": {
-        "src": "https://crawlchat.app/embed.js",
-        "id": "crawlchat-script",
-        "data-id": "67dbfc7258ed87c571a04b83",
-        "data-tag-sidepanel": "true",
-        "data-hide-ask-ai": "true"
-      },
-    },
-    {
-      "tagName": "script",
-      "attributes": {
         "src": "https://cdn.vemetric.com/main.js",
         "data-token": "MGxpZaWDYdxwChu5"
       },
