@@ -17,6 +17,7 @@ import { consumeCredits, hasEnoughCredits } from "libs/user-plan";
 import {
   makeFlow,
   makeRagTool,
+  QueryContext,
   RAGAgentCustomMessage,
 } from "./llm/flow-jasmine";
 import { extractCitations } from "libs/citation";
@@ -780,6 +781,10 @@ app.post("/compose/:scrapeId", authenticate, async (req, res) => {
 
   const messages = [...oldMessages, message];
 
+  const queryContext: QueryContext = {
+    ragQueries: [],
+  };
+
   const agent = new SimpleAgent({
     id: "compose-agent",
     prompt: `
@@ -808,7 +813,7 @@ app.post("/compose/:scrapeId", authenticate, async (req, res) => {
     schema: z.object({
       answer: z.string(),
     }),
-    tools: [makeRagTool(scrape.id, scrape.indexer).make()],
+    tools: [makeRagTool(scrape.id, scrape.indexer, { queryContext }).make()],
     ...llmConfig,
   });
 

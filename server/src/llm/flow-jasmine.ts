@@ -32,6 +32,10 @@ export type RAGAgentCustomMessage = {
   actionCall?: ApiActionCall;
 };
 
+export type QueryContext = {
+  ragQueries: string[];
+};
+
 export function makeRagTool(
   scrapeId: string,
   indexerKey: string | null,
@@ -39,6 +43,7 @@ export function makeRagTool(
     onPreSearch?: (query: string) => Promise<void>;
     topN?: number;
     minScore?: number;
+    queryContext?: QueryContext;
   }
 ) {
   const indexer = makeIndexer({ key: indexerKey, topN: options?.topN });
@@ -54,6 +59,22 @@ export function makeRagTool(
       }),
     }),
     execute: async ({ query }: { query: string }) => {
+      if (options?.queryContext?.ragQueries.includes(query)) {
+        console.log("Query already searched -", query);
+        return {
+          content: `The query "${query}" is already searched.`,
+        };
+      }
+      if (
+        options?.queryContext &&
+        options.queryContext.ragQueries.length >= 5
+      ) {
+        console.log("Maximum number of queries reached -", query);
+        return {
+          content: `Maximum number of queries reached. Now frame your answer.`,
+        };
+      }
+
       if (options?.onPreSearch) {
         await options.onPreSearch(query);
       }
@@ -75,6 +96,9 @@ export function makeRagTool(
         (r) => options?.minScore === undefined || r.score >= options.minScore
       );
       console.log("Filtered", filtered.length);
+      if (options?.queryContext) {
+        options.queryContext.ragQueries.push(query);
+      }
       return {
         content:
           filtered.length > 0
@@ -398,7 +422,14 @@ export function makeFlow(
     clientData?: any;
   }
 ) {
-  const ragTool = makeRagTool(scrapeId, indexerKey, options);
+  const queryContext: QueryContext = {
+    ragQueries: [],
+  };
+
+  const ragTool = makeRagTool(scrapeId, indexerKey, {
+    ...options,
+    queryContext,
+  });
 
   const enabledRichBlocks = options?.richBlocks
     ? options.richBlocks.map((rb) => ({
