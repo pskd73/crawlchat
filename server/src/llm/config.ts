@@ -74,11 +74,10 @@ export const getConfig = (model?: LlmModel | null): LlmConfig => {
   }
   if (model === LlmModel.gpt_5) {
     return {
-      model: "openai/gpt-5",
-      apiKey: process.env.OPENROUTER_API_KEY!,
+      model: "gpt-5",
+      apiKey: process.env.OPENAI_API_KEY!,
       ragTopN: 6,
       creditsPerMessage: 2,
-      baseURL: "https://openrouter.ai/api/v1",
       supportsImages: true,
     };
   }
