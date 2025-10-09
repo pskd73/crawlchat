@@ -335,7 +335,15 @@ export default function ApiKeyPage({ loaderData }: Route.ComponentProps) {
         <div className="flex flex-col gap-4">
           <p className="text-base-content/50">
             Manage your API keys to access your collection programmatically.
-            Read more about the API [here](https://docs.crawlchat.app/api).
+            Read more about the API{" "}
+            <a
+              href="https://docs.crawlchat.app/api"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              here
+            </a>
+            .
           </p>
           <div
             className={cn(
