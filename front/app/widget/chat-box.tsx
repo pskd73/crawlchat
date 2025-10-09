@@ -181,7 +181,7 @@ function ChatInput() {
       className={cn(
         "flex gap-2 border-t border-base-300 justify-between p-4",
         "transition-all",
-        sidePanel && "m-2 border rounded-full p-2 pl-5",
+        sidePanel && "m-2 border rounded-2xl",
         sidePanel && focused && "shadow"
       )}
     >
