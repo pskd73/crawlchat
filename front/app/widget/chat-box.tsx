@@ -194,7 +194,7 @@ function ChatInput() {
           placeholder={getPlaceholder()}
           className={cn(
             "text-lg p-0 max-h-[240px] overflow-y-auto resize-none",
-            "outline-none w-full",
+            "outline-none w-full placeholder-base-content/40",
             !query && "truncate"
           )}
           value={query}
