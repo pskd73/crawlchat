@@ -269,6 +269,25 @@ function AiModelSettings({ scrape, user }: { scrape: Scrape; user: User }) {
               </div>
             ),
           },
+          {
+            label: "Claude Sonnet 4.5",
+            value: "sonnet_4_5",
+
+            description:
+              "Best for technical use cases, programming docs. Can take more context.",
+            summary: "4 credits / message",
+            disabled: !isAllowed(["pro"]),
+            content: (
+              <div className="flex gap-2">
+                <div className="badge badge-accent badge-soft">
+                  <TbStar /> Fast & Best
+                </div>
+                <div className="badge badge-soft badge-primary">
+                  <TbCrown /> Pro
+                </div>
+              </div>
+            ),
+          },
         ]}
         name="llmModel"
         value={selectedModel}

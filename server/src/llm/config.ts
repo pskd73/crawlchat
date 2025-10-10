@@ -81,6 +81,16 @@ export const getConfig = (model?: LlmModel | null): LlmConfig => {
       supportsImages: true,
     };
   }
+  if (model === LlmModel.sonnet_4_5) {
+    return {
+      model: "anthropic/claude-sonnet-4.5",
+      apiKey: process.env.OPENROUTER_API_KEY!,
+      ragTopN: 10,
+      creditsPerMessage: 4,
+      supportsImages: true,
+      baseURL: "https://openrouter.ai/api/v1"
+    };
+  }
   return {
     model: "gpt-4o-mini",
     apiKey: process.env.OPENAI_API_KEY!,

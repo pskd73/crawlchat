@@ -390,6 +390,7 @@ export function AssistantMessage({
     ticketCreateFetcher,
     customerEmail,
     scrape,
+    chat,
   } = useChatBoxContext();
   const citation = useMemo(
     () => extractCitations(content, links),
@@ -436,42 +437,44 @@ export function AssistantMessage({
           {citation.content}
         </MarkdownProse>
 
-        <div className="flex items-center gap-2">
-          <MessageCopyButton content={content} />
+        {chat.askStage === "idle" && (
+          <div className="flex items-center gap-2">
+            <MessageCopyButton content={content} />
 
-          <MessageButton
-            tip="Refresh"
-            onClick={() => refresh(questionId, id)}
-            disabled={readOnly}
-          >
-            <TbRefresh />
-          </MessageButton>
+            <MessageButton
+              tip="Refresh"
+              onClick={() => refresh(questionId, id)}
+              disabled={readOnly}
+            >
+              <TbRefresh />
+            </MessageButton>
 
-          <MessageButton
-            tip="Helpful"
-            onClick={() => handleRate("up")}
-            disabled={readOnly}
-            active={currentRating === "up"}
-          >
-            <TbThumbUp />
-          </MessageButton>
+            <MessageButton
+              tip="Helpful"
+              onClick={() => handleRate("up")}
+              disabled={readOnly}
+              active={currentRating === "up"}
+            >
+              <TbThumbUp />
+            </MessageButton>
 
-          <MessageButton
-            tip="Not helpful"
-            onClick={() => handleRate("down")}
-            disabled={readOnly}
-            active={currentRating === "down"}
-          >
-            <TbThumbDown />
-          </MessageButton>
+            <MessageButton
+              tip="Not helpful"
+              onClick={() => handleRate("down")}
+              disabled={readOnly}
+              active={currentRating === "down"}
+            >
+              <TbThumbDown />
+            </MessageButton>
 
-          {admin && (
-            <div className="badge badge-soft badge-primary">
-              <TbChartBar />
-              {score.toFixed(2)}
-            </div>
-          )}
-        </div>
+            {admin && (
+              <div className="badge badge-soft badge-primary">
+                <TbChartBar />
+                {score.toFixed(2)}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
