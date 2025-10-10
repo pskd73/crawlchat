@@ -69,7 +69,7 @@ export function useChatBox({
       null,
     [thread]
   );
-  const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [theme, setTheme] = useState<"light" | "dark">();
   const [internalLinkHosts, setInternalLinkHosts] = useState<string[]>([]);
 
   useEffect(() => {
@@ -96,6 +96,8 @@ export function useChatBox({
   }, []);
 
   useEffect(() => {
+    if (sidePanel) return;
+    
     const isDarkMode = window.matchMedia(
       "(prefers-color-scheme: dark)"
     ).matches;
@@ -108,7 +110,7 @@ export function useChatBox({
 
     mediaQuery.addEventListener("change", handleThemeChange);
     return () => mediaQuery.removeEventListener("change", handleThemeChange);
-  }, []);
+  }, [sidePanel]);
 
   useEffect(() => {
     if (createThreadFetcher.data) {
