@@ -294,7 +294,7 @@ class CrawlChatEmbed {
     resize.classList.add("crawlchat-sidepanel-resize");
 
     const handleMouseMove = (e) => {
-      const width = Math.max(Math.min(window.innerWidth - e.clientX, 500), 400);
+      const width = Math.max(Math.min(window.innerWidth - e.clientX, 500), 320);
       document.documentElement.style.setProperty(
         "--crawlchat-sidepanel-width",
         `${width}px`
