@@ -206,8 +206,7 @@ app.message(async ({ message, say, client, context }) => {
     error,
     message: answerMessage,
   } = await query(scrape.id, llmMessages, createToken(scrape.userId), {
-    prompt:
-      `
+    prompt: `
 This would be a Slack message.
 Keep it short and concise. Don't use markdown for formatting.
 Keep the format plain, if possible use the Slack blocks for formatting bold, italic, tables, links, etc.
@@ -222,8 +221,7 @@ Only following blocks are allowed:
 8. Link — <url|label>
 
 You should use only the above formatting in the answer.
-Your name is Kitty.
-      `,
+`,
   });
 
   if (error) {
@@ -245,7 +243,7 @@ Your name is Kitty.
         type: "section",
         text: {
           type: "mrkdwn",
-          text: answer
+          text: answer,
         },
       },
     ],
