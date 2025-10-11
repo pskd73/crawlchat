@@ -833,6 +833,8 @@ app.post("/ticket/:scrapeId", authenticate, async (req, res) => {
     },
   });
 
+  await consumeCredits(scrape.userId, "messages", 1);
+
   await fetch(`${process.env.FRONT_URL}/email-alert`, {
     method: "POST",
     body: JSON.stringify({
