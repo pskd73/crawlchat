@@ -775,6 +775,11 @@ app.post("/ticket/:scrapeId", authenticate, async (req, res) => {
   const message = req.body.message as string;
   const threadId = req.body.threadId as string;
 
+  if (!userEmail || !title || !message) {
+    res.status(400).json({ message: "Missing userEmail or title or message" });
+    return;
+  }
+
   const ticketKey = randomUUID().slice(0, 8);
   const ticketNumber = await getNextNumber("ticket-number");
 
