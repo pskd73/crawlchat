@@ -239,8 +239,6 @@ You should use only the above formatting in the answer.
     return;
   }
 
-  console.log("Answer", answer);
-
   const sayResult = await say({
     text: answer,
     mrkdwn: true,

@@ -33,8 +33,6 @@ export async function query(
     message = answerJson.message;
   }
 
-  console.log({ answer, answerJson, error, message, status: result.status });
-
   return { answer, json: answerJson, error, message };
 }
 
