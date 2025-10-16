@@ -1,7 +1,7 @@
 import cn from "@meltdownjs/cn";
 import type { LlmModel } from "libs/prisma";
 import { useContext, useEffect, useRef } from "react";
-import { TbAlertTriangle, TbMenu2, TbX } from "react-icons/tb";
+import { TbAlertTriangle, TbMenu2 } from "react-icons/tb";
 import { Link } from "react-router";
 import { AppContext } from "~/dashboard/context";
 
@@ -17,6 +17,7 @@ const LlmNameMap: Record<LlmModel, string> = {
   gemini_2_5_flash: "Gemini 2.5 Flash",
   gemini_2_5_flash_lite: "Gemini 2.5 Flash Lite",
   o4_mini: "OpenAI o4-mini",
+  haiku_4_5: "Claude Haiku 4.5",
 };
 
 export function Page({
@@ -46,7 +47,11 @@ export function Page({
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const productionLlmModels: LlmModel[] = ["sonnet_4_5", "gpt_5", "gpt_5_mini"];
+  const productionLlmModels: LlmModel[] = [
+    "sonnet_4_5",
+    "gpt_5",
+    "haiku_4_5",
+  ];
   const currentLlmModel = scrape?.llmModel ?? "gpt_4o_mini";
 
   return (

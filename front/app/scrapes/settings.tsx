@@ -232,8 +232,8 @@ function AiModelSettings({ scrape, user }: { scrape: Scrape; user: User }) {
             ),
           },
           {
-            label: "OpenAI o4-mini",
-            value: "o4_mini",
+            label: "Claude Haiku 4.5",
+            value: "haiku_4_5",
 
             description:
               "Best for complex use cases, programming docs, better searches.",
@@ -242,7 +242,7 @@ function AiModelSettings({ scrape, user }: { scrape: Scrape; user: User }) {
             content: (
               <div className="flex gap-2">
                 <div className="badge badge-accent badge-soft">
-                  <TbBrain /> Reason
+                  <TbBrain /> Good + Fast
                 </div>
                 <div className="badge badge-soft badge-primary">
                   <TbCrown /> Hobby

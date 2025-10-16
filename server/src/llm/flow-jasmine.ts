@@ -443,6 +443,8 @@ export function makeFlow(
   const richBlocksPrompt = multiLinePrompt([
     "You can use rich message blocks as code language in the answer.",
     "Use the details only found in the context. Don't hallucinate.",
+    "It is important to pass json|<key> as that is the way to use rich message blocks.",
+    "It is invalid if <key> is not passed",
     "This is how you use a block: ```json|<key>\n<json>\n``` Example: ```json|cta\n{...}\n```",
     "Available blocks are:",
 

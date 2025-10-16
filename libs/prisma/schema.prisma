@@ -118,6 +118,7 @@ enum LlmModel {
   gpt_5
 
   sonnet_4_5
+  haiku_4_5
 }
 
 type RichBlockConfig {

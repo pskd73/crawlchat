@@ -42,7 +42,7 @@ export const getConfig = (model?: LlmModel | null): LlmConfig => {
       apiKey: process.env.OPENROUTER_API_KEY!,
       ragTopN: 6,
       creditsPerMessage: 1,
-      baseURL: "https://openrouter.ai/api/v1"
+      baseURL: "https://openrouter.ai/api/v1",
     };
   }
   if (model === LlmModel.gemini_2_5_flash_lite) {
@@ -87,8 +87,16 @@ export const getConfig = (model?: LlmModel | null): LlmConfig => {
       apiKey: process.env.OPENROUTER_API_KEY!,
       ragTopN: 10,
       creditsPerMessage: 4,
-      supportsImages: true,
-      baseURL: "https://openrouter.ai/api/v1"
+      baseURL: "https://openrouter.ai/api/v1",
+    };
+  }
+  if (model === LlmModel.haiku_4_5) {
+    return {
+      model: "anthropic/claude-haiku-4.5",
+      apiKey: process.env.OPENROUTER_API_KEY!,
+      ragTopN: 6,
+      creditsPerMessage: 1,
+      baseURL: "https://openrouter.ai/api/v1",
     };
   }
   return {
