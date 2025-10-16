@@ -3,22 +3,21 @@
   left: 20px;
   bottom: -8px;
   z-index: 2147483647;
-  background-color: #9605f7;
-  color: #fff;
+  background-color: #eee;
   padding: 12px;
   border-top-left-radius: 12px;
   border-top-right-radius: 12px;
   padding-bottom: 20px;
-  border: none;
+  border: 1px solid #ddd;
+  border-bottom: none;
   cursor: pointer;
-  transition: all 0.2s ease;
-  transform: translateY(100%);
 }
 
 .crawlchat-sticky-btn:hover {
-  background-color: #7c04d1;
+  background-color: #ddd;
 }
 
-.crawlchat-sticky-btn.active {
-  transform: translateY(0);
+.crawlchat-sticky-btn img {
+  width: 24px;
+  height: 24px;
 }

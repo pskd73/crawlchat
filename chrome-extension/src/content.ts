@@ -1,6 +1,6 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
-import Modal from "./modal";
+import Panel from "./panel";
 import { Config } from "./config";
 
 function injectShadowStyles(shadowRoot: ShadowRoot): void {
@@ -48,9 +48,7 @@ function createGlobalButton(): void {
   globalButton = document.createElement("button");
   globalButton.className = "crawlchat-sticky-btn";
   globalButton.innerHTML = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-    </svg>
+    <img src="https://crawlchat.app/logo.png" alt="CrawlChat" />
   `;
 
   globalButton.addEventListener("click", async (e) => {
@@ -68,11 +66,15 @@ function createGlobalButton(): void {
     const config = await getConfig();
 
     if (config && config.apiKey && config.scrapeId) {
-      openModal(config, targetElement);
+      openPanel(config, targetElement);
     }
   });
 
   document.body.appendChild(globalButton);
+}
+
+function isPanelOpen(): boolean {
+  return document.getElementById("crawlchat-panel") !== null;
 }
 
 function listenInput(
@@ -85,10 +87,8 @@ function listenInput(
   inputElement.dataset.crawlchatListener = "true";
 
   inputElement.addEventListener("focus", () => {
+    if (isPanelOpen()) return;
     latestFocusedElement = inputElement;
-    if (globalButton) {
-      globalButton.classList.add("active");
-    }
     if (blurTimeoutId !== null) {
       clearTimeout(blurTimeoutId);
       blurTimeoutId = null;
@@ -96,15 +96,11 @@ function listenInput(
   });
 
   inputElement.addEventListener("blur", () => {
-    if (blurTimeoutId !== null) {
-      clearTimeout(blurTimeoutId);
-    }
-    blurTimeoutId = window.setTimeout(() => {
-      if (globalButton) {
-        globalButton.classList.remove("active");
-      }
+    blurTimeoutId = setTimeout(() => {
+      if (isPanelOpen()) return;
+      latestFocusedElement = null;
       blurTimeoutId = null;
-    }, 150);
+    }, 500);
   });
 }
 
@@ -154,7 +150,7 @@ function addButtonsToExistingInputs(): void {
   });
 }
 
-async function openModal(
+async function openPanel(
   config: Config,
   inputElement: HTMLInputElement | HTMLTextAreaElement | HTMLElement,
   options?: {
@@ -162,26 +158,24 @@ async function openModal(
     autoUse?: boolean;
   }
 ) {
-  const existingModal = document.getElementById("crawlchat-modal");
-  if (existingModal) {
-    existingModal.remove();
+  const existingPanel = document.getElementById("crawlchat-panel");
+  if (existingPanel) {
+    existingPanel.remove();
   }
 
   const shadowHost = document.createElement("div");
-  shadowHost.id = "crawlchat-modal";
+  shadowHost.id = "crawlchat-panel";
   shadowHost.style.position = "fixed";
-  shadowHost.style.top = "0";
-  shadowHost.style.left = "0";
-  shadowHost.style.width = "100%";
-  shadowHost.style.height = "100%";
-  shadowHost.style.pointerEvents = "none";
+  shadowHost.style.left = "20px";
+  shadowHost.style.bottom = "0";
+  shadowHost.style.width = "384px";
   shadowHost.style.zIndex = "2147483647";
 
   const shadowRoot = shadowHost.attachShadow({ mode: "open" });
 
-  const modalContainer = document.createElement("div");
-  modalContainer.style.pointerEvents = "auto";
-  shadowRoot.appendChild(modalContainer);
+  const panelContainer = document.createElement("div");
+  panelContainer.style.height = "100%";
+  shadowRoot.appendChild(panelContainer);
 
   injectShadowStyles(shadowRoot);
 
@@ -193,98 +187,66 @@ async function openModal(
     (inputElement as HTMLElement).innerText ||
     "";
 
-  const root = createRoot(modalContainer);
+  const root = createRoot(panelContainer);
 
   const handleClose = () => {
-    closeModal(shadowHost);
+    closePanel(shadowHost);
   };
 
   const handleUse = (content: string) => {
-    if (latestFocusedElement) {
-      if (
-        latestFocusedElement instanceof HTMLInputElement ||
-        latestFocusedElement instanceof HTMLTextAreaElement
-      ) {
-        latestFocusedElement.value = content;
-      } else {
-        latestFocusedElement.innerHTML = content.replace(/\n/g, '<br>');
+    if (
+      latestFocusedElement instanceof HTMLInputElement ||
+      latestFocusedElement instanceof HTMLTextAreaElement
+    ) {
+      latestFocusedElement.value = content;
+    } else if (
+      latestFocusedElement instanceof HTMLElement &&
+      latestFocusedElement.contentEditable === "true"
+    ) {
+      (latestFocusedElement as HTMLElement).innerHTML = content.replace(
+        /\n/g,
+        "<br>"
+      );
+    }
+    closePanel(shadowHost);
+    setTimeout(() => {
+      if (latestFocusedElement) {
+        latestFocusedElement.focus();
       }
+    }, 100);
+  };
+
+  const handleCopy = (content: string) => {
+    navigator.clipboard.writeText(content);
+    closePanel(shadowHost);
+  };
+
+  const handleFocusElement = () => {
+    if (latestFocusedElement) {
+      latestFocusedElement.scrollIntoView({ behavior: "smooth" });
       latestFocusedElement.focus();
-      closeModal(shadowHost);
-      setTimeout(() => {
-        if (latestFocusedElement) {
-          latestFocusedElement.focus();
-        }
-      }, 100);
     }
   };
 
-  root.render(
-    React.createElement(Modal, {
-      config,
-      currentValue,
-      onClose: handleClose,
-      onUse: handleUse,
-      submit: options?.submit,
-      autoUse: options?.autoUse,
-    })
-  );
-
-  setTimeout(() => {
-    const modalOverlay = modalContainer.querySelector(
-      "div[class*='fixed inset-0']"
-    );
-    if (modalOverlay) {
-      modalOverlay.classList.remove("opacity-0");
-      modalOverlay.classList.add("opacity-100");
-      const modalContent = modalOverlay.querySelector(
-        "div[class*='bg-white rounded-xl']"
-      );
-      if (modalContent) {
-        modalContent.classList.remove("scale-95");
-        modalContent.classList.add("scale-100");
-      }
-    }
-  }, 10);
+  root.render(React.createElement(Panel, {
+    config,
+    currentValue,
+    onClose: handleClose,
+    onUse: latestFocusedElement ? handleUse : undefined,
+    onCopy: handleCopy,
+    onFocus: handleFocusElement,
+    submit: options?.submit,
+    autoUse: options?.autoUse,
+  }));
 }
 
-function closeModal(shadowHost: HTMLElement): void {
-  const shadowRoot = shadowHost.shadowRoot;
-  if (shadowRoot) {
-    const modalContainer = shadowRoot.firstElementChild as HTMLElement;
-    if (modalContainer) {
-      const modalOverlay = modalContainer.querySelector(
-        "div[class*='fixed inset-0']"
-      );
-      if (modalOverlay) {
-        modalOverlay.classList.remove("opacity-100");
-        modalOverlay.classList.add("opacity-0");
-        const modalContent = modalOverlay.querySelector(
-          "div[class*='bg-white rounded-xl']"
-        );
-        if (modalContent) {
-          modalContent.classList.remove("scale-100");
-          modalContent.classList.add("scale-95");
-        }
-      }
-    }
+function closePanel(shadowHost: HTMLElement): void {
+  if (shadowHost.parentNode) {
+    shadowHost.parentNode.removeChild(shadowHost);
   }
-  setTimeout(() => {
-    if (shadowHost.parentNode) {
-      shadowHost.parentNode.removeChild(shadowHost);
-    }
-    if (latestFocusedElement) {
-      latestFocusedElement.focus();
-    }
-  }, 300);
-}
 
-function handleModalAction(action: string | undefined): void {
-  if (!action) return;
-
-  const shadowHost = document.getElementById("crawlchat-modal");
-  if (shadowHost) {
-    closeModal(shadowHost);
+  if (latestFocusedElement) {
+    latestFocusedElement.focus();
   }
 }
 
@@ -313,15 +275,15 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 
   if (message.type === "OPEN_MODAL_FROM_SHORTCUT") {
-    handleShortcutOpenModal();
+    handleShortcutOpenPanel();
   }
 
   if (message.type === "OPEN_MODAL_AUTO_USE_FROM_SHORTCUT") {
-    handleShortcutOpenModalAutoUse();
+    handleShortcutOpenPanelAutoUse();
   }
 });
 
-async function handleShortcutOpenModal() {
+async function handleShortcutOpenPanel() {
   const config = await getConfig();
 
   if (config && config.apiKey && config.scrapeId) {
@@ -332,11 +294,11 @@ async function handleShortcutOpenModal() {
         | HTMLTextAreaElement
         | HTMLElement);
 
-    openModal(config, targetElement, { submit: true });
+    openPanel(config, targetElement, { submit: true });
   }
 }
 
-async function handleShortcutOpenModalAutoUse() {
+async function handleShortcutOpenPanelAutoUse() {
   const config = await getConfig();
 
   if (config && config.apiKey && config.scrapeId) {
@@ -347,6 +309,6 @@ async function handleShortcutOpenModalAutoUse() {
         | HTMLTextAreaElement
         | HTMLElement);
 
-    openModal(config, targetElement, { submit: true, autoUse: true });
+    openPanel(config, targetElement, { submit: true, autoUse: true });
   }
 }

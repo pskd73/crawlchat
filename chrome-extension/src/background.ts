@@ -13,15 +13,19 @@ chrome.commands.onCommand.addListener((command) => {
   if (command === "open-modal") {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (tabs[0]?.id) {
-        chrome.tabs.sendMessage(tabs[0].id, { type: "OPEN_MODAL_FROM_SHORTCUT" });
+        chrome.tabs.sendMessage(tabs[0].id, {
+          type: "OPEN_MODAL_FROM_SHORTCUT",
+        });
       }
     });
   }
-  
+
   if (command === "open-modal-auto-use") {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (tabs[0]?.id) {
-        chrome.tabs.sendMessage(tabs[0].id, { type: "OPEN_MODAL_AUTO_USE_FROM_SHORTCUT" });
+        chrome.tabs.sendMessage(tabs[0].id, {
+          type: "OPEN_MODAL_AUTO_USE_FROM_SHORTCUT",
+        });
       }
     });
   }
@@ -72,7 +76,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         "x-api-key": config.apiKey,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ prompt, messages, formatText }),
+      body: JSON.stringify({
+        prompt,
+        messages,
+        formatText,
+      }),
     })
       .then((response) => response.json())
       .then((data) => {
