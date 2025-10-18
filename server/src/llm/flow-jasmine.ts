@@ -127,7 +127,7 @@ function makeVerifyEmailTool() {
     id: "verify-email",
     description:
       "Don't use this tool, use the verify-email rich block instead.",
-    schema: z.never(),
+    schema: z.object({}),
     execute: async () => {
       return {
         content:
