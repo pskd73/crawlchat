@@ -4,10 +4,12 @@ import {
   ApiActionDataItem,
   ApiActionDataType,
   RichBlockConfig,
+  Thread,
 } from "libs/prisma";
 import { makeIndexer } from "../indexer/factory";
 import {
   FlowMessage,
+  LlmTool,
   multiLinePrompt,
   SimpleAgent,
   SimpleTool,
@@ -120,7 +122,23 @@ export function makeRagTool(
   });
 }
 
+function makeVerifyEmailTool() {
+  return new SimpleTool<RAGAgentCustomMessage>({
+    id: "verify-email",
+    description:
+      "Don't use this tool, use the verify-email rich block instead.",
+    schema: z.never(),
+    execute: async () => {
+      return {
+        content:
+          "Don't use this tool, use the verify-email rich block instead.",
+      };
+    },
+  });
+}
+
 export function makeActionTools(
+  thread: Thread,
   actions: ApiAction[],
   options?: {
     onPreAction?: (title: string) => void;
@@ -223,6 +241,13 @@ export function makeActionTools(
 
           if (options?.onPreAction) {
             options.onPreAction(action.title);
+          }
+
+          if (action.requireEmailVerification && !thread.emailVerifiedAt) {
+            return {
+              content:
+                "User needs to verify the email. Use the verify-email rich block to verify the email.",
+            };
           }
 
           const response = await fetch(action.url + queryParams, {
@@ -404,6 +429,7 @@ export function makeActionTools(
 }
 
 export function makeFlow(
+  thread: Thread,
   scrapeId: string,
   systemPrompt: string,
   query: string | MultimodalContent[],
@@ -445,6 +471,8 @@ export function makeFlow(
     "Use the details only found in the context. Don't hallucinate.",
     "It is important to pass json|<key> as that is the way to use rich message blocks.",
     "It is invalid if <key> is not passed",
+    "Don't ask for the payload details upfront. If you have the information already, pass them",
+    "Just show the block, don't ask for schema details",
     "This is how you use a block: ```json|<key>\n<json>\n``` Example: ```json|cta\n{...}\n```",
     "Available blocks are:",
 
@@ -470,7 +498,7 @@ export function makeFlow(
   ]);
 
   const actionTools = options?.actions
-    ? makeActionTools(options.actions, {
+    ? makeActionTools(thread, options.actions, {
         onPreAction: options.onPreAction,
       })
     : [];
@@ -524,7 +552,11 @@ export function makeFlow(
 
       `<client-data>\n${JSON.stringify(options?.clientData)}\n</client-data>`,
     ]),
-    tools: [ragTool.make(), ...actionTools.map((tool) => tool.make())],
+    tools: [
+      ragTool.make(),
+      ...actionTools.map((tool) => tool.make()),
+      makeVerifyEmailTool().make(),
+    ],
     model: options?.model,
     baseURL: options?.baseURL,
     apiKey: options?.apiKey,

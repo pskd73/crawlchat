@@ -38,6 +38,8 @@ export function useChatBox({
   const eraseFetcher = useFetcher();
   const deleteFetcher = useFetcher();
   const rateFetcher = useFetcher();
+  const requestEmailVerificationFetcher = useFetcher();
+  const verifyEmailFetcher = useFetcher();
   const ticketCreateFetcher = useFetcher();
   const createThreadFetcher = useFetcher();
   const [eraseAt, setEraseAt] = useState<number>();
@@ -181,6 +183,29 @@ export function useChatBox({
   }, [ticketCreateFetcher.data]);
 
   useEffect(() => {
+    if (requestEmailVerificationFetcher.data) {
+      if (requestEmailVerificationFetcher.data.success) {
+        setThread((t) => ({ ...t!, emailOtp: "xxxxxx" }));
+        toast.success("Email verification requested.");
+      } else {
+        toast.error("Enter a valid email");
+      }
+    }
+  }, [requestEmailVerificationFetcher.data]);
+
+  useEffect(() => {
+    if (verifyEmailFetcher.data) {
+      if (verifyEmailFetcher.data.success) {
+        setThread((t) => ({ ...t!, emailVerifiedAt: new Date() }));
+        toast.success("Email verified.");
+        ask("Verified. Proceed further");
+      } else {
+        toast.error("Invalid OTP");
+      }
+    }
+  }, [verifyEmailFetcher.data]);
+
+  useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       if (event.data === "focus") {
         scroll();
@@ -245,7 +270,7 @@ export function useChatBox({
     const message = document.querySelectorAll(".message");
     if (message) {
       const element = message[message.length - (last ? 1 : 2)] as HTMLElement;
-      const rect = element.getBoundingClientRect();
+      const rect = element?.getBoundingClientRect();
 
       const scrollContainer = document.getElementById(
         "chat-box-scroll"
@@ -339,6 +364,8 @@ export function useChatBox({
     theme,
     internalLinkHosts,
     sidePanel,
+    requestEmailVerificationFetcher,
+    verifyEmailFetcher,
     close,
     erase,
     deleteMessages,

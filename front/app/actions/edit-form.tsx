@@ -120,6 +120,8 @@ function CustomForm() {
     removeHeaderItem,
     description,
     setDescription,
+    requireEmailVerification,
+    setRequireEmailVerification,
   } = useContext(EditActionContext);
 
   return (
@@ -173,6 +175,20 @@ function CustomForm() {
             </select>
           </fieldset>
         </div>
+
+        <fieldset className="fieldset">
+          <legend className="fieldset-legend">Email verification</legend>
+          <label className="label">
+            <input
+              type="checkbox"
+              className="toggle"
+              defaultChecked={requireEmailVerification}
+              name="requireEmailVerification"
+              onChange={(e) => setRequireEmailVerification(e.target.checked)}
+            />
+            Require email verification
+          </label>
+        </fieldset>
       </div>
 
       <div className="flex flex-col gap-2 mt-6">

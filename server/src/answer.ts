@@ -7,6 +7,7 @@ import {
   RichBlockConfig,
   MessageChannel,
   Scrape,
+  Thread,
 } from "libs/prisma";
 import { getConfig } from "./llm/config";
 import { makeFlow, RAGAgentCustomMessage } from "./llm/flow-jasmine";
@@ -58,6 +59,7 @@ export type AnswerListener = (event: AnswerEvent) => void;
 
 export type Answerer = (
   scrape: Scrape,
+  thread: Thread,
   query: string | MultimodalContent[],
   messages: FlowMessage<RAGAgentCustomMessage>[],
   options?: {
@@ -166,6 +168,7 @@ export function collectContext(messages: FlowMessage<RAGAgentCustomMessage>[]) {
 
 export const baseAnswerer: Answerer = async (
   scrape,
+  thread,
   query,
   messages,
   options
@@ -176,6 +179,14 @@ export const baseAnswerer: Answerer = async (
   if (scrape.ticketingEnabled && options?.channel === "widget") {
     richBlocks.push(createTicketRichBlock);
   }
+
+  richBlocks.push({
+    name: "Verify email",
+    key: "verify-email",
+    payload: {},
+    prompt: `Use this block to verify the email of the user for this thread. 
+Just use this block, don't ask the user to enter the email.`,
+  });
 
   options?.listen?.({
     type: "init",
@@ -194,6 +205,7 @@ export const baseAnswerer: Answerer = async (
   }
 
   const flow = makeFlow(
+    thread,
     scrape.id,
     options?.prompt ?? scrape.chatPrompt ?? "",
     query,

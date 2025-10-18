@@ -20,6 +20,7 @@ export function SaveForm({
     description,
     type,
     calConfig,
+    requireEmailVerification,
   } = useContext(EditActionContext);
 
   return (
@@ -50,6 +51,7 @@ export function SaveForm({
             description,
             type,
             calConfig,
+            requireEmailVerification,
           })}
         />
         <button

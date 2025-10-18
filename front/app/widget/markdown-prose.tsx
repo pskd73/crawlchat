@@ -2,12 +2,19 @@ import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import hljs from "highlight.js";
 import { useState, type PropsWithChildren } from "react";
-import { TbArrowRight, TbCheck, TbCopy } from "react-icons/tb";
+import {
+  TbArrowRight,
+  TbCheck,
+  TbCircleCheckFilled,
+  TbCopy,
+} from "react-icons/tb";
 import { jsonrepair } from "jsonrepair";
-const linkifyRegex = require("remark-linkify-regex");
 import cn from "@meltdownjs/cn";
+import type { FetcherWithComponents } from "react-router";
+import type { Scrape, Thread } from "libs/prisma";
 import "./markdown-prose.css";
 import "highlight.js/styles/xt256.min.css";
+const linkifyRegex = require("remark-linkify-regex");
 
 const RichCreateTicket = ({
   title: initialTitle,
@@ -41,7 +48,7 @@ const RichCreateTicket = ({
     <div
       className={cn(
         "flex flex-col gap-2 border-4 border-base-300",
-        "p-4 rounded-2xl max-w-[400px] w-full my-8",
+        "p-4 rounded-2xl max-w-[400px] w-full my-8"
       )}
     >
       {!loading && (
@@ -70,11 +77,7 @@ const RichCreateTicket = ({
             disabled={disabled || !!customerEmail}
           />
           <div className="flex justify-end">
-            <button
-              className="btn"
-              onClick={handleSubmit}
-              disabled={disabled}
-            >
+            <button className="btn" onClick={handleSubmit} disabled={disabled}>
               {loading && (
                 <span className="loading loading-spinner loading-xs" />
               )}
@@ -86,6 +89,99 @@ const RichCreateTicket = ({
       {loading && (
         <div className="flex items-center justify-center">
           <span className="loading loading-spinner" />
+        </div>
+      )}
+    </div>
+  );
+};
+
+const RichVerifyEmail = ({
+  thread,
+  disabled,
+  requestEmailVerificationFetcher,
+  verifyEmailFetcher,
+}: {
+  scrape: Scrape;
+  thread: Thread;
+  email: string;
+  disabled?: boolean;
+  requestEmailVerificationFetcher: FetcherWithComponents<any>;
+  verifyEmailFetcher: FetcherWithComponents<any>;
+}) => {
+  return (
+    <div
+      className={cn(
+        "border-4 border-base-300",
+        "p-4 rounded-2xl max-w-[400px] w-full my-8"
+      )}
+    >
+      {!thread.emailVerifiedAt && !thread.emailOtp && (
+        <requestEmailVerificationFetcher.Form
+          method="post"
+          className="flex flex-col md:flex-row gap-2"
+        >
+          <input
+            type="hidden"
+            name="intent"
+            value="request-email-verification"
+          />
+
+          <input
+            className="input w-full"
+            placeholder="Email"
+            name="email"
+            disabled={
+              disabled || requestEmailVerificationFetcher.state !== "idle"
+            }
+          />
+
+          <button
+            className="btn"
+            disabled={
+              disabled || requestEmailVerificationFetcher.state !== "idle"
+            }
+            type="submit"
+          >
+            {requestEmailVerificationFetcher.state !== "idle" && (
+              <span className="loading loading-spinner loading-xs" />
+            )}
+            Verify <TbArrowRight />
+          </button>
+        </requestEmailVerificationFetcher.Form>
+      )}
+      {!thread.emailVerifiedAt && thread.emailOtp && (
+        <verifyEmailFetcher.Form
+          method="post"
+          className="flex flex-col md:flex-row gap-2"
+        >
+          <input type="hidden" name="intent" value="verify-email" />
+
+          <input
+            className="input w-full"
+            placeholder="OTP"
+            name="otp"
+            disabled={disabled}
+          />
+
+          <button
+            className="btn"
+            type="submit"
+            disabled={disabled || verifyEmailFetcher.state !== "idle"}
+          >
+            {verifyEmailFetcher.state !== "idle" && (
+              <span className="loading loading-spinner loading-xs" />
+            )}
+            Submit <TbCheck />
+          </button>
+        </verifyEmailFetcher.Form>
+      )}
+
+      {thread.emailVerifiedAt && (
+        <div className="flex items-center gap-2 justify-between text-success">
+          <div>Email verified</div>
+          <div>
+            <TbCircleCheckFilled size={24} />
+          </div>
         </div>
       )}
     </div>
@@ -122,15 +218,15 @@ function CodeCopyButton({ code }: { code: string }) {
 }
 
 export function MarkdownProse({
+  thread,
   children,
   noMarginCode,
   sources,
-  size = "md",
   options,
 }: PropsWithChildren<{
+  thread?: Thread | null;
   noMarginCode?: boolean;
   sources?: Array<{ title: string; url?: string }>;
-  size?: "md" | "lg";
   options?: {
     onTicketCreate?: (
       title: string,
@@ -142,6 +238,8 @@ export function MarkdownProse({
     customerEmail?: string;
     onSourceMouseEnter?: (index: number) => void;
     onSourceMouseLeave?: () => void;
+    requestEmailVerificationFetcher?: FetcherWithComponents<any>;
+    verifyEmailFetcher?: FetcherWithComponents<any>;
   };
 }>) {
   return (
@@ -172,6 +270,24 @@ export function MarkdownProse({
                       loading={options.ticketCreateLoading}
                       disabled={options.disabled}
                       customerEmail={options.customerEmail}
+                    />
+                  );
+                }
+                if (
+                  language === "json|verify-email" &&
+                  thread &&
+                  options?.requestEmailVerificationFetcher &&
+                  options?.verifyEmailFetcher
+                ) {
+                  return (
+                    <RichVerifyEmail
+                      {...json}
+                      disabled={options?.disabled}
+                      thread={thread}
+                      requestEmailVerificationFetcher={
+                        options.requestEmailVerificationFetcher
+                      }
+                      verifyEmailFetcher={options.verifyEmailFetcher}
                     />
                   );
                 }

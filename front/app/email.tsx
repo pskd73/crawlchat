@@ -7,6 +7,7 @@ import LoginEmail from "emails/login";
 import DataGapAlertEmail from "emails/data-gap-alert";
 import TicketUserCreateEmail from "emails/ticket-user-create";
 import TicketAdminCreateEmail from "emails/ticket-admin-create";
+import ChatVerifyEmail from "emails/chat-verify-email";
 
 export const sendEmail = async (to: string, subject: string, text: string) => {
   try {
@@ -145,4 +146,8 @@ export const sendNewTicketAdminEmail = async (
       email={email}
     />
   );
+};
+
+export const sendChatVerifyEmail = async (to: string, otp: string) => {
+  await sendReactEmail(to, "Verify email", <ChatVerifyEmail otp={otp} />);
 };

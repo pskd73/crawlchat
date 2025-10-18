@@ -13,13 +13,8 @@ import { v4 as uuidv4 } from "uuid";
 import { LlmModel, Message, MessageChannel, Thread } from "libs/prisma";
 import { makeIndexer } from "./indexer/factory";
 import { name } from "libs";
+import { consumeCredits, hasEnoughCredits } from "libs/user-plan";
 import {
-  consumeCredits,
-  getPagesCount,
-  hasEnoughCredits,
-} from "libs/user-plan";
-import {
-  makeFlow,
   makeRagTool,
   QueryContext,
   RAGAgentCustomMessage,
@@ -404,6 +399,7 @@ expressWs.app.ws("/", (ws: any, req) => {
         await retry(async () => {
           answerer(
             scrape,
+            thread,
             message.data.query,
             thread.messages.map((message) => {
               const llmMessage = message.llmMessage as any;
@@ -709,6 +705,7 @@ app.post("/answer/:scrapeId", authenticate, async (req, res) => {
 
   const answer = await baseAnswerer(
     scrape,
+    thread,
     query,
     messages.map((m) => ({
       llmMessage: {

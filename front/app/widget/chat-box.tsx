@@ -395,6 +395,9 @@ export function AssistantMessage({
     customerEmail,
     scrape,
     chat,
+    thread,
+    requestEmailVerificationFetcher,
+    verifyEmailFetcher,
   } = useChatBoxContext();
   const citation = useMemo(
     () => extractCitations(content, links),
@@ -426,7 +429,7 @@ export function AssistantMessage({
 
       <div className="flex flex-col gap-4">
         <MarkdownProse
-          size={scrape.widgetConfig?.size === "large" ? "lg" : "md"}
+          thread={thread}
           sources={Object.values(citation.citedLinks).map((link) => ({
             title: link?.title ?? link?.url ?? "Source",
             url: link?.url ?? undefined,
@@ -436,6 +439,8 @@ export function AssistantMessage({
             ticketCreateLoading: ticketCreateFetcher.state !== "idle",
             disabled: readOnly,
             customerEmail,
+            requestEmailVerificationFetcher,
+            verifyEmailFetcher,
           }}
         >
           {citation.content}
@@ -489,7 +494,7 @@ function NoMessages() {
 
   return (
     <div className="flex flex-col gap-4 p-4 flex-1">
-      <MarkdownProse size="lg">
+      <MarkdownProse>
         {scrape.widgetConfig?.welcomeMessage ||
           "Ask your queries here. Remember, I am an AI assistant and refer to the sources to confirm the answer."}
       </MarkdownProse>

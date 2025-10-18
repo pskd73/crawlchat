@@ -1,4 +1,4 @@
-import type { Scrape, ScrapeUser, UserRole } from "libs/prisma";
+import type { Scrape, ScrapeUser, Thread, UserRole } from "libs/prisma";
 import { redirect } from "react-router";
 import { getSession } from "~/session";
 
@@ -41,4 +41,10 @@ export function sanitizeScrape(scrape: Scrape) {
   scrape.discordDraftConfig = null;
   scrape.discordServerId = null;
   scrape.chatPrompt = null;
+}
+
+export function sanitizeThread(thread?: Thread | null) {
+  if (thread?.emailOtp) {
+    thread.emailOtp = "xxxxxx";
+  }
 }

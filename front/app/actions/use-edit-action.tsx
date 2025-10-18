@@ -42,6 +42,8 @@ export function useEditAction(initAction?: ApiAction) {
 
   const [calEventTypes, setCalEventTypes] = useState<CalEventType[]>([]);
   const [calProfile, setCalProfile] = useState<CalProfile | null>(null);
+  const [requireEmailVerification, setRequireEmailVerification] =
+    useState<boolean>(initAction?.requireEmailVerification ?? false);
 
   const canSubmit = useMemo(() => {
     if (!title || !description) return false;
@@ -173,6 +175,8 @@ export function useEditAction(initAction?: ApiAction) {
     setCalConfig,
     calEventTypes,
     calProfile,
+    requireEmailVerification,
+    setRequireEmailVerification,
   };
 }
 
