@@ -5,9 +5,9 @@ import { TbCheck, TbRefresh, TbX, TbStack } from "react-icons/tb";
 import { Link, Outlet } from "react-router";
 import { authoriseScrapeUser, getSessionScrapeId } from "~/scrapes/util";
 import { EmptyState } from "~/components/empty-state";
+import { makeMeta } from "~/meta";
 import cn from "@meltdownjs/cn";
 import moment from "moment";
-import { makeMeta } from "~/meta";
 
 export async function loader({ request, params }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -39,6 +39,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       createdAt: true,
       updatedAt: true,
       status: true,
+      error: true,
     },
   });
 
@@ -56,25 +57,7 @@ function getKey(item: { id: string; url?: string | null }) {
     return item.id;
   }
 
-  try {
-    return new URL(item.url).pathname;
-  } catch (error) {}
-
   return item.url;
-}
-
-function truncateEnd(text: string, maxLength: number) {
-  const prefix = text.length > maxLength ? "..." : "";
-  const postfix = text.slice(Math.max(0, text.length - maxLength));
-
-  return prefix + postfix;
-}
-
-function truncateStart(text: string, maxLength: number) {
-  const prefix = text.slice(0, maxLength);
-  const postfix = text.length > maxLength ? "..." : "";
-
-  return prefix + postfix;
 }
 
 export default function ScrapeLinks({ loaderData }: Route.ComponentProps) {
@@ -100,8 +83,7 @@ export default function ScrapeLinks({ loaderData }: Route.ComponentProps) {
             <table className="table">
               <thead>
                 <tr>
-                  <th>Key</th>
-                  <th>Title</th>
+                  <th>Name</th>
                   <th>Status</th>
                   <th className="text-end">Updated</th>
                 </tr>
@@ -109,40 +91,44 @@ export default function ScrapeLinks({ loaderData }: Route.ComponentProps) {
               <tbody>
                 {loaderData.items.map((item) => (
                   <tr key={item.id}>
-                    <td className="max-w-64">
-                      <Link
-                        className="link link-hover line-clamp-1"
-                        to={`/knowledge/item/${item.id}`}
-                      >
-                        {getKey(item)}
-                      </Link>
-                    </td>
-
                     <td>
-                      <div className="line-clamp-1">
-                        {truncateStart(item.title?.trim() || "-", 50)}
+                      <div className="flex flex-col">
+                        <Link
+                          className="link link-hover line-clamp-1"
+                          to={`/knowledge/item/${item.id}`}
+                        >
+                          {item.title?.trim() || "Untitled"}
+                        </Link>
+                        <div className="text-sm text-base-content/50">
+                          {getKey(item)}
+                        </div>
                       </div>
                     </td>
 
                     <td className="w-24">
                       <div
-                        className={cn(
-                          "badge badge-soft",
-                          item.status === "completed"
-                            ? "badge-primary"
-                            : item.status === "failed"
-                            ? "badge-error"
-                            : undefined
-                        )}
+                        className="tooltip"
+                        data-tip={item.error ?? undefined}
                       >
-                        {item.status === "completed" ? (
-                          <TbCheck />
-                        ) : item.status === "failed" ? (
-                          <TbX />
-                        ) : (
-                          <TbRefresh />
-                        )}
-                        {item.status === "completed" ? "Success" : "Failed"}
+                        <div
+                          className={cn(
+                            "badge badge-soft",
+                            item.status === "completed"
+                              ? "badge-primary"
+                              : item.status === "failed"
+                              ? "badge-error"
+                              : undefined
+                          )}
+                        >
+                          {item.status === "completed" ? (
+                            <TbCheck />
+                          ) : item.status === "failed" ? (
+                            <TbX />
+                          ) : (
+                            <TbRefresh />
+                          )}
+                          {item.status === "completed" ? "Success" : "Failed"}
+                        </div>
                       </div>
                     </td>
                     <td className="min-w-38 text-end">

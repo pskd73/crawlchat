@@ -83,7 +83,31 @@ export function makeKbProcesserListener(
 
     async onContentAvailable(path: string, content: KbContent) {
       if (content.error) {
-        throw new Error(content.error);
+        await prisma.scrapeItem.upsert({
+          where: {
+            knowledgeGroupId_url: {
+              knowledgeGroupId: knowledgeGroup.id,
+              url: path,
+            },
+          },
+          update: {
+            markdown: "Not available",
+            title: content.title,
+            status: "failed",
+            error: content.error,
+          },
+          create: {
+            userId: scrape.userId,
+            scrapeId: scrape.id,
+            knowledgeGroupId: knowledgeGroup.id,
+            url: path,
+            markdown: "Not available",
+            title: content.title,
+            status: "failed",
+            error: content.error,
+          },
+        });
+        return;
       }
 
       const indexer = makeIndexer({ key: scrape.indexer });

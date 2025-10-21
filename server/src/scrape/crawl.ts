@@ -14,6 +14,7 @@ export type ScrapeStore = {
 type ScrapeResult = {
   error?: string;
   parseOutput: ParseOutput;
+  statusCode: number;
 };
 
 function isSameHost(base: string, url: string) {
@@ -23,7 +24,9 @@ function isSameHost(base: string, url: string) {
   return normalizeHost(baseUrl.host) === normalizeHost(urlObj.host);
 }
 
-export async function scrapeFetch(url: string): Promise<string> {
+export async function scrapeFetch(
+  url: string
+): Promise<{ text: string; statusCode: number }> {
   console.log("Scraping", url);
   const headers = {
     "User-Agent":
@@ -52,7 +55,7 @@ export async function scrapeFetch(url: string): Promise<string> {
     credentials: "same-origin",
     signal: AbortSignal.timeout(10000),
   });
-  return await response.text();
+  return { text: await response.text(), statusCode: response.status };
 }
 
 export async function scrape(
@@ -65,23 +68,25 @@ export async function scrape(
   }
 ): Promise<ScrapeResult> {
   const { dynamicFallbackContentLength = 100 } = options ?? {};
-  let text = await scrapeFetch(url);
+  let { text, statusCode } = await scrapeFetch(url);
   const parsedText = parseHtml(text, options);
   let error = undefined;
 
   if (parsedText.text.length <= dynamicFallbackContentLength) {
     try {
-      text = await scrapePw(url, {
+      const pwResult = await scrapePw(url, {
         scrollSelector: options?.scrollSelector,
         maxWait: options?.maxWait,
       });
+      text = pwResult.text;
+      statusCode = pwResult.statusCode;
     } catch (e: any) {
       console.log(e);
       error = e.message;
     }
   }
 
-  return { parseOutput: parseHtml(text, options), error };
+  return { parseOutput: parseHtml(text, options), error, statusCode };
 }
 
 export type ScrapeWithLinksOptions = {
@@ -102,21 +107,22 @@ export async function scrapeWithLinks(
   if (options?.onPreScrape) {
     options.onPreScrape(url, store);
   }
-  const { parseOutput } = await scrape(url, options);
+  const { parseOutput, statusCode } = await scrape(url, options);
   const { links: linkLinks, metaTags, text, markdown } = parseOutput;
   store.urls[url] = {
     metaTags,
     text,
   };
+
+  console.log("StatusCode", statusCode);
+  if (Math.floor(statusCode / 100) !== 2) {
+    throw new Error(`Failed with status code ${statusCode}`);
+  }
+
   for (const link of linkLinks) {
     if (!link.href) continue;
 
-    let linkUrl: string | undefined;
-    try {
-      const safePostFix =
-        !link.href.startsWith("/") && !url.endsWith("/") ? "/" : "";
-      linkUrl = new URL(link.href, url + safePostFix).toString();
-    } catch (e) {}
+    const linkUrl = new URL(link.href, url).toString();
 
     if (!linkUrl) {
       console.log("Invalid link", link.href);
@@ -129,7 +135,6 @@ export async function scrapeWithLinks(
 
     let linkUrlStr = linkUrl.toString();
     linkUrlStr = linkUrlStr.split("#")[0];
-    linkUrlStr = linkUrlStr.replace(/\/$/, "");
 
     if (options?.skipRegex?.some((regex) => regex.test(linkUrlStr))) {
       continue;

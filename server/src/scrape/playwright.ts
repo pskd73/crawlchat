@@ -16,7 +16,7 @@ export async function scrapePw(
 ) {
   const page = await getPage();
   console.log("Navigating to", url);
-  await page.goto(url);
+  const response = await page.goto(url);
 
   if (options?.maxWait) {
     console.log("Waiting for maxWait", options.maxWait);
@@ -64,5 +64,5 @@ export async function scrapePw(
 
   console.log("Getting html");
   const html = await page.content();
-  return html;
+  return { text: html, statusCode: response?.status() ?? -1 };
 }
