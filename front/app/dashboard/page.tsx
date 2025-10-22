@@ -479,7 +479,11 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
               </div>
             ))}
             <div
-              className="tooltip"
+              className={cn(
+                "tooltip",
+                Object.entries(loaderData.categories).length <= 2 &&
+                  "md:tooltip-right"
+              )}
               data-tip="Add categories that will be tagged to the messages and you can check the count of each category here."
             >
               <a
