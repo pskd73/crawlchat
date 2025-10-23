@@ -23,6 +23,7 @@ import moment from "moment";
 import cn from "@meltdownjs/cn";
 import { makeMeta } from "~/meta";
 import { useEffect, useMemo, useState } from "react";
+import { CreditsUsedBadge } from "./credits-used-badge";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -213,6 +214,12 @@ export default function MessagesLayout({ loaderData }: Route.ComponentProps) {
                               <ScoreBadge score={pair.maxScore} />
                             )}
                             <Rating rating={pair.responseMessage.rating} />
+                            {pair.responseMessage.creditsUsed !== null && (
+                              <CreditsUsedBadge
+                                creditsUsed={pair.responseMessage.creditsUsed}
+                                llmModel={pair.responseMessage.llmModel}
+                              />
+                            )}
                           </div>
                         </td>
                         <td className="w-10">

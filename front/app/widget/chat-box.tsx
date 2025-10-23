@@ -449,13 +449,13 @@ export function AssistantMessage({
           <div className="flex items-center gap-2">
             <MessageCopyButton content={content} />
 
-            <MessageButton
+            {/* <MessageButton
               tip="Refresh"
               onClick={() => refresh(questionId, id)}
               disabled={readOnly}
             >
               <TbRefresh />
-            </MessageButton>
+            </MessageButton> */}
 
             <MessageButton
               tip="Helpful"

@@ -105,7 +105,7 @@ export const getConfig = (model?: LlmModel | null): LlmConfig => {
       model: "anthropic/claude-haiku-4.5",
       apiKey: process.env.OPENROUTER_API_KEY!,
       ragTopN: 6,
-      creditsPerMessage: 1,
+      creditsPerMessage: 2,
       baseURL: "https://openrouter.ai/api/v1",
       supportsImages: true
     };

@@ -368,6 +368,8 @@ expressWs.app.ws("/", (ws: any, req) => {
                   apiActionCalls: event.actionCalls as any,
                   ownerUserId: scrape.userId,
                   questionId: questionMessage?.id ?? null,
+                  llmModel: scrape.llmModel,
+                  creditsUsed: event.creditsUsed,
                 },
               });
               await updateLastMessageAt(threadId);
@@ -487,6 +489,7 @@ app.get("/mcp/:scrapeId", async (req, res) => {
     });
   }
   const query = req.query.query as string;
+  const creditsUsed = 1;
 
   await prisma.message.create({
     data: {
@@ -503,7 +506,7 @@ app.get("/mcp/:scrapeId", async (req, res) => {
   const result = await indexer.search(scrape.id, query);
   const processed = await indexer.process(query, result);
 
-  await consumeCredits(scrape.userId, "messages", 1);
+  await consumeCredits(scrape.userId, "messages", creditsUsed);
 
   const message: FlowMessage<RAGAgentCustomMessage> = {
     llmMessage: {
@@ -524,6 +527,7 @@ app.get("/mcp/:scrapeId", async (req, res) => {
       links,
       ownerUserId: scrape.userId,
       channel: "mcp",
+      creditsUsed,
     },
   });
   await updateLastMessageAt(thread.id);
@@ -735,6 +739,8 @@ app.post("/answer/:scrapeId", authenticate, async (req, res) => {
       ownerUserId: scrape.userId,
       channel,
       apiActionCalls: answer!.actionCalls as any,
+      llmModel: scrape.llmModel as any,
+      creditsUsed: answer!.creditsUsed,
     },
   });
   await updateLastMessageAt(thread.id);
@@ -826,6 +832,8 @@ app.post("/ticket/:scrapeId", authenticate, async (req, res) => {
     });
   }
 
+  const creditsUsed = 1;
+
   await prisma.message.create({
     data: {
       threadId: thread.id,
@@ -839,10 +847,11 @@ app.post("/ticket/:scrapeId", authenticate, async (req, res) => {
         role: "user",
         event: "message",
       },
+      creditsUsed,
     },
   });
 
-  await consumeCredits(scrape.userId, "messages", 1);
+  await consumeCredits(scrape.userId, "messages", creditsUsed);
 
   await fetch(`${process.env.FRONT_URL}/email-alert`, {
     method: "POST",

@@ -285,6 +285,8 @@ model Message {
   slackMessageId            String?
   discordMessageId          String?
   analysis                  MessageAnalysis?
+  llmModel                  LlmModel?
+  creditsUsed               Int?
 
   createdAt                 DateTime @default(now())
   updatedAt                 DateTime @updatedAt
