@@ -7,7 +7,7 @@ import type {
   Thread,
 } from "libs/prisma";
 import { getAuthUser } from "~/auth/middleware";
-import { redirect } from "react-router";
+import { Link, redirect } from "react-router";
 import { prisma } from "libs/prisma";
 import { MarkdownProse } from "~/widget/markdown-prose";
 import { getQueryString } from "libs/llm-message";
@@ -102,7 +102,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 
 function UsersTable({ userDetails }: { userDetails: UserDetail[] }) {
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto border border-base-300 rounded-box bg-base-200/50 shadow">
       <table className="table">
         <thead>
           <tr>
@@ -120,7 +120,14 @@ function UsersTable({ userDetails }: { userDetails: UserDetail[] }) {
           {userDetails.map((userDetail) => (
             <tr key={userDetail.user.id}>
               <td>{userDetail.user.id}</td>
-              <td>{userDetail.user.email}</td>
+              <td>
+                <Link
+                  to={`/admin-fowl/user/${userDetail.user.id}`}
+                  className="link link-primary link-hover"
+                >
+                  {userDetail.user.email}
+                </Link>
+              </td>
               <td>{userDetail.user.name}</td>
               <td>{userDetail.scrapes.length}</td>
               <td>{userDetail.groups.length}</td>
@@ -152,7 +159,7 @@ function MessagesTable({
   messageDetails: MessageDetail[];
 }) {
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto border border-base-300 rounded-box bg-base-200/50 shadow">
       <table className="table">
         <thead>
           <tr>

@@ -99,7 +99,10 @@ export default [
     ]),
   ]),
 
-  ...prefix("admin-fowl", [index("admin/page.tsx")]),
+  ...prefix("admin-fowl", [
+    index("admin/page.tsx"),
+    route("user/:userId", "admin/user.tsx"),
+  ]),
 
   route("email-alert", "email-alert.ts"),
 
