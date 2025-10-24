@@ -227,18 +227,6 @@ expressWs.app.ws("/", (ws: any, req) => {
     try {
       const message = JSON.parse(msg.toString());
 
-      if (
-        message?.data?.query
-          ?.toLowerCase()
-          .includes(
-            "server side rendering with paremterized videos in a studio"
-          )
-      ) {
-        console.log("Closing spam socket");
-        ws.close();
-        return;
-      }
-
       if (message.type === "join-room") {
         const authHeader = message.data.headers.Authorization;
         if (!authHeader?.startsWith("Bearer ")) {
@@ -269,6 +257,12 @@ expressWs.app.ws("/", (ws: any, req) => {
             messages: true,
           },
         });
+
+        if (message.data.query.length > 1000) {
+          return ws.send(
+            makeMessage("error", { message: "Question too long. Please shorten it." })
+          );
+        }
 
         if (deleteIds) {
           await prisma.message.deleteMany({
@@ -404,12 +398,14 @@ expressWs.app.ws("/", (ws: any, req) => {
 
         const answerer = baseAnswerer;
 
+        const recentMessages = thread.messages.slice(-40);
+
         await retry(async () => {
           answerer(
             scrape,
             thread,
             message.data.query,
-            thread.messages.map((message) => {
+            recentMessages.map((message) => {
               const llmMessage = message.llmMessage as any;
               if (message.apiActionCalls.length > 0) {
                 llmMessage.content = `
@@ -678,6 +674,11 @@ app.post("/answer/:scrapeId", authenticate, async (req, res) => {
   }
   let query = req.body.query as string | MultimodalContent[];
 
+  if (JSON.stringify(query).length > 1000) {
+    res.status(400).json({ message: "Question too long" });
+    return;
+  }
+
   const messages = (req.body.messages ?? []) as {
     role: string;
     content: string | MultimodalContent[];
@@ -713,11 +714,13 @@ app.post("/answer/:scrapeId", authenticate, async (req, res) => {
     },
   });
 
+  const recentMessages = messages.slice(-40);
+
   const answer = await baseAnswerer(
     scrape,
     thread,
     query,
-    messages.map((m) => ({
+    recentMessages.map((m) => ({
       llmMessage: {
         role: m.role as any,
         content: m.content,

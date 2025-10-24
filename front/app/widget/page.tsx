@@ -78,6 +78,7 @@ export async function loader({ params, request }: Route.LoaderArgs) {
   let messages: Message[] = [];
   let thread: Thread | null = null;
   let userToken: string | null = null;
+  const headers: HeadersInit = {};
 
   const session = await getSession(request.headers.get("cookie"));
   const chatSessionKeys = session.get("chatSessionKeys") ?? {};
@@ -98,6 +99,15 @@ export async function loader({ params, request }: Route.LoaderArgs) {
     }
   }
 
+  if (thread && messages.length > 60) {
+    console.log("Clearing chat session");
+    delete chatSessionKeys[thread.scrapeId];
+    session.set("chatSessionKeys", chatSessionKeys);
+    userToken = null;
+    messages = [];
+    headers["Set-Cookie"] = await commitSession(session);
+  }
+
   const searchParams = new URL(request.url).searchParams;
   const embed = searchParams.get("embed") === "true";
   const width = searchParams.get("width");
@@ -108,17 +118,22 @@ export async function loader({ params, request }: Route.LoaderArgs) {
   sanitizeScrape(scrape);
   sanitizeThread(thread);
 
-  return {
-    scrape,
-    userToken,
-    thread,
-    messages,
-    embed,
-    width,
-    height,
-    fullscreen,
-    sidePanel,
-  };
+  return data(
+    {
+      scrape,
+      userToken,
+      thread,
+      messages,
+      embed,
+      width,
+      height,
+      fullscreen,
+      sidePanel,
+    },
+    {
+      headers,
+    }
+  );
 }
 
 export function meta({ data }: Route.MetaArgs) {
