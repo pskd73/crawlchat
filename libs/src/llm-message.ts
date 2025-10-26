@@ -6,10 +6,15 @@ export function getQueryString(query: string | MultimodalContent[]) {
   if (typeof query === "string") {
     return query;
   }
-  return query
-    .filter((q) => q.type === "text")
-    .map((q) => q.text)
-    .join("\n");
+
+  if (Array.isArray(query)) {
+    return query
+      .filter((q) => q.type === "text")
+      .map((q) => q.text)
+      .join("\n");
+  }
+
+  return "Unsupported query type";
 }
 
 export function getImagesCount(query: string | MultimodalContent[]) {
