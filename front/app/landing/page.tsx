@@ -2297,7 +2297,7 @@ function SecondaryCTA({
   ctaLabel: string;
 }) {
   return (
-    <div className={cn("border border-primary/20 rounded-box overflow-hidden")}>
+    <div className={cn("border border-primary/20 rounded-box overflow-hidden flex-1")}>
       <div
         className={cn(
           "p-4 border-b border-primary/20",
