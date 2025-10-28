@@ -41,7 +41,7 @@ export class WebKbProcesser extends BaseKbProcesser {
     if (!url.startsWith("http")) {
       url = "https://" + url;
     }
-    return url.toLowerCase();
+    return url;
   }
 
   async onError(path: string, error: any) {

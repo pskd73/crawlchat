@@ -64,7 +64,7 @@ function cleanUrl(url: string) {
   if (!url.startsWith("http")) {
     url = "https://" + url;
   }
-  return url.toLowerCase();
+  return url;
 }
 
 async function updateLastMessageAt(threadId: string) {
