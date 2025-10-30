@@ -1326,7 +1326,7 @@ function Hero() {
       icon: <TbRobotFace />,
     },
     {
-      text: "Data gaps, analytics, corrections and more!",
+      text: "Categories, data gaps, analytics and more!",
       icon: <TbChartBar />,
     },
   ];
@@ -1894,7 +1894,6 @@ function Gallery() {
       poster:
         "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/landing-page-demo-poster.png",
       icon: <TbVideo />,
-      new: true,
     },
     {
       title: "Add your docs",
@@ -1911,26 +1910,26 @@ function Gallery() {
       img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/gallery/customise-chatbot.png",
       icon: <TbCode />,
     },
-    // {
-    //   title: "Analytics",
-    //   img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/gallery/analytics.png",
-    //   icon: <TbChartBar />,
-    // },
+    {
+      title: "Categories",
+      img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/gallery/categories.png",
+      icon: <TbFolder />,
+      new: true,
+    },
     {
       title: "Conversations",
       img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/gallery/messages.png",
       icon: <TbMessage />,
     },
-    {
-      title: "Performance",
-      img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/gallery/performance.png",
-      icon: <TbChartLine />,
-    },
+    // {
+    //   title: "Performance",
+    //   img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/gallery/performance.png",
+    //   icon: <TbChartLine />,
+    // },
     {
       title: "Data gaps",
       img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/gallery/data-gaps.png",
       icon: <TbChartBarOff />,
-      new: true,
     },
   ];
 
