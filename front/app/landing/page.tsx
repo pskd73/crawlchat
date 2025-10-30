@@ -1946,7 +1946,7 @@ function GalleryVideo({
         <div
           className={cn(
             "absolute w-full h-full bg-black/50",
-            "flex justify-center items-center"
+            "flex justify-center items-center flex-col gap-4"
           )}
         >
           <button
@@ -1958,6 +1958,7 @@ function GalleryVideo({
           >
             <TbPlayerPlayFilled size={82} />
           </button>
+          <div className="text-base-100">Plays with sound</div>
         </div>
       )}
 
@@ -1965,8 +1966,9 @@ function GalleryVideo({
         <div className="absolute p-4 flex items-center gap-2 bottom-0">
           <button
             className={cn(
-              "p-2 bg-primary text-primary-content rounded-full",
-              "cursor-pointer hover:scale-105 transition-all duration-200 z-10"
+              "p-2 bg-base-100 text-primary rounded-full",
+              "cursor-pointer hover:scale-105 transition-all duration-200 z-10",
+              "shadow"
             )}
             onClick={handlePause}
           >
@@ -1974,8 +1976,9 @@ function GalleryVideo({
           </button>
           <button
             className={cn(
-              "p-2 bg-primary text-primary-content rounded-full",
-              "cursor-pointer hover:scale-105 transition-all duration-200 z-10"
+              "p-2 bg-base-100 text-primary rounded-full",
+              "cursor-pointer hover:scale-105 transition-all duration-200 z-10",
+              "shadow"
             )}
             onClick={handleToggleMute}
           >
@@ -2113,6 +2116,7 @@ function Gallery() {
 
         {steps[activeStep].video && (
           <GalleryVideo
+            key={steps[activeStep].title.replace(" ", "-").toLowerCase()}
             id={steps[activeStep].title.replace(" ", "-").toLowerCase()}
             autoPlay={steps[activeStep].autoPlay ?? true}
             video={steps[activeStep].video}
