@@ -1,6 +1,6 @@
 import type { Route } from "./+types/page";
 import type { PropsWithChildren, ReactNode } from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   TbArrowDown,
   TbArrowRight,
@@ -33,6 +33,10 @@ import {
   TbLock,
   TbMail,
   TbMessage,
+  TbMusic,
+  TbMusicX,
+  TbPlayerPauseFilled,
+  TbPlayerPlayFilled,
   TbPlug,
   TbRobotFace,
   TbScoreboard,
@@ -1096,7 +1100,7 @@ export function Footer() {
           </div>
           <div className="flex-[2]">
             <ul className="flex flex-col gap-4">
-            <li>
+              <li>
                 <FooterLink href="/blog/crawlchat-vs-kapa-ai">
                   CrawlChat vs Kapa.ai
                 </FooterLink>
@@ -1885,12 +1889,123 @@ function FAQ() {
   );
 }
 
+function GalleryVideo({
+  id,
+  video,
+  poster,
+  autoPlay,
+}: {
+  id: string;
+  video: string;
+  poster: string;
+  autoPlay: boolean;
+}) {
+  const [playing, setPlaying] = useState(false);
+  const [muted, setMuted] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    function handlePlay() {
+      setPlaying(true);
+      track(`gallery-video-${id}`, {
+        video: video,
+      });
+    }
+    function handlePause() {
+      setPlaying(false);
+    }
+    videoRef.current?.addEventListener("play", handlePlay);
+    videoRef.current?.addEventListener("pause", handlePause);
+    return () => {
+      videoRef.current?.removeEventListener("play", handlePlay);
+      videoRef.current?.removeEventListener("pause", handlePause);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.muted = muted;
+    }
+  }, [muted]);
+
+  function handlePlay() {
+    videoRef.current?.play();
+  }
+
+  function handleToggleMute() {
+    setMuted(!muted);
+  }
+
+  function handlePause() {
+    videoRef.current?.pause();
+  }
+
+  return (
+    <div className="relative">
+      {!playing && (
+        <div
+          className={cn(
+            "absolute w-full h-full bg-black/50",
+            "flex justify-center items-center"
+          )}
+        >
+          <button
+            className={cn(
+              "p-10 bg-primary text-primary-content rounded-full",
+              "cursor-pointer hover:scale-105 transition-all duration-200 z-10"
+            )}
+            onClick={handlePlay}
+          >
+            <TbPlayerPlayFilled size={82} />
+          </button>
+        </div>
+      )}
+
+      {playing && (
+        <div className="absolute p-4 flex items-center gap-2 bottom-0">
+          <button
+            className={cn(
+              "p-2 bg-primary text-primary-content rounded-full",
+              "cursor-pointer hover:scale-105 transition-all duration-200 z-10"
+            )}
+            onClick={handlePause}
+          >
+            <TbPlayerPauseFilled size={24} />
+          </button>
+          <button
+            className={cn(
+              "p-2 bg-primary text-primary-content rounded-full",
+              "cursor-pointer hover:scale-105 transition-all duration-200 z-10"
+            )}
+            onClick={handleToggleMute}
+          >
+            {!muted ? <TbMusicX size={24} /> : <TbMusic size={24} />}
+          </button>
+        </div>
+      )}
+
+      <video
+        ref={videoRef}
+        autoPlay={autoPlay ?? true}
+        src={video}
+        poster={poster}
+        className={cn("w-full h-full object-cover")}
+      />
+    </div>
+  );
+}
+
 function Gallery() {
   const steps = [
     {
-      title: "Dashboard",
-      img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/gallery/dashboard.png",
-      icon: <TbDashboard />,
+      title: "Intro",
+      icon: <TbVideo />,
+      video:
+        "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/gallery/intro.mp4",
+      poster:
+        "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/gallery/intro-poster.png",
+      new: true,
+      autoPlay: false,
     },
     {
       title: "Demo",
@@ -1899,6 +2014,11 @@ function Gallery() {
       poster:
         "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/landing-page-demo-poster.png",
       icon: <TbVideo />,
+    },
+    {
+      title: "Dashboard",
+      img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/gallery/dashboard.png",
+      icon: <TbDashboard />,
     },
     {
       title: "Add your docs",
@@ -1992,12 +2112,11 @@ function Gallery() {
         )}
 
         {steps[activeStep].video && (
-          <video
-            autoPlay
-            controls
-            src={steps[activeStep].video}
+          <GalleryVideo
+            id={steps[activeStep].title.replace(" ", "-").toLowerCase()}
+            autoPlay={steps[activeStep].autoPlay ?? true}
+            video={steps[activeStep].video}
             poster={steps[activeStep].poster}
-            className={cn("w-full h-full object-cover")}
           />
         )}
       </div>
@@ -2028,7 +2147,7 @@ function Gallery() {
               <span
                 className={cn(
                   "badge badge-error badge-xs",
-                  "absolute top-0 right-0",
+                  "absolute top-0 right-0 z-10",
                   "translate-x-1/2 -translate-y-1/2"
                 )}
               >
@@ -2301,7 +2420,11 @@ function SecondaryCTA({
   ctaLabel: string;
 }) {
   return (
-    <div className={cn("border border-primary/20 rounded-box overflow-hidden flex-1")}>
+    <div
+      className={cn(
+        "border border-primary/20 rounded-box overflow-hidden flex-1"
+      )}
+    >
       <div
         className={cn(
           "p-4 border-b border-primary/20",
