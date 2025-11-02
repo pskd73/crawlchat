@@ -80,6 +80,10 @@ export default function User({ loaderData }: Route.ComponentProps) {
           { label: "Message credits", value: user.plan?.credits?.messages },
           { label: "Created At", value: user.createdAt.toLocaleString() },
           { label: "Plan", value: user.plan?.planId },
+          {
+            label: "Plan activated at",
+            value: user.plan?.activatedAt.toLocaleString() ?? "-",
+          },
           { label: "Pages limit", value: user.plan?.limits?.pages },
           {
             label: "Members limit",
