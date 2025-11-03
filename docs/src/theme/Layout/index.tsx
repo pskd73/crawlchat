@@ -29,6 +29,7 @@ export default function LayoutWrapper(props: Props): ReactNode {
         sidePanel
         sidePanelOpen
         hideToc
+        noPrimaryColor
       />
     </>
   );

@@ -84,6 +84,9 @@ class CrawlChatEmbed {
       params.set("height", window.innerHeight.toString() + "px");
       params.set("fullscreen", "true");
     }
+    if (this.getScriptElem()?.dataset.noPrimaryColor === "true") {
+      params.set("noPrimaryColor", "true");
+    }
     const src = `${this.host}/w/${this.scrapeId}?${params.toString()}`;
 
     iframe.src = src;
@@ -284,8 +287,17 @@ class CrawlChatEmbed {
 
     sidepanel.appendChild(this.makeResizeDiv());
 
+    const params = new URLSearchParams({
+      embed: "true",
+      fullscreen: "true",
+      sidepanel: "true",
+    });
+    if (this.getScriptElem()?.dataset.noPrimaryColor === "true") {
+      params.set("noPrimaryColor", "true");
+    }
+
     const iframe = document.createElement("iframe");
-    iframe.src = `${this.host}/w/${this.scrapeId}?embed=true&fullscreen=true&sidepanel=true`;
+    iframe.src = `${this.host}/w/${this.scrapeId}?${params.toString()}`;
     iframe.allowTransparency = "true";
     iframe.allow = "clipboard-write";
     iframe.className = "crawlchat-embed";
@@ -381,8 +393,8 @@ class CrawlChatEmbed {
   }
 
   mountContentSelectTooltip() {
-    const buttons = JSON.parse(this.getScriptElem()?.dataset.selectionButtons)
-    
+    const buttons = JSON.parse(this.getScriptElem()?.dataset.selectionButtons);
+
     let tooltip = null;
     let isSelecting = false;
     let hideTimeout = null;
@@ -461,20 +473,23 @@ class CrawlChatEmbed {
       if (selection && selection.toString().trim().length > 0) {
         const range = selection.getRangeAt(0);
         const commonAncestor = range.commonAncestorContainer;
-        const mainElement = commonAncestor.nodeType === Node.TEXT_NODE 
-          ? commonAncestor.parentElement.closest('main')
-          : commonAncestor.closest('main');
-        
-        const noSelectionElements = document.querySelectorAll('.no-crawlchat-selection');
+        const mainElement =
+          commonAncestor.nodeType === Node.TEXT_NODE
+            ? commonAncestor.parentElement.closest("main")
+            : commonAncestor.closest("main");
+
+        const noSelectionElements = document.querySelectorAll(
+          ".no-crawlchat-selection"
+        );
         let hasExcludedContent = false;
-        
+
         for (const excludedElement of noSelectionElements) {
           if (range.intersectsNode(excludedElement)) {
             hasExcludedContent = true;
             break;
           }
         }
-        
+
         if (mainElement && !hasExcludedContent) {
           showTooltip(selection);
           isSelecting = true;

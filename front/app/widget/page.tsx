@@ -75,6 +75,12 @@ export async function loader({ params, request }: Route.LoaderArgs) {
     return redirect("/w/not-found");
   }
 
+  const url = new URL(request.url);
+  const noPrimaryColor = url.searchParams.get("noPrimaryColor") === "true";
+  if (noPrimaryColor && scrape.widgetConfig) {
+    scrape.widgetConfig.applyColorsToChatbox = false;
+  }
+
   let messages: Message[] = [];
   let thread: Thread | null = null;
   let userToken: string | null = null;
