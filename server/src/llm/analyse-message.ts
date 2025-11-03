@@ -162,6 +162,7 @@ export async function analyseMessage(
   let prompt = `
     You are a helpful assistant that analyses a message and returns a message analysis.
     You need to analyse the question, answer and the sources provided and give back the details provided.
+    You need to provide the response in the mentioned schema.
 
     <question>
     ${question}
@@ -278,6 +279,10 @@ export async function analyseMessage(
   if (!content) {
     return null;
   }
+
+  console.log("=== content ===");
+  console.log(content);
+  console.log("===");
 
   return JSON.parse(content as string) as {
     questionSentiment: QuestionSentiment;
