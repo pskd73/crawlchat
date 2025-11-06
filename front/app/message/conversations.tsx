@@ -108,7 +108,6 @@ export function meta() {
   });
 }
 
-
 export async function action({ request }: Route.ActionArgs) {
   const user = await getAuthUser(request);
   const scrapeId = await getSessionScrapeId(request);
@@ -229,8 +228,10 @@ export default function Conversations({ loaderData }: Route.ComponentProps) {
                         {thread.location?.country && (
                           <CountryFlag location={thread.location} />
                         )}
-                        <span className="text-base-content/80">
-                          {thread.id.substring(thread.id.length - 4)}
+                        <span className="text-base-content/80 line-clamp-1">
+                          {thread.messages[0]?.llmMessage
+                            ? (thread.messages[0]?.llmMessage as any).content
+                            : thread.id.substring(thread.id.length - 4)}
                         </span>
                       </div>
                       <div className="flex gap-2 items-center">
@@ -283,23 +284,22 @@ export default function Conversations({ loaderData }: Route.ComponentProps) {
             </div>
           </div>
 
-          <div className="w-[500px] relative">
+          <div className="w-[600px] relative">
             {selectedThread && (
-                <ChatBoxProvider
-                  key={selectedThread.id}
-                  scrape={loaderData.scrape!}
-                  thread={selectedThread}
-                  messages={selectedThread.messages}
-                  embed={false}
-                  admin={true}
-                  token={null}
-                  readonly={true}
-                >
-                  <ChatboxContainer>
-                    <ChatBox />
-                  </ChatboxContainer>
-                </ChatBoxProvider>
-              
+              <ChatBoxProvider
+                key={selectedThread.id}
+                scrape={loaderData.scrape!}
+                thread={selectedThread}
+                messages={selectedThread.messages}
+                embed={false}
+                admin={true}
+                token={null}
+                readonly={true}
+              >
+                <ChatboxContainer>
+                  <ChatBox />
+                </ChatboxContainer>
+              </ChatBoxProvider>
             )}
 
             <div className="absolute top-0 right-0">
