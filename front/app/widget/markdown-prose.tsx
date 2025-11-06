@@ -26,7 +26,7 @@ const RichCreateTicket = ({
 }: {
   title: string;
   message: string;
-  onTicketCreate: (email: string, title: string, message: string) => void;
+  onTicketCreate?: (email: string, title: string, message: string) => void;
   loading?: boolean;
   disabled?: boolean;
   customerEmail?: string;
@@ -41,7 +41,7 @@ const RichCreateTicket = ({
       return;
     }
 
-    onTicketCreate(email, title, message);
+    onTicketCreate?.(email, title, message);
   }
 
   return (
@@ -77,7 +77,11 @@ const RichCreateTicket = ({
             disabled={disabled || !!customerEmail}
           />
           <div className="flex justify-end">
-            <button className="btn" onClick={handleSubmit} disabled={disabled}>
+            <button
+              className="btn"
+              onClick={handleSubmit}
+              disabled={disabled || !onTicketCreate}
+            >
               {loading && (
                 <span className="loading loading-spinner loading-xs" />
               )}
@@ -259,17 +263,14 @@ export function MarkdownProse({
             if (language.startsWith("json|")) {
               try {
                 const json = JSON.parse(jsonrepair(children as string));
-                if (
-                  language === "json|create-ticket" &&
-                  options?.onTicketCreate
-                ) {
+                if (language === "json|create-ticket") {
                   return (
                     <RichCreateTicket
                       {...json}
-                      onTicketCreate={options.onTicketCreate}
-                      loading={options.ticketCreateLoading}
-                      disabled={options.disabled}
-                      customerEmail={options.customerEmail}
+                      onTicketCreate={options?.onTicketCreate}
+                      loading={options?.ticketCreateLoading}
+                      disabled={options?.disabled}
+                      customerEmail={options?.customerEmail}
                     />
                   );
                 }

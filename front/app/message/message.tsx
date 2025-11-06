@@ -1,9 +1,9 @@
 import type { Route } from "./+types/message";
 import type { ApiAction, CategorySuggestion, Message } from "libs/prisma";
 import {
-  TbChartBar,
   TbFolder,
   TbMessage,
+  TbMessages,
   TbPhoto,
   TbPlus,
   TbSettingsBolt,
@@ -17,7 +17,6 @@ import {
   Link as RouterLink,
   useFetcher,
   useLocation,
-  useNavigate,
 } from "react-router";
 import { CountryFlag } from "./country-flag";
 import { extractCitations } from "libs/citation";
@@ -27,7 +26,6 @@ import { authoriseScrapeUser, getSessionScrapeId } from "~/scrapes/util";
 import { Rating } from "./rating-badge";
 import { Page } from "~/components/page";
 import { ChannelBadge } from "~/components/channel-badge";
-import toast from "react-hot-toast";
 import cn from "@meltdownjs/cn";
 import moment from "moment";
 import { ScoreBadge } from "~/components/score-badge";
@@ -161,29 +159,35 @@ function AssistantMessage({
 
   return (
     <div className="flex flex-col gap-4 max-w-prose">
-      <MarkdownProse
-        sources={Object.values(citation.citedLinks).map((link) => ({
-          title: link?.title ?? link?.url ?? "Source",
-          url: link?.url ?? undefined,
-        }))}
-        options={{
-          disabled: true,
-          onSourceMouseEnter: (index) => {
-            for (let i = 0; i < Object.keys(citation.citedLinks).length; i++) {
-              if (
-                citation.citedLinks[i].fetchUniqueId ===
-                message.links[index].fetchUniqueId
+      <div className="bg-base-200/50 rounded-box p-4 shadow border border-base-300">
+        <MarkdownProse
+          sources={Object.values(citation.citedLinks).map((link) => ({
+            title: link?.title ?? link?.url ?? "Source",
+            url: link?.url ?? undefined,
+          }))}
+          options={{
+            disabled: true,
+            onSourceMouseEnter: (index) => {
+              for (
+                let i = 0;
+                i < Object.keys(citation.citedLinks).length;
+                i++
               ) {
-                setHoveredUniqueId(message.links[index].fetchUniqueId);
-                break;
+                if (
+                  citation.citedLinks[i].fetchUniqueId ===
+                  message.links[index].fetchUniqueId
+                ) {
+                  setHoveredUniqueId(message.links[index].fetchUniqueId);
+                  break;
+                }
               }
-            }
-          },
-          onSourceMouseLeave: () => setHoveredUniqueId(null),
-        }}
-      >
-        {citation.content}
-      </MarkdownProse>
+            },
+            onSourceMouseLeave: () => setHoveredUniqueId(null),
+          }}
+        >
+          {citation.content}
+        </MarkdownProse>
+      </div>
 
       {message.links.length > 0 && (
         <div className="flex flex-col gap-2">
@@ -353,13 +357,25 @@ export default function Message({ loaderData }: Route.ComponentProps) {
       title="Message"
       icon={<TbMessage />}
       right={
-        <Link
-          className="btn btn-primary"
-          to={`/messages/${messagePair?.queryMessage?.id}/fix`}
-        >
-          <TbSettingsBolt />
-          Correct it
-        </Link>
+        <>
+          {!messagePair?.queryMessage?.thread.isDefault && (
+            <Link
+              className="btn btn-primary btn-soft"
+              to={`/messages/conversations?id=${messagePair?.queryMessage?.threadId}`}
+              target="_blank"
+            >
+              <TbMessages />
+              View conversation
+            </Link>
+          )}
+          <Link
+            className="btn btn-primary"
+            to={`/messages/${messagePair?.queryMessage?.id}/fix`}
+          >
+            <TbSettingsBolt />
+            Correct it
+          </Link>
+        </>
       }
     >
       <div className="flex flex-col gap-6">

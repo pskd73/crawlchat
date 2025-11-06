@@ -112,7 +112,6 @@ function AssistantMessage({
     <div className="flex flex-col gap-2">
       <Sources citation={citation} />
       <MarkdownProse
-        size={"md"}
         sources={Object.values(citation.citedLinks).map((link) => ({
           title: link?.title ?? link?.url ?? "Source",
           url: link?.url ?? undefined,
