@@ -346,6 +346,8 @@ model Thread {
   emailOtp        String?
   emailEntered    String?
 
+  clientThreadId  String?
+
   scrape          Scrape   @relation(fields: [scrapeId], references: [id], onDelete: Cascade)
   
   messages        Message[]

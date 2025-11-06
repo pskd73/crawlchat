@@ -694,11 +694,17 @@ app.post("/answer/:scrapeId", authenticate, async (req, res) => {
   let thread = await prisma.thread.findFirst({
     where: { scrapeId: scrape.id, isDefault: true },
   });
+  if (req.body.clientThreadId) {
+    thread = await prisma.thread.findFirst({
+      where: { clientThreadId: req.body.clientThreadId },
+    });
+  }
   if (!thread) {
     thread = await prisma.thread.create({
       data: {
         scrapeId: scrape.id,
-        isDefault: true,
+        isDefault: !req.body.clientThreadId,
+        clientThreadId: req.body.clientThreadId,
       },
     });
   }

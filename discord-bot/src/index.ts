@@ -340,12 +340,30 @@ client.on(Events.MessageCreate, async (message) => {
     messages.push(await makeMessage(message, scrape));
 
     let response = "Something went wrong";
+    let discordThread = null;
+
+    if (
+      scrape.discordConfig?.replyAsThread &&
+      message.channel.type !== ChannelType.PublicThread
+    ) {
+      const shortQuery = cleanContent(
+        removeBotMentions(message.content)
+      ).substring(0, 50);
+      discordThread = await message.startThread({
+        name: `Response to: ${shortQuery}${
+          shortQuery.length > 50 ? "..." : ""
+        }`,
+        autoArchiveDuration: ThreadAutoArchiveDuration.ThreeDays,
+      });
+    }
+
     const {
       answer,
       error,
       message: answerMessage,
     } = await query(scrape.id, messages, createToken(scrape.userId), {
       prompt: defaultPrompt,
+      clientThreadId: discordThread?.id,
     });
 
     if (error) {
@@ -359,20 +377,8 @@ client.on(Events.MessageCreate, async (message) => {
 
     let replyResult;
 
-    if (
-      scrape.discordConfig?.replyAsThread &&
-      message.channel.type !== ChannelType.PublicThread
-    ) {
-      const shortQuery = cleanContent(
-        removeBotMentions(message.content)
-      ).substring(0, 50);
-      const thread = await message.startThread({
-        name: `Response to: ${shortQuery}${
-          shortQuery.length > 50 ? "..." : ""
-        }`,
-        autoArchiveDuration: ThreadAutoArchiveDuration.ThreeDays,
-      });
-      replyResult = await thread.send(response);
+    if (discordThread) {
+      replyResult = await discordThread.send(response);
     } else {
       replyResult = await message.reply(response);
     }
