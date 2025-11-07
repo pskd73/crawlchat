@@ -31,12 +31,12 @@ You need to pass the following headers in the request
 
 Pass the following information in the body of the request
 
-| Key                     | Type                   | Note                                                              |
-| ----------------------- | ---------------------- | ----------------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------- |
-| `userEmail` (required)  | `STRING`               | The email of the user whose on behalf the ticket is being created |
-| `title` (required)      | `STRING`               | The title of the ticket                                           |
-| `message` (required)    | `STRING`               | The message about the ticket issue                                |
-| `customTags` (optional) | `Record<string, string | boolean                                                           | number>` | Any custom information that will be set on the ticket and will be shown on the dashboard |
+| Key                     | Type     | Note                                                                                                                                                      |
+| ----------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `userEmail` (required)  | `STRING` | The email of the user whose on behalf the ticket is being created                                                                                         |
+| `title` (required)      | `STRING` | The title of the ticket                                                                                                                                   |
+| `message` (required)    | `STRING` | The message about the ticket issue                                                                                                                        |
+| `customTags` (optional) | `Json`   | Any custom information that will be set on the ticket and will be shown on the dashboard. The value should be on of `string`, `number` or `boolean` types |
 
 ### CURL Request
 
