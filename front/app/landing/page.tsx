@@ -1041,7 +1041,10 @@ export function CTA({ text }: { text?: string }) {
         <div className="flex justify-center mt-8">
           <a
             href="/login"
-            className={cn(ctaClassNames(true), "bg-base-100 border-0 text-accent")}
+            className={cn(
+              ctaClassNames(true),
+              "bg-base-100 border-0 text-accent"
+            )}
           >
             Get started
             <TbArrowRight />
@@ -1321,15 +1324,15 @@ function Hero() {
 
   const features = [
     {
-      text: "Web widgets",
+      text: "Embed on web",
       icon: <TbWorld />,
     },
     {
-      text: "Discord & Slack bots with MCP server",
+      text: "Discord, Slack, MCP and API integrations",
       icon: <TbRobotFace />,
     },
     {
-      text: "Categories, data gaps, analytics and more!",
+      text: "Analytics and observability",
       icon: <TbChartBar />,
     },
   ];
@@ -1357,13 +1360,13 @@ function Hero() {
         )}
 
         <h1 className="font-radio-grotesk text-[42px] md:text-[58px] leading-[1.1]">
-          Make your technical docs answer queries{" "}
-          <span className="text-primary">instantly!</span>
+          <span className="text-primary">AI Assistant</span> for your
+          documentation that answers the queries!
         </h1>
 
         <p className="text-xl mt-6 text-base-content/60">
-          Your users don't want to dig through endless pages of docs. They want
-          answers that meet them where they are. With CrawlChat you get
+          Add Ask AI to your documentation and let your users find answers for
+          their questions instantly!
           <ul className="mt-4 flex flex-col gap-2">
             {features.map((feature, index) => (
               <li key={index} className="flex items-center gap-2">
