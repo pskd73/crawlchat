@@ -1,4 +1,4 @@
-import type { Message } from "libs/prisma";
+import type { Message, QuestionSentiment } from "libs/prisma";
 
 export function getMessagesSummary(messages: Message[]) {
   const dailyMessages: Record<string, number> = {};
@@ -100,15 +100,18 @@ export function getMessagesSummary(messages: Message[]) {
 
   const resolvedCount = messages.filter((m) => m.analysis?.resolved).length;
 
-  const happyPct =
-    messages.filter((m) => m.analysis?.questionSentiment === "happy").length /
-    questions;
-  const sadPct =
-    messages.filter((m) => m.analysis?.questionSentiment === "sad").length /
-    questions;
-  const neutralPct =
-    messages.filter((m) => m.analysis?.questionSentiment === "neutral").length /
-    questions;
+  const sentimentCounts: Record<QuestionSentiment, number> = {
+    happy: 0,
+    sad: 0,
+    neutral: 0,
+  };
+  for (const message of messages) {
+    if (!message.analysis?.questionSentiment) continue;
+    sentimentCounts[message.analysis.questionSentiment]++;
+  }
+  const happyPct = questions > 0 ? sentimentCounts.happy / questions : 0;
+  const sadPct = questions > 0 ? sentimentCounts.sad / questions : 0;
+  const neutralPct = questions > 0 ? sentimentCounts.neutral / questions : 0;
 
   return {
     messagesCount: Object.values(dailyMessages).reduce(
