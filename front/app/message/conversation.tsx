@@ -136,7 +136,7 @@ export default function Conversation({ loaderData }: Route.ComponentProps) {
     >
       <div
         className={cn(
-          "bg-base-200 border border-base-300 rounded-box",
+          "bg-base-200/50 border border-base-300 rounded-box",
           "sticky top-[76px] max-w-prose w-full"
         )}
       >
