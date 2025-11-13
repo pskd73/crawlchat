@@ -1,5 +1,5 @@
 import type { Route } from "./+types/layout";
-import { Outlet, redirect, useFetcher } from "react-router";
+import { Outlet, useFetcher } from "react-router";
 import { AppContext, useApp } from "./context";
 import { getAuthUser } from "~/auth/middleware";
 import { SideMenu } from "./side-menu";
@@ -33,23 +33,6 @@ export async function loader({ request }: Route.LoaderArgs) {
 
   const session = await getSession(request.headers.get("cookie"));
   const scrapeId = session.get("scrapeId");
-
-  const url = new URL(request.url);
-  const skipOnboarding = url.searchParams.get("skip-onboarding");
-
-  if (skipOnboarding) {
-    await prisma.user.update({
-      where: { id: user!.id },
-      data: { showOnboarding: false },
-    });
-    throw redirect("/app");
-  }
-
-  const isWelcome = request.url.endsWith("/welcome");
-
-  if (user!.showOnboarding && !isWelcome) {
-    throw redirect("/welcome");
-  }
 
   const scrapes = await prisma.scrapeUser
     .findMany({
@@ -105,7 +88,6 @@ export async function loader({ request }: Route.LoaderArgs) {
     starterPlan: PLAN_STARTER,
     proPlan: PLAN_PRO,
     hobbyPlan: PLAN_HOBBY,
-    isWelcome,
     usedPages,
   };
 }
@@ -145,35 +127,33 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
           </div>
         </div>
 
-        {!loaderData.isWelcome && (
-          <div className="drawer-side z-20">
-            <label
-              htmlFor="side-menu-drawer"
-              aria-label="close sidebar"
-              className="drawer-overlay"
+        <div className="drawer-side z-20">
+          <label
+            htmlFor="side-menu-drawer"
+            aria-label="close sidebar"
+            className="drawer-overlay"
+          />
+          <div
+            className={cn(
+              "h-full w-68 bg-base-100 overflow-auto",
+              "md:border-r md:border-base-300"
+            )}
+          >
+            <SideMenu
+              loggedInUser={user}
+              scrapeOwner={loaderData.scrape?.user!}
+              plan={loaderData.plan}
+              scrapes={loaderData.scrapes}
+              scrapeId={loaderData.scrapeId}
+              scrapeIdFetcher={scrapeIdFetcher}
+              toBeFixedMessages={loaderData.toBeFixedMessages}
+              openTickets={loaderData.openTickets}
+              dataGapMessages={loaderData.dataGapMessages.length}
+              scrape={loaderData.scrape}
+              usedPages={loaderData.usedPages}
             />
-            <div
-              className={cn(
-                "h-full w-68 bg-base-100 overflow-auto",
-                "md:border-r md:border-base-300"
-              )}
-            >
-              <SideMenu
-                loggedInUser={user}
-                scrapeOwner={loaderData.scrape?.user!}
-                plan={loaderData.plan}
-                scrapes={loaderData.scrapes}
-                scrapeId={loaderData.scrapeId}
-                scrapeIdFetcher={scrapeIdFetcher}
-                toBeFixedMessages={loaderData.toBeFixedMessages}
-                openTickets={loaderData.openTickets}
-                dataGapMessages={loaderData.dataGapMessages.length}
-                scrape={loaderData.scrape}
-                usedPages={loaderData.usedPages}
-              />
-            </div>
           </div>
-        )}
+        </div>
       </div>
       <Toaster position="bottom-right" />
       <UpgradeModal

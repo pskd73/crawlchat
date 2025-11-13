@@ -1603,7 +1603,7 @@ export function JonnyTestimonial() {
         </div>
       }
       author="Jonny Burger"
-      authorImage="https://pbs.twimg.com/profile_images/1701672174661046272/Ez-SKeJ1_400x400.jpg"
+      authorImage="/testi-profile/jonny.jpg"
       authorLink="https://x.com/JNYBGR/status/1899786274635927674"
       icon={<TbBrandX />}
       authorCompany="Remotion"
@@ -1622,7 +1622,7 @@ export function EgelhausTestimonial() {
         </div>
       }
       author="Egelhaus"
-      authorImage="https://avatars.githubusercontent.com/u/156946629?v=4"
+      authorImage="/testi-profile/egelhaus.png"
       authorLink="https://github.com/egelhaus"
       icon={<TbBrandDiscord />}
       authorCompany="Postiz"
@@ -1642,7 +1642,7 @@ export function AntonTestimonial() {
         </div>
       }
       author="Anton Lavrenov"
-      authorImage="https://pbs.twimg.com/profile_images/1561788279313383424/RcRFiKnE_400x400.png"
+      authorImage="/testi-profile/anton.png"
       authorLink="https://x.com/lavrton/status/1915467775734350149"
       icon={<TbBrandX />}
       authorCompany="Konvajs & Polotno"
@@ -1661,7 +1661,7 @@ export function MauritsTestimonial() {
         </div>
       }
       author="Maurits Koekoek"
-      authorImage="https://media.licdn.com/dms/image/v2/D4E03AQG-zmBs0zHLvA/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1683012930288?e=1762992000&v=beta&t=-WWlQX12NNN2OwenPmyI0FW42zOuScR_4Ei2IcRr18Y"
+      authorImage="/testi-profile/maurits.jpeg"
       authorLink="https://www.linkedin.com/feed/update/urn:li:activity:7353688013584977920?commentUrn=urn%3Ali%3Acomment%3A%28activity%3A7353688013584977920%2C7353699420036571137%29&dashCommentUrn=urn%3Ali%3Afsd_comment%3A%287353699420036571137%2Curn%3Ali%3Aactivity%3A7353688013584977920%29"
       icon={<TbBrandLinkedin />}
       authorCompany="270 Degrees"

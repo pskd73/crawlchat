@@ -148,7 +148,7 @@ export function Page({
           </div>
         )}
 
-        {scrape?.llmModel && !productionLlmModels.includes(scrape.llmModel) && (
+        {!productionLlmModels.includes(currentLlmModel) && (
           <div role="alert" className="alert alert-warning alert-dash mb-4">
             <TbAlertTriangle size={20} />
             <span>

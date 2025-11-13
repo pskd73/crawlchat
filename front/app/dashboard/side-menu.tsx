@@ -5,12 +5,11 @@ import {
   TbArrowDown,
   TbArrowRight,
   TbBook,
-  TbBrandDiscord,
   TbChartBarOff,
+  TbChartLine,
   TbChevronDown,
   TbChevronUp,
   TbCreditCard,
-  TbHelp,
   TbHome,
   TbKey,
   TbLogout,
@@ -92,7 +91,7 @@ function CreditProgress({
 
   return (
     <div className="flex flex-col gap-1">
-      <div className="flex justify-between text-sm">
+      <div className="flex justify-between text-xs">
         {title}
         <div className="tooltip tooltip-left" data-tip={tip}>
           {numberToKMB(used)} / {numberToKMB(total)}
@@ -101,14 +100,17 @@ function CreditProgress({
       <progress
         className={cn(
           "progress",
-          percentage > 80 && "progress-error",
-          percentage > 60 && "progress-warning",
-          percentage > 40 && "progress-info",
-          percentage > 20 && "progress-success"
+          percentage > 80
+            ? "progress-error"
+            : percentage > 60
+            ? "progress-warning"
+            : percentage > 40
+            ? "progress-info"
+            : "progress-success"
         )}
         value={value}
         max={total}
-      ></progress>
+      />
     </div>
   );
 }
@@ -158,8 +160,8 @@ function SetupProgress({ scrapeId }: { scrapeId: string }) {
   }
 
   return (
-    <div className="flex flex-col gap-1 w-full">
-      <div className="flex gap-1 text-xs opacity-50">
+    <div className="flex flex-col gap-1 w-full items-center">
+      <div className="flex gap-1 text-xs opacity-50 items-center">
         Next step
         <TbArrowDown />
       </div>
@@ -218,17 +220,11 @@ export function SideMenu({
 }) {
   const links = useMemo(() => {
     const links = [
-      { label: "Home", to: "/app", icon: <TbHome /> },
+      { label: "Summary", to: "/app", icon: <TbChartLine /> },
       {
         label: "Knowledge",
         to: "/knowledge",
         icon: <TbBook />,
-        forScrape: true,
-      },
-      {
-        label: "Actions",
-        to: "/actions",
-        icon: <TbPointer />,
         forScrape: true,
       },
       {
@@ -257,9 +253,9 @@ export function SideMenu({
         forScrape: true,
       },
       {
-        label: "Compose",
-        to: "/compose",
-        icon: <TbPencil />,
+        label: "Actions",
+        to: "/actions",
+        icon: <TbPointer />,
         forScrape: true,
       },
       {
@@ -269,15 +265,21 @@ export function SideMenu({
         forScrape: true,
       },
       {
-        label: "API Keys",
-        to: "/api-key",
-        icon: <TbKey />,
-      },
-      {
         label: "Team",
         to: "/team",
         icon: <TbUsers />,
         forScrape: true,
+      },
+      {
+        label: "Compose",
+        to: "/compose",
+        icon: <TbPencil />,
+        forScrape: true,
+      },
+      {
+        label: "API Keys",
+        to: "/api-key",
+        icon: <TbKey />,
       },
       { label: "Profile", to: "/profile", icon: <TbUser /> },
     ];
@@ -389,7 +391,7 @@ export function SideMenu({
       </div>
 
       <div className="p-4 flex flex-col gap-2">
-        <div className="flex justify-center items-center gap-1">
+        {/* <div className="flex justify-center items-center gap-1">
           <div className="tooltip" data-tip="Join on Discord">
             <a
               href="https://discord.gg/zW3YmCRJkC"
@@ -414,12 +416,13 @@ export function SideMenu({
               <TbMessage />
             </Link>
           </div>
-        </div>
-        {/* {scrapeId && <SetupProgress scrapeId={scrapeId} />} */}
+        </div> */}
+
+        {scrapeId && <SetupProgress scrapeId={scrapeId} />}
         <div
           className={cn(
             "flex flex-col gap-2 bg-base-200 rounded-box",
-            "p-4 border border-base-300"
+            "p-3 border border-base-300"
           )}
         >
           <CreditProgress

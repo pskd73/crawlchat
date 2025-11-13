@@ -65,7 +65,7 @@ export const allSetupProgressActions: SetupProgressAction[] = [
   {
     id: "upgrade",
     title: "Upgrade now",
-    description: "Upgrade to a paid plan (owner)",
+    description: "Upgrade to a paid plan",
     checker: (input) => input.scrape?.user.plan?.planId === "free",
     url: () => "/profile#billing",
     icon: <TbCrown />,
