@@ -3,6 +3,44 @@ import { OrderedSet } from "./ordered-set";
 import { parseHtml, ParseOutput } from "./parse";
 import { scrapePw } from "./playwright";
 
+const heavyFiles = [
+  ".jpg",
+  ".jpeg",
+  ".png",
+  ".gif",
+  ".mp4",
+  ".pdf",
+  ".doc",
+  ".docx",
+  ".xls",
+  ".xlsx",
+  ".ppt",
+  ".pptx",
+  ".zip",
+  ".rar",
+  ".7z",
+  ".tar",
+  ".gz",
+  ".bz2",
+  ".xz",
+  ".wmv",
+  ".avi",
+  ".mov",
+  ".flv",
+  ".wma",
+  ".mp3",
+  ".ogg",
+  ".aac",
+  ".m4a",
+  ".m4v",
+  ".m4b",
+  ".m4p",
+  ".m4r",
+  ".m4b",
+  ".m4p",
+  ".m4r",
+];
+
 export type ScrapeStore = {
   urls: Record<
     string,
@@ -145,7 +183,6 @@ export async function scrapeWithLinks(
       continue;
     }
 
-    const heavyFiles = [".jpg", ".jpeg", ".png", ".gif", ".mp4", ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx"];
     if (heavyFiles.some((file) => linkUrlStr.endsWith(file))) {
       continue;
     }
