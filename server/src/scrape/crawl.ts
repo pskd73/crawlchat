@@ -145,6 +145,11 @@ export async function scrapeWithLinks(
       continue;
     }
 
+    const heavyFiles = [".jpg", ".jpeg", ".png", ".gif", ".mp4", ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx"];
+    if (heavyFiles.some((file) => linkUrlStr.endsWith(file))) {
+      continue;
+    }
+
     store.urlSet.add(linkUrlStr);
   }
 
