@@ -231,7 +231,7 @@ export default function Conversations({ loaderData }: Route.ComponentProps) {
                         : thread.id.substring(thread.id.length - 4)}
                     </Link>
                   </div>
-                  <div className="flex gap-2 items-center flex-wrap">
+                  <div className="flex gap-2 items-center">
                     {thread.ticketStatus && (
                       <div
                         className="tooltip tooltip-left"

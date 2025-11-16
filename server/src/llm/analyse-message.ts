@@ -202,6 +202,7 @@ export async function analyseMessage(
         Use the recent questions to generate follow up questions.
         Don't use the recent questions as it is.
         Use the thread questions to generate follow up questions related to the thread.
+        It should be as if the user is asking the question to the assistant.
         Max it should be 3 questions.
         It should not be part of thread questions.
       `

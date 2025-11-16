@@ -167,6 +167,12 @@ export default function Conversation({ loaderData }: Route.ComponentProps) {
                     <span>Make a blog post</span>
                   </Link>
                 </li>
+                <li>
+                  <Link to={`/compose?threadId=${loaderData.thread.id}`}>
+                    <TbPencil />
+                    <span>Compose</span>
+                  </Link>
+                </li>
               </ul>
             </div>
           </div>

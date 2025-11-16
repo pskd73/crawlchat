@@ -205,9 +205,12 @@ export default function Compose({ loaderData }: Route.ComponentProps) {
         <input type="hidden" name="format" value={format} />
 
         {loaderData.thread && (
-          <div className="bg-base-200 p-4 rounded-box border border-base-300 shadow line-clamp-1">
-            Using conversation:{" "}
-            <span>
+          <div
+            className={cn(
+              "bg-base-200 p-4 rounded-box border border-base-300 shadow"
+            )}
+          >
+            <span className="line-clamp-1">
               {loaderData.thread.title ??
                 (loaderData.thread.messages[0].llmMessage?.content as string)}
             </span>
