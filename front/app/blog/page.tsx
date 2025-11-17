@@ -35,13 +35,24 @@ export default function BlogPage({ loaderData }: Route.ComponentProps) {
             <p className="opacity-60 text-center text-lg max-w-3xl mx-auto">
               {loaderData.post.description}
             </p>
+
             <div className="flex items-center justify-center gap-2 text-sm opacity-60 text-center">
               <TbClock />
               {moment(loaderData.post.date).format("MMMM D, YYYY")}
             </div>
           </div>
 
-          <div className="prose dark:prose-invert mx-auto mt-20 max-w-full">
+          {loaderData.post.image && (
+              <div className="flex items-center justify-center">
+                <img
+                  src={loaderData.post.image}
+                  alt={loaderData.post.title}
+                  className="w-full max-w-3xl mx-auto"
+                />
+              </div>
+            )}
+
+          <div className="prose dark:prose-invert mx-auto mt-20 max-w-3xl">
             <Markdown remarkPlugins={[remarkGfm]}>
               {loaderData.post.markdown}
             </Markdown>
