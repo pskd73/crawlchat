@@ -367,15 +367,15 @@ export default function Message({ loaderData }: Route.ComponentProps) {
               target="_blank"
             >
               <TbMessages />
-              View conversation
+              <span className="hidden md:block">View conversation</span>
             </Link>
           )}
           <Link
-            className="btn btn-primary"
+            className="btn btn-primary btn-soft"
             to={`/questions/${messagePair?.queryMessage?.id}/fix`}
           >
             <TbSettingsBolt />
-            Correct it
+            <span className="hidden md:block">Correct it</span>
           </Link>
         </>
       }

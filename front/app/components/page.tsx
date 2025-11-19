@@ -89,7 +89,7 @@ export function Page({
             </label>
             <div>
               <div className="flex items-center gap-2 text-xl font-medium">
-                {icon}
+                <span className="shrink-0">{icon}</span>
                 <div className="line-clamp-1">{title}</div>
               </div>
               {description && (
