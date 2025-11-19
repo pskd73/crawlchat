@@ -603,7 +603,7 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
             </div>
           </div>
 
-          <div className="flex gap-4">
+          <div className="flex gap-4 flex-col md:flex-row">
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-2">
                 <TbMessage />
@@ -615,7 +615,11 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
                   "border-base-300 p-1 bg-base-200/50 shadow"
                 )}
               >
-                <AreaChart width={width / 2 - 20} height={200} data={chartData}>
+                <AreaChart
+                  width={width < 500 ? width : width / 2 - 20}
+                  height={200}
+                  data={chartData}
+                >
                   <XAxis dataKey="name" hide />
                   <Tooltip
                     contentStyle={{
@@ -651,7 +655,7 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
                 )}
               >
                 <AreaChart
-                  width={width / 2 - 20}
+                  width={width < 500 ? width : width / 2 - 20}
                   height={200}
                   data={scoreDistributionData}
                 >
