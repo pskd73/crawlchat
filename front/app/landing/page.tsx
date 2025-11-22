@@ -2566,7 +2566,10 @@ function SourcesChannels() {
           {Array.from(Array(4)).map((i) => (
             <div key={i} className="flex gap-4 animate-infinite-scroll">
               {sources.map((source, index) => (
-                <div key={`${source.title}-${index}`} className="flex-shrink-0">
+                <div
+                  key={`${i}-${source.title}-${index}`}
+                  className="flex-shrink-0"
+                >
                   <SourceCard
                     icon={source.icon}
                     title={source.title}
@@ -2582,9 +2585,9 @@ function SourcesChannels() {
         <div className="inline-flex gap-4 flex-nowrap infinite-scroll-container">
           {Array.from(Array(4)).map((i) => (
             <div key={i} className="flex gap-4 animate-infinite-scroll-reverse">
-              {channels.map((channel) => (
+              {channels.map((channel, index) => (
                 <ChannelCard
-                  key={channel.title}
+                  key={`${i}-${channel.title}-${index}`}
                   icon={channel.icon}
                   title={channel.title}
                   tooltip={channel.tooltip}
