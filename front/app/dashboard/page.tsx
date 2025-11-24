@@ -236,14 +236,14 @@ export async function action({ request }: Route.ActionArgs) {
 }
 
 export const BRIGHT_COLORS = [
-  "#4E7B67",
-  "#9A1558",
-  "#3769B8",
+  "#A208BD",
+  "#83B139",
+  "#2F64C9",
   "#FC3B81",
   "#84555F",
-  "#F2F6A6",
-  "#DA8D0C",
-  "#00B768",
+  "#E8CC41",
+  "#37D9F6",
+  "#C0F73B",
 ];
 
 export function StatCard({
