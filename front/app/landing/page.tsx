@@ -301,7 +301,7 @@ export function UsedBy() {
           <div className="font-medium text-xl">Polotno</div>
         </div> */}
 
-        <div className="bg-gray-900 rounded-box p-4 px-6 pb-3">
+        <div className="bg-gray-900 rounded-box p-4 px-6 pb-3 rounded-full">
           <img
             src="/used-by/postiz.svg"
             alt="Postiz"
@@ -1326,8 +1326,8 @@ function Hero() {
             "flex-col sm:flex-row"
           )}
         >
-          <Link to="/login" className="btn btn-primary btn-xl">
-            Get started
+          <Link to="/pricing" className="btn btn-primary btn-xl">
+            Start free trial
             <TbArrowRight />
           </Link>
         </div>
