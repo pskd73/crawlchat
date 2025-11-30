@@ -924,27 +924,62 @@ export function Footer() {
   return (
     <footer className="bg-base-100">
       <Container>
-        <div className="py-8 flex flex-col md:flex-row gap-10">
+        <div className="py-8 flex flex-col md:flex-row gap-8">
           <div className="flex-[2] flex flex-col gap-4">
             <Logo />
             <p className="font-medium opacity-60">
               Power up your tech documentation with AI
             </p>
             <p className="opacity-50 text-xs font-medium">© 2025 CrawlChat</p>
-            <div>
+            <p className="flex items-center gap-2">
+              <span>Built with ❤️ by</span>{" "}
               <a
-                href="https://www.tinystartups.com/launch/crawlchat/?utm_source=badge"
+                href="https://x.com/pramodk73"
                 target="_blank"
+                className="rounded-box"
               >
                 <img
-                  src="https://cdn.prod.website-files.com/657b3d8ca1cab4015f06c850/680a4af610583c7e07a8f1a1_No2prgold-removebg-preview.png"
-                  alt="CrawlChat was #2 Product of the Week on Tiny Startups"
-                  style={{ width: "160px", height: "auto" }}
+                  src="/pramod.jpg"
+                  alt="@pramodk73"
+                  className="max-h-8 inline-block"
                 />
               </a>
-            </div>
+            </p>
           </div>
           <div className="flex-[2]">
+            <div className="mb-8">
+              <h3 className="text-sm opacity-50 mb-2">Trusted by</h3>
+              <div className="flex items-center gap-4 flex-wrap">
+                <img
+                  src="/used-by/remotion.png"
+                  alt="Remotion"
+                  className="max-h-6 inline-block"
+                />
+                <img
+                  src="/used-by/konvajs.png"
+                  alt="Konva"
+                  className="max-h-6 inline-block"
+                />
+                <img
+                  src="/used-by/270logo.svg"
+                  alt="270Degrees"
+                  className="max-h-6 inline-block"
+                />
+                <img
+                  src="/used-by/polotno.png"
+                  alt="Polotno"
+                  className="max-h-6 inline-block"
+                />
+                <div className="bg-black px-2 rounded-full">
+                  <img
+                    src="/used-by/postiz.svg"
+                    alt="Postiz"
+                    className="max-h-4 inline-block"
+                  />
+                </div>
+              </div>
+            </div>
+
             <ul className="flex flex-col gap-4">
               <li>
                 <FooterLink href="/blog/crawlchat-vs-kapa-ai">
@@ -967,33 +1002,8 @@ export function Footer() {
                 </FooterLink>
               </li>
               <li>
-                <FooterLink href="/blog/why-crawlchat-is-the-better-choice-for-you">
-                  Why CrawlChat is the better choice for you
-                </FooterLink>
-              </li>
-              <li>
-                <FooterLink href="/blog/internal-assistant-for-gtm-teams">
-                  Internal assistant for GTM teams
-                </FooterLink>
-              </li>
-              <li>
-                <FooterLink href="/blog/actions-on-crawlchat">
-                  Introducing Actions
-                </FooterLink>
-              </li>
-              <li>
                 <FooterLink href="/blog/how-polotno-uses-crawlchat">
                   How Polotno uses CrawlChat
-                </FooterLink>
-              </li>
-              <li>
-                <FooterLink href="/blog/boosting-developer-experience-with-crawlchat">
-                  Boosting Developer Experience - DX
-                </FooterLink>
-              </li>
-              <li>
-                <FooterLink href="/blog/how-to-add-ask-ai-chatbot-to-docusaurus-site">
-                  How to integrate with Docusaurus
                 </FooterLink>
               </li>
               <li>
@@ -1041,12 +1051,6 @@ export function Footer() {
             </ul>
           </div>
           <div className="flex-[1]">
-            {/* <ul className="flex flex-col gap-4 mb-6">
-              <li>
-                <FooterLink href="/tool/draft">AI Draft tool</FooterLink>
-              </li>
-            </ul> */}
-
             <ul className="flex flex-col gap-4">
               <li>
                 <FooterLink href="/terms">Terms</FooterLink>
