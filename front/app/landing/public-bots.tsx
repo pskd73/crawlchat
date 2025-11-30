@@ -1,10 +1,5 @@
 import {
-  LandingPage,
   Container,
-  Nav,
-  Footer,
-  CTA,
-  ctaClassNames,
 } from "~/landing/page";
 import type { Route } from "./+types/public-bots";
 import { TbArrowRight } from "react-icons/tb";
@@ -63,7 +58,7 @@ export default function PublicBots({ loaderData }: Route.ComponentProps) {
           {loaderData.bots.map((bot) => (
             <div
               key={bot.url}
-              className="flex flex-col gap-2 border border-outline rounded-2xl p-8 bg-canvas shadow-sm"
+              className="flex flex-col gap-2 border border-base-300 rounded-2xl p-4 bg-canvas shadow-sm"
             >
               <div>
                 <img src={bot.logo} alt={bot.title} className="max-h-10" />
@@ -75,8 +70,7 @@ export default function PublicBots({ loaderData }: Route.ComponentProps) {
                   href={bot.url}
                   target="_blank"
                   className={cn(
-                    ctaClassNames(false),
-                    "text-md px-2 py-1 w-fit"
+                    "btn btn-primary"
                   )}
                 >
                   Chat now

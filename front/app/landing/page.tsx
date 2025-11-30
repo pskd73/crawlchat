@@ -5,6 +5,7 @@ import {
   TbArrowRight,
   TbBook,
   TbBook2,
+  TbBrandChrome,
   TbBrandDiscord,
   TbBrandGithub,
   TbBrandLinkedin,
@@ -27,18 +28,24 @@ import {
   TbDatabase,
   TbFile,
   TbFolder,
+  TbInfoCircleFilled,
   TbLock,
   TbMail,
   TbMenu2,
   TbMessage,
+  TbMoodHappy,
   TbMusic,
   TbMusicX,
+  TbPencil,
   TbPlayerPauseFilled,
   TbPlayerPlayFilled,
   TbPlug,
+  TbPointer,
   TbRobotFace,
   TbScoreboard,
+  TbShieldLock,
   TbThumbUp,
+  TbTicket,
   TbUpload,
   TbUserHeart,
   TbUsers,
@@ -216,7 +223,7 @@ function Stats({
         </h3>
       </div>
 
-      <div className="flex-1 shadow-md bg-base-100 rounded-box">
+      <div className="flex-1 bg-base-100 rounded-box">
         <StatsItem label="Today" value={messagesDay} />
         <StatsItem label="In the last week" value={messagesThisWeek} />
         <StatsItem label="In the last month" value={messagesMonth} />
@@ -477,7 +484,7 @@ function ClickableFeature({
       className={cn(
         "rounded-box p-4 border border-transparent hover:border-base-300 gap-2 flex flex-col",
         "cursor-pointer",
-        active && "bg-base-100 shadow-md hover:border-transparent"
+        active && "bg-base-100 hover:border-transparent"
       )}
       onClick={onClick}
     >
@@ -539,7 +546,7 @@ function FeaturesWithImage({
       </div>
       <div
         className={cn(
-          "flex-1 bg-ash-strong rounded-box shadow-md border",
+          "flex-1 bg-ash-strong rounded-box border",
           "border-base-300 aspect-square overflow-hidden",
           "w-full aspect-square h-fit"
         )}
@@ -733,13 +740,14 @@ function PricingBox({
   return (
     <div
       className={cn(
-        "flex-1 bg-base-100 shadow-md border border-base-300 rounded-box relative"
+        "flex-1 border border-base-300 rounded-box relative",
+        popular && "border-primary"
       )}
     >
       {popular && (
         <div
           className={cn(
-            "bg-primary-subtle border border-base-300 absolute",
+            "bg-primary-subtle border-2 border-primary absolute",
             "translate-y-[-40%] top-0 right-0 translate-x-[10%]",
             "text-lg text-primary px-3 py-2 font-medium flex items-center gap-2 rounded-box",
             "bg-base-200 shadow-2xl"
@@ -750,13 +758,18 @@ function PricingBox({
         </div>
       )}
 
-      <div className={cn("p-6 border-b border-base-300")}>
-        <h4 className="text-4xl font-semibold font-radio-grotesk">{title}</h4>
+      <div
+        className={cn(
+          "p-6 border-b border-base-300",
+          popular && "border-primary"
+        )}
+      >
+        <h4 className="text-3xl font-semibold font-radio-grotesk">{title}</h4>
         <p className="opacity-50 font-medium">{description}</p>
       </div>
       <div className="p-6 gap-6 flex flex-col">
         <div className="flex gap-1 items-end">
-          <p className="text-6xl font-bold font-radio-grotesk">{price}</p>
+          <p className="text-4xl font-semibold font-radio-grotesk">{price}</p>
           <p className="opacity-50 font-medium mb-1">/month</p>
         </div>
         <ul className="flex flex-col gap-2">
@@ -795,65 +808,16 @@ function PricingBox({
 }
 
 export function PricingBoxes({
-  freePlan,
   starterPlan,
   proPlan,
-  hobbyPlan,
   onClick,
 }: {
-  freePlan?: Plan;
   starterPlan: Plan;
   proPlan: Plan;
-  hobbyPlan: Plan;
   onClick?: (planId: string) => void;
 }) {
   return (
     <>
-      {freePlan && (
-        <PricingBox
-          free
-          title="Free"
-          description="Try it out now"
-          price={`$${freePlan.price}`}
-          items={[
-            { text: `${freePlan.credits.scrapes} pages` },
-            { text: `${freePlan.credits.messages} message credits` },
-            { text: `${freePlan.limits.scrapes} collection` },
-            { text: `${freePlan.limits.teamMembers} team member` },
-            { text: "Base AI models", excluded: true },
-            { text: "Support tickets", excluded: true },
-            { text: "MCP server", excluded: true },
-            { text: "Discord bot", excluded: true },
-            { text: "GitHub issues", excluded: true },
-            { text: "Image inputs", excluded: true },
-          ]}
-          href="/login"
-        />
-      )}
-      {/* <PricingBox
-        title="Hobby"
-        description="Explore the platform"
-        price={`$${hobbyPlan.price}`}
-        items={[
-          { text: `${hobbyPlan.credits.scrapes} pages` },
-          { text: `${hobbyPlan.credits.messages} message credits/month` },
-          { text: `${hobbyPlan.limits.scrapes} collections` },
-          { text: `${hobbyPlan.limits.teamMembers} team members` },
-          { text: "Base AI models" },
-          { text: "Support tickets" },
-          { text: "API access" },
-          { text: "Follow up questions", excluded: true },
-          { text: "MCP server", excluded: true },
-          { text: "Discord bot", excluded: true },
-          { text: "GitHub issues", excluded: true },
-          { text: "Image inputs", excluded: true },
-        ]}
-        href={
-          "https://checkout.dodopayments.com/buy/pdt_IcrpqSx48qoCenz4lnLi1?quantity=1&redirect_url=https://crawlchat.app%2Fprofile%23billing"
-        }
-        payLabel="Purchase"
-        onClick={onClick ? () => onClick?.(hobbyPlan.id) : undefined}
-      /> */}
       <PricingBox
         title="Starter"
         description="Start your journey with CrawlChat"
@@ -864,13 +828,6 @@ export function PricingBoxes({
           { text: `${starterPlan.limits.scrapes} collections` },
           { text: `${starterPlan.limits.teamMembers} team members` },
           { text: "Smart AI models" },
-          { text: "Support tickets" },
-          { text: "API access" },
-          { text: "Follow up questions" },
-          { text: "MCP server" },
-          { text: "Discord bot" },
-          { text: "GitHub issues", excluded: true },
-          { text: "Image inputs", excluded: true },
         ]}
         href={
           "https://checkout.dodopayments.com/buy/pdt_vgCVfRAaCT99LM1Dfk5qF?quantity=1&redirect_url=https://crawlchat.app%2Fprofile%23billing"
@@ -888,14 +845,7 @@ export function PricingBoxes({
           { text: `${proPlan.credits.messages} message credits/month` },
           { text: `${proPlan.limits.scrapes} collections` },
           { text: `${proPlan.limits.teamMembers} team members` },
-          { text: "Reasoning AI models" },
-          { text: "Support tickets" },
-          { text: "API access" },
-          { text: "Follow up questions" },
-          { text: "MCP server" },
-          { text: "Discord bot" },
-          { text: "GitHub issues" },
-          { text: "Image inputs" },
+          { text: "Best AI models" },
         ]}
         href={
           "https://checkout.dodopayments.com/buy/pdt_P68hLo9a0At8cgn4WbzBe?quantity=1&redirect_url=https://crawlchat.app%2Fprofile%23billing"
@@ -908,8 +858,7 @@ export function PricingBoxes({
 }
 
 export function Pricing() {
-  const { freePlan, starterPlan, proPlan, hobbyPlan } =
-    useLoaderData<typeof loader>();
+  const { starterPlan, proPlan } = useLoaderData<typeof loader>();
 
   return (
     <div className="mt-32" id="pricing">
@@ -923,12 +872,7 @@ export function Pricing() {
       </HeadingDescription>
 
       <div className="flex flex-col md:flex-row md:gap-6 gap-10 mt-20">
-        <PricingBoxes
-          // freePlan={freePlan}
-          starterPlan={starterPlan}
-          proPlan={proPlan}
-          hobbyPlan={hobbyPlan}
-        />
+        <PricingBoxes starterPlan={starterPlan} proPlan={proPlan} />
       </div>
     </div>
   );
@@ -1283,16 +1227,6 @@ export function Nav({ user }: { user?: User | null }) {
   );
 }
 
-export function ctaClassNames(primary: boolean) {
-  return cn(
-    "text-2xl border-2 border-primary px-8 py-4 rounded-box font-medium",
-    "flex items-center gap-2 transition-all hover:translate-y-[-2px]",
-    "text-center justify-center",
-    !primary && "text-primary hover:bg-primary-subtle",
-    primary && "bg-primary text-primary-content"
-  );
-}
-
 function Hero() {
   const { focusChangelog } = useLoaderData<typeof loader>();
 
@@ -1336,7 +1270,9 @@ function Hero() {
 
   return (
     <div
-      className={cn("flex gap-10 md:gap-14 mb-10 flex-col md:flex-row py-2 md:mt-8")}
+      className={cn(
+        "flex gap-10 md:gap-14 mb-10 flex-col md:flex-row py-2 md:mt-8"
+      )}
     >
       <div className={cn("flex flex-col flex-[1.4]")}>
         {focusChangelog && (
@@ -1363,7 +1299,9 @@ function Hero() {
         </h1>
 
         <p className="text-xl mt-6">
-          Add an AI chatbot to your documentation website. Users can ask questions and get instant answers from your docs, without searching through pages.
+          Add an AI chatbot to your documentation website. Users can ask
+          questions and get instant answers from your docs, without searching
+          through pages.
         </p>
 
         <ul className="mt-6 flex flex-col gap-3">
@@ -1468,97 +1406,6 @@ export function LandingPage({ children }: PropsWithChildren) {
       <div className="relative">{children}</div>
 
       <Toaster position="bottom-center" />
-    </div>
-  );
-}
-
-function FlowCard({
-  title,
-  description,
-  img,
-  cols,
-  rows,
-}: {
-  title: string;
-  description: string;
-  img: string;
-  cols: number;
-  rows: number;
-}) {
-  return (
-    <div
-      className={cn(
-        "rounded-box bg-base-100 border border-base-300 p-6 flex flex-col justify-between gap-4",
-        cols === 1 && "md:col-span-1",
-        cols === 2 && "md:col-span-2",
-        cols === 3 && "md:col-span-3",
-        rows === 1 && "md:row-span-1",
-        rows === 2 && "md:row-span-2",
-        rows === 3 && "md:row-span-3"
-      )}
-    >
-      <div className="flex flex-col gap-2">
-        <h3 className="text-3xl font-medium font-radio-grotesk">{title}</h3>
-        <p className="text-lg opacity-60">{description}</p>
-      </div>
-      <div>
-        <img
-          src={img}
-          alt={title}
-          className="border border-base-300 rounded-box"
-        />
-      </div>
-    </div>
-  );
-}
-
-export function Flow() {
-  return (
-    <div className="mt-32">
-      <Heading>
-        A workflow for <HeadingHighlight>AI powered</HeadingHighlight> docs
-      </Heading>
-
-      <HeadingDescription>
-        CrawlChat is a simple yet powerful AI tool for technical documentation.
-        Configure it in minutes and gain actionable analytics to improve your
-        docs.
-      </HeadingDescription>
-
-      <div
-        className={cn(
-          `grid grid-cols-1 grid-rows-4 md:grid-cols-3 md:grid-rows-2 gap-6`
-        )}
-      >
-        <FlowCard
-          title="Knowledge base with your documentation"
-          description="Transform your documentation into an AI powered knowledge base. Simply provide your documentation URL or upload files to get started."
-          img="/new-landing/flow-knowledge.png"
-          cols={2}
-          rows={1}
-        />
-        <FlowCard
-          title="First level AI support"
-          description="Let the AI chatbot handle basic and repetitive questions, dramatically reducing support workload."
-          img="/new-landing/flow-chatbot.png"
-          cols={1}
-          rows={1}
-        />
-        <FlowCard
-          title="Escalate to human support"
-          description="CrawlChat features a powerful AI driven support ticket system. The chatbot automatically creates tickets when queries can't be resolved by AI."
-          img="/new-landing/flow-support-ticket.png"
-          cols={1}
-          rows={1}
-        />
-        <FlowCard
-          title="Analyse and improve"
-          description="Receive detailed reports on chatbot performance and knowledge base effectiveness. Identify knowledge gaps using CrawlChat's scoring system and continuously improve your documentation."
-          img="/new-landing/flow-analyse.png"
-          cols={2}
-          rows={1}
-        />
-      </div>
     </div>
   );
 }
@@ -2475,6 +2322,158 @@ function SecondaryCTAs() {
   );
 }
 
+function PricingFeature({
+  icon,
+  title,
+  tooltip,
+}: {
+  icon: ReactNode;
+  title: string;
+  tooltip?: string;
+}) {
+  return (
+    <div className="flex items-center gap-2 group">
+      <div className="text-primary text-lg">{icon}</div>
+      <div className="font-radio-grotesk text-primary text-lg">{title}</div>
+
+      {tooltip && (
+        <div
+          className={cn(
+            "tooltip text-base-content/30 group-hover:opacity-100 opacity-0",
+            "hidden md:block"
+          )}
+          data-tip={tooltip}
+        >
+          <TbInfoCircleFilled />
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function PricingFeatures() {
+  const features = [
+    {
+      icon: <TbCode />,
+      title: "API",
+    },
+    {
+      icon: <TbBrandDiscord />,
+      title: "Discord bot",
+    },
+    {
+      icon: <TbBrandSlack />,
+      title: "Slack app",
+    },
+    {
+      icon: <MCPIcon />,
+      title: "MCP server",
+    },
+    {
+      icon: <TbBrandGithub />,
+      title: "GitHub issues",
+      tooltip: "Import your GitHub issues into your knowledge base",
+    },
+    {
+      icon: <TbBrandNotion />,
+      title: "Notion",
+      tooltip: "Import your Notion pages into your knowledge base",
+    },
+    {
+      icon: <FaConfluence />,
+      title: "Confluence",
+      tooltip: "Import your Confluence pages into your knowledge base",
+    },
+    {
+      icon: <SiLinear />,
+      title: "Linear",
+      tooltip:
+        "Import your Linear issues and projects into your knowledge base",
+    },
+    {
+      icon: <SiN8N />,
+      title: "n8n",
+      tooltip: "Integrate with n8n by using CrawlChat node into your workflows",
+    },
+    {
+      icon: <TbChartBar />,
+      title: "Analytics",
+    },
+    {
+      icon: <TbFolder />,
+      title: "Categories",
+      tooltip: "Group your questions into categories for better insights",
+    },
+    {
+      icon: <TbChartBarOff />,
+      title: "Data gaps",
+    },
+    {
+      icon: <TbUsers />,
+      title: "Teams",
+    },
+    {
+      icon: <TbTicket />,
+      title: "Support tickets",
+      tooltip: "Create support tickets for your users when AI can't help",
+    },
+    {
+      icon: <TbShieldLock />,
+      title: "Private",
+      tooltip: "Keep your knowledge base private and secure",
+    },
+    {
+      icon: <TbMoodHappy />,
+      title: "Sentiment analysis",
+    },
+    {
+      icon: <TbPointer />,
+      title: "Actions",
+      tooltip: "Add custom actions as APIs for the chatbot to perform",
+    },
+    {
+      icon: <TbPencil />,
+      title: "Compose",
+      tooltip:
+        "Use your knowledge base to create content for different purposes",
+    },
+    {
+      icon: <TbBrandChrome />,
+      title: "Chrome extension",
+      tooltip:
+        "Use the Chrome extension to quickly generate text content from your documentation",
+    },
+    {
+      icon: <TbMail />,
+      title: "Email reports",
+      tooltip:
+        "Get weekly reports on your email about the questions asked and analytics",
+    },
+  ];
+
+  return (
+    <div className="border border-base-300 rounded-box p-6">
+      <div className="mb-4">
+        <h2 className="text-2xl font-medium font-radio-grotesk">Features</h2>
+        <p className="text-base-content/50">
+          Following features are available in all plans.
+        </p>
+      </div>
+
+      <ul className="grid grid-cols-1 md:grid-cols-3 gap-2">
+        {features.map((feature) => (
+          <PricingFeature
+            key={feature.title}
+            icon={feature.icon}
+            title={feature.title}
+            tooltip={feature.tooltip}
+          />
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 export default function Landing({ loaderData }: Route.ComponentProps) {
   return (
     <>
@@ -2496,10 +2495,6 @@ export default function Landing({ loaderData }: Route.ComponentProps) {
         <Works />
       </Container>
 
-      {/* <Container>
-        <Flow />
-      </Container> */}
-
       <Container>
         <ChannelWidget />
       </Container>
@@ -2512,14 +2507,6 @@ export default function Landing({ loaderData }: Route.ComponentProps) {
         <ChannelDiscord />
       </Container>
 
-      {/* <Container>
-        <ChannelMCP />
-      </Container> */}
-
-      {/* <Container>
-        <Tools />
-      </Container> */}
-
       <Container>
         <Stats
           messagesThisWeek={loaderData.messagesThisWeek}
@@ -2530,6 +2517,10 @@ export default function Landing({ loaderData }: Route.ComponentProps) {
 
       <Container>
         <Pricing />
+      </Container>
+
+      <Container>
+        <PricingFeatures />
       </Container>
 
       <Container>

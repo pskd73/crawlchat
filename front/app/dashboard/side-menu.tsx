@@ -466,7 +466,7 @@ export function SideMenu({
           <div className="dropdown dropdown-top dropdown-end">
             <button
               tabIndex={0}
-              className="btn btn-sm btn-circle mt-1 btn-square bg-base-200"
+              className="btn btn-sm mt-1 btn-square bg-base-200"
             >
               <TbChevronUp />
             </button>

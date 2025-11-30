@@ -1,5 +1,5 @@
 import { PLAN_FREE, PLAN_HOBBY, PLAN_PRO, PLAN_STARTER } from "libs/user-plan";
-import { Container, CustomTestimonials, FAQ, Pricing } from "./page";
+import { Container, CustomTestimonials, FAQ, Pricing, PricingFeatures } from "./page";
 import { makeMeta } from "~/meta";
 
 export function meta() {
@@ -24,6 +24,10 @@ export default function Landing() {
     <>
       <Container>
         <Pricing />
+      </Container>
+
+      <Container>
+        <PricingFeatures />
       </Container>
 
       <CustomTestimonials />
