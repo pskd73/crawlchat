@@ -44,6 +44,7 @@ import {
   TbPointer,
   TbRobotFace,
   TbScoreboard,
+  TbSearch,
   TbShieldLock,
   TbThumbUp,
   TbTicket,
@@ -69,7 +70,7 @@ import { Link, useLoaderData } from "react-router";
 import { cache as changelogCache } from "~/changelog/fetch";
 import { makeMeta } from "~/meta";
 import cn from "@meltdownjs/cn";
-import { SiDocusaurus, SiLinear, SiN8N } from "react-icons/si";
+import { SiDocusaurus, SiLinear, SiN8N, SiOpenai } from "react-icons/si";
 import { FaConfluence, FaMicrophone } from "react-icons/fa";
 import { Logo } from "~/dashboard/logo";
 import { MCPIcon } from "~/mcp-icon";
@@ -228,7 +229,7 @@ function Stats({
         </h3>
       </div>
 
-      <div className="flex-1 bg-base-100 rounded-box">
+      <div className="flex-1 bg-base-100 rounded-box border border-base-300">
         <StatsItem label="Today" value={messagesDay} />
         <StatsItem label="In the last week" value={messagesThisWeek} />
         <StatsItem label="In the last month" value={messagesMonth} />
@@ -251,12 +252,6 @@ export function UsedBy() {
           className="max-h-[38px]"
         />
 
-        {/* <img
-          src="/used-by/remotion-white.png"
-          alt="Remotion"
-          className="max-h-[38px] hidden dark:block"
-        /> */}
-
         <div className="flex items-center gap-2">
           <img
             src="/used-by/konvajs.png"
@@ -275,18 +270,6 @@ export function UsedBy() {
           <div className="font-medium text-xl">270Degrees</div>
         </div>
 
-        {/* <img
-          src="/used-by/trustworks.png"
-          alt="Trustworks"
-          className="max-h-[38px] dark:hidden"
-        />
-
-        <img
-          src="/used-by/trustworks-white.png"
-          alt="Trustworks"
-          className="max-h-[38px] hidden dark:block"
-        /> */}
-
         <div className="flex items-center gap-2">
           <img
             src="/used-by/polotno.png"
@@ -295,15 +278,6 @@ export function UsedBy() {
           />
           <div className="font-medium text-xl">Polotno</div>
         </div>
-
-        {/* <div className="items-center gap-2 hidden dark:flex">
-          <img
-            src="/used-by/polotno-white.png"
-            alt="Polotno"
-            className="max-h-[38px]"
-          />
-          <div className="font-medium text-xl">Polotno</div>
-        </div> */}
 
         <div className="bg-gray-900 rounded-box p-4 px-6 pb-3 rounded-full">
           <img
@@ -2639,6 +2613,94 @@ export function PricingFeatures() {
   );
 }
 
+function BentoCard({
+  icon,
+  title,
+  description,
+  className,
+}: {
+  icon: ReactNode;
+  title: string;
+  description: string;
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn(
+        "rounded-box border border-base-300 bg-base-100 p-6",
+        "flex flex-col gap-3",
+        className
+      )}
+    >
+      <div className="text-3xl text-accent">{icon}</div>
+      <h4 className="text-xl font-radio-grotesk font-semibold">{title}</h4>
+      <p className="text-base-content/70 leading-relaxed">{description}</p>
+    </div>
+  );
+}
+
+function Why() {
+  const benefits = [
+    {
+      icon: <TbSearch />,
+      title: "vs. RAG",
+      description:
+        "Just the RAG workflow stops at finding the relevant documents. CrawlChat goes further by reranking them, supporting multiple sources, multiple platforms to deploy the chat assistant, categorizing the questions, finding data gaps, giving ability to add custom actions, and so on.",
+    },
+    {
+      icon: <SiOpenai />,
+      title: "vs. LLMs",
+      description:
+        "Offloading support doesn't help. CrawlChat gives complete visibility into your community queries and useful analytics.",
+    },
+    {
+      icon: <TbUserHeart />,
+      title: "vs. Human Support",
+      description:
+        "The queries you get are repeated and answered 80% of the times in your docs. CrawlChat respects humans and saves their time!",
+    },
+    {
+      icon: <TbMessage />,
+      title: "vs. Other AI Chatbots",
+      description:
+        "CrawlChat is tailored for technical documentation and developer workflows. Other platforms don't provide tools such as Discord bot, MCP server, integrated Support Tickets, Data gaps, etc. If you are software and have a help docs, CrawlChat is the best choice.",
+    },
+  ];
+
+  return (
+    <div className="mt-32">
+      <Heading>
+        Why use <HeadingHighlight>CrawlChat</HeadingHighlight>?
+      </Heading>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-12">
+        <BentoCard
+          icon={benefits[0].icon}
+          title={benefits[0].title}
+          description={benefits[0].description}
+          className="md:col-span-2 lg:col-span-2"
+        />
+        <BentoCard
+          icon={benefits[1].icon}
+          title={benefits[1].title}
+          description={benefits[1].description}
+        />
+        <BentoCard
+          icon={benefits[2].icon}
+          title={benefits[2].title}
+          description={benefits[2].description}
+        />
+        <BentoCard
+          icon={benefits[3].icon}
+          title={benefits[3].title}
+          description={benefits[3].description}
+          className="md:col-span-2"
+        />
+      </div>
+    </div>
+  );
+}
+
 export default function Landing({ loaderData }: Route.ComponentProps) {
   return (
     <>
@@ -2678,6 +2740,10 @@ export default function Landing({ loaderData }: Route.ComponentProps) {
           messagesDay={loaderData.messagesDay}
           messagesMonth={loaderData.messagesMonth}
         />
+      </Container>
+
+      <Container>
+        <Why />
       </Container>
 
       <Container>
