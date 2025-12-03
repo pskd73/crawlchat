@@ -85,7 +85,7 @@ export const getConfig = (model?: LlmModel | null): LlmConfig => {
   }
   if (model === LlmModel.gpt_5) {
     return {
-      model: "openai/gpt-5",
+      model: "openai/gpt-5.1",
       apiKey: process.env.OPENROUTER_API_KEY!,
       ragTopN: 4,
       creditsPerMessage: 4,
