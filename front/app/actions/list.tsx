@@ -1,7 +1,7 @@
 import type { Route } from "./+types/list";
 import type { ApiActionType } from "libs/prisma";
-import { TbPlus, TbPointer, TbWebhook } from "react-icons/tb";
-import { Link } from "react-router";
+import { TbCopy, TbPlus, TbPointer, TbWebhook } from "react-icons/tb";
+import { Link, redirect, useFetcher } from "react-router";
 import { getAuthUser } from "~/auth/middleware";
 import { Page } from "~/components/page";
 import { authoriseScrapeUser, getSessionScrapeId } from "~/scrapes/util";
@@ -46,6 +46,45 @@ export function meta() {
   });
 }
 
+export async function action({ request }: Route.ActionArgs) {
+  const user = await getAuthUser(request);
+  const scrapeId = await getSessionScrapeId(request);
+  authoriseScrapeUser(user!.scrapeUsers, scrapeId);
+
+  const formData = await request.formData();
+  const intent = formData.get("intent");
+
+  if (intent === "duplicate") {
+    const id = formData.get("id");
+    const action = await prisma.apiAction.findUnique({
+      where: { id: id as string },
+    });
+
+    if (!action) {
+      return Response.json({ error: "Action not found" }, { status: 404 });
+    }
+
+    const newAction = await prisma.apiAction.create({
+      data: {
+        scrapeId,
+        userId: user!.id,
+        title: `${action.title} (Copy)`,
+        url: action.url,
+        method: action.method,
+        data: action.data,
+        headers: action.headers,
+        description: action.description,
+        type: action.type,
+        calConfig: action.calConfig,
+        linearConfig: action.linearConfig,
+        requireEmailVerification: action.requireEmailVerification,
+      },
+    });
+
+    throw redirect(`/actions/${newAction.id}`);
+  }
+}
+
 function NoActions() {
   return (
     <div className="flex flex-1 items-center justify-center">
@@ -86,6 +125,26 @@ function ActionType({ type }: { type: ApiActionType | null }) {
   );
 }
 
+function DuplicateAction({ id }: { id: string }) {
+  const fetcher = useFetcher();
+
+  return (
+    <div className="tooltip tooltip-left" data-tip="Duplicate">
+      <fetcher.Form method="post">
+        <input type="hidden" name="intent" value="duplicate" />
+        <input type="hidden" name="id" value={id} />
+        <button
+          className="btn btn-sm btn-square"
+          type="submit"
+          disabled={fetcher.state !== "idle"}
+        >
+          <TbCopy />
+        </button>
+      </fetcher.Form>
+    </div>
+  );
+}
+
 export default function Actions({ loaderData }: Route.ComponentProps) {
   return (
     <Page
@@ -119,6 +178,7 @@ export default function Actions({ loaderData }: Route.ComponentProps) {
                 <col />
                 <col className="w-[16%]" />
                 <col className="min-w-24 w-[14%]" />
+                <col className="w-16" />
               </colgroup>
               <thead>
                 <tr>
@@ -126,6 +186,7 @@ export default function Actions({ loaderData }: Route.ComponentProps) {
                   <th>Title</th>
                   <th>Calls</th>
                   <th className="text-end">Created</th>
+                  <th className="text-end">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -152,6 +213,9 @@ export default function Actions({ loaderData }: Route.ComponentProps) {
                     </td>
                     <td className="text-end">
                       {moment(item.createdAt).fromNow()}
+                    </td>
+                    <td className="text-end">
+                      <DuplicateAction id={item.id} />
                     </td>
                   </tr>
                 ))}

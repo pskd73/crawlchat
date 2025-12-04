@@ -17,6 +17,8 @@ import {
   TbPencil,
   TbPlug,
   TbPointer,
+  TbRobot,
+  TbRobotFace,
   TbSettings,
   TbTicket,
   TbUser,
@@ -38,6 +40,7 @@ import { track } from "~/track";
 import { ScrapePrivacyBadge } from "~/components/scrape-type-badge";
 import { PlanIconBadge } from "~/components/plan-icon-badge";
 import cn from "@meltdownjs/cn";
+import { showModal } from "~/components/daisy-utils";
 
 function SideMenuItem({
   link,
@@ -192,6 +195,22 @@ function SetupProgress({ scrapeId }: { scrapeId: string }) {
   );
 }
 
+function ChatModal({ token }: { token: string }) {
+  return (
+    <dialog id="chat-modal" className="modal">
+      <div className="modal-box p-0 w-1/2 max-w-5xl">
+        <iframe
+          src={`/w/crawlchat-internal?secret=${token}&embed=true`}
+          style={{width: "100%", height: "500px" }}
+        />
+      </div>
+      <form method="dialog" className="modal-backdrop">
+        <button>close</button>
+      </form>
+    </dialog>
+  );
+}
+
 export function SideMenu({
   scrapeOwner,
   loggedInUser,
@@ -204,6 +223,7 @@ export function SideMenu({
   scrape,
   dataGapMessages,
   usedPages,
+  token,
 }: {
   scrapeOwner: User;
   loggedInUser: User;
@@ -217,6 +237,7 @@ export function SideMenu({
   scrape?: Scrape;
   dataGapMessages: number;
   usedPages: number;
+  token: string;
 }) {
   const links = useMemo(() => {
     const links = [
@@ -359,7 +380,7 @@ export function SideMenu({
               <button
                 tabIndex={0}
                 className="btn w-full flex justify-between"
-                style={{ background: "white"}}
+                style={{ background: "white" }}
               >
                 {scrapeId ? scrape?.title : "Select collection"}
                 <TbChevronDown />
@@ -388,6 +409,20 @@ export function SideMenu({
               badge={getMenuBadge(link.label)}
             />
           ))}
+          <div
+            className={cn(
+              "flex pl-3 pr-2 py-1 w-full items-center gap-2 rounded-box",
+              "transition-all hover:bg-accent hover:text-accent-content",
+              "cursor-pointer"
+            )}
+            onClick={() => showModal("chat-modal")}
+          >
+            <TbRobotFace />
+            <span>Chat</span>
+            <span className="badge badge-primary badge-sm badge-soft">
+              New
+            </span>
+          </div>
         </div>
       </div>
 
@@ -493,6 +528,7 @@ export function SideMenu({
           </div>
         </div>
       </div>
+      <ChatModal token={token} />
     </div>
   );
 }

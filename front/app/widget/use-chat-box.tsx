@@ -22,6 +22,7 @@ export function useChatBox({
   fullscreen,
   readonly: initReadOnly,
   sidePanel,
+  secret,
 }: {
   scrape: Scrape;
   thread: Thread | null;
@@ -32,6 +33,7 @@ export function useChatBox({
   fullscreen?: boolean;
   readonly?: boolean;
   sidePanel?: boolean;
+  secret?: string | null;
 }) {
   const pinFetcher = useFetcher();
   const unpinFetcher = useFetcher();
@@ -52,6 +54,7 @@ export function useChatBox({
     scrapeId: scrape.id,
     defaultMessages: messages,
     threadId: thread?.id,
+    secret: secret ?? undefined,
   });
 
   const [screen, setScreen] = useState<"chat" | "mcp" | "ticket-create">(
@@ -406,6 +409,7 @@ export function ChatBoxProvider({
   fullscreen,
   readonly,
   sidePanel,
+  secret,
 }: {
   children: React.ReactNode;
   scrape: Scrape;
@@ -417,6 +421,7 @@ export function ChatBoxProvider({
   fullscreen?: boolean;
   readonly?: boolean;
   sidePanel?: boolean;
+  secret?: string | null;
 }) {
   const chatBox = useChatBox({
     scrape,
@@ -428,6 +433,7 @@ export function ChatBoxProvider({
     fullscreen,
     readonly,
     sidePanel,
+    secret,
   });
   return (
     <ChatBoxContext.Provider value={chatBox}>

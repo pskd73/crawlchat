@@ -14,11 +14,13 @@ export function useScrapeChat({
   scrapeId,
   threadId,
   defaultMessages,
+  secret,
 }: {
   token?: string;
   scrapeId: string;
   defaultMessages: Message[];
   threadId?: string;
+  secret?: string;
 }) {
   const socket = useRef<WebSocket>(null);
   const [messages, setMessages] = useState<Message[]>(defaultMessages);
@@ -178,6 +180,7 @@ export function useScrapeChat({
           currentTimeISO: new Date().toISOString(),
           timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
         },
+        secret: secret,
       })
     );
     const messagesCount = messages.length;

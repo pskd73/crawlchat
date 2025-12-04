@@ -143,6 +143,7 @@ export function makeActionTools(
   actions: ApiAction[],
   options?: {
     onPreAction?: (title: string) => void;
+    secret?: string;
   }
 ) {
   function itemToZod(item: ApiActionDataItem) {
@@ -259,6 +260,13 @@ export function makeActionTools(
               makeValue(thread, input, item),
               item.dataType
             );
+
+            if (item.value?.includes("{{secret}}")) {
+              headers[item.key] = item.value.replace(
+                "{{secret}}",
+                options?.secret!
+              );
+            }
           }
 
           if (options?.onPreAction) {
@@ -550,6 +558,7 @@ export function makeFlow(
     showSources?: boolean;
     actions?: ApiAction[];
     clientData?: any;
+    secret?: string;
   }
 ) {
   const queryContext: QueryContext = {
@@ -603,6 +612,7 @@ export function makeFlow(
   const actionTools = options?.actions
     ? makeActionTools(thread, options.actions, {
         onPreAction: options.onPreAction,
+        secret: options?.secret,
       })
     : [];
 

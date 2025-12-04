@@ -69,6 +69,7 @@ export type Answerer = (
     actions?: ApiAction[];
     channel?: MessageChannel;
     clientData?: any;
+    secret?: string;
   }
 ) => Promise<AnswerCompleteEvent | null>;
 
@@ -235,6 +236,7 @@ Just use this block, don't ask the user to enter the email. Use it only if the t
       showSources: scrape.showSources ?? false,
       actions: options?.actions,
       clientData: options?.clientData,
+      secret: options?.secret,
     }
   );
 

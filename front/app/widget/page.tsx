@@ -120,6 +120,7 @@ export async function loader({ params, request }: Route.LoaderArgs) {
   const height = searchParams.get("height");
   const fullscreen = searchParams.get("fullscreen") === "true";
   const sidePanel = searchParams.get("sidepanel") === "true";
+  const secret = searchParams.get("secret");
 
   sanitizeScrape(scrape);
   sanitizeThread(thread);
@@ -135,6 +136,7 @@ export async function loader({ params, request }: Route.LoaderArgs) {
       height,
       fullscreen,
       sidePanel,
+      secret,
     },
     {
       headers,
@@ -353,6 +355,7 @@ export default function ScrapeWidget({ loaderData }: Route.ComponentProps) {
       token={loaderData.userToken}
       fullscreen={loaderData.fullscreen}
       sidePanel={loaderData.sidePanel}
+      secret={loaderData.secret}
     >
       <div
         className={cn(

@@ -7,6 +7,7 @@ export function CrawlChatScript({
   hideToc,
   selectionButtons,
   noPrimaryColor,
+  secret,
 }: {
   id: string;
   sidePanel?: boolean;
@@ -16,6 +17,7 @@ export function CrawlChatScript({
   hideToc?: boolean;
   selectionButtons?: Record<string, { name: string; queryPrefix: string }>;
   noPrimaryColor?: boolean;
+  secret?: string;
 }) {
   return (
     <script
@@ -31,6 +33,7 @@ export function CrawlChatScript({
         selectionButtons ? JSON.stringify(selectionButtons) : undefined
       }
       data-no-primary-color={noPrimaryColor}
+      data-secret={secret}
     />
   );
 }

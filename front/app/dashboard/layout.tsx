@@ -22,6 +22,7 @@ import cn from "@meltdownjs/cn";
 import { makeMeta } from "~/meta";
 import { UpgradeModal } from "./upgrade-modal";
 import { showModal } from "~/components/daisy-utils";
+import { createToken } from "libs/jwt";
 
 export function meta() {
   return makeMeta({
@@ -78,6 +79,8 @@ export async function loader({ request }: Route.LoaderArgs) {
 
   const usedPages = await getPagesCount(scrape?.userId ?? user!.id);
 
+  const token = createToken(user!.id, { expiresInSeconds: 60 * 60 });
+
   return {
     user: user!,
     plan,
@@ -94,6 +97,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     proYearlyPlan: PLAN_PRO_YEARLY,
     usedPages,
     scrapeUsers,
+    token,
   };
 }
 
@@ -163,6 +167,7 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
               dataGapMessages={loaderData.dataGapMessages.length}
               scrape={loaderData.scrape}
               usedPages={loaderData.usedPages}
+              token={loaderData.token}
             />
           </div>
         </div>

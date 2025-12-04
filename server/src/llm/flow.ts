@@ -88,9 +88,7 @@ export class Flow<CustomState, CustomMessage> {
     return message.llmMessage && "tool_calls" in message.llmMessage;
   }
 
-  async stream(
-    options?: HandleStreamOptions
-  ): Promise<null | {
+  async stream(options?: HandleStreamOptions): Promise<null | {
     messages: FlowMessage<CustomMessage>[];
     agentId: string;
   }> {
@@ -110,7 +108,7 @@ export class Flow<CustomState, CustomMessage> {
       const message = await this.runTool(
         call.toolCall.id,
         call.toolCall.function.name,
-        JSON.parse(call.toolCall.function.arguments)
+        JSON.parse(call.toolCall.function.arguments || "{}")
       );
       if (pendingToolCalls.length > 1) {
         this.flowState.nextAgentIds = [agentId, ...this.flowState.nextAgentIds];

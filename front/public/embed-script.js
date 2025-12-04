@@ -87,6 +87,10 @@ class CrawlChatEmbed {
     if (this.getScriptElem()?.dataset.noPrimaryColor === "true") {
       params.set("noPrimaryColor", "true");
     }
+    const secret = this.getScriptElem()?.dataset.secret;
+    if (secret) {
+      params.set("secret", secret);
+    }
     const src = `${this.host}/w/${this.scrapeId}?${params.toString()}`;
 
     iframe.src = src;
@@ -294,6 +298,10 @@ class CrawlChatEmbed {
     });
     if (this.getScriptElem()?.dataset.noPrimaryColor === "true") {
       params.set("noPrimaryColor", "true");
+    }
+    const secret = this.getScriptElem()?.dataset.secret;
+    if (secret) {
+      params.set("secret", secret);
     }
 
     const iframe = document.createElement("iframe");
