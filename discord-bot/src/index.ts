@@ -33,7 +33,8 @@ const client = new Client({
 const allBotUserIds = process.env.ALL_BOT_USER_IDS!.split(",");
 
 const defaultPrompt = `Keep the response very short and very concised.
-It should be under 1000 charecters.`;
+It should be under 1000 charecters.
+It is from a Discord server.`;
 
 const fetchAllParentMessages = async (
   message: DiscordMessage,
