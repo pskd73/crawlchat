@@ -8,6 +8,7 @@ import {
   getPagesCount,
   PLAN_FREE,
   PLAN_HOBBY,
+  PLAN_HOBBY_YEARLY,
   PLAN_PRO,
   PLAN_PRO_YEARLY,
   PLAN_STARTER,
@@ -96,6 +97,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     hobbyPlan: PLAN_HOBBY,
     starterYearlyPlan: PLAN_STARTER_YEARLY,
     proYearlyPlan: PLAN_PRO_YEARLY,
+    hobbyYearlyPlan: PLAN_HOBBY_YEARLY,
     usedPages,
     scrapeUsers,
     token,
@@ -178,6 +180,8 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
         proPlan={loaderData.proPlan}
         starterYearlyPlan={loaderData.starterYearlyPlan}
         proYearlyPlan={loaderData.proYearlyPlan}
+        hobbyPlan={loaderData.hobbyPlan}
+        hobbyYearlyPlan={loaderData.hobbyYearlyPlan}
       />
       <ChatModal token={loaderData.token} />
     </AppContext.Provider>

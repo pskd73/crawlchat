@@ -274,7 +274,7 @@ expressWs.app.ws("/", (ws: any, req) => {
           },
         });
 
-        if (message.data.query.length > 1000) {
+        if (message.data.query.length > 3000) {
           return ws.send(
             makeMessage("error", {
               message: "Question too long. Please shorten it.",

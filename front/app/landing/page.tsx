@@ -62,6 +62,7 @@ import {
   PLAN_PRO,
   PLAN_STARTER,
   PLAN_HOBBY,
+  PLAN_HOBBY_YEARLY,
   type Plan,
   PLAN_STARTER_YEARLY,
   PLAN_PRO_YEARLY,
@@ -157,6 +158,7 @@ export async function loader() {
     starterPlan: PLAN_STARTER,
     proPlan: PLAN_PRO,
     hobbyPlan: PLAN_HOBBY,
+    hobbyYearlyPlan: PLAN_HOBBY_YEARLY,
     focusChangelog,
     starterYearlyPlan: PLAN_STARTER_YEARLY,
     proYearlyPlan: PLAN_PRO_YEARLY,
@@ -861,6 +863,8 @@ function CreditsPopover() {
 }
 
 export function PricingBoxes({
+  hobbyPlan,
+  hobbyYearlyPlan,
   starterPlan,
   proPlan,
   starterYearlyPlan,
@@ -868,6 +872,8 @@ export function PricingBoxes({
   yearly,
   onClick,
 }: {
+  hobbyPlan: Plan;
+  hobbyYearlyPlan: Plan;
   starterPlan: Plan;
   proPlan: Plan;
   starterYearlyPlan: Plan;
@@ -878,6 +884,41 @@ export function PricingBoxes({
   if (yearly) {
     return (
       <>
+        <PricingBox
+          period="year"
+          title="Hobby"
+          description="Perfect for personal projects"
+          price={`$${hobbyYearlyPlan.price}`}
+          items={[
+            { text: `${hobbyYearlyPlan.limits.pages} pages` },
+            {
+              text: (
+                <div>
+                  {hobbyYearlyPlan.credits.messages / 12} message
+                  credits/month
+                  <CreditsPopover />
+                </div>
+              ),
+            },
+            { text: `${hobbyYearlyPlan.limits.scrapes} collections` },
+            { text: `${hobbyYearlyPlan.limits.teamMembers} team members` },
+            {
+              text: (
+                <span>
+                  <a href="/ai-models" className="link link-primary link-hover">
+                    Smart AI
+                  </a>{" "}
+                  models
+                </span>
+              ),
+            },
+          ]}
+          href={
+            "https://checkout.dodopayments.com/buy/pdt_boJZHUL9XLprkefonKtuT?quantity=1&redirect_url=https://crawlchat.app%2Fprofile%23billing"
+          }
+          onClick={onClick ? () => onClick?.(hobbyYearlyPlan.id) : undefined}
+          payLabel="Start free trial"
+        />
         <PricingBox
           period="year"
           title="Starter"
@@ -953,6 +994,39 @@ export function PricingBoxes({
   }
   return (
     <>
+      <PricingBox
+        title="Hobby"
+        description="Perfect for personal projects"
+        price={`$${hobbyPlan.price}`}
+        items={[
+          { text: `${hobbyPlan.limits.pages} pages` },
+          {
+            text: (
+              <div>
+                {hobbyPlan.credits.messages} message credits/month
+                <CreditsPopover />
+              </div>
+            ),
+          },
+          { text: `${hobbyPlan.limits.scrapes} collections` },
+          { text: `${hobbyPlan.limits.teamMembers} team members` },
+          {
+            text: (
+              <span>
+                <a href="/ai-models" className="link link-primary link-hover">
+                  Smart AI
+                </a>{" "}
+                models
+              </span>
+            ),
+          },
+        ]}
+        href={
+          "https://checkout.dodopayments.com/buy/pdt_IcrpqSx48qoCenz4lnLi1?quantity=1&redirect_url=https://crawlchat.app%2Fprofile%23billing"
+        }
+        onClick={onClick ? () => onClick?.(hobbyPlan.id) : undefined}
+        payLabel="Start free trial"
+      />
       <PricingBox
         title="Starter"
         description="Start your journey with CrawlChat"
@@ -1069,8 +1143,14 @@ export function PricingSwitch({
 }
 
 export function Pricing({ noMarginTop }: { noMarginTop?: boolean }) {
-  const { starterPlan, proPlan, starterYearlyPlan, proYearlyPlan } =
-    useLoaderData<typeof loader>();
+  const {
+    hobbyPlan,
+    hobbyYearlyPlan,
+    starterPlan,
+    proPlan,
+    starterYearlyPlan,
+    proYearlyPlan,
+  } = useLoaderData<typeof loader>();
   const [isYearly, setIsYearly] = useState(false);
 
   return (
@@ -1088,6 +1168,8 @@ export function Pricing({ noMarginTop }: { noMarginTop?: boolean }) {
 
       <div className="flex flex-col md:flex-row md:gap-6 gap-10 mt-20">
         <PricingBoxes
+          hobbyPlan={hobbyPlan}
+          hobbyYearlyPlan={hobbyYearlyPlan}
           starterPlan={starterPlan}
           proPlan={proPlan}
           starterYearlyPlan={starterYearlyPlan}

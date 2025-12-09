@@ -1,5 +1,6 @@
 import {
   PLAN_HOBBY,
+  PLAN_HOBBY_YEARLY,
   PLAN_PRO,
   PLAN_PRO_YEARLY,
   PLAN_STARTER,
@@ -30,6 +31,7 @@ export const productIdPlanMap: Record<string, Plan> = {
   pdt_P68hLo9a0At8cgn4WbzBe: PLAN_PRO,
   pdt_uAHyWAsgys9afUnn9NjAM: PLAN_STARTER_YEARLY,
   pdt_5dCrGhvBslGdT2fIxQjuy: PLAN_PRO_YEARLY,
+  pdt_boJZHUL9XLprkefonKtuT: PLAN_HOBBY_YEARLY,
 
   // dev
   pdt_CDgenxMUiAKjzBDVROTDr: PLAN_STARTER,
@@ -41,6 +43,9 @@ const planProductIdMap: Record<string, string> = {
   [PLAN_HOBBY.id]: "pdt_IcrpqSx48qoCenz4lnLi1",
   [PLAN_STARTER.id]: "pdt_vgCVfRAaCT99LM1Dfk5qF",
   [PLAN_PRO.id]: "pdt_P68hLo9a0At8cgn4WbzBe",
+  [PLAN_STARTER_YEARLY.id]: "pdt_uAHyWAsgys9afUnn9NjAM",
+  [PLAN_PRO_YEARLY.id]: "pdt_5dCrGhvBslGdT2fIxQjuy",
+  [PLAN_HOBBY_YEARLY.id]: "pdt_boJZHUL9XLprkefonKtuT",
 
   // [PLAN_HOBBY.id]: "pdt_lpFZp5sBEu5bzKwCbE5Y8",
   // [PLAN_STARTER.id]: "pdt_CDgenxMUiAKjzBDVROTDr",

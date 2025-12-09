@@ -1,6 +1,7 @@
 import {
   PLAN_FREE,
   PLAN_HOBBY,
+  PLAN_HOBBY_YEARLY,
   PLAN_PRO,
   PLAN_PRO_YEARLY,
   PLAN_STARTER,
@@ -31,6 +32,7 @@ export async function loader() {
     hobbyPlan: PLAN_HOBBY,
     starterYearlyPlan: PLAN_STARTER_YEARLY,
     proYearlyPlan: PLAN_PRO_YEARLY,
+    hobbyYearlyPlan: PLAN_HOBBY_YEARLY,
   };
 }
 

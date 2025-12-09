@@ -62,6 +62,13 @@ export default function AIModels() {
       sonnet_4_5: "Best",
     },
     {
+      feature: "Hobby plan",
+      gpt_4o_mini: <Check />,
+      haiku_4_5: <Check />,
+      gpt_5: <X />,
+      sonnet_4_5: <X />,
+    },
+    {
       feature: "Starter plan",
       gpt_4o_mini: <Check />,
       haiku_4_5: <Check />,
