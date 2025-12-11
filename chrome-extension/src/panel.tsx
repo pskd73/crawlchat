@@ -45,9 +45,16 @@ const Panel = ({
       prompt: "",
     };
   }, [currentValue]);
-  const [compose, setCompose] = useState<{ content: string; messages: any }>({
+  const [compose, setCompose] = useState<{
+    content: string;
+    messages: any;
+    slate?: string;
+    title?: string;
+  }>({
     content: input.content,
     messages: input.messages,
+    slate: "",
+    title: undefined,
   });
   const [composeLoading, setComposeLoading] = useState(false);
   const [composeError, setComposeError] = useState<string>();
@@ -115,6 +122,9 @@ const Panel = ({
           prompt,
           messages,
           formatText,
+          slate: compose?.slate ?? "",
+          content: compose?.content ?? "",
+          title: compose?.title ?? "",
         },
         (response) => {
           if (chrome.runtime.lastError) {
@@ -137,6 +147,8 @@ const Panel = ({
     setCompose({
       content: result.data.content,
       messages: result.data.messages,
+      slate: result.data.slate,
+      title: result.data.title,
     });
     setComposeLoading(false);
     setCurrentPrompt("");

@@ -68,7 +68,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 
   if (message.type === "API_COMPOSE") {
-    const { config, prompt, messages, formatText } = message;
+    const { config, prompt, messages, formatText, slate, content, title } =
+      message;
 
     fetch(`${API_HOST}/compose/${config.scrapeId}`, {
       method: "POST",
@@ -80,6 +81,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         prompt,
         messages,
         formatText,
+        slate,
+        content,
+        title,
         llmModel: "haiku_4_5",
       }),
     })
