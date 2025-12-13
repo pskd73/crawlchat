@@ -225,6 +225,7 @@ export default function Conversations({ loaderData }: Route.ComponentProps) {
                         name={thread.fingerprint}
                         size={24}
                         variant="beam"
+                        className="shrink-0"
                       />
                     )}
                     {thread.location?.country && (

@@ -313,6 +313,7 @@ export default function MessagesLayout({ loaderData }: Route.ComponentProps) {
                                 name={pair.queryMessage.fingerprint}
                                 size={24}
                                 variant="beam"
+                                className="shrink-0"
                               />
                             )}
                             <RouterLink
