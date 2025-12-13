@@ -736,7 +736,7 @@ function Toolbar() {
         )}
 
         <div className="text-xl font-bold">
-          {scrape.widgetConfig?.title ?? scrape.title ?? "Ask AI"}
+          {scrape.widgetConfig?.title || scrape.title || "Ask AI"}
         </div>
 
         {admin &&

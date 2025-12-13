@@ -15,14 +15,12 @@ import { useEffect, useMemo, useState } from "react";
 import { ChatBoxProvider } from "~/widget/use-chat-box";
 import ChatBox, { ChatboxContainer } from "~/widget/chat-box";
 import {
-  TbColorPicker,
   TbHome,
   TbMessage,
   TbPlus,
   TbTrash,
   TbX,
 } from "react-icons/tb";
-import { HexColorPicker, HexColorInput } from "react-colorful";
 import cn from "@meltdownjs/cn";
 import { makeMeta } from "~/meta";
 
@@ -108,7 +106,7 @@ export async function action({ request }: Route.ActionArgs) {
   }
   if (formData.has("primaryColor")) {
     update.primaryColor = formData.get("primaryColor") as string;
-    update.primaryColor = ["null", "#"].includes(update.primaryColor)
+    update.primaryColor = ["null", "#abcdef"].includes(update.primaryColor)
       ? null
       : update.primaryColor;
   }
@@ -117,7 +115,9 @@ export async function action({ request }: Route.ActionArgs) {
   }
   if (formData.has("buttonTextColor")) {
     update.buttonTextColor = formData.get("buttonTextColor") as string;
-    update.buttonTextColor = ["null", "#"].includes(update.buttonTextColor)
+    update.buttonTextColor = ["null", "#abcdef"].includes(
+      update.buttonTextColor
+    )
       ? null
       : update.buttonTextColor;
   }
@@ -180,6 +180,7 @@ const DEFAULT_MESSAGE: Message = {
   llmModel: "gpt_4o_mini",
   creditsUsed: 0,
   attachments: [],
+  fingerprint: "test",
 };
 
 function AskAIButton({
@@ -218,42 +219,22 @@ function ColorPicker({
   onClear: () => void;
 }) {
   return (
-    <div className="flex-1 flex gap-1 items-end">
-      <fieldset className="fieldset flex-1">
-        <legend className="fieldset-legend">{label}</legend>
-        <HexColorInput
-          name={name}
-          color={color ?? undefined}
-          onChange={setColor}
-          className="input w-full"
-          placeholder={"Pick a color"}
-          prefixed
-        />
-      </fieldset>
-
-      <div className="dropdown dropdown-end">
-        <button
-          type="button"
-          className="btn btn-square mb-1"
-          style={{ backgroundColor: color ?? undefined }}
-        >
-          <TbColorPicker />
-        </button>
-        <div
-          className={cn(
-            "dropdown-content bg-base-100 rounded-box z-1",
-            "w-56 h-56 shadow-sm flex justify-center items-center"
-          )}
-        >
-          <HexColorPicker color={color ?? undefined} onChange={setColor} />
-        </div>
-      </div>
-      <fieldset className="fieldset">
-        <button className="btn btn-square" onClick={onClear} type="button">
-          <TbX />
-        </button>
-      </fieldset>
-    </div>
+    <fieldset className="fieldset flex-1 flex gap-2 items-end">
+      <legend className="fieldset-legend">{label}</legend>
+      <input
+        type="color"
+        name={name}
+        value={color ?? "#abcdef"}
+        onChange={(e) =>
+          !e.target.value.includes("abcdef") && setColor(e.target.value)
+        }
+        className="input w-12 px-1"
+        placeholder={"Pick a color"}
+      />
+      <button className="btn btn-square" onClick={onClear} type="button">
+        <TbX />
+      </button>
+    </fieldset>
   );
 }
 
