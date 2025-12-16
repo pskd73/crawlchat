@@ -1603,6 +1603,172 @@ app.post("/site-use-case", async (req, res) => {
   }
 });
 
+app.post("/extract-facts/:scrapeId", authenticate, async (req, res) => {
+  const scrapeId = req.params.scrapeId;
+  const text = req.body.text as string;
+
+  if (!text || typeof text !== "string") {
+    res.status(400).json({ message: "Missing or invalid text parameter" });
+    return;
+  }
+
+  const scrape = await prisma.scrape.findFirstOrThrow({
+    where: { id: scrapeId },
+  });
+
+  authoriseScrapeUser(req.user!.scrapeUsers, scrape.id, res);
+
+  if (
+    !(await hasEnoughCredits(scrape.userId, "messages", {
+      alert: {
+        scrapeId: scrape.id,
+        token: createToken(scrape.userId),
+      },
+    }))
+  ) {
+    res.status(400).json({ message: "Not enough credits" });
+    return;
+  }
+
+  const queryContext: QueryContext = {
+    ragQueries: [],
+  };
+
+  const llmConfig = getConfig("gemini_2_5_flash");
+  const agent = new SimpleAgent({
+    id: "extract-facts-agent",
+    prompt: `Extract all facts mentioned in the given text. Each fact should be a complete, standalone statement that exactly matches the wording from the source text. Do not paraphrase, summarize, or combine facts. Each fact should be extracted verbatim from the source.
+
+Use the search_data tool to search the knowledge base for additional context and information that might help identify all facts mentioned in the text. Search for relevant information that could help extract complete and accurate facts.
+
+Important requirements:
+- Extract every fact mentioned in the text
+- Each fact string must exactly match the source text
+- Do not miss any facts
+- Each fact should be a separate string in the array
+- Preserve the exact wording from the source text
+- Use the search_data tool to find additional context if needed
+
+Text to analyze:
+${text}`,
+    tools: [makeRagTool(scrape.id, scrape.indexer, { queryContext }).make()],
+    schema: z.object({
+      facts: z
+        .array(z.string())
+        .describe(
+          "Array of facts extracted from the text, each exactly matching the source"
+        ),
+    }),
+    user: scrape.id,
+    maxTokens: 4000,
+    ...llmConfig,
+  });
+
+  const flow = new Flow([agent], {
+    messages: [
+      {
+        llmMessage: {
+          role: "user",
+          content:
+            "Extract all facts from the provided text. Use the search_data tool if you need additional context from the knowledge base.",
+        },
+      },
+    ],
+  });
+  flow.addNextAgents(["extract-facts-agent"]);
+
+  while (await flow.stream()) {}
+
+  const response = flow.getLastMessage().llmMessage.content as string;
+  const parsed = JSON.parse(response);
+  const facts = parsed.facts || [];
+
+  await consumeCredits(scrape.userId, "messages", llmConfig.creditsPerMessage);
+
+  res.json({ facts });
+});
+
+app.post("/fact-check/:scrapeId", authenticate, async (req, res) => {
+  const scrapeId = req.params.scrapeId;
+  const fact = req.body.fact as string;
+
+  const scrape = await prisma.scrape.findFirstOrThrow({
+    where: { id: scrapeId },
+  });
+
+  authoriseScrapeUser(req.user!.scrapeUsers, scrape.id, res);
+
+  if (
+    !(await hasEnoughCredits(scrape.userId, "messages", {
+      alert: {
+        scrapeId: scrape.id,
+        token: createToken(scrape.userId),
+      },
+    }))
+  ) {
+    res.status(400).json({ message: "Not enough credits" });
+    return;
+  }
+
+  const queryContext: QueryContext = {
+    ragQueries: [],
+  };
+
+  const llmConfig = getConfig("gemini_2_5_flash");
+  const agent = new SimpleAgent({
+    id: "fact-check-agent",
+    prompt: `You are a fact-checking assistant. Your task is to evaluate how accurate a given fact is based on the knowledge base context.
+
+Use the search_data tool to search the knowledge base for information related to the fact. Search for relevant information that can verify or refute the fact.
+
+After searching the knowledge base, analyze the fact against the context and provide a score from 0 to 1:
+- 1.0: The fact is completely accurate and well-supported by the knowledge base
+- 0.8-0.9: The fact is mostly accurate with minor discrepancies
+- 0.5-0.7: The fact is partially accurate but has some inaccuracies
+- 0.2-0.4: The fact is mostly inaccurate
+- 0.0-0.1: The fact is completely inaccurate or contradicted by the knowledge base
+
+Fact to check: ${fact}`,
+    tools: [makeRagTool(scrape.id, scrape.indexer, { queryContext }).make()],
+    schema: z.object({
+      score: z.number().min(0).max(1).describe("Accuracy score from 0 to 1"),
+      reason: z
+        .string()
+        .max(50)
+        .describe("Brief reasoning for the score in 10 words"),
+    }),
+    user: scrape.id,
+    maxTokens: 2000,
+    ...llmConfig,
+  });
+
+  const flow = new Flow([agent], {
+    messages: [
+      {
+        llmMessage: {
+          role: "user",
+          content: `Check the accuracy of this fact: "${fact}". Use the search_data tool to search the knowledge base for relevant information, then provide a score.`,
+        },
+      },
+    ],
+  });
+  flow.addNextAgents(["fact-check-agent"]);
+
+  while (await flow.stream()) {}
+
+  const response = flow.getLastMessage().llmMessage.content as string;
+  const parsed = JSON.parse(response);
+  const score =
+    typeof parsed.score === "number"
+      ? Math.max(0, Math.min(1, parsed.score))
+      : 0;
+  const reason = parsed.reason || "";
+
+  await consumeCredits(scrape.userId, "messages", llmConfig.creditsPerMessage);
+
+  res.json({ fact, score, reason });
+});
+
 app.get("/api/user", authenticate, async (req, res) => {
   res.json({ user: req.user });
 });
