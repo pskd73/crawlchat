@@ -1,8 +1,8 @@
 import type { Route } from "./+types/items";
 import { getAuthUser } from "~/auth/middleware";
 import { prisma } from "~/prisma";
-import { TbCheck, TbRefresh, TbX, TbStack } from "react-icons/tb";
-import { Link, Outlet } from "react-router";
+import { TbCheck, TbRefresh, TbX, TbStack, TbChevronLeft, TbChevronRight } from "react-icons/tb";
+import { Link, Outlet, useLoaderData } from "react-router";
 import { authoriseScrapeUser, getSessionScrapeId } from "~/scrapes/util";
 import { EmptyState } from "~/components/empty-state";
 import { makeMeta } from "~/meta";
@@ -30,8 +30,23 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     throw new Response("Not found", { status: 404 });
   }
 
+  const url = new URL(request.url);
+  const page = parseInt(url.searchParams.get("page") ?? "1");
+  const pageSize = 100;
+
+  const where = {
+    scrapeId: scrape.id,
+    knowledgeGroupId: params.groupId,
+  };
+
+  const totalItems = await prisma.scrapeItem.count({
+    where,
+  });
+
+  const totalPages = Math.ceil(totalItems / pageSize);
+
   const items = await prisma.scrapeItem.findMany({
-    where: { scrapeId: scrape.id, knowledgeGroupId: params.groupId },
+    where,
     select: {
       id: true,
       url: true,
@@ -41,9 +56,21 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       status: true,
       error: true,
     },
+    orderBy: {
+      updatedAt: "desc",
+    },
+    skip: (page - 1) * pageSize,
+    take: pageSize,
   });
 
-  return { scrape, items, knowledgeGroup };
+  return {
+    scrape,
+    items,
+    knowledgeGroup,
+    page,
+    totalPages,
+    totalItems,
+  };
 }
 
 export function meta({ data }: Route.MetaArgs) {
@@ -58,6 +85,40 @@ function getKey(item: { id: string; url?: string | null }) {
   }
 
   return item.url;
+}
+
+function Pagination() {
+  const { page, totalPages, knowledgeGroup } = useLoaderData<typeof loader>();
+
+  return (
+    <div className="flex gap-2 items-center justify-end">
+      <Link
+        className={cn("btn btn-square", page <= 1 && "btn-disabled")}
+        to={
+          page > 1
+            ? `/knowledge/group/${knowledgeGroup.id}/items?page=${page - 1}`
+            : "#"
+        }
+      >
+        <TbChevronLeft />
+      </Link>
+
+      <div className="flex items-center justify-center gap-4 text-sm">
+        {page} / {totalPages}
+      </div>
+
+      <Link
+        className={cn("btn btn-square", page === totalPages && "btn-disabled")}
+        to={
+          page < totalPages
+            ? `/knowledge/group/${knowledgeGroup.id}/items?page=${page + 1}`
+            : "#"
+        }
+      >
+        <TbChevronRight />
+      </Link>
+    </div>
+  );
 }
 
 export default function ScrapeLinks({ loaderData }: Route.ComponentProps) {
@@ -139,6 +200,12 @@ export default function ScrapeLinks({ loaderData }: Route.ComponentProps) {
               </tbody>
             </table>
           </div>
+
+          {loaderData.totalPages > 1 && (
+            <div className="flex justify-end">
+              <Pagination />
+            </div>
+          )}
 
           <Outlet />
         </div>
