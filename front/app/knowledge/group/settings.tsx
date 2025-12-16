@@ -209,6 +209,11 @@ export async function action({ request, params }: Route.ActionArgs) {
       "linearSkipProjectStatuses"
     ) as string;
   }
+  if (formData.has("allowedGithubIssueStates")) {
+    update.allowedGithubIssueStates = formData.get(
+      "allowedGithubIssueStates"
+    ) as string;
+  }
   if (formData.has("youtubeUrls")) {
     const urlsString = formData.get("youtubeUrls") as string;
     const urls = urlsString
@@ -420,6 +425,19 @@ function WebSettings({ group }: { group: KnowledgeGroup }) {
 }
 
 function GithubIssuesSettings({ group }: { group: KnowledgeGroup }) {
+  const allowedStatesFetcher = useFetcher();
+  const [allowedStates, setAllowedStates] = useState<string[]>(
+    group.allowedGithubIssueStates?.split(",").filter(Boolean) ?? []
+  );
+  const allowedStatesString = useMemo(() => {
+    return allowedStates.join(",");
+  }, [allowedStates]);
+
+  const stateOptions: Array<SelectValue> = [
+    { title: "Open", value: "open" },
+    { title: "Closed", value: "closed" },
+  ];
+
   const details = useMemo(() => {
     return [
       {
@@ -437,7 +455,29 @@ function GithubIssuesSettings({ group }: { group: KnowledgeGroup }) {
     ];
   }, [group]);
 
-  return <DataList data={details} />;
+  return (
+    <div className="flex flex-col gap-6">
+      <DataList data={details} />
+      <SettingsSection
+        id="allowed-github-issue-states"
+        fetcher={allowedStatesFetcher}
+        title="Allowed issue states"
+        description="Select the states of issues to fetch. You can select multiple states. Default it fetches all closed issues."
+      >
+        <input
+          value={allowedStatesString}
+          name="allowedGithubIssueStates"
+          type="hidden"
+        />
+        <MultiSelect
+          value={allowedStates}
+          onChange={setAllowedStates}
+          placeholder="Select states to fetch"
+          selectValues={stateOptions}
+        />
+      </SettingsSection>
+    </div>
+  );
 }
 
 function NotionSettings({

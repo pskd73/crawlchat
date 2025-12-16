@@ -553,6 +553,8 @@ model KnowledgeGroup {
   linearSkipIssueStatuses                   String?
   linearSkipProjectStatuses                 String?
 
+  allowedGithubIssueStates                  String?
+
   fetchError                                String?
   urls                                      KnowledgeGroupUrlItem[]
 

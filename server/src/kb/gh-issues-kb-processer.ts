@@ -67,69 +67,78 @@ export class GithubIssuesKbProcesser extends BaseKbProcesser {
 
     const [, , username, repo] = match;
 
-    let pagination: GithubPagination = {};
+    const allowedStates = this.knowledgeGroup.allowedGithubIssueStates ?? "closed";
+
     let addedCount = 0;
     const maxIssuesToAdd = ISSUES_TO_FETCH[this.knowledgeGroup.scrapeId] ?? 100;
-    do {
-      const { issues: newIssues, pagination: newPagination } = await getIssues({
-        repo,
-        username,
-        state: "closed",
-        pageUrl: pagination.nextUrl,
-      });
 
-      for (let i = 0; i < newIssues.length; i++) {
-        const issue = newIssues[i];
+    for (const state of allowedStates.split(",")) {
+      if (await this.shouldStop() || addedCount >= maxIssuesToAdd) {
+        break;
+      }
 
-        if (addedCount >= maxIssuesToAdd) {
-          break;
-        }
-
-        if (issue.pull_request) {
-          continue;
-        }
-
-        if (
-          await shouldSkipIssue(issue.html_url, this.knowledgeGroup.scrapeId)
-        ) {
-          console.log(
-            `Skipping issue ${issue.number} because it was already added`
-          );
-          addedCount++;
-          continue;
-        }
-
-        const timeline = await getIssueTimeline({
+      let pagination: GithubPagination = {};
+      do {
+        const { issues: newIssues, pagination: newPagination } = await getIssues({
           repo,
           username,
-          issueNumber: issue.number,
+          state: state as "open" | "closed" | "all",
+          pageUrl: pagination.nextUrl,
         });
 
-        await this.onContentAvailable(issue.html_url, {
-          text: getIssueMarkdown(issue, timeline),
-          title: issue.title,
-        });
+        for (let i = 0; i < newIssues.length; i++) {
+          const issue = newIssues[i];
 
-        addedCount++;
+          if (addedCount >= maxIssuesToAdd) {
+            break;
+          }
+
+          if (issue.pull_request) {
+            continue;
+          }
+
+          if (
+            await shouldSkipIssue(issue.html_url, this.knowledgeGroup.scrapeId)
+          ) {
+            console.log(
+              `Skipping issue ${issue.number} because it was already added`
+            );
+            addedCount++;
+            continue;
+          }
+
+          const timeline = await getIssueTimeline({
+            repo,
+            username,
+            issueNumber: issue.number,
+          });
+
+          await this.onContentAvailable(issue.html_url, {
+            text: getIssueMarkdown(issue, timeline),
+            title: issue.title,
+          });
+
+          addedCount++;
+
+          if (await this.shouldStop()) {
+            break;
+          }
+
+          await githubApiRateLimiter.wait();
+        }
 
         if (await this.shouldStop()) {
           break;
         }
 
+        pagination = newPagination;
         await githubApiRateLimiter.wait();
-      }
-
-      if (await this.shouldStop()) {
-        break;
-      }
-
-      pagination = newPagination;
-      await githubApiRateLimiter.wait();
-      console.log(
-        `Added ${addedCount} issues, ${
-          maxIssuesToAdd - addedCount
-        } remaining...`
-      );
-    } while (addedCount < maxIssuesToAdd && pagination.nextUrl);
+        console.log(
+          `Added ${addedCount} issues, ${
+            maxIssuesToAdd - addedCount
+          } remaining...`
+        );
+      } while (addedCount < maxIssuesToAdd && pagination.nextUrl);
+    }
   }
 }
