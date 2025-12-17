@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { TbArrowRight, TbSearch, TbWorld } from "react-icons/tb";
+import { Link, Outlet } from "react-router";
 import { makeMeta } from "~/meta";
 
 export function meta() {
@@ -37,6 +38,8 @@ export default function EmbedDemo() {
           </div>
 
           <div className="flex gap-2 items-center">
+            <a href="/embed-demo/pricing" className="link link-primary">Pricing</a>
+            <Link to="/embed-demo/docs" className="link link-primary">Docs</Link>
             <label className="input">
               <TbSearch />
               <input
@@ -53,6 +56,8 @@ export default function EmbedDemo() {
             </div>
           </div>
         </div>
+
+        <Outlet />
 
         <div className="w-full h-[100px] bg-base-200 rounded-box" />
         <div className="w-full h-[240px] bg-base-200 rounded-box" />

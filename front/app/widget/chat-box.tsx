@@ -79,6 +79,25 @@ export function useChatBoxDimensions(
   return { width, height };
 }
 
+function ChatInputBadge({
+  children,
+  tooltip,
+}: PropsWithChildren<{ tooltip?: string }>) {
+  return (
+    <div className="tooltip tooltip-right" data-tip={tooltip}>
+      <div
+        className={cn(
+          "bg-base-100 p-1 px-2 border border-base-300 text-xs",
+          "w-fit rounded-box text-base-content/70 hover:text-base-content",
+          "transition-all"
+        )}
+      >
+        {children}
+      </div>
+    </div>
+  );
+}
+
 function ChatInput() {
   const {
     ask,
@@ -90,6 +109,7 @@ function ChatInput() {
     embed,
     sidePanel,
     defaultQuery,
+    currentPage,
   } = useChatBoxContext();
 
   const [focused, setFocused] = useState(false);
@@ -190,46 +210,55 @@ function ChatInput() {
     : undefined;
 
   return (
-    <div
-      className={cn(
-        "flex gap-2 border-t border-base-300 justify-between p-4",
-        "transition-all",
-        sidePanel && "m-2 border rounded-2xl p-2 pl-4"
+    <div>
+      {currentPage && (
+        <div className="bg-base-200 p-1 border-t border-base-300">
+          <ChatInputBadge tooltip={"Asking about this page"}>
+            {currentPage.title}
+          </ChatInputBadge>
+        </div>
       )}
-    >
-      <div className="flex-1 flex items-center">
-        <textarea
-          ref={inputRef}
-          placeholder={getPlaceholder()}
-          className={cn(
-            "text-lg p-0 max-h-[240px] overflow-y-auto resize-none",
-            "outline-none w-full placeholder-base-content/40",
-            !query && "truncate"
-          )}
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          rows={1}
-          onKeyDown={handleKeyDown}
-          disabled={isDisabled}
-          onFocus={() => setFocused(true)}
-          onBlur={() => setFocused(false)}
-        />
-      </div>
-
-      <button
+      <div
         className={cn(
-          "btn btn-sm btn-circle text-lg shadow-none border-0",
-          cleanedQuery.length > 0 ? "btn-primary" : "btn-soft"
+          "flex gap-2 border-t border-base-300 justify-between p-4",
+          "transition-all",
+          sidePanel && "m-2 border rounded-2xl p-2 pl-4"
         )}
-        onClick={handleAsk}
-        disabled={isDisabled}
-        style={{
-          backgroundColor: !isDisabled ? bg ?? undefined : undefined,
-          color: !isDisabled ? color ?? undefined : undefined,
-        }}
       >
-        <TbArrowUp />
-      </button>
+        <div className="flex-1 flex items-center">
+          <textarea
+            ref={inputRef}
+            placeholder={getPlaceholder()}
+            className={cn(
+              "text-lg p-0 max-h-[240px] overflow-y-auto resize-none",
+              "outline-none w-full placeholder-base-content/40",
+              !query && "truncate"
+            )}
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            rows={1}
+            onKeyDown={handleKeyDown}
+            disabled={isDisabled}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
+          />
+        </div>
+
+        <button
+          className={cn(
+            "btn btn-sm btn-circle text-lg shadow-none border-0",
+            cleanedQuery.length > 0 ? "btn-primary" : "btn-soft"
+          )}
+          onClick={handleAsk}
+          disabled={isDisabled}
+          style={{
+            backgroundColor: !isDisabled ? bg ?? undefined : undefined,
+            color: !isDisabled ? color ?? undefined : undefined,
+          }}
+        >
+          <TbArrowUp />
+        </button>
+      </div>
     </div>
   );
 }

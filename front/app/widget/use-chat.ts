@@ -185,7 +185,7 @@ export function useScrapeChat({
     socket.current?.close();
   }
 
-  function ask(query: string, options?: { delete?: string[] }) {
+  function ask(query: string, options?: { delete?: string[]; url?: string }) {
     if (query.length === 0) return -1;
 
     socket.current!.send(
@@ -199,6 +199,7 @@ export function useScrapeChat({
         },
         secret: secret,
         fingerprint,
+        url: options?.url,
       })
     );
     const messagesCount = messages.length;
@@ -227,6 +228,7 @@ export function useScrapeChat({
         creditsUsed: 0,
         attachments: [],
         fingerprint: null,
+        url: null,
       },
     ]);
     setAskStage("asked");

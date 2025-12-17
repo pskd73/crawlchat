@@ -70,7 +70,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   }, [location]);
 
   const isEmbedDemo = matches.some(
-    (match) => match.id === "landing/embed-demo"
+    (match) => match.id.startsWith("embed-demo")
   );
   const isLandingPage = matches.some((match) => match.id === "landing/page");
 
@@ -117,7 +117,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <script
             src="/embed.js"
             id="crawlchat-script"
-            data-id="67bca5b7b57f15a3a6f8eac6"
+            data-id="crawlchat"
             data-ask-ai-text="💬 Ask AI"
             data-ask-ai-background-color="#000000"
             data-ask-ai-color="white"

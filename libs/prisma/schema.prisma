@@ -325,6 +325,7 @@ model Message {
   llmModel                  LlmModel?
   creditsUsed               Int?
   fingerprint               String?
+  url                       String?
 
   createdAt                 DateTime @default(now())
   updatedAt                 DateTime @updatedAt

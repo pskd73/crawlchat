@@ -4,6 +4,7 @@ import {
   ApiActionDataItem,
   ApiActionDataType,
   RichBlockConfig,
+  ScrapeItem,
   Thread,
 } from "libs/prisma";
 import { makeIndexer } from "../indexer/factory";
@@ -559,6 +560,7 @@ export function makeFlow(
     actions?: ApiAction[];
     clientData?: any;
     secret?: string;
+    scrapeItem?: ScrapeItem;
   }
 ) {
   const queryContext: QueryContext = {
@@ -616,6 +618,21 @@ export function makeFlow(
       })
     : [];
 
+  let currentPagePrompt = "";
+  if (options?.scrapeItem) {
+    currentPagePrompt = `
+    The current page from which the user is asking the question is as mentioned below.
+    Use this information to answer the question if user refers to the page.
+
+    <current-page>
+    ${JSON.stringify({
+      url: options.scrapeItem.url,
+      title: options.scrapeItem.title,
+      markdown: options.scrapeItem.markdown,
+    })}
+    </current-page>`;
+  }
+
   const ragAgent = new SimpleAgent<RAGAgentCustomMessage>({
     id: "rag-agent",
     prompt: multiLinePrompt([
@@ -665,6 +682,8 @@ export function makeFlow(
       "Don't ask more than 3 questions for the entire answering flow.",
       "Be polite when you don't have the answer, explain in a friendly way and inform that it is better to reach out the support team.",
       systemPrompt,
+
+      currentPagePrompt,
 
       `<client-data>\n${JSON.stringify(options?.clientData)}\n</client-data>`,
     ]),

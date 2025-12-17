@@ -78,6 +78,10 @@ export function useChatBox({
   );
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [internalLinkHosts, setInternalLinkHosts] = useState<string[]>([]);
+  const [currentPage, setCurrentPage] = useState<{
+    title: string;
+    url: string;
+  }>();
 
   useEffect(() => {
     if (token) {
@@ -233,6 +237,14 @@ export function useChatBox({
         if (data.type === "query") {
           ask(data.query);
         }
+        if (data.type === "host-navigation") {
+          if (data.title && data.url) {
+            setCurrentPage({
+              title: data.title,
+              url: data.url,
+            });
+          }
+        }
       } catch {}
     };
 
@@ -272,7 +284,9 @@ export function useChatBox({
       setPendingQuery(query);
       return;
     }
-    chat.ask(query);
+    chat.ask(query, {
+      url: currentPage?.url,
+    });
     await scroll(true);
   }
 
@@ -387,6 +401,7 @@ export function useChatBox({
     requestEmailVerificationFetcher,
     verifyEmailFetcher,
     defaultQuery,
+    currentPage,
     close,
     erase,
     deleteMessages,

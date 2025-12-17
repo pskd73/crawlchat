@@ -8,6 +8,7 @@ import {
   MessageChannel,
   Scrape,
   Thread,
+  ScrapeItem,
 } from "libs/prisma";
 import { getConfig } from "./llm/config";
 import { makeFlow, RAGAgentCustomMessage } from "./llm/flow-jasmine";
@@ -70,6 +71,7 @@ export type Answerer = (
     channel?: MessageChannel;
     clientData?: any;
     secret?: string;
+    scrapeItem?: ScrapeItem;
   }
 ) => Promise<AnswerCompleteEvent | null>;
 
@@ -237,6 +239,7 @@ Just use this block, don't ask the user to enter the email. Use it only if the t
       actions: options?.actions,
       clientData: options?.clientData,
       secret: options?.secret,
+      scrapeItem: options?.scrapeItem,
     }
   );
 

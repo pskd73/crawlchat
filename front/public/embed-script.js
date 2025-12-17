@@ -167,6 +167,12 @@ class CrawlChatEmbed {
     if (data.type === "embed-ready") {
       this.widgetConfig = data.widgetConfig;
       await this.showAskAIButton();
+      if (
+        window.location.href.includes("crawlchat.app") ||
+        window.location.href.includes("localhost")
+      ) {
+        this.watchNavigation();
+      }
     }
   }
 
@@ -574,6 +580,32 @@ class CrawlChatEmbed {
         "*"
       );
     }
+  }
+
+  watchNavigation() {
+    const notify = async (url) => {
+      const iframe = document.getElementById(this.iframeId);
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      iframe?.contentWindow?.postMessage(
+        JSON.stringify({
+          type: "host-navigation",
+          url: url ?? window.location.href,
+          title: document.title,
+        }),
+        "*"
+      );
+    };
+
+    const hasNavigationApi =
+      typeof window.navigation !== "undefined" &&
+      typeof window.navigation.addEventListener === "function";
+    if (hasNavigationApi) {
+      window.navigation.addEventListener("navigate", (e) => {
+        notify(e.destination.url);
+      });
+    }
+
+    notify(window.location.href);
   }
 }
 
