@@ -294,10 +294,10 @@ export function UsedBy() {
         <img
           src="/used-by/remotion.png"
           alt="Remotion"
-          className="max-h-[38px]"
+          className="max-h-[38px] shrink-0"
         />
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           <img
             src="/used-by/konvajs.png"
             alt="Konva"
@@ -306,7 +306,7 @@ export function UsedBy() {
           <div className="font-medium text-xl">Konvajs</div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           <img
             src="/used-by/270logo.svg"
             alt="270Degrees.nl"
@@ -315,7 +315,7 @@ export function UsedBy() {
           <div className="font-medium text-xl">270Degrees</div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           <img
             src="/used-by/polotno.png"
             alt="Polotno"
@@ -324,7 +324,13 @@ export function UsedBy() {
           <div className="font-medium text-xl">Polotno</div>
         </div>
 
-        <div className="bg-gray-900 rounded-box p-4 px-6 pb-3 rounded-full">
+        <img
+          src="/used-by/backpack-laravel.png"
+          alt="Backpack for Laravel"
+          className="max-h-[38px]"
+        />
+
+        <div className="bg-gray-900 rounded-box p-4 px-6 pb-3 rounded-full shrink-0">
           <img
             src="/used-by/postiz.svg"
             alt="Postiz"
@@ -1271,6 +1277,11 @@ export function Footer() {
                 <img
                   src="/used-by/polotno.png"
                   alt="Polotno"
+                  className="max-h-6 inline-block"
+                />
+                <img
+                  src="/used-by/backpack-laravel.png"
+                  alt="Backpack for Laravel"
                   className="max-h-6 inline-block"
                 />
                 <div className="bg-black px-2 rounded-full">
