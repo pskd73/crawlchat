@@ -15,7 +15,8 @@ const collectionIcons: Record<string, string> = {
   "6887d9ca7c36f5b8b4348089": "🤝",
   "67e312247a822a2303f2b8a7": "🪄",
   "686d843711915abf46700f2b": "9️⃣",
-  "692bb91325e4f55feefdfe82": "💬",
+  "67dbfc7258ed87c571a04b83": "💬",
+  "692bb91325e4f55feefdfe82": "☁️"
 };
 
 router.get("/metrics", async (req, res) => {
