@@ -63,6 +63,21 @@ export async function authenticate(
   }
 }
 
+export async function adminAuthenticate(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  await authenticate(req, res, () => {
+    const adminEmails = ["pramodkumar.damam73@gmail.com"];
+    if (!req.user?.email || !adminEmails.includes(req.user.email)) {
+      res.status(403).json({ message: "Forbidden: Admin access only" });
+      return;
+    }
+    next();
+  });
+}
+
 declare global {
   namespace Express {
     interface Request {

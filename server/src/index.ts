@@ -49,6 +49,7 @@ import { randomUUID } from "crypto";
 import { extractSiteUseCase } from "./site-use-case";
 import { handleWs } from "./routes/socket";
 import apiRouter from "./routes/api";
+import adminRouter from "./routes/admin";
 
 const app: Express = express();
 const expressWs = ws(app);
@@ -66,6 +67,7 @@ app.use(/\/((?!sse).)*/, express.json({ limit: "50mb" }));
 app.use(cors());
 
 app.use("/api", apiRouter);
+app.use("/admin", adminRouter);
 
 function cleanUrl(url: string) {
   if (!url.startsWith("http")) {
