@@ -86,12 +86,13 @@ export async function action({ params, request }: Route.ActionArgs) {
     });
 
     const token = createToken(user!.id);
-    const host = ["scrape_web"].includes(scrapeItem.knowledgeGroup!.type)
+    const shouldUseSourceSync =
+      ["scrape_web"].includes(scrapeItem.knowledgeGroup!.type) &&
+      scrapeItem.knowledgeGroup!.userId === "67af3a40d81c3547d5bc4b56";
+    const host = shouldUseSourceSync
       ? process.env.VITE_SOURCE_SYNC_URL
       : process.env.VITE_SERVER_URL;
-    const endpoint = ["scrape_web"].includes(scrapeItem.knowledgeGroup!.type)
-      ? "/update-item"
-      : "/scrape";
+    const endpoint = shouldUseSourceSync ? "/update-item" : "/scrape";
 
     await fetch(`${host}${endpoint}`, {
       method: "POST",
