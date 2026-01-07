@@ -79,11 +79,6 @@ export async function action({ request, params }: Route.ActionArgs) {
       return { error: "Knowledge group ID is required" };
     }
 
-    const group = await prisma.knowledgeGroup.update({
-      where: { id: knowledgeGroupId, scrapeId },
-      data: { status: "processing", fetchError: null },
-    });
-
     const token = createToken(user!.id);
     const host = process.env.VITE_SOURCE_SYNC_URL;
     const endpoint = "/update-group";

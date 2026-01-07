@@ -68,7 +68,15 @@ export function ActionButton({
     }
   }, [stopFetcher.data]);
 
-  if (["custom", "upload"].includes(group.type)) {
+  if (
+    [
+      "custom",
+      "upload",
+      "learn_discord",
+      "learn_slack",
+      "answer_corrections",
+    ].includes(group.type)
+  ) {
     return null;
   }
 
