@@ -498,6 +498,7 @@ enum KnowledgeGroupType {
   notion
   confluence
   linear
+  linear_projects
   custom
   youtube
   youtube_channel

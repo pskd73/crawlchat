@@ -124,7 +124,10 @@ export default function KnowledgeGroups({ loaderData }: Route.ComponentProps) {
         typeText = "Confluence";
       } else if (group.type === "linear") {
         icon = <SiLinear />;
-        typeText = "Linear";
+        typeText = "Linear Issues";
+      } else if (group.type === "linear_projects") {
+        icon = <SiLinear />;
+        typeText = "Linear Projects";
       } else if (group.type === "youtube") {
         icon = <TbVideo />;
         typeText = "YouTube";

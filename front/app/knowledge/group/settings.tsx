@@ -103,7 +103,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 
   let linearIssueStatuses: Array<SelectValue> = [];
   let linearProjectStatuses: Array<SelectValue> = [];
-  if (knowledgeGroup.type === "linear" && knowledgeGroup.linearApiKey) {
+  if ((knowledgeGroup.type === "linear" || knowledgeGroup.type === "linear_projects") && knowledgeGroup.linearApiKey) {
     const client = new LinearClient({
       apiKey: knowledgeGroup.linearApiKey,
     });
@@ -601,43 +601,47 @@ function LinearSettings({
 
   return (
     <div className="flex flex-col gap-6">
-      <SettingsSection
-        id="linear-skip-issue-statuses"
-        fetcher={skipIssueStatusesFetcher}
-        title="Skip issue statuses"
-        description="Specify the statuses of the issues that you don't want it to scrape. You can give multiple statuses."
-      >
-        <input
-          value={skipIssueStatusesString}
-          name="linearSkipIssueStatuses"
-          type="hidden"
-        />
-        <MultiSelect
-          value={skipIssueStatuses}
-          onChange={setSkipIssueStatuses}
-          placeholder="Select statuses to skip"
-          selectValues={linearIssueStatuses}
-        />
-      </SettingsSection>
+      {group.type === "linear" && (
+        <SettingsSection
+          id="linear-skip-issue-statuses"
+          fetcher={skipIssueStatusesFetcher}
+          title="Skip issue statuses"
+          description="Specify the statuses of the issues that you don't want it to scrape. You can give multiple statuses."
+        >
+          <input
+            value={skipIssueStatusesString}
+            name="linearSkipIssueStatuses"
+            type="hidden"
+          />
+          <MultiSelect
+            value={skipIssueStatuses}
+            onChange={setSkipIssueStatuses}
+            placeholder="Select statuses to skip"
+            selectValues={linearIssueStatuses}
+          />
+        </SettingsSection>
+      )}
 
-      <SettingsSection
-        id="linear-skip-project-statuses"
-        fetcher={skipProjectStatusesFetcher}
-        title="Skip project statuses"
-        description="Specify the statuses of the projects that you don't want it to scrape. You can give multiple statuses."
-      >
-        <input
-          value={skipProjectStatusesString}
-          name="linearSkipProjectStatuses"
-          type="hidden"
-        />
-        <MultiSelect
-          value={skipProjectStatuses}
-          onChange={setSkipProjectStatuses}
-          placeholder="Select statuses to skip"
-          selectValues={linearProjectStatuses}
-        />
-      </SettingsSection>
+      {group.type === "linear_projects" && (
+        <SettingsSection
+          id="linear-skip-project-statuses"
+          fetcher={skipProjectStatusesFetcher}
+          title="Skip project statuses"
+          description="Specify the statuses of the projects that you don't want it to scrape. You can give multiple statuses."
+        >
+          <input
+            value={skipProjectStatusesString}
+            name="linearSkipProjectStatuses"
+            type="hidden"
+          />
+          <MultiSelect
+            value={skipProjectStatuses}
+            onChange={setSkipProjectStatuses}
+            placeholder="Select statuses to skip"
+            selectValues={linearProjectStatuses}
+          />
+        </SettingsSection>
+      )}
 
       <AutoUpdateSettings group={group} />
     </div>
@@ -769,7 +773,8 @@ export default function KnowledgeGroupSettings({
             confluencePages={loaderData.confluencePages}
           />
         )}
-        {loaderData.knowledgeGroup.type === "linear" && (
+        {(loaderData.knowledgeGroup.type === "linear" ||
+          loaderData.knowledgeGroup.type === "linear_projects") && (
           <LinearSettings
             group={loaderData.knowledgeGroup}
             linearIssueStatuses={loaderData.linearIssueStatuses}

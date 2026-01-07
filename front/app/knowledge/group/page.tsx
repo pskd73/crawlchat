@@ -89,6 +89,7 @@ export async function action({ request, params }: Route.ActionArgs) {
       "scrape_web",
       "upload",
       "github_discussions",
+      "linear_projects",
     ].includes(group.type);
     const host = shouldUseSourceSync
       ? process.env.VITE_SOURCE_SYNC_URL
@@ -182,7 +183,10 @@ export default function KnowledgeGroupPage({
     if (loaderData.knowledgeGroup.type === "github_discussions") {
       return <TbBrandGithub />;
     }
-    if (loaderData.knowledgeGroup.type === "linear") {
+    if (
+      loaderData.knowledgeGroup.type === "linear" ||
+      loaderData.knowledgeGroup.type === "linear_projects"
+    ) {
       return <SiLinear />;
     }
     if (loaderData.knowledgeGroup.type === "youtube") {

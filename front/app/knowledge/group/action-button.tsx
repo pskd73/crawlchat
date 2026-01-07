@@ -68,19 +68,7 @@ export function ActionButton({
     }
   }, [stopFetcher.data]);
 
-  if (
-    ![
-      "scrape_web",
-      "scrape_github",
-      "github_issues",
-      "github_discussions",
-      "notion",
-      "confluence",
-      "linear",
-      "youtube",
-      "youtube_channel",
-    ].includes(group.type)
-  ) {
+  if (["custom", "upload"].includes(group.type)) {
     return null;
   }
 

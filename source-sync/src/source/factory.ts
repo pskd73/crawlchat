@@ -6,6 +6,7 @@ import { GithubDiscussionsSource } from "./github-discussions";
 import { TextSource } from "./text";
 import { ConfluenceSource } from "./confluence";
 import { LinearIssuesSource } from "./linear";
+import { LinearProjectSource } from "./linear-project";
 import { YoutubeChannelSource } from "./youtube-channel";
 import { YoutubeVideosSource } from "./youtube-videos";
 
@@ -25,6 +26,8 @@ export function makeSource(type: KnowledgeGroupType) {
       return new ConfluenceSource();
     case "linear":
       return new LinearIssuesSource();
+    case "linear_projects":
+      return new LinearProjectSource();
     case "youtube_channel":
       return new YoutubeChannelSource();
     case "youtube":

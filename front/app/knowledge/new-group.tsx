@@ -121,6 +121,7 @@ export async function action({ request }: { request: Request }) {
       type !== "notion" &&
       type !== "confluence" &&
       type !== "linear" &&
+      type !== "linear_projects" &&
       type !== "youtube" &&
       type !== "youtube_channel"
     ) {
@@ -346,13 +347,32 @@ export function NewKnowledgeGroupForm({
         ),
       },
       {
-        title: "Linear",
+        title: "Linear Issues",
         value: "linear",
         description: "Fetch Linear issues",
         icon: <SiLinear />,
         longDescription: (
           <p>
             Fetch Linear issues as the knowledge base. Learn more about creating
+            an API Key{" "}
+            <a
+              href="https://docs.crawlchat.app/knowledge-base/linear-issues"
+              target="_blank"
+              className="link link-primary"
+            >
+              here
+            </a>
+          </p>
+        ),
+      },
+      {
+        title: "Linear Projects",
+        value: "linear_projects",
+        description: "Fetch Linear projects",
+        icon: <SiLinear />,
+        longDescription: (
+          <p>
+            Fetch Linear projects as the knowledge base. Learn more about creating
             an API Key{" "}
             <a
               href="https://docs.crawlchat.app/knowledge-base/linear-issues"
@@ -619,7 +639,7 @@ export function NewKnowledgeGroupForm({
         </>
       )}
 
-      {type === "linear" && (
+      {(type === "linear" || type === "linear_projects") && (
         <>
           <fieldset className="fieldset">
             <legend className="fieldset-legend">Linear API Key</legend>
