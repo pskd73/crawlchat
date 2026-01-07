@@ -462,11 +462,6 @@ export async function fillMessageAnalysis(
       resolved: partialAnalysis?.resolved ?? false,
     };
 
-    // const checkForDataGap = shouldCheckForDataGap(sources);
-    console.log({
-      noInformation: partialAnalysis?.noInformation,
-    });
-
     if (partialAnalysis?.noInformation) {
       const decomposedQuestions = await decomposeQuestion(
         question,
