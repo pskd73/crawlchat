@@ -34,7 +34,7 @@ authenticator.use(
       secret: "secret",
       callbackURL: "/login/verify",
       successRedirect: "/app",
-      failureRedirect: "/login",
+      failureRedirect: "/login?error=true",
       emailSentRedirect: "/login?mail-sent=true",
       sessionStorage,
     },

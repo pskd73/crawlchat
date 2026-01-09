@@ -22,9 +22,13 @@ export async function loader({ request }: Route.LoaderArgs) {
     return redirect("/app");
   }
 
+  const session = await getSession(request.headers.get("cookie"));
   const searchParams = new URL(request.url).searchParams;
 
-  return { mailSent: !!searchParams.has("mail-sent") };
+  return {
+    mailSent: !!searchParams.has("mail-sent"),
+    error: session.get("error"),
+  };
 }
 
 export function meta() {
@@ -51,7 +55,7 @@ export async function action({ request }: Route.ActionArgs) {
 
 export default function LoginPage() {
   const fetcher = useFetcher();
-  const { mailSent } = useLoaderData();
+  const { mailSent, error } = useLoaderData();
   const emailRef = useRef<HTMLInputElement>(null);
   const testiIndex = useMemo(() => Math.floor(Math.random() * 4), []);
 
@@ -115,6 +119,13 @@ export default function LoginPage() {
                 </div>
               )}
 
+              {(error || fetcher.data?.error) && (
+                <div role="alert" className="alert alert-error">
+                  <TbCircleX />
+                  <span>{error || fetcher.data?.error}</span>
+                </div>
+              )}
+
               <button
                 className="btn btn-primary w-full"
                 type="submit"
@@ -126,13 +137,6 @@ export default function LoginPage() {
                 Login
                 <TbArrowRight />
               </button>
-
-              {fetcher.data?.error && (
-                <div role="alert" className="alert alert-error">
-                  <TbCircleX />
-                  <span>{fetcher.data.error}</span>
-                </div>
-              )}
             </div>
 
             <div className="divider m-0">OR</div>
