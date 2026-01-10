@@ -1,4 +1,4 @@
-import { Outlet } from "react-router";
+import { Outlet, redirect } from "react-router";
 import { CTA, Footer, LandingPage, Nav } from "./page";
 import { getAuthUser } from "~/auth/middleware";
 import type { Route } from "./+types/layout";
@@ -25,6 +25,10 @@ async function getGithubStars() {
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request, { dontRedirect: true });
+
+  if (process.env.SELF_HOSTED) {
+    return redirect("/login");
+  }
 
   return {
     user,

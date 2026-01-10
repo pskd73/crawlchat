@@ -1,4 +1,6 @@
+import React from "react";
 import { Resend } from "resend";
+import { render } from "@react-email/render";
 import WelcomeEmail from "emails/welcome";
 import InvitationEmail from "emails/invitation";
 import TeamJoinEmail from "emails/team-join";
@@ -11,8 +13,23 @@ import ChatVerifyEmail from "emails/chat-verify-email";
 import WeeklyEmail from "emails/weekly";
 import type { MessagesSummary } from "./messages-summary";
 
+if (!process.env.SELF_HOSTED && !process.env.RESEND_KEY) {
+  throw new Error("RESEND_KEY must be set when not self-hosted");
+}
+
+if (!process.env.SELF_HOSTED && !process.env.RESEND_FROM_EMAIL) {
+  throw new Error("RESEND_FROM_EMAIL must be set when not self-hosted");
+}
+
 export const sendEmail = async (to: string, subject: string, text: string) => {
   try {
+    if (!process.env.RESEND_KEY) {
+      return console.log("Send email", {
+        to,
+        subject,
+        text,
+      });
+    }
     const resend = new Resend(process.env.RESEND_KEY!);
     await resend.emails.send({
       from: process.env.RESEND_FROM_EMAIL!,
@@ -28,9 +45,16 @@ export const sendEmail = async (to: string, subject: string, text: string) => {
 export const sendReactEmail = async (
   to: string,
   subject: string,
-  component: React.ReactNode
+  component: React.ReactElement
 ) => {
   try {
+    if (!process.env.RESEND_KEY) {
+      return console.log("Send email", {
+        to,
+        subject,
+        text: await render(component, { plainText: true }),
+      });
+    }
     const resend = new Resend(process.env.RESEND_KEY!);
     await resend.emails.send({
       from: process.env.RESEND_FROM_EMAIL!,

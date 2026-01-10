@@ -32,14 +32,18 @@ export async function loader({ request }: Route.LoaderArgs) {
 
   const cookie = await commitSession(session);
 
-  return Response.json({
-    mailSent: !!searchParams.has("mail-sent"),
-    error,
-  }, {
-    headers: {
-      "Set-Cookie": cookie,
+  return Response.json(
+    {
+      mailSent: !!searchParams.has("mail-sent"),
+      error,
+      selfHosted: process.env.SELF_HOSTED,
     },
-  });
+    {
+      headers: {
+        "Set-Cookie": cookie,
+      },
+    }
+  );
 }
 
 export function meta() {
@@ -66,7 +70,7 @@ export async function action({ request }: Route.ActionArgs) {
 
 export default function LoginPage() {
   const fetcher = useFetcher();
-  const { mailSent, error } = useLoaderData();
+  const { mailSent, error, selfHosted } = useLoaderData();
   const emailRef = useRef<HTMLInputElement>(null);
   const testiIndex = useMemo(() => Math.floor(Math.random() * 4), []);
 
@@ -81,23 +85,25 @@ export default function LoginPage() {
       data-theme="brand"
       className="flex h-screen w-screen gap-2 items-stretch"
     >
-      <div
-        className={cn(
-          "flex-col items-center justify-center bg-base-200 flex-1",
-          "hidden md:flex px-4 gap-0 relative",
-          "border-r border-base-300"
-        )}
-      >
-        <div className="text-2xl font-bold text-center py-4">
-          People love <span className="font-radio-grotesk">CrawlChat</span> ❤️
+      {!selfHosted && (
+        <div
+          className={cn(
+            "flex-col items-center justify-center bg-base-200 flex-1",
+            "hidden md:flex px-4 gap-0 relative",
+            "border-r border-base-300"
+          )}
+        >
+          <div className="text-2xl font-bold text-center py-4">
+            People love <span className="font-radio-grotesk">CrawlChat</span> ❤️
+          </div>
+          <div className="max-w-500px overflow-y-auto no-scrollbar pb-4 max-w-96">
+            {testiIndex === 0 && <JonnyTestimonial />}
+            {testiIndex === 1 && <AntonTestimonial />}
+            {testiIndex === 2 && <MauritsTestimonial />}
+            {testiIndex === 3 && <EgelhausTestimonial />}
+          </div>
         </div>
-        <div className="max-w-500px overflow-y-auto no-scrollbar pb-4 max-w-96">
-          {testiIndex === 0 && <JonnyTestimonial />}
-          {testiIndex === 1 && <AntonTestimonial />}
-          {testiIndex === 2 && <MauritsTestimonial />}
-          {testiIndex === 3 && <EgelhausTestimonial />}
-        </div>
-      </div>
+      )}
       <div className="flex flex-col flex-1 gap-2 h-full justify-center items-center">
         <fetcher.Form method="post">
           <div

@@ -8,25 +8,21 @@ services:
     ports:
       - "3001:3000"
     environment:
-      # Remember to change these variables in production!
+      SELF_HOSTED: "true"
       DATABASE_URL: "mongodb://database:27017/crawlchat?replicaSet=rs0"
+      JWT_SECRET: "a-long-secret"
+      VITE_APP_URL: "http://localhost:3001"
+      VITE_SERVER_WS_URL: "ws://localhost:3002"
+      VITE_SERVER_URL: "http://localhost:3002"
+      VITE_SOURCE_SYNC_URL: "http://localhost:3003"
+      DEFAULT_SIGNUP_PLAN_ID: "accelerate-yearly"
+      # optional
       RESEND_FROM_EMAIL: ""
       RESEND_KEY: ""
-      VITE_APP_URL: ""
-      VITE_SERVER_WS_URL: ""
-      VITE_SERVER_URL: ""
-      # Put random characters here (at least 32 characters); Has to be the in all services
-      JWT_SECRET: ""
-      LEMONSQUEEZY_WEBHOOK_SECRET: ""
       GOOGLE_CLIENT_ID: ""
       GOOGLE_CLIENT_SECRET: ""
       GOOGLE_REDIRECT_URI: ""
-      DODO_WEBHOOK_SECRET: ""
-      DODO_API_KEY: ""
-      DATAFAST_API_KEY: ""
-      VITE_SOURCE_SYNC_URL: "http://source_sync:3000"
       ADMIN_EMAILS: ""
-      DEFAULT_SIGNUP_PLAN_ID: "accelerate-yearly"
 
   server:
     image: ghcr.io/crawlchat/crawlchat-server:latest
@@ -37,13 +33,13 @@ services:
     ports:
       - "3002:3000"
     environment:
-      OPENAI_API_KEY: ""
-      # Remember to change these variables in production!
+      SELF_HOSTED: "true"
       DATABASE_URL: "mongodb://database:27017/crawlchat?replicaSet=rs0"
-      PINECONE_API_KEY: ""
-      # Put random characters here (at least 32 characters); Has to be the in all services
-      JWT_SECRET: ""
+      JWT_SECRET: "a-long-secret"
       SOURCE_SYNC_URL: "http://source_sync:3000"
+      PINECONE_API_KEY: "<PINECONE_API_KEY>"
+      OPENROUTER_API_KEY: "<OPENROUTER_API_KEY>"
+      # optional
       ADMIN_EMAILS: ""
 
   source_sync:
@@ -51,18 +47,20 @@ services:
     depends_on:
       - redis
       - database
+    ports:
+      - "3003:3000"
     networks:
       - crawlchat-net
     environment:
-      # Remember to change these variables in production!
+      SELF_HOSTED: "true"
       DATABASE_URL: "mongodb://database:27017/crawlchat?replicaSet=rs0"
-      PINECONE_API_KEY: ""
-      # Put random characters here (at least 32 characters)
-      JWT_SECRET: ""
-      SCRAPECREATORS_API_KEY: ""
+      JWT_SECRET: "a-long-secret"
+      PINECONE_API_KEY: "<PINECONE_API_KEY>"
       REDIS_URL: "redis://redis:6379"
       GROUP_QUEUE_NAME: "crawlchat_source_sync_groups"
       ITEM_QUEUE_NAME: "crawlchat_source_sync_items"
+      # optional
+      SCRAPECREATORS_API_KEY: ""
 
   discord_bot:
     image: ghcr.io/crawlchat/crawlchat-discord:latest
@@ -71,39 +69,34 @@ services:
     networks:
       - crawlchat-net
     environment:
-      # Discord App ID
+      SELF_HOSTED: "true"
       APP_ID: ""
-      # Discord App / Bot Token
       DISCORD_TOKEN: ""
       PUBLIC_KEY: ""
       BOT_USER_ID: ""
       ALL_BOT_USER_IDS: ""
       SERVER_HOST: ""
-      # Put random characters here (at least 32 characters)
-      JWT_SECRET: ""
-      # Remember to change these variables in production!
-      DATABASE_URL: "mongodb://database:27017/crawlchat?replicaSet=rs0"
-
+      JWT_SECRET: "a-long-secret"
+      
   slack_app:
     image: ghcr.io/crawlchat/crawlchat-slack:latest
     depends_on:
       - database
+    ports:
+      - "3004:3000"
     networks:
       - crawlchat-net
     environment:
-      SERVER_HOST: ""
+      SELF_HOSTED: "true"
+      DATABASE_URL: "mongodb://database:27017/crawlchat?replicaSet=rs0"
+      SERVER_HOST: "http://localhost:3002"
+      JWT_SECRET: "a-long-secret"
       SLACK_SIGNING_SECRET: ""
       SLACK_CLIENT_ID: ""
       SLACK_CLIENT_SECRET: ""
       SLACK_STATE_SECRET: ""
       HOST: ""
-      # Put random characters here (at least 32 characters)
-      JWT_SECRET: ""
-      # Remember to change these variables in production!
-      DATABASE_URL: "mongodb://database:27017/crawlchat?replicaSet=rs0"
 
-
-# Redis & MongoDB
   database:
     image: mongo:7
     restart: unless-stopped
