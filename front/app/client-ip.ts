@@ -1,6 +1,31 @@
 export function getClientIp(req: Request) {
   const headers = req.headers;
-  return headers.get("x-forwarded-for") || headers.get("x-real-ip");
+  
+  const ipHeaders = {
+    "x-forwarded-for": headers.get("x-forwarded-for"),
+    "cf-connecting-ip": headers.get("cf-connecting-ip"),
+    "x-real-ip": headers.get("x-real-ip"),
+    "x-client-ip": headers.get("x-client-ip"),
+  };
+  
+  console.log("IP-related headers:", ipHeaders);
+  
+  const xForwardedFor = headers.get("x-forwarded-for");
+  if (xForwardedFor) {
+    const ips = xForwardedFor.split(",").map((ip) => ip.trim());
+    const clientIp = ips[ips.length - 1];
+    console.log("Extracted client IP from x-forwarded-for:", clientIp);
+    return clientIp;
+  }
+  
+  const fallbackIp = 
+    headers.get("cf-connecting-ip") ||
+    headers.get("x-real-ip") ||
+    headers.get("x-client-ip") ||
+    null;
+  
+  console.log("Using fallback IP:", fallbackIp);
+  return fallbackIp;
 }
 
 export type IpDetails = {
