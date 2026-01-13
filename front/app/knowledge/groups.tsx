@@ -296,11 +296,13 @@ export default function KnowledgeGroups({ loaderData }: Route.ComponentProps) {
                         {item.group.title ?? "Untitled"}
                       </Link>
                     </td>
-                    <td className="min-w-38">
-                      <div className="flex gap-2 items-center">
-                        {item.citedNum} / {item.totalCited}
+                    <td className="min-w-20">
+                      <div
+                        className="tooltip"
+                        data-tip={`${item.citedNum} / ${item.totalCited}`}
+                      >
                         <progress
-                          className="progress w-10"
+                          className="progress w-14"
                           value={item.citationPct}
                           max="100"
                         />
@@ -314,8 +316,8 @@ export default function KnowledgeGroups({ loaderData }: Route.ComponentProps) {
                     <td className="min-w-38">
                       <GroupStatus status={item.group.status} />
                     </td>
-                    <td className="min-w-38">
-                      <div>
+                    <td className="min-w-56">
+                      <div className="flex items-center gap-2">
                         <Timestamp date={item.group.updatedAt} />
                         {item.group.nextUpdateAt && (
                           <div

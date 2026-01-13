@@ -16,6 +16,10 @@ import { makeMeta } from "~/meta";
 import cn from "@meltdownjs/cn";
 import { Timestamp } from "~/components/timestamp";
 
+function isUrl(url: string) {
+  url.startsWith("https");
+}
+
 export async function loader({ request, params }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
   const scrapeId = await getSessionScrapeId(request);
@@ -168,7 +172,17 @@ export default function ScrapeLinks({ loaderData }: Route.ComponentProps) {
                           {item.title?.trim() || "Untitled"}
                         </Link>
                         <div className="text-sm text-base-content/50">
-                          {getKey(item)}
+                          {isUrl(getKey(item)) ? (
+                            <Link
+                              className="link link-hover line-clamp-1"
+                              to={getKey(item)}
+                              target="_blank"
+                            >
+                              {getKey(item)}
+                            </Link>
+                          ) : (
+                            getKey(item)
+                          )}
                         </div>
                       </div>
                     </td>
@@ -184,8 +198,8 @@ export default function ScrapeLinks({ loaderData }: Route.ComponentProps) {
                             item.status === "completed"
                               ? "badge-primary"
                               : item.status === "failed"
-                              ? "badge-error"
-                              : undefined
+                                ? "badge-error"
+                                : undefined
                           )}
                         >
                           {item.status === "completed" ? (
@@ -198,12 +212,12 @@ export default function ScrapeLinks({ loaderData }: Route.ComponentProps) {
                           {item.status === "completed"
                             ? "Success"
                             : item.status === "failed"
-                            ? "Failed"
-                            : "Pendings"}
+                              ? "Failed"
+                              : "Pendings"}
                         </div>
                       </div>
                     </td>
-                    <td className="min-w-38 text-end">
+                    <td className="min-w-44 text-end">
                       <Timestamp date={item.updatedAt} />
                     </td>
                   </tr>

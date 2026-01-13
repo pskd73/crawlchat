@@ -401,22 +401,24 @@ export default function MessagesLayout({ loaderData }: Route.ComponentProps) {
                             onlyIcon
                           />
                         </td>
-                        <td className="min-w-12 flex items-center gap-2">
-                          {pair.queryMessage?.analysis?.category && (
-                            <span className="badge badge-soft badge-accent whitespace-nowrap">
-                              <TbFolder />
-                              {pair.queryMessage?.analysis?.category}
-                            </span>
-                          )}
-                          <CategorySuggestionCount
-                            scrape={loaderData.scrape}
-                            suggestions={
-                              pair.queryMessage?.analysis
-                                ?.categorySuggestions ?? []
-                            }
-                          />
+                        <td className="min-w-12">
+                          <div className="flex items-center gap-2">
+                            {pair.queryMessage?.analysis?.category && (
+                              <span className="badge badge-soft badge-accent whitespace-nowrap">
+                                <TbFolder />
+                                {pair.queryMessage?.analysis?.category}
+                              </span>
+                            )}
+                            <CategorySuggestionCount
+                              scrape={loaderData.scrape}
+                              suggestions={
+                                pair.queryMessage?.analysis
+                                  ?.categorySuggestions ?? []
+                              }
+                            />
+                          </div>
                         </td>
-                        <td className="text-end min-w-34">
+                        <td className="text-end min-w-46">
                           {pair.queryMessage?.createdAt && (
                             <Timestamp date={pair.queryMessage.createdAt} />
                           )}
