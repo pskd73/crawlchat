@@ -15,6 +15,7 @@ import {
 } from "~/landing/page";
 import cn from "@meltdownjs/cn";
 import { RateLimiter } from "libs/rate-limiter";
+import { getClientIp } from "~/client-ip";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request, { dontRedirect: true });
@@ -60,6 +61,7 @@ export async function action({ request }: Route.ActionArgs) {
   const clonedRequest = request.clone();
   const formData = await clonedRequest.formData();
   const email = formData.get("email") as string;
+  const ip = getClientIp(request);
 
   if (!rateLimiters[email]) {
     rateLimiters[email] = new RateLimiter(3, email);
@@ -68,7 +70,7 @@ export async function action({ request }: Route.ActionArgs) {
   try {
     rateLimiters[email].check();
   } catch (error) {
-    console.warn("Spamming detected for email: ", email);
+    console.warn("Spamming detected for email: ", email, ip);
     return { error: "Too many requests. Please try again later." };
   }
 
