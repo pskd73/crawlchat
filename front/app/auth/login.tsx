@@ -64,7 +64,7 @@ export async function action({ request }: Route.ActionArgs) {
   const ip = getClientIp(request);
 
   if (!rateLimiters[email]) {
-    rateLimiters[email] = new RateLimiter(3, email);
+    rateLimiters[email] = new RateLimiter(1, email);
   }
 
   try {
