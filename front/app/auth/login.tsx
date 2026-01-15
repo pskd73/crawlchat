@@ -142,6 +142,7 @@ export default function LoginPage() {
     turnstileLoaded.current = true;
     (window as any).turnstile.render("#turnstile-container", {
       sitekey: turnstileSiteKey,
+      theme: "light",
       callback: function (token: string) {
         if (token) {
           setClientValidated(true);
