@@ -109,10 +109,14 @@ export function useChatBox({
   }, []);
 
   useEffect(() => {
+    if (initialTheme) {
+      return setTheme(initialTheme);
+    }
+
     const isDarkMode = window.matchMedia(
       "(prefers-color-scheme: dark)"
     ).matches;
-    setTheme(isDarkMode || initialTheme === "dark" ? "dark" : "light");
+    setTheme(isDarkMode ? "dark" : "light");
 
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     const handleThemeChange = (e: MediaQueryListEvent) => {
