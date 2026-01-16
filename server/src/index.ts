@@ -255,7 +255,7 @@ app.get("/mcp/:scrapeId", async (req, res) => {
   };
   const links = await collectSourceLinks(scrape.id, [message]);
 
-  await prisma.message.create({
+  const answerMessage = await prisma.message.create({
     data: {
       threadId: thread.id,
       scrapeId: scrape.id,
@@ -266,6 +266,10 @@ app.get("/mcp/:scrapeId", async (req, res) => {
       creditsUsed,
       questionId: questionMessage.id,
     },
+  });
+  await prisma.message.update({
+    where: { id: questionMessage.id },
+    data: { answerId: answerMessage.id },
   });
   await updateLastMessageAt(thread.id);
   res.json(processed);
@@ -515,6 +519,10 @@ app.post("/answer/:scrapeId", authenticate, async (req, res) => {
       questionId: questionMessage.id,
     },
   });
+  await prisma.message.update({
+    where: { id: questionMessage.id },
+    data: { answerId: newAnswerMessage.id },
+  });
   await updateLastMessageAt(thread.id);
 
   if (scrape.analyseMessage) {
@@ -729,6 +737,10 @@ app.post("/google-chat/answer/:scrapeId", async (req, res) => {
       questionId: questionMessage.id,
       fingerprint: googleChatEvent.chat.user.email,
     },
+  });
+  await prisma.message.update({
+    where: { id: questionMessage.id },
+    data: { answerId: newAnswerMessage.id },
   });
   await updateLastMessageAt(thread.id);
 

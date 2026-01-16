@@ -309,6 +309,7 @@ model Message {
   ownerUserId               String   @db.ObjectId
   scrapeId                  String   @db.ObjectId
   questionId                String?  @db.ObjectId
+  answerId                  String?  @db.ObjectId
 
   llmMessage                LlmMessage?
   links                     MessageSourceLink[]

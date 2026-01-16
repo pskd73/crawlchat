@@ -200,6 +200,12 @@ export const handleWs: expressWs.WebsocketRequestHandler = (ws) => {
               url: currentItem?.url,
             },
           });
+          if (questionMessage) {
+            await prisma.message.update({
+              where: { id: questionMessage.id },
+              data: { answerId: newAnswerMessage.id },
+            });
+          }
           await updateLastMessageAt(threadId);
           ws?.send(
             makeMessage("llm-chunk", {
