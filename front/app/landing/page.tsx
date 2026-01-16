@@ -908,6 +908,12 @@ export function PricingSwitch({
   yearly: boolean;
   setYearly: (yearly: boolean) => void;
 }) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   function handleYearlyChange(yearly: boolean) {
     setYearly(yearly);
     track("pricing_" + (yearly ? "yearly" : "monthly"), {});
@@ -921,12 +927,14 @@ export function PricingSwitch({
       >
         Monthly
       </span>
-      <input
-        type="checkbox"
-        checked={yearly}
-        onChange={() => handleYearlyChange(!yearly)}
-        className="toggle toggle-lg"
-      />
+      {mounted && (
+        <input
+          type="checkbox"
+          checked={yearly}
+          onChange={() => handleYearlyChange(!yearly)}
+          className="toggle toggle-lg"
+        />
+      )}
       <span
         className="text-lg relative cursor-pointer"
         onClick={() => handleYearlyChange(true)}
@@ -1710,11 +1718,11 @@ export function JonnyTestimonial({ small }: { small?: boolean }) {
   return (
     <CustomTestimonial
       text={
-        <div>
+        <span>
           MCP, llms.txt and remotion.ai are now live! Thanks to @pramodk73 and{" "}
           <CTHS>CrawlChat</CTHS> for getting us up to speed with{" "}
           <CTH>AI integrations.</CTH>
-        </div>
+        </span>
       }
       author="Jonny Burger"
       authorImage="/testi-profile/jonny.jpg"
@@ -1730,11 +1738,11 @@ export function EgelhausTestimonial({ small }: { small?: boolean }) {
   return (
     <CustomTestimonial
       text={
-        <div>
+        <span>
           We can definitely recommend using CrawlChat, it's{" "}
           <CTH>easy to set up</CTH>, really <CTH>affordable</CTH>, and has great
           support. Thank you <CTHS>@pramodk73</CTHS> for making this!
-        </div>
+        </span>
       }
       author="Egelhaus"
       authorImage="/testi-profile/egelhaus.png"
@@ -1750,12 +1758,12 @@ export function AntonTestimonial({ small }: { small?: boolean }) {
   return (
     <CustomTestimonial
       text={
-        <div>
+        <span>
           Integrated <CTHS>CrawlChat</CTHS> into the new Konva docs – hats off
           to @pramodk73 for making it insanely useful. It now powers{" "}
           <CTH>"Ask AI"</CTH> widget on site, <CTH>MCP server</CTH> for docs,{" "}
           <CTH>Discord bot</CTH> for community. Smarter docs. Better support.
-        </div>
+        </span>
       }
       author="Anton Lavrenov"
       authorImage="/testi-profile/anton.png"
@@ -1771,11 +1779,11 @@ export function MauritsTestimonial({ small }: { small?: boolean }) {
   return (
     <CustomTestimonial
       text={
-        <div>
+        <span>
           Can wholeheartedly <CTH>recommend this</CTH>. The number of support
           calls to 270 Degrees significantly <CTH>dropped</CTH> after we
           implemented <CTHS>CrawlChat</CTHS>.
-        </div>
+        </span>
       }
       author="Maurits Koekoek"
       authorImage="/testi-profile/maurits.jpeg"
@@ -2469,7 +2477,7 @@ function SourcesChannels() {
 
       <div className="flex flex-col bg-base-100 py-8 gap-8">
         <div className="inline-flex gap-4 flex-nowrap infinite-scroll-container">
-          {Array.from(Array(4)).map((i) => (
+          {Array.from(Array(4)).map((_, i) => (
             <div key={i} className="flex gap-4 animate-infinite-scroll">
               {sources.map((source, index) => (
                 <div
@@ -2489,7 +2497,7 @@ function SourcesChannels() {
         </div>
 
         <div className="inline-flex gap-4 flex-nowrap infinite-scroll-container">
-          {Array.from(Array(4)).map((i) => (
+          {Array.from(Array(4)).map((_, i) => (
             <div key={i} className="flex gap-4 animate-infinite-scroll-reverse">
               {channels.map((channel, index) => (
                 <ChannelCard
