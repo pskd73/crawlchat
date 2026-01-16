@@ -54,7 +54,7 @@ export const companies: Record<string, CaseStudyCompany> = {
           >
             Remotion
           </a>{" "}
-          is an open-source framework that lets developers create videos using
+          is an source-open framework that lets developers create videos using
           React. Instead of traditional video editors, you build videos with
           code, using HTML, CSS, and JavaScript to design animations and
           visuals, which can be rendered into video files like MP4.
