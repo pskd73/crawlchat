@@ -24,6 +24,7 @@ import { RadioCard } from "~/components/radio-card";
 import toast from "react-hot-toast";
 import { makeMeta } from "~/meta";
 import cn from "@meltdownjs/cn";
+import { v4 as uuidv4 } from "uuid";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -216,27 +217,26 @@ export async function action({ request }: { request: Request }) {
     });
 
     if (type === "upload") {
-      for (const file of fileMarkdowns) {
-        const response = await fetch(
-          `${process.env.VITE_SERVER_URL}/resource/${scrape.id}`,
-          {
-            method: "POST",
-            body: JSON.stringify({
-              markdown: file.markdown,
+      await fetch(
+        `${process.env.VITE_SERVER_URL}/page/${scrape.id}`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            knowledgeGroupType: "upload",
+            defaultGroupTitle: "Upload",
+            knowledgeGroupId: group.id,
+            pages: fileMarkdowns.map((file) => ({
               title: file.title,
-              knowledgeGroupType: "upload",
-              defaultGroupTitle: "Upload",
-              knowledgeGroupId: group.id,
-            }),
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${createToken(user!.id)}`,
-            },
-          }
-        );
-
-        console.log("Upload file", await response.text());
-      }
+              text: file.markdown,
+              pageId: `default-${uuidv4()}`,
+            })),
+          }),
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${createToken(user!.id)}`,
+          },
+        }
+      );
     }
 
     const shouldRefresh = formData.get("shouldRefresh") === "on";

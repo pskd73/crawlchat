@@ -285,11 +285,12 @@ app.post(
     const markdown = req.body.markdown || req.body.content;
     const title = req.body.title;
     const knowledgeGroupId = req.body.knowledgeGroupId;
+    const pages = req.body.pages;
     const url = req.body.key ?? `default-${uuidv4()}`;
 
     authoriseScrapeUser(req.user!.scrapeUsers, scrapeId, res);
 
-    if (!scrapeId || !markdown || !title) {
+    if (!pages && (!markdown || !title)) {
       res.status(400).json({ message: "Missing content or title" });
       return;
     }
@@ -340,6 +341,7 @@ app.post(
         text: markdown,
         knowledgeGroupId: knowledgeGroup.id,
         pageId: url,
+        pages,
       }),
     });
 
@@ -1054,7 +1056,7 @@ app.post("/compose/:scrapeId", authenticate, async (req, res) => {
   });
   flow.addNextAgents(["compose-agent"]);
 
-  while (await flow.stream()) {}
+  while (await flow.stream()) { }
 
   const response = flow.getLastMessage().llmMessage.content as string;
   const { slate: newSlate, details, title: newTitle } = JSON.parse(response);
@@ -1212,7 +1214,7 @@ app.post("/fix-message", authenticate, async (req, res) => {
 
   flow.addNextAgents(["fix-agent"]);
 
-  while (await flow.stream()) {}
+  while (await flow.stream()) { }
 
   const content = (flow.getLastMessage().llmMessage.content as string) ?? "";
   const { correctAnswer, title } = JSON.parse(content);
@@ -1314,7 +1316,7 @@ ${text}`,
   });
   flow.addNextAgents(["extract-facts-agent"]);
 
-  while (await flow.stream()) {}
+  while (await flow.stream()) { }
 
   const response = flow.getLastMessage().llmMessage.content as string;
   const parsed = JSON.parse(response);
@@ -1391,7 +1393,7 @@ Fact to check: ${fact}`,
   });
   flow.addNextAgents(["fact-check-agent"]);
 
-  while (await flow.stream()) {}
+  while (await flow.stream()) { }
 
   const response = flow.getLastMessage().llmMessage.content as string;
   const parsed = JSON.parse(response);

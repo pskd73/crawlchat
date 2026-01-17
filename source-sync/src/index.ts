@@ -8,7 +8,7 @@ import { authenticate, AuthMode, authoriseScrapeUser } from "libs/express-auth";
 import "./worker";
 import { Prisma, prisma } from "libs/dist/prisma";
 import { v4 as uuidv4 } from "uuid";
-import { getPendingUrls, scheduleGroup, scheduleUrl } from "./source/schedule";
+import { getPendingUrls, scheduleGroup, scheduleUrl, scheduleUrls } from "./source/schedule";
 
 declare global {
   namespace Express {
@@ -134,7 +134,7 @@ app.post(
   "/text-page",
   authenticate,
   async function (req: Request, res: Response) {
-    const { title, text, knowledgeGroupId, pageId } = req.body;
+    const { title, text, knowledgeGroupId, pageId, pages } = req.body;
 
     const knowledgeGroup = await prisma.knowledgeGroup.findFirstOrThrow({
       where: { id: knowledgeGroupId },
@@ -156,12 +156,31 @@ app.post(
       data: { status: "processing", updateProcessId: processId },
     });
 
-    await scheduleUrl(knowledgeGroup, processId, pageId, pageId, {
-      textPage: {
-        title,
-        text,
-      },
-    });
+    if (title && text && pageId) {
+      await scheduleUrl(knowledgeGroup, processId, pageId, pageId, {
+        textPage: {
+          title,
+          text,
+        },
+      });
+    }
+
+    if (pages) {
+      await scheduleUrls(
+        knowledgeGroup, 
+        processId, 
+        pages.map((page: { title: string, text: string, pageId: string }) => ({ 
+          url: page.pageId, 
+          sourcePageId: page.pageId, 
+          jobData: { 
+            textPage: { 
+              title: page.title, 
+              text: page.text 
+            } 
+          } 
+        }
+      )));
+    }
 
     res.json({ message: "ok" });
   }
