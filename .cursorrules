@@ -18,3 +18,6 @@
 - Keep functions focused and single-purpose
 - Prefer explicit error handling over try-catch when possible
 
+### Documentation Files
+- NEVER create documentation files in the git root, which e.g. explain what you changed, what you added, how to use a feature you added etc.
+- ONLY create documentation files under docs/docs if you were SPECIFICALLY asked by your operator to do it.
