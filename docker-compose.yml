@@ -2,11 +2,11 @@ services:
   front:
     image: ghcr.io/crawlchat/crawlchat-front:latest
     networks:
-      - crawlchat-net
+      - local-net
     depends_on:
       - database
     ports:
-      - "3001:3000"
+      - "localhost:3001:3000"
     environment:
       SELF_HOSTED: "true"
       DATABASE_URL: "mongodb://database:27017/crawlchat?replicaSet=rs0"
@@ -27,11 +27,11 @@ services:
   server:
     image: ghcr.io/crawlchat/crawlchat-server:latest
     networks:
-      - crawlchat-net
+      - local-net
     depends_on:
       - database
     ports:
-      - "3002:3000"
+      - "localhost:3002:3000"
     environment:
       SELF_HOSTED: "true"
       DATABASE_URL: "mongodb://database:27017/crawlchat?replicaSet=rs0"
@@ -48,9 +48,9 @@ services:
       - redis
       - database
     ports:
-      - "3003:3000"
+      - "localhost:3003:3000"
     networks:
-      - crawlchat-net
+      - local-net
     environment:
       SELF_HOSTED: "true"
       DATABASE_URL: "mongodb://database:27017/crawlchat?replicaSet=rs0"
@@ -68,7 +68,7 @@ services:
     depends_on:
       - database
     networks:
-      - crawlchat-net
+      - local-net
     environment:
       SELF_HOSTED: "true"
       APP_ID: ""
@@ -84,9 +84,9 @@ services:
     depends_on:
       - database
     ports:
-      - "3004:3000"
+      - "localhost:3004:3000"
     networks:
-      - crawlchat-net
+      - local-net
     environment:
       SELF_HOSTED: "true"
       DATABASE_URL: "mongodb://database:27017/crawlchat?replicaSet=rs0"
@@ -102,16 +102,16 @@ services:
     image: mongo:7
     restart: unless-stopped
     command: ["mongod", "--replSet", "rs0", "--bind_ip_all", "--noauth"]
-    volumes:
-      - mongo_data:/data/db
-    networks:
-      - crawlchat-net
     healthcheck:
       test: mongosh --eval "db.adminCommand('ping')" --quiet
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 40s
+    volumes:
+      - local_mongo_data:/data/db
+    networks:
+      - local-net
 
   mongo-init:
     image: mongo:7
@@ -126,7 +126,7 @@ services:
       mongosh --host database:27017 --eval 'rs.initiate({_id:\"rs0\",members:[{_id:0,host:\"database:27017\"}]})'
       "]
     networks:
-      - crawlchat-net
+      - local-net
 
   redis:
     image: redis:7
@@ -139,14 +139,14 @@ services:
       timeout: 2s
       retries: 12
     volumes:
-      - redis_data:/data
+      - local_redis_data:/data
     networks:
-      - crawlchat-net
+      - local-net
 
 networks:
-  crawlchat-net:
+  local-net:
     driver: bridge
 
 volumes:
-  mongo_data:
-  redis_data:
+  local_mongo_data:
+  local_redis_data:

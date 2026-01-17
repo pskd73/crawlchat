@@ -14,7 +14,7 @@
 
 1. Clone the repo
 2. Copy `.env.example` -> `.env` and set above `envs`
-3. Run `databases` on Docker: `cd front`, `npm i`, `npm run local:db`
+3. Run `databases` on Docker: `docker compose -f docker-compose-local.yml up`
 4. Run `front` app [NEW TERMINAL]: `cd front`, `npm i`, `npm run dev`
 5. Run `server` app [NEW TERMINAL]: `cd server`, `npm i`, `npm run dev`
 6. Run `source-sync` app [NEW TERMINAL]: `cd source-sync`, `npm i`, `npm run dev`
