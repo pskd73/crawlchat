@@ -121,10 +121,13 @@ jobs:
             exit 1
           fi
 
+          # Escape backticks in the answer to prevent JavaScript syntax errors
+          ESCAPED_ANSWER=$(echo "$ANSWER" | sed 's/`/\\`/g')
+
           # Use multiline output format for GitHub Actions to handle newlines safely
           {
             echo "answer<<EOF"
-            echo "$ANSWER"
+            echo "$ESCAPED_ANSWER"
             echo "EOF"
           } >> $GITHUB_OUTPUT
 
