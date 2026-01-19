@@ -10,6 +10,11 @@ on:
   discussion_comment:
     types: [created]
 
+permissions:
+  issues: write
+  discussions: write
+  contents: read
+
 jobs:
   answer:
     if: >
@@ -29,18 +34,30 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" == "issues" ] || [ "${{ github.event_name }}" == "issue_comment" ]; then
             # Get all comments on the issue
-            COMMENTS=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            COMMENTS=$(curl -s -w "\nHTTP_STATUS:%{http_code}" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
               "${{ github.event.issue.comments_url }}")
           else
             # Get all comments on the discussion
-            COMMENTS=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            COMMENTS=$(curl -s -w "\nHTTP_STATUS:%{http_code}" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
               "https://api.github.com/repos/${{ github.repository }}/discussions/${{ github.event.discussion.number }}/comments")
           fi
 
+          # Extract HTTP status and response body
+          HTTP_STATUS=$(echo "$COMMENTS" | grep "HTTP_STATUS:" | cut -d: -f2)
+          COMMENTS_BODY=$(echo "$COMMENTS" | sed '/HTTP_STATUS:/d')
+
+          if [ "$HTTP_STATUS" != "200" ]; then
+            echo "Failed to fetch comments, HTTP status: $HTTP_STATUS"
+            # If we can't check, assume no response to be safe
+            echo "already_responded=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
           # Check if any comment contains our bot marker
-          if echo "$COMMENTS" | jq -e '.[] | select(.body | contains("🤖 CrawlChat Answer"))' > /dev/null; then
+          if echo "$COMMENTS_BODY" | jq -e '.[] | select(.body | contains("🤖 CrawlChat Answer"))' > /dev/null 2>&1; then
             echo "Bot already responded"
             echo "already_responded=true" >> $GITHUB_OUTPUT
+            exit 0
           else
             echo "Bot has not responded yet"
             echo "already_responded=false" >> $GITHUB_OUTPUT
@@ -59,28 +76,57 @@ jobs:
             QUESTION="${{ github.event.comment.body }}"
           fi
 
-          # Remove @crawlchat mention from question
-          QUESTION=$(echo "$QUESTION" | sed 's/@crawlchat//g' | xargs)
+          # Remove @crawlchat mention from question and clean up
+          QUESTION=$(printf '%s' "$QUESTION" | sed 's/@crawlchat//g' | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//')
 
-          echo "Question: $QUESTION"
+          if [ ${#QUESTION} -gt 2000 ]; then
+            echo "Question too long, truncating to 2000 characters"
+            QUESTION="${QUESTION:0:2000}"
+          fi
+
+          # Escape special characters for JSON
+          QUESTION_JSON=$(printf '%s' "$QUESTION" | jq -R -s '.')
+
+          # Log sanitized question (remove newlines and limit length for security)
+          QUESTION_LOG=$(printf '%s' "$QUESTION" | tr '\n' ' ' | cut -c1-200)
+          echo "Question (sanitized): $QUESTION_LOG"
 
           # Call the CrawlChat Answer API
-          RESPONSE=$(curl -s -X POST "${{ secrets.API_URL }}/answer/${{ secrets.COLLECTION_ID }}" \
-            -H "x-api-key: ${{ secrets.API_KEY }}" \
+          RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" -X POST "${{ secrets.CRAWLCHAT_API_HOST }}/answer/${{ secrets.CRAWLCHAT_COLLECTION_ID }}" \
+            -H "x-api-key: ${{ secrets.CRAWLCHAT_API_KEY }}" \
             -H "Content-Type: application/json" \
-            -d "{\"query\": \"$QUESTION\"}")
+            -d "{\"query\": $QUESTION_JSON}")
 
-          echo "API Response: $RESPONSE"
+          # Extract HTTP status and response body
+          HTTP_STATUS=$(echo "$RESPONSE" | grep "HTTP_STATUS:" | cut -d: -f2)
+          RESPONSE_BODY=$(echo "$RESPONSE" | sed '/HTTP_STATUS:/d')
 
-          # Extract the content from the response
-          ANSWER=$(echo "$RESPONSE" | jq -r '.content')
+          echo "HTTP Status: $HTTP_STATUS"
 
-          if [ "$ANSWER" == "null" ] || [ -z "$ANSWER" ]; then
-            echo "Failed to get answer from API"
+          if [ "$HTTP_STATUS" != "200" ]; then
+            echo "API request failed with status: $HTTP_STATUS"
+            # Log error response for debugging (limit to first 500 chars)
+            ERROR_PREVIEW=$(echo "$RESPONSE_BODY" | cut -c1-500)
+            echo "Error response: $ERROR_PREVIEW"
             exit 1
           fi
 
-          echo "answer=$ANSWER" >> $GITHUB_OUTPUT
+          # Extract the content from the response
+          ANSWER=$(echo "$RESPONSE_BODY" | jq -r '.content')
+
+          if [ "$ANSWER" == "null" ] || [ -z "$ANSWER" ]; then
+            echo "Failed to get answer from API response - content field missing or empty"
+            # Log response structure for debugging (without sensitive content)
+            echo "Response structure: $(echo "$RESPONSE_BODY" | jq 'keys' 2>/dev/null || echo 'invalid json')"
+            exit 1
+          fi
+
+          # Use multiline output format for GitHub Actions to handle newlines safely
+          {
+            echo "answer<<EOF"
+            echo "$ANSWER"
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
 
       - name: Post comment with answer
         if: steps.check_response.outputs.already_responded == 'false'
@@ -89,27 +135,24 @@ jobs:
           script: |
             const answer = `${{ steps.api_call.outputs.answer }}`;
 
-            const body = `🤖 **CrawlChat Answer**
+            const body = '🤖 **CrawlChat Answer**\n\n' + answer + '\n\n---\n*This answer was generated by CrawlChat AI based on our documentation.*';
 
-${answer}
+            const eventName = '${{ github.event_name }}';
 
----
-*This answer was generated by CrawlChat AI based on our documentation.*`;
-
-            if (${{ github.event_name }} === 'issues' || ${{ github.event_name }} === 'issue_comment') {
+            if (eventName === 'issues' || eventName === 'issue_comment') {
               // Post comment on issue
               await github.rest.issues.createComment({
-                issue_number: ${{ github.event.issue.number }},
-                owner: ${{ github.repository_owner }},
-                repo: ${{ github.repository }},
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
                 body: body
               });
             } else {
               // Post comment on discussion
               await github.rest.discussions.createComment({
                 discussion_number: ${{ github.event.discussion.number }},
-                owner: ${{ github.repository_owner }},
-                repo: ${{ github.repository }},
+                owner: context.repo.owner,
+                repo: context.repo.repo,
                 body: body
               });
             }

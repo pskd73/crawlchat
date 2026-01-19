@@ -3,6 +3,7 @@
 .vscode
 .env
 
+/bin/
 # Docker
 docker-compose.override.yml
 
