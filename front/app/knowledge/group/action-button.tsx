@@ -114,16 +114,23 @@ export function ActionButton({
         </refreshFetcher.Form>
       )}
       {group.status === "processing" && (
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 h-full">
           {!small && processStatus && processStatus.pending > 0 && (
             <div
-              className="tooltip tooltip-left flex items-center gap-2"
-              data-tip="Pending items"
+              className="tooltip tooltip-left flex items-center gap-2 h-full"
+              data-tip="Pages in progress"
             >
-              <span
-                className={cn("loading loading-sm", small && "loading-xs")}
-              />
-              <span className="text-xl">{processStatus.pending}</span>
+              <div
+                className={cn(
+                  "items-center gap-2 h-full",
+                  "bg-neutral/10 rounded-box flex justify-center items-center p-2 px-4"
+                )}
+              >
+                <span
+                  className={cn("loading loading-sm", small && "loading-xs")}
+                />
+                <span>{processStatus.pending}</span>
+              </div>
             </div>
           )}
           <stopFetcher.Form

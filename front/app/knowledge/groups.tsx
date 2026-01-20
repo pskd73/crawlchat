@@ -28,6 +28,7 @@ import { FaConfluence } from "react-icons/fa";
 import { Timestamp } from "~/components/timestamp";
 import { createToken } from "libs/jwt";
 import KnowledgeSearch, { type ItemSearchResult } from "./search";
+import { getTotalPageChunks } from "./group/page-chunks";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -82,7 +83,20 @@ export async function loader({ request }: Route.LoaderArgs) {
   const url = new URL(request.url);
   const query = url.searchParams.get("query");
 
-  return { scrape, knowledgeGroups, counts, citationCounts, token, query };
+  const pageChunks: Record<string, number> = {};
+  for (const group of knowledgeGroups) {
+    pageChunks[group.id] = await getTotalPageChunks(group.id);
+  }
+
+  return {
+    scrape,
+    knowledgeGroups,
+    counts,
+    citationCounts,
+    token,
+    query,
+    pageChunks,
+  };
 }
 
 export function meta() {
@@ -273,7 +287,7 @@ export default function KnowledgeGroups({ loaderData }: Route.ComponentProps) {
                   <th>Type</th>
                   <th>Title</th>
                   <th>Citation</th>
-                  <th>Pages</th>
+                  <th>Page chunks</th>
                   <th>Status</th>
                   <th>Updated</th>
                   <th>Actions</th>
@@ -310,7 +324,7 @@ export default function KnowledgeGroups({ loaderData }: Route.ComponentProps) {
                     </td>
                     <td>
                       <span className="badge badge-soft badge-primary">
-                        {loaderData.counts[item.group.id] ?? 0}
+                        {loaderData.pageChunks[item.group.id] ?? 0}
                       </span>
                     </td>
                     <td className="min-w-38">

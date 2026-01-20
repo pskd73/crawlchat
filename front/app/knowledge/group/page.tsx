@@ -11,6 +11,7 @@ import {
   TbBrandSlack,
   TbCircleX,
   TbFile,
+  TbPageBreak,
   TbSettings,
   TbVideo,
   TbWorld,
@@ -23,6 +24,7 @@ import cn from "@meltdownjs/cn";
 import { makeMeta } from "~/meta";
 import { FaConfluence } from "react-icons/fa";
 import { SiLinear } from "react-icons/si";
+import { getTotalPageChunks } from "./page-chunks";
 
 export async function loader({ request, params }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -55,7 +57,9 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     expiresInSeconds: 60 * 60,
   });
 
-  return { scrape, knowledgeGroup, items, token };
+  const totalPageChunks = await getTotalPageChunks(knowledgeGroup.id);
+
+  return { scrape, knowledgeGroup, items, token, totalPageChunks };
 }
 
 export function meta({ data }: Route.MetaArgs) {
@@ -132,7 +136,7 @@ export default function KnowledgeGroupPage({
       },
       {
         value: `/knowledge/group/${loaderData.knowledgeGroup.id}/items`,
-        label: `Knowledge items (${loaderData.items})`,
+        label: `Pages (${loaderData.items})`,
         icon: <TbBook2 />,
       },
     ];
@@ -191,10 +195,25 @@ export default function KnowledgeGroupPage({
       title={loaderData.knowledgeGroup.title ?? "Untitled"}
       icon={getIcon()}
       right={
-        <ActionButton
-          group={loaderData.knowledgeGroup}
-          token={loaderData.token}
-        />
+        <>
+          {loaderData.totalPageChunks > 0 && (
+            <div className="tooltip tooltip-left" data-tip="Page chunks">
+              <div
+                className={cn(
+                  "h-full flex text-center items-center",
+                  "p-2 px-4 bg-accent/10 rounded-box text-accent gap-2"
+                )}
+              >
+                <TbPageBreak />
+                {loaderData.totalPageChunks}
+              </div>
+            </div>
+          )}
+          <ActionButton
+            group={loaderData.knowledgeGroup}
+            token={loaderData.token}
+          />
+        </>
       }
     >
       <div className="flex flex-col gap-6 flex-1">

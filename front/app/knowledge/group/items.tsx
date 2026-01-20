@@ -1,6 +1,7 @@
 import type { Route } from "./+types/items";
 import { getAuthUser } from "~/auth/middleware";
 import { prisma } from "libs/prisma";
+import type { ScrapeItemStatus } from "libs/prisma";
 import {
   TbCheck,
   TbRefresh,
@@ -8,6 +9,7 @@ import {
   TbStack,
   TbChevronLeft,
   TbChevronRight,
+  TbPageBreak,
 } from "react-icons/tb";
 import { Link, Outlet, useLoaderData } from "react-router";
 import { authoriseScrapeUser, getSessionScrapeId } from "~/auth/scrape-session";
@@ -66,6 +68,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       updatedAt: true,
       status: true,
       error: true,
+      embeddings: true,
     },
     orderBy: {
       updatedAt: "desc",
@@ -132,6 +135,42 @@ function Pagination() {
   );
 }
 
+function StatusBadge({
+  status,
+  error,
+}: {
+  status: ScrapeItemStatus | null;
+  error?: string | null;
+}) {
+  return (
+    <div className="tooltip" data-tip={error ?? undefined}>
+      <div
+        className={cn(
+          "badge badge-soft",
+          status === "completed"
+            ? "badge-primary"
+            : status === "failed"
+              ? "badge-error"
+              : undefined
+        )}
+      >
+        {status === "completed" ? (
+          <TbCheck />
+        ) : status === "failed" ? (
+          <TbX />
+        ) : (
+          <TbRefresh />
+        )}
+        {status === "completed"
+          ? "Success"
+          : status === "failed"
+            ? "Failed"
+            : "Pendings"}
+      </div>
+    </div>
+  );
+}
+
 export default function ScrapeLinks({ loaderData }: Route.ComponentProps) {
   return (
     <>
@@ -156,7 +195,7 @@ export default function ScrapeLinks({ loaderData }: Route.ComponentProps) {
               <thead>
                 <tr>
                   <th>Name</th>
-                  <th>Status</th>
+                  <th>Details</th>
                   <th className="text-end">Updated</th>
                 </tr>
               </thead>
@@ -188,36 +227,20 @@ export default function ScrapeLinks({ loaderData }: Route.ComponentProps) {
                     </td>
 
                     <td className="w-24">
-                      <div
-                        className="tooltip"
-                        data-tip={item.error ?? undefined}
-                      >
-                        <div
-                          className={cn(
-                            "badge badge-soft",
-                            item.status === "completed"
-                              ? "badge-primary"
-                              : item.status === "failed"
-                                ? "badge-error"
-                                : undefined
-                          )}
-                        >
-                          {item.status === "completed" ? (
-                            <TbCheck />
-                          ) : item.status === "failed" ? (
-                            <TbX />
-                          ) : (
-                            <TbRefresh />
-                          )}
-                          {item.status === "completed"
-                            ? "Success"
-                            : item.status === "failed"
-                              ? "Failed"
-                              : "Pendings"}
-                        </div>
+                      <div className="flex items-center gap-2">
+                        {item.embeddings.length > 1 && (
+                          <div className="tooltip" data-tip="Page Chunks">
+                            <span className="badge badge-soft badge-accent">
+                              <TbPageBreak />
+                              {item.embeddings.length}
+                            </span>
+                          </div>
+                        )}
+                        <StatusBadge status={item.status} error={item.error} />
                       </div>
                     </td>
-                    <td className="min-w-44 text-end">
+
+                    <td className="min-w-46 text-end">
                       <Timestamp date={item.updatedAt} />
                     </td>
                   </tr>
