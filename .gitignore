@@ -1,6 +1,5 @@
 .DS_Store
 .venv
-.vscode
 .env
 
 /bin/
