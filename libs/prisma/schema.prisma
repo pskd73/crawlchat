@@ -194,6 +194,7 @@ model Scrape {
   slackTeamId           String?
   slackConfig           SlackConfig?
   githubRepoName        String?
+  githubAutoReply       Boolean?
 
   helpdeskConfig        HelpdeskConfig?
 

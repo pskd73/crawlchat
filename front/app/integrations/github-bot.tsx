@@ -45,7 +45,10 @@ export async function action({ request }: Route.ActionArgs) {
 
   const update: Prisma.ScrapeUpdateInput = {};
   if (formData.has("githubRepoName")) {
-    (update as any).githubRepoName = formData.get("githubRepoName") as string;
+    update.githubRepoName = formData.get("githubRepoName") as string;
+  }
+  if (formData.has("from-github-auto-reply")) {
+    update.githubAutoReply = formData.get("githubAutoReply") === "on";
   }
 
   const updated = await prisma.scrape.update({
@@ -60,6 +63,7 @@ export default function GitHubIntegrations({
   loaderData,
 }: Route.ComponentProps) {
   const fetcher = useFetcher();
+  const autoReplyFetcher = useFetcher();
 
   useFetcherToast(fetcher);
 
@@ -95,8 +99,26 @@ export default function GitHubIntegrations({
               className="input w-full"
               name="githubRepoName"
               placeholder="Ex: crawlchat/crawlchat"
-              defaultValue={(loaderData.scrape as any).githubRepoName ?? ""}
+              defaultValue={loaderData.scrape.githubRepoName ?? ""}
             />
+          </SettingsSection>
+
+          <SettingsSection
+            id="github-auto-reply"
+            title={"Auto-reply"}
+            description="Automatically reply to new GitHub issues and discussions when they are created. The bot will only reply if it has relevant knowledge about the topic."
+            fetcher={autoReplyFetcher}
+          >
+            <input type="hidden" name="from-github-auto-reply" value="on" />
+            <label className="label">
+              <input
+                type="checkbox"
+                className="toggle"
+                name="githubAutoReply"
+                defaultChecked={loaderData.scrape.githubAutoReply ?? true}
+              />
+              Active
+            </label>
           </SettingsSection>
         </SettingsContainer>
       </SettingsSectionProvider>
