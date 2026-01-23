@@ -205,6 +205,11 @@ async function answer(data: {
     );
   }
 
+  // Check if auto-reply is enabled
+  if (scrape.githubAutoReply === false) {
+    return;
+  }
+
   if (!data.question.trim()) {
     return;
   }
