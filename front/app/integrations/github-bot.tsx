@@ -1,5 +1,5 @@
 import type { Route } from "./+types/github-bot";
-import type { Prisma, Scrape } from "libs/prisma";
+import type { Prisma } from "libs/prisma";
 import { useFetcher } from "react-router";
 import {
   SettingsContainer,
@@ -43,7 +43,10 @@ export async function action({ request }: Route.ActionArgs) {
 
   const formData = await request.formData();
 
-  const update: Prisma.ScrapeUpdateInput & { githubAutoReply?: boolean; githubRepoName?: string } = {};
+  const update = {} as Prisma.ScrapeUpdateInput & {
+    githubRepoName?: string;
+    githubAutoReply?: boolean;
+  };
   if (formData.has("githubRepoName")) {
     update.githubRepoName = formData.get("githubRepoName") as string;
   }
@@ -62,7 +65,6 @@ export async function action({ request }: Route.ActionArgs) {
 export default function GitHubIntegrations({
   loaderData,
 }: Route.ComponentProps) {
-  const scrape = loaderData.scrape as Scrape & { githubAutoReply?: boolean; githubRepoName?: string | null };
   const fetcher = useFetcher();
 
   useFetcherToast(fetcher);
@@ -99,7 +101,7 @@ export default function GitHubIntegrations({
               className="input w-full"
               name="githubRepoName"
               placeholder="Ex: crawlchat/crawlchat"
-              defaultValue={scrape.githubRepoName ?? ""}
+              defaultValue={loaderData.scrape.githubRepoName ?? ""}
             />
           </SettingsSection>
 
@@ -115,7 +117,7 @@ export default function GitHubIntegrations({
                 type="checkbox"
                 className="toggle"
                 name="githubAutoReply"
-                defaultChecked={scrape.githubAutoReply ?? true}
+                defaultChecked={loaderData.scrape.githubAutoReply ?? true}
               />
               Active
             </label>
