@@ -7,7 +7,7 @@ import { extractCitations } from "libs/citation";
 import { createToken } from "libs/jwt";
 import { consumeCredits, hasEnoughCredits } from "libs/user-plan";
 import { getQueryString } from "libs/llm-message";
-import { MessageRating, Thread, prisma } from "libs/prisma";
+import { MessageRating, Scrape, Thread, prisma } from "libs/prisma";
 import jwt from "jsonwebtoken";
 
 type GitHubPostResponse = {
@@ -185,9 +185,9 @@ async function postIssueComment(
 }
 
 async function answer(data: {
+  scrape: Scrape;
   type: "discussion" | "issue";
   number: number;
-  repoFullName: string;
   owner: string;
   repo: string;
   question: string;
@@ -196,17 +196,7 @@ async function answer(data: {
   title?: string;
   userId?: string;
 }) {
-  const scrape = await prisma.scrape.findFirst({
-    where: { githubRepoName: data.repoFullName },
-  });
-  if (!scrape) {
-    return console.error(
-      `GitHub repo ${data.repoFullName} not found in CrawlChat`
-    );
-  }
-  if (scrape.githubAutoReply === false) {
-    return;
-  }
+  const { scrape } = data;
 
   if (!data.question.trim()) {
     return;
@@ -353,6 +343,16 @@ router.post("/webhook", async (req: Request, res: Response) => {
 });
 
 async function processWebhook(event: string, payload: any) {
+  const repoFullName = payload.repository.full_name;
+
+  const scrape = await prisma.scrape.findFirst({
+    where: { githubRepoName: repoFullName },
+  });
+
+  if (!scrape) {
+    return console.error(`GitHub repo ${repoFullName} not found in CrawlChat`);
+  }
+
   if (event === "discussion_comment" && payload.action === "created") {
     const comment = payload.comment;
     const discussion = payload.discussion;
@@ -384,9 +384,9 @@ async function processWebhook(event: string, payload: any) {
       ) {
         const threadKey = `${repoFullName}-discussion-${discussion.number}`;
         await answer({
+          scrape,
           type: "discussion",
           number: discussion.number,
-          repoFullName,
           owner,
           repo: repoName,
           question: cleanupMention(comment.body),
@@ -430,9 +430,9 @@ async function processWebhook(event: string, payload: any) {
       ) {
         const threadKey = `${repoFullName}#issue-${issue.number}`;
         await answer({
+          scrape,
           type: "issue",
           number: issue.number,
-          repoFullName,
           owner,
           repo: repoName,
           question: cleanupMention(comment.body),
@@ -449,6 +449,10 @@ async function processWebhook(event: string, payload: any) {
     const issue = payload.issue;
     const repository = payload.repository;
     const installationId = payload.installation?.id;
+
+    if (scrape.githubAutoReply === false) {
+      return;
+    }
 
     if (
       issue &&
@@ -468,9 +472,9 @@ async function processWebhook(event: string, payload: any) {
       if (repoFullName && owner && repoName && questionText) {
         const threadKey = `${repoFullName}#issue-${issue.number}`;
         await answer({
+          scrape,
           type: "issue",
           number: issue.number,
-          repoFullName,
           owner,
           repo: repoName,
           question: questionText,

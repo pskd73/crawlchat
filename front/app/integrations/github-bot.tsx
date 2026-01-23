@@ -43,10 +43,7 @@ export async function action({ request }: Route.ActionArgs) {
 
   const formData = await request.formData();
 
-  const update = {} as Prisma.ScrapeUpdateInput & {
-    githubRepoName?: string;
-    githubAutoReply?: boolean;
-  };
+  const update: Prisma.ScrapeUpdateInput = {};
   if (formData.has("githubRepoName")) {
     update.githubRepoName = formData.get("githubRepoName") as string;
   }
@@ -66,6 +63,7 @@ export default function GitHubIntegrations({
   loaderData,
 }: Route.ComponentProps) {
   const fetcher = useFetcher();
+  const autoReplyFetcher = useFetcher();
 
   useFetcherToast(fetcher);
 
@@ -109,7 +107,7 @@ export default function GitHubIntegrations({
             id="github-auto-reply"
             title={"Auto-reply"}
             description="Automatically reply to new GitHub issues and discussions when they are created. The bot will only reply if it has relevant knowledge about the topic."
-            fetcher={fetcher}
+            fetcher={autoReplyFetcher}
           >
             <input type="hidden" name="from-github-auto-reply" value="on" />
             <label className="label">
