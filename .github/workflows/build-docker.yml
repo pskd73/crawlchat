@@ -19,9 +19,9 @@ jobs:
     strategy:
       matrix:
         include:
-          - build_app: slack
+          - build_app: slack-app
             image_name: crawlchat-slack
-          - build_app: discord
+          - build_app: discord-bot
             image_name: crawlchat-discord
           - build_app: docs
             image_name: crawlchat-docs
