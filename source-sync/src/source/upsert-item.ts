@@ -5,6 +5,8 @@ import { makeIndexer } from "../indexer/factory";
 import { deleteByIds, makeRecordId } from "../pinecone";
 import { v4 as uuidv4 } from "uuid";
 import { prisma } from "@packages/common/prisma";
+import { getAllNodes, removeByChunk, upsert } from "@packages/graph/graph";
+import { extract } from "src/memory/extract";
 
 export async function upsertItem(
   scrape: Scrape,
@@ -57,6 +59,9 @@ export async function upsertItem(
       indexer.getKey(),
       existingItem.embeddings.map((embedding) => embedding.id)
     );
+    for (const embedding of existingItem.embeddings) {
+      await removeByChunk(scrape.id, embedding.id);
+    }
   }
 
   const embeddings = documents.map((doc) => ({
@@ -88,6 +93,22 @@ export async function upsertItem(
       embeddings,
     },
   });
+
+  for (const document of documents) {
+    console.log(`Upserting document ${document.id}`);
+    const existingNodes = await getAllNodes(scrape.id);
+    const { relationships } = await extract(document.text, existingNodes);
+
+    for (const relationship of relationships) {
+      await upsert(
+        scrape.id,
+        relationship.from,
+        relationship.to,
+        relationship.relationship,
+        document.id
+      );
+    }
+  }
 }
 
 export async function upsertFailedItem(

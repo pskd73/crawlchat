@@ -15,6 +15,7 @@ import {
   scheduleUrl,
   scheduleUrls,
 } from "./source/schedule";
+import memoryRoutes from "./memory/routes";
 
 declare global {
   namespace Express {
@@ -34,6 +35,8 @@ const PORT = process.env.PORT || 3007;
 
 app.use(express.json());
 app.use(cors());
+
+app.use("/memory", memoryRoutes);
 
 app.get("/health", (req, res) => {
   res.json({ status: "ok" });

@@ -21,11 +21,8 @@ import {
 import { makeIndexer } from "./indexer/factory";
 import { name } from "@packages/common";
 import { consumeCredits, hasEnoughCredits } from "@packages/common/user-plan";
-import {
-  makeRagTool,
-  QueryContext,
-  RAGAgentCustomMessage,
-} from "./llm/flow-jasmine";
+import { RAGAgentCustomMessage } from "./llm/flow-jasmine";
+import { makeRagTool, QueryContext } from "./llm/rag-tool";
 import { extractCitations } from "@packages/common/citation";
 import { FlowMessage, multiLinePrompt, SimpleAgent } from "./llm/agentic";
 import { chunk } from "@packages/common/chunk";
@@ -50,6 +47,7 @@ import { handleWs } from "./routes/socket";
 import apiRouter from "./routes/api";
 import adminRouter from "./routes/admin";
 import githubBotRouter from "./github-bot";
+import { removeByChunk } from "@packages/graph/graph";
 
 declare global {
   namespace Express {
@@ -154,6 +152,10 @@ app.delete(
       scrapeItem.embeddings.map((e) => e.id)
     );
 
+    for (const embedding of scrapeItem.embeddings) {
+      await removeByChunk(scrapeItem.scrapeId, embedding.id);
+    }
+
     await prisma.scrapeItem.delete({
       where: { id: scrapeItemId },
     });
@@ -186,6 +188,12 @@ app.delete(
     const chunks = chunk(ids, 800);
     for (const chunk of chunks) {
       await deleteByIds(indexer.getKey(), chunk);
+    }
+
+    for (const item of items) {
+      for (const embedding of item.embeddings) {
+        await removeByChunk(item.scrapeId, embedding.id);
+      }
     }
 
     await prisma.scrapeItem.deleteMany({

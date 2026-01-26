@@ -7,7 +7,6 @@ import {
   ScrapeItem,
   Thread,
 } from "@packages/common/prisma";
-import { makeIndexer } from "../indexer/factory";
 import {
   FlowMessage,
   multiLinePrompt,
@@ -20,6 +19,8 @@ import { richMessageBlocks } from "@packages/common/rich-message-block";
 import { createBooking, getSlots } from "@packages/common/cal";
 import { MultimodalContent } from "@packages/common/llm-message";
 import zodToJsonSchema from "zod-to-json-schema";
+import { makeRagTool, QueryContext } from "./rag-tool";
+import { makeGraphTools } from "./graph-tool";
 
 export type RAGAgentCustomMessage = {
   result?: {
@@ -33,95 +34,6 @@ export type RAGAgentCustomMessage = {
   }[];
   actionCall?: ApiActionCall;
 };
-
-export type QueryContext = {
-  ragQueries: string[];
-};
-
-export function makeRagTool(
-  scrapeId: string,
-  indexerKey: string | null,
-  options?: {
-    onPreSearch?: (query: string) => Promise<void>;
-    topN?: number;
-    minScore?: number;
-    queryContext?: QueryContext;
-  }
-) {
-  const indexer = makeIndexer({ key: indexerKey, topN: options?.topN });
-
-  return new SimpleTool({
-    id: "search_data",
-    description: multiLinePrompt([
-      "Search the vector database for the most relevant documents.",
-    ]),
-    schema: z.object({
-      query: z.string({
-        description: "The query to search the vector database with",
-      }),
-    }),
-    execute: async ({ query }: { query: string }) => {
-      if (options?.queryContext?.ragQueries.includes(query)) {
-        console.log("Query already searched -", query);
-        return {
-          content: `The query "${query}" is already searched.`,
-        };
-      }
-      if (
-        options?.queryContext &&
-        options.queryContext.ragQueries.length >= 5
-      ) {
-        console.log("Maximum number of queries reached -", query);
-        return {
-          content: `Maximum number of queries reached. Now frame your answer.`,
-        };
-      }
-
-      const queryWords = query?.split(" ");
-      if (query.length < 5 || queryWords?.length < 4) {
-        console.log("Query is too short -", query);
-        return {
-          content: `The query "${query}" is too short. Search again with a longer query.`,
-        };
-      }
-
-      console.log("Searching RAG for -", query);
-
-      if (options?.onPreSearch) {
-        await options.onPreSearch(query);
-      }
-
-      const result = await indexer.search(scrapeId, query, {
-        topK: 20,
-      });
-
-      const processed = await indexer.process(query, result);
-      const filtered = processed.filter(
-        (r) => options?.minScore === undefined || r.score >= options.minScore
-      );
-      if (options?.queryContext) {
-        options.queryContext.ragQueries.push(query);
-      }
-      const context = JSON.stringify(
-        filtered.map((r, i) => ({
-          url: r.url,
-          content: r.content,
-          fetchUniqueId: r.fetchUniqueId,
-        }))
-      );
-      return {
-        content:
-          filtered.length > 0
-            ? `<context>\n${context}\n</context>`
-            : "No relevant information found. Don't answer the query. Inform that you don't know the answer.",
-        customMessage: {
-          result: processed,
-          query,
-        },
-      };
-    },
-  });
-}
 
 function makeVerifyEmailTool() {
   return new SimpleTool<RAGAgentCustomMessage>({
@@ -571,6 +483,8 @@ export function makeFlow(
     queryContext,
   });
 
+  const graphTools = makeGraphTools(scrapeId);
+
   const enabledRichBlocks = options?.richBlocks
     ? options.richBlocks.map((rb) => ({
         key: rb.key,
@@ -636,6 +550,11 @@ export function makeFlow(
     id: "rag-agent",
     prompt: multiLinePrompt([
       "You are a helpful assistant that can answer questions about the context provided.",
+
+      "Use the graph tools to get the context.",
+      "Use the graph tools multiple times so that you can travel through the graph and get the better context.",
+      "Better you use the graph tools first to find out the bigger picture about the topic and then use the RAG tool to get full context.",
+
       "Use the search_data tool to search the vector database for the relavent information.",
       "You can run search_data tool multiple times to get more information.",
       "Don't hallucinate. You cannot add new topics to the query. It should be inside the context of the query.",
@@ -651,13 +570,13 @@ export function makeFlow(
       "Break multi level queries as well. For example: 'What is the average score?' should be split into 'score list' and then calculate the average.",
       "You need to find indirect questions. For example: 'What is the cheapest pricing plan?' should be converted into 'pricing plans' and then find cheapest",
       "Don't use the search_data tool if the latest message is answer for a follow up question. Ex: yes, no.",
-
       "Don't repeat the question in the answer.",
       "Don't inform about searching using the RAG tool. Just fetch and answer.",
       "Don't use headings in the answer.",
       "Query only related items from RAG. Keep the search simple and small",
       "Don't repeat similar search terms. Don't use more than 3 searches from RAG.",
       "Don't use the RAG tool once you have the answer.",
+
       "Output should be very very short and under 200 words.",
       "Give the answer in human readable format with markdown.",
 
@@ -687,7 +606,9 @@ export function makeFlow(
       `<client-data>\n${JSON.stringify(options?.clientData)}\n</client-data>`,
     ]),
     tools: [
+      ...graphTools.map((tool) => tool.make()),
       ragTool.make(),
+
       ...actionTools.map((tool) => tool.make()),
       makeVerifyEmailTool().make(),
     ],

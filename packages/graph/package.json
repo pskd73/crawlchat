@@ -1,0 +1,39 @@
+{
+  "name": "@packages/graph",
+  "version": "1.0.0",
+  "description": "",
+  "type": "commonjs",
+  "main": "dist/graph.js",
+  "types": "dist/graph.d.ts",
+  "exports": {
+    ".": {
+      "default": "./dist/graph.js",
+      "types": "./dist/graph.d.ts"
+    },
+    "./graph": {
+      "default": "./dist/graph.js",
+      "types": "./dist/graph.d.ts"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "graph": [
+        "./dist/graph.d.ts"
+      ]
+    }
+  },
+  "scripts": {
+    "dev": "tsc --watch",
+    "build": "tsc",
+    "prettier": "prettier --no-error-on-unmatched-pattern --check ./**/*.{ts,tsx,js,jsx,json,css,md}"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^22.13.9",
+    "typescript": "^5.8.2"
+  },
+  "dependencies": {
+    "neo4j-driver": "^5.20.0"
+  }
+}
