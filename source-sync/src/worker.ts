@@ -49,7 +49,7 @@ async function checkGroupCompletion(job: Job<ItemData>) {
   await decrementPendingUrls(job.data.processId);
   const pendingUrls = await getPendingUrls(job.data.processId);
 
-  if (pendingUrls === 0) {
+  if (!job.data.standAlone && pendingUrls === 0) {
     await prisma.knowledgeGroup.update({
       where: { id: job.data.knowledgeGroupId },
       data: { status: "done" },
@@ -140,7 +140,10 @@ const itemWorker = new Worker<ItemData>(
       },
     });
 
-    if (knowledgeGroup.updateProcessId !== data.processId) {
+    if (
+      !job.data.standAlone &&
+      knowledgeGroup.updateProcessId !== data.processId
+    ) {
       return;
     }
 

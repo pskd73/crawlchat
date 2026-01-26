@@ -167,6 +167,7 @@ app.post(
 
     if (title && text && pageId) {
       await scheduleUrl(knowledgeGroup, processId, pageId, pageId, {
+        standAlone: true,
         textPage: {
           title,
           text,
@@ -186,6 +187,7 @@ app.post(
               title: page.title,
               text: page.text,
             },
+            standAlone: true,
           },
         }))
       );

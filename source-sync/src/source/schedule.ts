@@ -56,7 +56,7 @@ export async function scheduleUrl(
     throw new Error("Knowledge group not found");
   }
 
-  if (knowledgeGroup.status !== "processing") {
+  if (!jobData?.standAlone && knowledgeGroup.status !== "processing") {
     return null;
   }
 

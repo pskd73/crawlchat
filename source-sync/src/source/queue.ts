@@ -37,6 +37,7 @@ export type ItemData = {
     text: string;
   };
   cursor?: string;
+  standAlone?: boolean;
 };
 
 export const groupQueue = new Queue<GroupData>(GROUP_QUEUE_NAME, {
