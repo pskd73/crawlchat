@@ -1,6 +1,3 @@
-import dotenv from "dotenv";
-dotenv.config({ path: "../.env" });
-
 if (!process.env.APP_ID) {
   if (!process.env.SELF_HOSTED) {
     throw new Error("APP_ID is not set");

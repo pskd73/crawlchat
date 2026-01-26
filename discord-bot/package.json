@@ -6,7 +6,7 @@
   "scripts": {
     "build": "npx tsc",
     "start": "node dist/index.js",
-    "dev": "nodemon src/index.ts",
+    "dev": "dotenv -e ../.env -- npx tsx watch src/index.ts",
     "prettier": "prettier --no-error-on-unmatched-pattern --check ./**/*.{ts,tsx,js,jsx,json,css,md}"
   },
   "author": "",
@@ -14,15 +14,14 @@
   "devDependencies": {
     "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "^22.13.9",
-    "concurrently": "^9.1.2",
-    "nodemon": "^3.1.9",
+    "dotenv-cli": "^7.4.4",
     "ts-node": "^10.9.2",
+    "tsx": "^4.19.2",
     "typescript": "^5.8.2"
   },
   "dependencies": {
     "@packages/common": "*",
     "discord.js": "^14.18.0",
-    "dotenv": "^16.4.7",
     "jsonwebtoken": "^9.0.2"
   }
 }

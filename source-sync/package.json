@@ -7,7 +7,7 @@
     "generate": "npx playwright install-deps && npx playwright install",
     "build": "npx tsc",
     "start": "node -r tsconfig-paths/register dist/index.js",
-    "dev": "nodemon src/index.ts",
+    "dev": "dotenv -e ../.env -- npx tsx watch -r tsconfig-paths/register src/index.ts",
     "prettier": "prettier --no-error-on-unmatched-pattern --check ./**/*.{ts,tsx,js,jsx,json,css,md}"
   },
   "author": "",
@@ -17,10 +17,11 @@
     "@types/express": "^5.0.6",
     "@types/node": "^22.13.1",
     "@types/turndown": "^5.0.6",
-    "nodemon": "^3.1.9",
+    "dotenv-cli": "^7.4.4",
     "prettier": "^3.2.5",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
+    "tsx": "^4.19.2",
     "typescript": "^5.7.3"
   },
   "dependencies": {
@@ -31,7 +32,6 @@
     "bullmq": "^5.66.4",
     "cheerio": "^1.1.2",
     "cors": "^2.8.5",
-    "dotenv": "^16.4.7",
     "express": "^5.2.1",
     "ioredis": "^5.8.2",
     "lodash": "^4.17.21",

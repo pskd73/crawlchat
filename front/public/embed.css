@@ -42,6 +42,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  z-index: 99;
 }
 
 #crawlchat-ask-ai-button:hover {

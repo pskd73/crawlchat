@@ -6,7 +6,7 @@
   "scripts": {
     "build": "npx tsc",
     "start": "node dist/index.js",
-    "dev": "nodemon src/index.ts",
+    "dev": "dotenv -e ../.env -- npx tsx watch src/index.ts",
     "cli": "npx tsc && node dist/cli.js",
     "cron": "npx tsc && node dist/cron.js \"$@\"",
     "prettier": "prettier --no-error-on-unmatched-pattern --check ./**/*.{ts,tsx,js,jsx,json,css,md}"
@@ -19,9 +19,9 @@
     "@types/express-ws": "^3.0.5",
     "@types/jsonwebtoken": "^9.0.8",
     "@types/node": "^22.13.1",
-    "concurrently": "^9.1.2",
-    "nodemon": "^3.1.9",
+    "dotenv-cli": "^7.4.4",
     "ts-node": "^10.9.2",
+    "tsx": "^4.19.2",
     "typescript": "^5.9.3"
   },
   "dependencies": {
@@ -29,7 +29,6 @@
     "@pinecone-database/pinecone": "^4.1.0",
     "@prisma/client": "^6.2.1",
     "cors": "^2.8.5",
-    "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "express-ws": "^5.0.2",
     "jsonwebtoken": "^9.0.2",

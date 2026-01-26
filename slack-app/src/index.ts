@@ -1,6 +1,3 @@
-import dotenv from "dotenv";
-dotenv.config({ path: "../.env" });
-
 if (!process.env.SLACK_SIGNING_SECRET) {
   if (!process.env.SELF_HOSTED) {
     throw new Error("SLACK_SIGNING_SECRET is not set");
