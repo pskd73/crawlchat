@@ -46,7 +46,9 @@ export function makeRagAgent(
   };
 
   const ragTool = makeSearchTool(scrapeId, indexerKey, {
-    ...options,
+    onPreSearch: options?.onPreSearch,
+    topN: options?.llmConfig.ragTopN,
+    minScore: options?.minScore,
     queryContext,
   });
 
