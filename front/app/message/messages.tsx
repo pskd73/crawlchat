@@ -41,6 +41,7 @@ import { useEffect, useMemo, useState } from "react";
 import { CreditsUsedBadge } from "./credits-used-badge";
 import { SentimentBadge } from "./sentiment-badge";
 import Avatar from "boring-avatars";
+import { LanguageBadge } from "./language-badge";
 
 function isLowRating(message: Message) {
   if (message.analysis?.questionSentiment === "sad") return true;
@@ -370,7 +371,6 @@ export default function MessagesLayout({ loaderData }: Route.ComponentProps) {
                   <tr>
                     <th>Question</th>
                     <th>Details</th>
-                    <th>Language</th>
                     <th>Channel</th>
                     <th>Category</th>
                     <th className="text-end">Time</th>
@@ -465,9 +465,13 @@ export default function MessagesLayout({ loaderData }: Route.ComponentProps) {
                               llmModel={pair.responseMessage.llmModel}
                             />
                           )}
+                          {pair.responseMessage.analysis?.language && (
+                            <LanguageBadge
+                              language={pair.responseMessage.analysis.language}
+                            />
+                          )}
                         </div>
                       </td>
-                      <td>{pair.responseMessage.analysis?.language}</td>
                       <td className="w-10">
                         <ChannelBadge
                           channel={pair.queryMessage?.channel}
