@@ -224,7 +224,7 @@ export function makeRagFlow(
         },
       ],
     },
-    { maxToolCalls: 10 }
+    { maxToolCalls: 100 }
   );
 
   flow.addNextAgents(["rag-agent"]);
