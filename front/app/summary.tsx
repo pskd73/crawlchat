@@ -783,7 +783,7 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
               </div>
             )}
 
-          {loaderData.topItems && (
+          {loaderData.topItems && loaderData.topItems.length > 0 && (
             <div>
               <Heading>Top cited pages</Heading>
               <TopPages topItems={loaderData.topItems} />
