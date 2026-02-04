@@ -432,3 +432,7 @@
   font-weight: 900;
   font-style: italic;
 }
+
+#crawlchat-ask-ai-button {
+  border-radius: 0px !important;
+}

@@ -1480,7 +1480,7 @@ function Hero() {
       icon: <TbCode />,
     },
     {
-      text: "Shows you questions being asked and ways to improve your docs",
+      text: "Strong citations for your users and analytics to improve your docs",
       icon: <TbChartBar />,
     },
     {
@@ -1541,10 +1541,9 @@ function Hero() {
           </a>
         )}
 
-        <h1 className="font-brand text-[42px] md:text-[42px] leading-[1.2]">
-          Turn your documentation into an{" "}
-          <span className="text-accent whitespace-nowrap">AI assistant</span>{" "}
-          that answers questions instantly
+        <h1 className="font-brand text-[42px] md:text-[62px] leading-[1.2]">
+          Power up your documentation with{" "}
+          <span className="text-accent whitespace-nowrap">AI</span>
         </h1>
 
         <p className="text-xl mt-6 font-brand italic text-base-content/50">
@@ -1640,10 +1639,16 @@ export function CustomTestimonial({
       className={cn(
         "border-r-0 md:border-r border-b",
         "md:border-b-0 border-base-300 p-6 last:border-r-0",
-        "last:border-b-0"
+        "last:border-b-0 group"
       )}
     >
-      <p className={cn("font-brand text-center", !small && "text-xl")}>
+      <p
+        className={cn(
+          "font-brand text-center text-base-content/60",
+          "group-hover:text-base-content",
+          !small && "text-xl"
+        )}
+      >
         {text}
       </p>
 
