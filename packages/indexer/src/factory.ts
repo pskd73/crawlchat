@@ -9,7 +9,10 @@ export function makeIndexer({
   key: string | null;
   topN?: number;
 }): Indexer {
-  const indexers = [new MarsIndexer({ topN }), new EarthIndexer({ topN })];
+  const indexers: Indexer[] = [new MarsIndexer({ topN })];
+  if (process.env.PGVECTOR_URL) {
+    indexers.push(new EarthIndexer({ topN }));
+  }
   const indexMap = new Map<string, Indexer>();
   for (const indexer of indexers) {
     indexMap.set(indexer.getKey(), indexer);
