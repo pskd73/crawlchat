@@ -301,8 +301,8 @@ export async function fetchYouTubeVideoData(
   const title = data.title?.trim() || "YouTube Video";
 
   let transcript =
-    transcriptFromVideoResponse(data) ??
-    (await fetchTranscriptFromApi(videoUrl, apiKey, options?.language));
+    (await fetchTranscriptFromApi(videoUrl, apiKey, options?.language)) ??
+    transcriptFromVideoResponse(data);
 
   if (!transcript || transcript.length === 0) {
     throw new Error(
