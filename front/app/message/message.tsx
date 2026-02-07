@@ -232,7 +232,10 @@ function AssistantMessage({
                     {JSON.parse(toolCall.params)}
                   </div>
                 </div>
-                <div className="tooltip" data-tip="Response length">
+                <div
+                  className="tooltip tooltip-left"
+                  data-tip="Response length"
+                >
                   <div className="badge">{toolCall.responseLength}</div>
                 </div>
               </div>
