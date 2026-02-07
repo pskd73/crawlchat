@@ -233,6 +233,7 @@ type MessageSourceLink {
   knowledgeGroupId        String?     @db.ObjectId
   fetchUniqueId           String?
   searchQuery             String?
+  searchType              String?
   cited                   Boolean?
 }
 

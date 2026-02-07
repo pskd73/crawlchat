@@ -6,7 +6,7 @@ export type SearchToolContext = {
   queries: string[];
 };
 
-const MIN_QUERY_WORDS = 4;
+const MIN_QUERY_WORDS = 3;
 
 export function makeSearchTool(
   scrapeId: string,
@@ -28,10 +28,12 @@ export function makeSearchTool(
     ]),
     schema: z.object({
       query: z.string({
-        description: "The query to search the vector database with",
+        description:
+          "The query to search the vector database with. Minimum 4 words required.",
       }),
     }),
     execute: async ({ query }: { query: string }) => {
+      console.log("[search_data] called with:", { query });
       if (options?.queryContext?.queries.includes(query)) {
         console.log("Query already searched -", query);
         return {
@@ -59,8 +61,6 @@ export function makeSearchTool(
         };
       }
 
-      console.log("Searching RAG for -", query);
-
       if (options?.onPreSearch) {
         await options.onPreSearch(query);
       }
@@ -81,6 +81,7 @@ export function makeSearchTool(
           url: r.url,
           content: r.content,
           fetchUniqueId: r.fetchUniqueId,
+          scrapeItemId: r.scrapeItemId,
         }))
       );
       return {
@@ -89,7 +90,7 @@ export function makeSearchTool(
             ? `<context>\n${context}\n</context>`
             : "No relevant information found. Don't answer the query. Inform that you don't know the answer.",
         customMessage: {
-          result: processed,
+          result: processed.map((r) => ({ ...r, searchType: "search_data" })),
           query,
         },
       };

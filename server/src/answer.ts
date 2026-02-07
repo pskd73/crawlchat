@@ -135,11 +135,12 @@ export async function collectSourceLinks(
       links.push({
         url: match.url ?? null,
         title: item.title,
-        score: match.score,
+        score: match.score ?? null,
         scrapeItemId: item.id,
         fetchUniqueId: match.fetchUniqueId ?? null,
         knowledgeGroupId: item.knowledgeGroupId,
         searchQuery: match.query ?? null,
+        searchType: match.searchType ?? null,
         cited: null,
       });
     }

@@ -6,7 +6,6 @@ import type {
 } from "@packages/common/prisma";
 import {
   TbFolder,
-  TbLink,
   TbMessage,
   TbMessages,
   TbPaperclip,
@@ -34,6 +33,7 @@ import { Timestamp } from "~/components/timestamp";
 import { makeMeta } from "~/meta";
 import { getImagesCount, getQueryString } from "@packages/common/llm-message";
 import { SentimentBadge } from "./sentiment-badge";
+import { SearchTypeBadge } from "./search-type-badge";
 
 export async function loader({ request, params }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -174,8 +174,13 @@ function AssistantMessage({
   }, [message.toolCalls]);
 
   return (
-    <div className="flex flex-col gap-4 max-w-prose">
-      <div className="bg-base-100 rounded-box p-4 shadow border border-base-300">
+    <div className="flex flex-col gap-4">
+      <div
+        className={cn(
+          "bg-base-100 rounded-box p-4 shadow border border-base-300",
+          "max-w-prose"
+        )}
+      >
         <MarkdownProse
           sources={Object.values(citation.citedLinks).map((link) => ({
             title: link?.title ?? link?.url ?? "Source",
@@ -245,6 +250,7 @@ function AssistantMessage({
               <thead>
                 <tr>
                   <th>Title</th>
+                  <th>Type</th>
                   <th>Query</th>
                   <th>Score</th>
                 </tr>
@@ -268,26 +274,33 @@ function AssistantMessage({
                         {link.title || link.url}
                       </RouterLink>
                     </td>
-                    <td className="w-18 md:w-56">
+                    <td className="w-28">
+                      <SearchTypeBadge searchType={link.searchType ?? "-"} />
+                    </td>
+                    <td className="font-mono">
                       {link.searchQuery ? (
-                        <div
-                          className="tooltip"
-                          data-tip="Search in the knowledge base"
-                        >
-                          <Link
-                            className="link link-hover link-primary"
-                            to={`/knowledge?query=${link.searchQuery}`}
-                            target="_blank"
+                        link.searchType === "search_data" ? (
+                          <div
+                            className="tooltip"
+                            data-tip="Search in the knowledge base"
                           >
-                            {link.searchQuery}
-                          </Link>
-                        </div>
+                            <Link
+                              className={cn("link link-hover link-primary")}
+                              to={`/knowledge?query=${link.searchQuery}`}
+                              target="_blank"
+                            >
+                              {link.searchQuery}
+                            </Link>
+                          </div>
+                        ) : (
+                          link.searchQuery
+                        )
                       ) : (
                         "-"
                       )}
                     </td>
                     <td className="w-24">
-                      {link.score && (
+                      {link.score ? (
                         <div className="flex items-center gap-1">
                           {link.cited && (
                             <div className="badge badge-secondary badge-soft gap-1 px-2">
@@ -296,6 +309,8 @@ function AssistantMessage({
                           )}
                           <ScoreBadge score={link.score} />
                         </div>
+                      ) : (
+                        "-"
                       )}
                     </td>
                   </tr>
@@ -537,7 +552,7 @@ export default function Message({ loaderData }: Route.ComponentProps) {
               <div
                 className={cn(
                   "flex flex-col bg-base-100 rounded-box",
-                  "shadow border border-base-300 max-w-prose"
+                  "shadow border border-base-300"
                 )}
               >
                 {filteredCategorySuggestions

@@ -90,7 +90,10 @@ export function makeMessagePairs(messages: MessageWithThread[]) {
         links.filter((l) => l.score !== null).length;
     }
 
-    if (message.links.length === 0) {
+    if (
+      message.links.length === 0 ||
+      message.links.every((l) => l.score === null)
+    ) {
       minScore = undefined;
       maxScore = undefined;
       averageScore = undefined;

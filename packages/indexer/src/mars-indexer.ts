@@ -4,15 +4,7 @@ import {
   QueryResponse,
 } from "@pinecone-database/pinecone";
 import { Indexer, IndexDocument } from "./indexer";
-
-function randomFetchId() {
-  const chars = "01234567890";
-  let result = "";
-  for (let i = 0; i < 5; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return result;
-}
+import { randomFetchId } from "./random-fetch-id";
 
 export class MarsIndexer implements Indexer {
   private pinecone: Pinecone;

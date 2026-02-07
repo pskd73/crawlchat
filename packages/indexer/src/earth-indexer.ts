@@ -5,20 +5,12 @@ import type {
   RecordMetadata,
 } from "@pinecone-database/pinecone";
 import { Indexer, IndexDocument } from "./indexer";
+import { randomFetchId } from "./random-fetch-id";
 
 const EMBEDDING_DIM = 3072;
 const TABLE_NAME = "earth_embeddings";
 const OPENROUTER_EMBEDDINGS_URL = "https://openrouter.ai/api/v1/embeddings";
 const EMBEDDING_MODEL = "openai/text-embedding-3-large";
-
-function randomFetchId() {
-  const chars = "01234567890";
-  let result = "";
-  for (let i = 0; i < 5; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return result;
-}
 
 export class EarthIndexer implements Indexer {
   private pool: Pool;

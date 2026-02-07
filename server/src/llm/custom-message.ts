@@ -10,10 +10,11 @@ export type CustomMessage = {
     id: string;
     content: string;
     url?: string;
-    score: number;
+    score?: number;
     scrapeItemId?: string;
     fetchUniqueId?: string;
     query?: string;
+    searchType?: string;
   }[];
   actionCall?: ApiActionCall;
   dataGap?: DataGap;
