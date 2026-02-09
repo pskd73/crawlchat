@@ -220,6 +220,7 @@ Only following blocks are allowed:
 8. Link — <url|label>
 
 You should use only the above formatting in the answer.
+Don't use ** or __ for bold, use * instead. This is very important. Don't use markdown.
 `,
     fingerprint: (message as any).user,
   });
