@@ -981,7 +981,7 @@ app.post("/compose/:scrapeId", authenticate, async (req, res) => {
     textSearchToolCalls: 0,
   };
 
-  const llmConfig = getConfig("openrouter/openai/gpt-5.2");
+  const llmConfig = getConfig("openrouter/openai/gpt-5.1");
   const agent = new Agent({
     id: "compose-agent",
     prompt: `
