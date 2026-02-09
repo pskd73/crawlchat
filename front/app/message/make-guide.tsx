@@ -58,6 +58,9 @@ export async function action({ request, params }: Route.ActionArgs) {
 export default function MakeGuide({ loaderData }: Route.ComponentProps) {
   const composer = useComposer({
     scrapeId: loaderData.scrape.id,
+    intent: "compose",
+    action: "/tool/compose",
+    storageKeyPrefix: "compose-state",
     prompt: `You are a helpful guide writer.
       You are given a conversation and you need to write a guide based on the conversation.
 

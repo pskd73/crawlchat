@@ -44,6 +44,11 @@
   list-style: none;
 }
 
+.lexical-editor-content pre,
+.lexical-editor-content code.block {
+  white-space: break-spaces;
+}
+
 .lexical-editor-content [contenteditable="true"] p code,
 .lexical-editor-content [contenteditable="true"] span code,
 .lexical-editor-content [contenteditable="true"] h1 code,

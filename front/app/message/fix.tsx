@@ -185,6 +185,9 @@ function FixComposer({
 }) {
   const composer = useComposer({
     scrapeId,
+    intent: "compose",
+    action: "/tool/compose",
+    storageKeyPrefix: "compose-state",
     stateLess: true,
     init: {
       format: "markdown",

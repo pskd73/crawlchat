@@ -401,6 +401,12 @@ export function SideMenu({
             forScrape: true,
           },
           {
+            label: "Skill maker",
+            to: "/tool/skill-maker",
+            icon: <TbCode />,
+            forScrape: true,
+          },
+          {
             label: "Fact check",
             to: "/tool/fact-check",
             icon: <TbChecks />,

@@ -157,10 +157,16 @@ export function useComposer({
   stateLess,
   init,
   prompt: inputPrompt,
+  intent,
+  action,
+  storageKeyPrefix,
 }: {
   scrapeId: string;
   stateLess?: boolean;
   prompt?: string;
+  intent: string;
+  action: string;
+  storageKeyPrefix: string;
   init?: {
     format?: ComposeFormat;
     formatText?: string;
@@ -194,7 +200,7 @@ export function useComposer({
 
       if (!stateLess) {
         localStorage.setItem(
-          `compose-state-${scrapeId}`,
+          `${storageKeyPrefix}-${scrapeId}`,
           JSON.stringify({
             slate: fetcher.data.slate,
             messages: fetcher.data.messages,
@@ -203,15 +209,17 @@ export function useComposer({
         );
       }
     }
-  }, [fetcher.data, scrapeId]);
+  }, [fetcher.data, scrapeId, stateLess, storageKeyPrefix]);
 
   useEffect(() => {
     if (stateLess) return;
 
-    if (scrapeId && localStorage.getItem(`compose-state-${scrapeId}`)) {
-      setState(JSON.parse(localStorage.getItem(`compose-state-${scrapeId}`)!));
+    if (scrapeId && localStorage.getItem(`${storageKeyPrefix}-${scrapeId}`)) {
+      setState(
+        JSON.parse(localStorage.getItem(`${storageKeyPrefix}-${scrapeId}`)!)
+      );
     }
-  }, [scrapeId]);
+  }, [scrapeId, stateLess, storageKeyPrefix]);
 
   function setSlate(text: string) {
     setState((old) => {
@@ -228,7 +236,7 @@ export function useComposer({
   function askEdit(content: string) {
     fetcher.submit(
       {
-        intent: "compose",
+        intent,
         content,
         prompt,
         messages: JSON.stringify(state?.messages ?? []),
@@ -239,7 +247,7 @@ export function useComposer({
       },
       {
         method: "post",
-        action: "/tool/compose",
+        action,
       }
     );
   }
@@ -777,7 +785,7 @@ function LexicalEditor({
   return (
     <LexicalComposer initialConfig={initialConfig}>
       <div>
-        <div className="sticky top-15 z-10">
+        <div className="sticky top-[61px] z-10 bg-base-100">
           <TitleBar composer={composer} />
           <ToolbarPlugin />
         </div>
@@ -861,7 +869,12 @@ export function ComposerSection({
         editable={true}
       />
 
-      <div className="sticky bottom-0 bg-base-200/50 z-10 border-t border-base-300">
+      <div
+        className={cn(
+          "sticky bottom-0 z-10 border-t border-base-300",
+          "bg-base-200"
+        )}
+      >
         <div className="flex gap-2 items-center p-2">
           <input
             className="input flex-1"
@@ -903,6 +916,9 @@ export function ComposerSection({
 export default function Compose({ loaderData }: Route.ComponentProps) {
   const composer = useComposer({
     scrapeId: loaderData.scrapeId,
+    intent: "compose",
+    action: "/tool/compose",
+    storageKeyPrefix: "compose-state",
     init: {
       format: loaderData.format as ComposeFormat,
     },

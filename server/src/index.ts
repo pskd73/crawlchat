@@ -47,6 +47,10 @@ import { handleWs } from "./routes/socket";
 import apiRouter from "./routes/api";
 import adminRouter from "./routes/admin";
 import githubBotRouter from "./github-bot";
+import {
+  makeTextSearchRegexTool,
+  TextSearchToolContext,
+} from "./llm/text-search-tool";
 
 declare global {
   namespace Express {
@@ -972,11 +976,12 @@ app.post("/compose/:scrapeId", authenticate, async (req, res) => {
 
   const messages = [message];
 
-  const queryContext: SearchToolContext = {
+  const queryContext: SearchToolContext & TextSearchToolContext = {
     queries: [],
+    textSearchToolCalls: 0,
   };
 
-  const llmConfig = getConfig("openrouter/google/gemini-3-flash-preview");
+  const llmConfig = getConfig("openrouter/openai/gpt-5.2");
   const agent = new Agent({
     id: "compose-agent",
     prompt: `
@@ -1015,9 +1020,20 @@ app.post("/compose/:scrapeId", authenticate, async (req, res) => {
     You should only apply changes and not do anything else.
     Don't inspire from previous slates. Continue from the current slate.
 
+    Use the provided tools to get the information.
+    Don't compose without using the tools.
+    Query for search_data should be at least 4 words.
+    Use text_search_regex tool to find out about keywords and phrases.
+    Recommended to use text_search_regex tool for the technical keywords.
+
+    Once you see that a set of tools are returning the same result, don't use the tools again.
+
     ${prompt}
     `,
-    tools: [makeSearchTool(scrape.id, scrape.indexer, { queryContext })],
+    tools: [
+      makeSearchTool(scrape.id, scrape.indexer, { queryContext }),
+      makeTextSearchRegexTool(scrape.id, queryContext),
+    ],
     schema: z.object({
       slate: z.string({
         description: "The answer in slate format",

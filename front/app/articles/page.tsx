@@ -69,6 +69,9 @@ export async function action({ request, params }: Route.ActionArgs) {
 export default function Article({ loaderData }: Route.ComponentProps) {
   const composer = useComposer({
     scrapeId: loaderData.article.scrapeId,
+    intent: "compose",
+    action: "/tool/compose",
+    storageKeyPrefix: "compose-state",
     init: {
       format: "markdown",
       state: {
