@@ -129,13 +129,7 @@ async function getContextMessages(
       messages = replies.messages;
     }
   } else {
-    const history = await client.conversations.history({
-      channel: message.channel,
-      limit: 15,
-    });
-    if (history.messages) {
-      messages = history.messages.reverse();
-    }
+    messages = [message];
   }
 
   return messages.map((m) => ({
