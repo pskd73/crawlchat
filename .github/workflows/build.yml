@@ -24,6 +24,14 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Discord notification
+        if: success()
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        uses: Ilshidur/action-discord@0.4.0
+        with:
+          args: 'Build succeeded for {{ EVENT_PAYLOAD.repository.full_name }} ({{ github.sha }}).'
+
   prettier:
     runs-on: ubuntu-latest
 
