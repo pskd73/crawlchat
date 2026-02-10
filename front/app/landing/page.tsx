@@ -997,7 +997,7 @@ export function CTA({ text }: { text?: string }) {
       <div className="w-full py-16 px-10 relative border-t-4 border-dashed border-primary/20">
         <h2
           className={cn(
-            "font-brand text-[42px] leading-[1.2]",
+            "font-brand text-[36px] md:text-[42px] leading-[1.2]",
             "font-medium text-center max-w-[900px] mx-auto"
           )}
         >
@@ -1038,7 +1038,7 @@ export function Footer() {
         <div className="py-8 flex flex-col md:flex-row gap-8">
           <div className="flex-[2] flex flex-col gap-4">
             <Logo />
-            <p className="font-medium opacity-60 font-brand italic">
+            <p className="font-medium text-base-content/50 font-brand italic">
               Power up your tech documentation with AI
             </p>
             <p className="opacity-50 text-xs font-medium">© 2026 CrawlChat</p>
@@ -1541,24 +1541,23 @@ function Hero() {
           </a>
         )}
 
-        <h1 className="font-brand text-[42px] md:text-[62px] leading-[1.2]">
+        <h1 className="font-brand text-[36px] md:text-[62px] leading-[1.2]">
           Power up your documentation with{" "}
           <span className="text-accent whitespace-nowrap">AI</span>
         </h1>
 
-        <p className="text-xl mt-6 font-brand italic text-base-content/50">
+        <p className="md:text-xl mt-6 font-brand italic text-base-content/50">
           Add an AI chatbot to your documentation website. Users can ask
-          questions and get instant answers from your docs, without searching
-          through pages.
+          questions and get instant answers from your docs with citations.
         </p>
 
         <ul className="mt-6 flex flex-col gap-2">
           {features.map((feature, index) => (
-            <li key={index} className="flex gap-3 items-start">
+            <li key={index} className="flex gap-2 items-start">
               <div className="text-primary rounded-box p-1 mt-0.5">
                 <TbCheck size={20} />
               </div>
-              <span className="text-lg">{feature.text}</span>
+              <span className="md:text-lg">{feature.text}</span>
             </li>
           ))}
         </ul>
@@ -1589,7 +1588,7 @@ function Hero() {
         </div>
       </div>
 
-      <div className="flex-1 flex-col">
+      <div className="flex-1 flex-col mt-2">
         <div className="relative animate-breath-y">
           <div className="border-2 border-accent rounded-box overflow-hidden shadow">
             <iframe
