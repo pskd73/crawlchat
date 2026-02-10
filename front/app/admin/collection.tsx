@@ -2,6 +2,7 @@ import { getAuthUser } from "~/auth/middleware";
 import type { Route } from "./+types/collection";
 import { redirect, useLoaderData } from "react-router";
 import { prisma } from "@packages/common/prisma";
+import { getTotalPageChunks } from "~/knowledge/group/page-chunks";
 import { DataList } from "~/components/data-list";
 import { makeMeta } from "~/meta";
 import {
@@ -51,6 +52,11 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     itemsCount[item.id] = item.count;
   }
 
+  const pageChunks: Record<string, number> = {};
+  for (const group of scrape.knowoledgeGroups) {
+    pageChunks[group.id] = await getTotalPageChunks(group.id);
+  }
+
   const dailyMessages = await Promise.all(
     Array.from({ length: 30 }).map(async (_, index) => {
       const now = moment();
@@ -74,7 +80,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     })
   );
 
-  return { scrape, itemsCount, dailyMessages };
+  return { scrape, itemsCount, pageChunks, dailyMessages };
 }
 
 export function meta() {
@@ -111,7 +117,7 @@ function CategoriesTable() {
 }
 
 function GroupsTable() {
-  const { itemsCount, scrape } = useLoaderData<typeof loader>();
+  const { itemsCount, pageChunks, scrape } = useLoaderData<typeof loader>();
 
   return (
     <div className="overflow-x-auto border border-base-300 rounded-box bg-base-100 shadow">
@@ -129,7 +135,9 @@ function GroupsTable() {
             <tr key={index}>
               <td>{group.title}</td>
               <td>{group.type}</td>
-              <td>{itemsCount[group.id]}</td>
+              <td>
+                {pageChunks[group.id] ?? 0}({itemsCount[group.id]})
+              </td>
               <td>{group.createdAt.toLocaleString()}</td>
             </tr>
           ))}
