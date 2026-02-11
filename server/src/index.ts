@@ -35,11 +35,7 @@ import {
 } from "./answer";
 import { createToken } from "@packages/common/jwt";
 import { MultimodalContent } from "@packages/common/llm-message";
-import {
-  draftRateLimiter,
-  mcpRateLimiter,
-  wsRateLimiter,
-} from "./rate-limiter";
+import { draftRateLimiter, mcpRateLimiter } from "./rate-limiter";
 import { getConfig } from "./llm/config";
 import { getNextNumber } from "@packages/common/mongo-counter";
 import { randomUUID } from "crypto";
@@ -371,8 +367,6 @@ app.post(
 app.post("/answer/:scrapeId", authenticate, async (req, res) => {
   console.log("Answer request for", req.params.scrapeId);
 
-  wsRateLimiter.check();
-
   const scrape = await prisma.scrape.findFirst({
     where: { id: req.params.scrapeId },
   });
@@ -573,8 +567,6 @@ app.post("/answer/:scrapeId", authenticate, async (req, res) => {
 
 app.post("/google-chat/answer/:scrapeId", async (req, res) => {
   console.log("Google Chat request for", req.params.scrapeId);
-
-  wsRateLimiter.check();
 
   const apiKey = req.query.apiKey as string;
   if (!apiKey) {

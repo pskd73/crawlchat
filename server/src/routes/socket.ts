@@ -1,7 +1,7 @@
 import { prisma } from "@packages/common/prisma";
 import { createToken, verifyToken } from "@packages/common/jwt";
 import { hasEnoughCredits } from "@packages/common/user-plan";
-import { wsRateLimiter } from "../rate-limiter";
+import { socketAskRateLimiter } from "../rate-limiter";
 import { baseAnswerer, saveAnswer, type AnswerListener } from "../answer";
 import { retry } from "../retry";
 import expressWs from "express-ws";
@@ -71,8 +71,6 @@ export const handleWs: expressWs.WebsocketRequestHandler = (ws) => {
   };
 
   const onMessage = async (msg: Buffer | string) => {
-    wsRateLimiter.check();
-
     const message = JSON.parse(msg.toString());
 
     if (message.type === "join-room") {
@@ -104,6 +102,8 @@ export const handleWs: expressWs.WebsocketRequestHandler = (ws) => {
     if (message.type !== "ask-llm") {
       return;
     }
+
+    socketAskRateLimiter.check();
 
     const threadId = message.data.threadId;
     addToThread(threadId, ws);
