@@ -1,6 +1,21 @@
-import type { Message, QuestionSentiment } from "@packages/common/prisma";
+import type {
+  MessageAnalysis,
+  MessageRating,
+  MessageSourceLink,
+  QuestionSentiment,
+} from "@packages/common/prisma";
 
-export function getMessagesSummary(messages: Message[]) {
+type MessageForSummary = {
+  createdAt: Date;
+  llmMessage: {
+    role: string | null;
+  } | null;
+  rating: MessageRating | null;
+  analysis: MessageAnalysis | null;
+  links: MessageSourceLink[];
+};
+
+export function getMessagesSummary(messages: MessageForSummary[]) {
   const dailyMessages: Record<
     string,
     {
@@ -99,7 +114,7 @@ export function getMessagesSummary(messages: Message[]) {
     .slice(0, 5);
 
   let lowRatingQueries = [];
-  let lastUserMessage: Message | null = null;
+  let lastUserMessage: MessageForSummary | null = null;
   for (const message of messages) {
     const role = (message.llmMessage as any)?.role;
     if (role === "user") {

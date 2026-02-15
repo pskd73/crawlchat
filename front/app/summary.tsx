@@ -106,6 +106,17 @@ export async function loader({ request }: Route.LoaderArgs) {
         gte: new Date(Date.now() - ONE_WEEK * 2),
       },
     },
+    select: {
+      createdAt: true,
+      llmMessage: {
+        select: {
+          role: true,
+        },
+      },
+      rating: true,
+      analysis: true,
+      links: true,
+    },
   });
 
   const nScrapeItems = scrapeId
