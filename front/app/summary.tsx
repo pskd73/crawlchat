@@ -5,7 +5,6 @@ import {
   TbConfetti,
   TbCrown,
   TbDatabase,
-  TbFolder,
   TbMessage,
   TbMoodCry,
   TbMoodHappy,
@@ -19,7 +18,6 @@ import {
   XAxis,
   CartesianGrid,
   Tooltip,
-  LineChart,
   Line,
   ComposedChart,
   Bar,
@@ -137,7 +135,8 @@ export async function loader({ request }: Route.LoaderArgs) {
           (m) =>
             m.analysis?.category &&
             monoString(m.analysis.category) === monoString(category.title)
-        )
+        ),
+        true
       ),
     }))
     .sort((a, b) => b.summary.messagesCount - a.summary.messagesCount);

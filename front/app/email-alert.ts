@@ -171,13 +171,14 @@ export async function action({ request }: Route.LoaderArgs) {
         createdAt: { gte: startDate.toDate() },
       },
     });
-    const summary = getMessagesSummary(messages);
+    const summary = getMessagesSummary(messages, true);
     const categoriesSummary: { name: string; summary: MessagesSummary }[] = [];
     for (const category of scrape.messageCategories) {
       categoriesSummary.push({
         name: category.title,
         summary: getMessagesSummary(
-          messages.filter((m) => m.analysis?.category === category.title)
+          messages.filter((m) => m.analysis?.category === category.title),
+          true
         ),
       });
     }
