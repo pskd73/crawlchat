@@ -64,6 +64,7 @@ export async function scheduleUrl(
     return null;
   }
 
+  await incrementPendingUrls(processId);
   await itemQueue.add(
     "item",
     {
@@ -82,6 +83,7 @@ export async function scheduleGroup(
   processId: string,
   jobData?: Partial<GroupData>
 ) {
+  await incrementPendingUrls(processId);
   await groupQueue.add("group", {
     ...jobData,
     scrapeId: group.scrapeId,
@@ -107,5 +109,8 @@ export async function scheduleUrls(
       ...jobData,
       cursor: i === urls.length - 1 ? cursor : undefined,
     });
+  }
+  if (urls.length === 0 && cursor) {
+    await scheduleGroup(group, processId, { cursor });
   }
 }

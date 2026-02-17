@@ -3,6 +3,7 @@ import type {
   KnowledgeGroupUpdateFrequency,
   Prisma,
   KnowledgeGroup,
+  GithubIssuesType,
 } from "@packages/common/prisma";
 import { prisma } from "@packages/common/prisma";
 import { getNextUpdateTime } from "@packages/common/knowledge-group";
@@ -310,6 +311,11 @@ export async function action({ request, params }: Route.ActionArgs) {
   if (formData.has("from-load-dynamically")) {
     update.loadDynamically = formData.get("loadDynamically") === "on";
   }
+  if (formData.has("githubIssuesType")) {
+    update.githubIssuesType = formData.get(
+      "githubIssuesType"
+    ) as GithubIssuesType;
+  }
 
   const group = await prisma.knowledgeGroup.update({
     where: { id: groupId, scrapeId },
@@ -551,6 +557,7 @@ function WebSettings({ group }: { group: KnowledgeGroup }) {
 
 function GithubIssuesSettings({ group }: { group: KnowledgeGroup }) {
   const allowedStatesFetcher = useFetcher();
+  const githubIssuesTypeFetcher = useFetcher();
   const [allowedStates, setAllowedStates] = useState<string[]>(
     group.allowedGithubIssueStates?.split(",").filter(Boolean) ?? []
   );
@@ -600,6 +607,23 @@ function GithubIssuesSettings({ group }: { group: KnowledgeGroup }) {
           placeholder="Select states to fetch"
           selectValues={stateOptions}
         />
+      </SettingsSection>
+
+      <SettingsSection
+        id="github-issues-type"
+        fetcher={githubIssuesTypeFetcher}
+        title="Issues type"
+        description="Specify the type of issues to fetch. Either fetch all issues, only issues, or only pull requests."
+      >
+        <select
+          name="githubIssuesType"
+          className="select"
+          defaultValue={group.githubIssuesType ?? "all"}
+        >
+          <option value="all">All</option>
+          <option value="only_issues">Only issues</option>
+          <option value="only_prs">Only pull requests</option>
+        </select>
       </SettingsSection>
     </div>
   );

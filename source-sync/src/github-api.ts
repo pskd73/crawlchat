@@ -1,3 +1,5 @@
+import { GithubIssuesType } from "@packages/common/prisma";
+
 const ISSUES_PER_PAGE = 10;
 
 type GithubIssue = {
@@ -8,7 +10,7 @@ type GithubIssue = {
   state: "open" | "closed" | "all";
   body: string;
   user: GithubUser;
-  pull_request: {
+  pull_request?: {
     url: string;
   };
   title?: string;
@@ -47,6 +49,7 @@ export async function getIssues({
   page = 1,
   state = "closed",
   pageUrl,
+  type = "all",
 }: {
   repo: string;
   username: string;
@@ -54,6 +57,7 @@ export async function getIssues({
   page?: number;
   state?: "open" | "closed" | "all";
   pageUrl?: string;
+  type?: GithubIssuesType;
 }): Promise<{ issues: GithubIssue[]; pagination: GithubPagination }> {
   const url =
     pageUrl ??
@@ -70,8 +74,17 @@ export async function getIssues({
     throw new Error(`Failed to fetch issues: ${response.statusText}`);
   }
 
+  const allItems: GithubIssue[] = await response.json();
+  let issues = allItems;
+
+  if (type === "only_issues") {
+    issues = issues.filter((item) => !item.pull_request);
+  } else if (type === "only_prs") {
+    issues = issues.filter((item) => !!item.pull_request);
+  }
+
   return {
-    issues: await response.json(),
+    issues,
     pagination: parsePagination(response.headers),
   };
 }

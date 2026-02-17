@@ -548,6 +548,12 @@ type KnowledgeGroupUrlItem {
   url String
 }
 
+enum GithubIssuesType {
+  all
+  only_issues
+  only_prs
+}
+
 model KnowledgeGroup {
   id                                        String   @id @default(auto()) @map("_id") @db.ObjectId
   scrapeId                                  String   @db.ObjectId
@@ -588,6 +594,7 @@ model KnowledgeGroup {
 
   allowedGithubIssueStates                  String?
   onlyAnsweredDiscussions                   Boolean?
+  githubIssuesType                          GithubIssuesType?
 
   fetchError                                String?
   urls                                      KnowledgeGroupUrlItem[]

@@ -29,6 +29,7 @@ export class GithubIssuesSource implements Source {
       username,
       state: stateToFetch,
       pageUrl: jobData.cursor,
+      type: group.githubIssuesType ?? "all",
     });
 
     await scheduleUrls(
