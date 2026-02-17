@@ -79,6 +79,8 @@ export async function loader({ params, request }: Route.LoaderArgs) {
   const noPrimaryColor = url.searchParams.get("noPrimaryColor") === "true";
   if (noPrimaryColor && scrape.widgetConfig) {
     scrape.widgetConfig.applyColorsToChatbox = false;
+    scrape.widgetConfig.chatboxBgColor = null;
+    scrape.widgetConfig.chatboxTextColor = null;
   }
 
   let messages: Message[] = [];
