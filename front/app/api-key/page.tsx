@@ -12,6 +12,7 @@ import { EmptyState } from "~/components/empty-state";
 import { getAuthUser } from "~/auth/middleware";
 import { authoriseScrapeUser, getSessionScrapeId } from "~/auth/scrape-session";
 import { prisma } from "@packages/common/prisma";
+import type { ApiKey } from "@packages/common/prisma";
 import { useFetcher } from "react-router";
 import { useEffect, useState } from "react";
 import { hideModal, showModal } from "~/components/daisy-utils";
@@ -168,7 +169,7 @@ function DeleteApiKey({
   apiKey,
   onClose,
 }: {
-  apiKey?: any;
+  apiKey?: ApiKey;
   onClose: () => void;
 }) {
   const fetcher = useFetcher();
@@ -227,8 +228,8 @@ function ApiKeyRow({
   apiKey,
   onDelete,
 }: {
-  apiKey: any;
-  onDelete: (apiKey: any) => void;
+  apiKey: ApiKey;
+  onDelete: (apiKey: ApiKey) => void;
 }) {
   const [showKey, setShowKey] = useState(false);
 
@@ -292,7 +293,7 @@ function ApiKeyRow({
 }
 
 export default function ApiKeyPage({ loaderData }: Route.ComponentProps) {
-  const [deleteApiKey, setDeleteApiKey] = useState<any>();
+  const [deleteApiKey, setDeleteApiKey] = useState<ApiKey>();
 
   useEffect(() => {
     if (deleteApiKey) {
