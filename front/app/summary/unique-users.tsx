@@ -4,6 +4,7 @@ import { CountryFlag } from "~/message/country-flag";
 import { ChannelBadge } from "~/components/channel-badge";
 import { Timestamp } from "~/components/timestamp";
 import { Link } from "react-router";
+import { TbArrowUp, TbArrowDown } from "react-icons/tb";
 
 export type UniqueUser = {
   fingerprint: string;
@@ -15,18 +16,101 @@ export type UniqueUser = {
   location: Location | null;
 };
 
-export function UniqueUsers({ users }: { users: UniqueUser[] }) {
+const SORT_FIELDS = [
+  "questionsCount",
+  "ageDays",
+  "firstAsked",
+  "lastAsked",
+  "channel",
+];
+
+function SortHeader({
+  field,
+  label,
+  currentSortBy,
+  currentSortOrder,
+  onSort,
+}: {
+  field: string;
+  label: string;
+  currentSortBy: string;
+  currentSortOrder: string;
+  onSort: (field: string) => void;
+}) {
+  const isActive = currentSortBy === field;
+  return (
+    <button
+      className={`flex items-center gap-1 font-medium hover:text-primary ${isActive ? "text-primary" : ""}`}
+      onClick={() => onSort(field)}
+    >
+      {label}
+      {isActive ? (
+        currentSortOrder === "asc" ? (
+          <TbArrowUp className="text-xs" />
+        ) : (
+          <TbArrowDown className="text-xs" />
+        )
+      ) : null}
+    </button>
+  );
+}
+
+export function UniqueUsers({
+  users,
+  sortBy = "lastAsked",
+  sortOrder = "desc",
+  onSort,
+}: {
+  users: UniqueUser[];
+  sortBy?: string;
+  sortOrder?: string;
+  onSort?: (field: string) => void;
+}) {
+  const handleSort = (field: string) => {
+    onSort?.(field);
+  };
+
   return (
     <div className="overflow-x-auto rounded-box border border-base-300 bg-base-100">
       <table className="table">
         <thead>
           <tr>
             <th>User</th>
-            <th>Questions</th>
-            <th>Age</th>
-            <th>First asked</th>
-            <th>Last asked</th>
-            <th>Channel</th>
+            {SORT_FIELDS.map((field) => (
+              <th key={field}>
+                {onSort ? (
+                  <SortHeader
+                    field={field}
+                    label={
+                      field === "questionsCount"
+                        ? "Questions"
+                        : field === "ageDays"
+                          ? "Age"
+                          : field === "firstAsked"
+                            ? "First asked"
+                            : field === "lastAsked"
+                              ? "Last asked"
+                              : "Channel"
+                    }
+                    currentSortBy={sortBy}
+                    currentSortOrder={sortOrder}
+                    onSort={handleSort}
+                  />
+                ) : (
+                  <span className="font-medium">
+                    {field === "questionsCount"
+                      ? "Questions"
+                      : field === "ageDays"
+                        ? "Age"
+                        : field === "firstAsked"
+                          ? "First asked"
+                          : field === "lastAsked"
+                            ? "Last asked"
+                            : "Channel"}
+                  </span>
+                )}
+              </th>
+            ))}
           </tr>
         </thead>
         <tbody>
