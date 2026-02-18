@@ -4,6 +4,8 @@ import { CountryFlag } from "~/message/country-flag";
 import { ChannelBadge } from "~/components/channel-badge";
 import { Timestamp } from "~/components/timestamp";
 import { Link } from "react-router";
+import { TbArrowUp, TbArrowDown } from "react-icons/tb";
+import cn from "@meltdownjs/cn";
 
 export type UniqueUser = {
   fingerprint: string;
@@ -15,18 +17,81 @@ export type UniqueUser = {
   location: Location | null;
 };
 
-export function UniqueUsers({ users }: { users: UniqueUser[] }) {
+export const FIELD_LABELS: Record<string, string> = {
+  questionsCount: "Questions",
+  ageDays: "Age",
+  firstAsked: "First asked",
+  lastAsked: "Last asked",
+  channel: "Channel",
+};
+
+function SortHeader({
+  field,
+  label,
+  currentSortBy,
+  currentSortOrder,
+  onSort,
+}: {
+  field: string;
+  label?: string;
+  currentSortBy?: string;
+  currentSortOrder?: string;
+  onSort?: (field: string) => void;
+}) {
+  const displayLabel = label ?? FIELD_LABELS[field] ?? field;
+  const isActive = currentSortBy === field;
+  return (
+    <button
+      className={cn(
+        "flex items-center gap-1 font-medium hover:text-primary",
+        isActive && "text-primary"
+      )}
+      onClick={() => onSort?.(field)}
+    >
+      {displayLabel}
+      {isActive ? (
+        currentSortOrder === "asc" ? (
+          <TbArrowUp className="text-xs" />
+        ) : (
+          <TbArrowDown className="text-xs" />
+        )
+      ) : null}
+    </button>
+  );
+}
+
+export function UniqueUsers({
+  users,
+  sortBy = "lastAsked",
+  sortOrder = "desc",
+  onSort,
+}: {
+  users: UniqueUser[];
+  sortBy?: string;
+  sortOrder?: string;
+  onSort?: (field: string) => void;
+}) {
+  const fields = Object.keys(FIELD_LABELS);
   return (
     <div className="overflow-x-auto rounded-box border border-base-300 bg-base-100">
       <table className="table">
         <thead>
           <tr>
             <th>User</th>
-            <th>Questions</th>
-            <th>Age</th>
-            <th>First asked</th>
-            <th>Last asked</th>
-            <th>Channel</th>
+            {fields.map((field) => (
+              <th key={field}>
+                {onSort ? (
+                  <SortHeader
+                    field={field}
+                    currentSortBy={sortBy}
+                    currentSortOrder={sortOrder}
+                    onSort={onSort}
+                  />
+                ) : (
+                  <span className="font-medium">{FIELD_LABELS[field]}</span>
+                )}
+              </th>
+            ))}
           </tr>
         </thead>
         <tbody>
