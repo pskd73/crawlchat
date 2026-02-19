@@ -42,10 +42,19 @@ Always prefer canonical types:
 - For roles: use "has_role"
 - For negation statements: use "not"
 
+PRONOUN HANDLING (STRICT):
+- Do NOT create nodes for pronouns.
+- Pronouns include: "i", "me", "my", "mine", "myself", "you", "your", "yours", "yourself", "he", "him", "his", "himself", "she", "her", "hers", "herself", "it", "its", "itself", "we", "us", "our", "ours", "ourselves", "they", "them", "their", "theirs", "themselves", "this", "that", "these", "those".
+- If a pronoun clearly refers to a named entity in context, replace the pronoun with that entity.
+- If antecedent is ambiguous or missing, DROP that relationship instead of emitting a pronoun node.
+- Never output pronouns in "from" or "to".
+
 Examples:
 - "Pramod is a good boy" => [{"from":"Pramod","to":"boy","relationship":"instance_of"},{"from":"Pramod","to":"good","relationship":"has_trait"}]
 - "Server is not reachable" => [{"from":"server","to":"reachable","relationship":"not"}]
 - "API rate limit is 100 requests/minute" => [{"from":"api_rate_limit","to":"100_requests_per_minute","relationship":"has_quantity"}]
+- "Tom entered the room. He sat down." => [{"from":"Tom","to":"room","relationship":"entered"},{"from":"Tom","to":"sat_down","relationship":"did"}]
+- "He sat down." => []
 
 Return every distinct fact from the sentence, but avoid duplicates.
 
@@ -54,7 +63,8 @@ If the text is code, use technical relationship types. For example, "implements"
 
 export async function extract(
   text: string,
-  existingNodes: string[]
+  existingNodes: string[],
+  contextText?: string
 ): Promise<{
   nodes: string[];
   relationships: { from: string; to: string; relationship: string }[];
@@ -73,7 +83,10 @@ export async function extract(
   const messages: Message[] = [
     {
       role: "user",
-      content: `Extract nodes and edges from the following text:\n\n${text}`,
+      content:
+        contextText && contextText.trim().length > 0
+          ? `Extract nodes and edges from the following text.\nUse the provided context only to resolve references (especially pronouns). Do not extract unrelated facts from context.\n\nText:\n${text}\n\nContext:\n${contextText}`
+          : `Extract nodes and edges from the following text:\n\n${text}`,
     },
   ];
   const result = await handleStream(await agent.stream(messages));

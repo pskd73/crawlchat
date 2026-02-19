@@ -18,6 +18,7 @@ const rememberBodySchema = z.object({
   collectionId: collectionIdSchema,
   text: z.string().trim().min(1),
   id: z.string().trim().min(1),
+  context: z.string().trim().min(1).optional(),
 });
 const recallQuerySchema = z.object({
   collectionId: collectionIdSchema,
@@ -60,11 +61,11 @@ router.post("/remember", async (req: Request, res: Response) => {
   if (!parsedBody.success) {
     return res.status(400).json(zodErrorResponse(parsedBody.error));
   }
-  const { collectionId, text, id } = parsedBody.data;
+  const { collectionId, text, id, context } = parsedBody.data;
 
   const existingNodes = await getAllNodes(collectionId);
 
-  const { nodes, relationships } = await extract(text, existingNodes);
+  const { nodes, relationships } = await extract(text, existingNodes, context);
   for (const relationship of relationships) {
     await upsert(
       collectionId,
