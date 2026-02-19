@@ -1,10 +1,5 @@
-import { OpenRouter } from "@openrouter/sdk";
+import { Agent, handleStream, Message } from "@packages/agentic";
 import { z } from "zod";
-import zodToJsonSchema from "zod-to-json-schema";
-
-const openRouter = new OpenRouter({
-  apiKey: process.env.OPENROUTER_API_KEY,
-});
 
 const extractSchema = z.object({
   relationships: z.array(
@@ -18,21 +13,12 @@ const extractSchema = z.object({
 
 type ExtractSchema = z.infer<typeof extractSchema>;
 
-export async function extract(
-  text: string,
-  existingNodes: string[]
-): Promise<{
-  nodes: string[];
-  relationships: { from: string; to: string; relationship: string }[];
-}> {
-  const response = await openRouter.chat.send({
-    model: "openai/gpt-4o-mini",
-    messages: [
-      {
-        role: "system",
-        content: `Extract memory nodes and edges from the given text. 
+function getExtractPrompt(existingNodes: string[]) {
+  return `Extract memory nodes and edges from the given text. 
 Identify key entities, concepts, or ideas as nodes. 
 Identify relationships between these nodes as edges.
+Extract all meaningful facts, including properties, qualities, roles, classifications, quantities, and negations.
+Do not collapse multiple facts into a single weak edge.
 
 CRITICAL: REUSE EXISTING NODES - Do NOT create duplicate nodes!
 - If an entity in the text matches an existing node name (case-insensitive), you MUST use the EXACT existing node name
@@ -43,38 +29,60 @@ CRITICAL: REUSE EXISTING NODES - Do NOT create duplicate nodes!
 Existing nodes: ${existingNodes.length > 0 ? existingNodes.map((node) => `"${node}"`).join(", ") : "(none)"}
 
 IMPORTANT: Relationship types must be prominent, single-word or hyphenated relationship verbs, NOT generic phrases.
+Relationship types must be lowercase snake_case.
 
-Good relationship types: "owns", "created", "located_in", "works_for", "manages", "contains", "depends_on", "implements", "inherits_from", "causes", "prevents", "requires", "produces", "consumes", "connects_to", "derives_from"
+Good relationship types: "owns", "created", "located_in", "works_for", "manages", "contains", "depends_on", "implements", "inherits_from", "causes", "prevents", "requires", "produces", "consumes", "connects_to", "derives_from", "instance_of", "has_trait", "has_property", "has_role", "has_quantity", "not"
 
-BAD relationship types (DO NOT USE): "as a", "belongs to", "is a", "has a", "related to", "associated with", "part of", "member of"
+BAD relationship types (DO NOT USE): "as a", "belongs to", "is a", "has a", "related to", "associated with", "part of", "member of", "is", "has"
 
 Use specific, action-oriented relationship types that clearly describe the nature of the connection between nodes.
+Always prefer canonical types:
+- For classification: use "instance_of"
+- For adjectives/qualities: use "has_trait" or "has_property"
+- For roles: use "has_role"
+- For negation statements: use "not"
 
-If the text is code, use technical relationship types. For example, "implements", "inherits_from", "depends_on", "uses", "requires", "produces", "consumes", "connects_to", "derives_from".
-`,
-      },
-      {
-        role: "user",
-        content: `Extract nodes and edges from the following text:\n\n${text}`,
-      },
-    ],
-    responseFormat: {
-      type: "json_schema",
-      jsonSchema: {
-        name: "extract",
-        description: "Extracted memory nodes and edges",
-        schema: zodToJsonSchema(extractSchema as any),
-        strict: true,
-      },
-    },
+Examples:
+- "Pramod is a good boy" => [{"from":"Pramod","to":"boy","relationship":"instance_of"},{"from":"Pramod","to":"good","relationship":"has_trait"}]
+- "Server is not reachable" => [{"from":"server","to":"reachable","relationship":"not"}]
+- "API rate limit is 100 requests/minute" => [{"from":"api_rate_limit","to":"100_requests_per_minute","relationship":"has_quantity"}]
+
+Return every distinct fact from the sentence, but avoid duplicates.
+
+If the text is code, use technical relationship types. For example, "implements", "inherits_from", "depends_on", "uses", "requires", "produces", "consumes", "connects_to", "derives_from".`;
+}
+
+export async function extract(
+  text: string,
+  existingNodes: string[]
+): Promise<{
+  nodes: string[];
+  relationships: { from: string; to: string; relationship: string }[];
+}> {
+  const agent = new Agent({
+    id: "memory-extract-agent",
+    prompt: getExtractPrompt(existingNodes),
+    schema: extractSchema,
+    model: process.env.MEMORY_EXTRACT_MODEL ?? "openai/gpt-4o-mini",
+    baseURL: process.env.OPENROUTER_BASE_URL ?? "https://openrouter.ai/api/v1",
+    apiKey: process.env.OPENROUTER_API_KEY,
+    user: "memory-extract",
+    maxTokens: 1200,
   });
 
-  const content = response.choices[0]?.message?.content as string;
+  const messages: Message[] = [
+    {
+      role: "user",
+      content: `Extract nodes and edges from the following text:\n\n${text}`,
+    },
+  ];
+  const result = await handleStream(await agent.stream(messages));
+  const content = result.content;
   if (!content) {
     return { nodes: [], relationships: [] };
   }
 
-  const parsed = JSON.parse(content) as ExtractSchema;
+  const parsed = extractSchema.parse(JSON.parse(content)) as ExtractSchema;
   const relationships = parsed.relationships;
 
   const nodes: string[] = [
