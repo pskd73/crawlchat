@@ -320,10 +320,12 @@ export async function fillMessageAnalysis(
             set: {
               category,
               categorySuggestions: partialAnalysis?.categorySuggestions ?? [],
+              shortQuestion: partialAnalysis?.shortQuestion ?? null,
             },
             update: {
               category,
               categorySuggestions: partialAnalysis?.categorySuggestions ?? [],
+              shortQuestion: partialAnalysis?.shortQuestion ?? null,
             },
           },
         },

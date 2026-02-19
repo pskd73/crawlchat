@@ -437,6 +437,12 @@ export function QuestionAnswer({
           )}
         </div>
 
+        {messagePair?.responseMessage?.analysis?.shortQuestion && (
+          <div className="text-sm italic text-base-content/50">
+            {messagePair?.responseMessage?.analysis?.shortQuestion}
+          </div>
+        )}
+
         <div className="flex gap-2 items-center">
           {messagePair?.queryMessage?.analysis?.category && (
             <span className="badge badge-soft badge-accent whitespace-nowrap">
