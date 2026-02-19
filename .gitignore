@@ -11,3 +11,5 @@ node_modules/
 
 .turbo
 out/
+
+.last_processed_commit
