@@ -37,8 +37,26 @@ jobs:
     strategy:
       matrix:
         include:
+          - build_app: slack-app
+            image_name: slack-app
+            dockerfile: docker/Dockerfile
+          - build_app: discord-bot
+            image_name: discord-bot
+            dockerfile: docker/Dockerfile
+          - build_app: docs
+            image_name: docs
+            dockerfile: docker/Dockerfile
           - build_app: front
             image_name: front
+            dockerfile: docker/Dockerfile
+          - build_app: marker
+            image_name: marker
+            dockerfile: docker/Dockerfile.marker
+          - build_app: server
+            image_name: server
+            dockerfile: docker/Dockerfile
+          - build_app: source-sync
+            image_name: source-sync
             dockerfile: docker/Dockerfile
 
     steps:
