@@ -133,10 +133,6 @@ app.delete(
     const indexer = makeIndexer({ key: scrapeItem.scrape.indexer });
     await indexer.deleteByIds(scrapeItem.embeddings.map((e) => e.id));
 
-    for (const embedding of scrapeItem.embeddings) {
-      await removeByChunk(scrapeItem.scrapeId, embedding.id);
-    }
-
     await prisma.scrapeItem.delete({
       where: { id: scrapeItemId },
     });
@@ -169,12 +165,6 @@ app.delete(
     const chunks = chunk(ids, 800);
     for (const chunk of chunks) {
       await indexer.deleteByIds(chunk);
-    }
-
-    for (const item of items) {
-      for (const embedding of item.embeddings) {
-        await removeByChunk(item.scrapeId, embedding.id);
-      }
     }
 
     await prisma.scrapeItem.deleteMany({
