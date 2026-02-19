@@ -16,6 +16,7 @@ import {
   TbChartBar,
   TbChartBarOff,
   TbCheck,
+  TbClock,
   TbChevronDown,
   TbChevronRight,
   TbChevronUp,
@@ -2712,6 +2713,21 @@ export function PricingFeatures() {
     {
       icon: <TbHelpCircleFilled />,
       title: "Follow up questions",
+    },
+    {
+      icon: <TbClock />,
+      title: "1 year data retention",
+      tooltip: "Your data is retained for 1 year",
+    },
+    {
+      icon: <TbSearch />,
+      title: "Hybrid search",
+      tooltip: "Vector + text search for better results",
+    },
+    {
+      icon: <TbUsers />,
+      title: "Chat users across channels",
+      tooltip: "View chat users across channels",
     },
   ];
 
