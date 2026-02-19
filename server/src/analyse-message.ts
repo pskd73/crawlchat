@@ -289,6 +289,15 @@ export async function fillMessageAnalysis(
       cleanedCategory && cleanedCategory.score > 0.9
         ? cleanedCategory.title
         : null;
+    const avgScore =
+      message.links.length > 0
+        ? message.links.reduce((acc, curr) => acc + (curr.score ?? 0), 0) /
+          message.links.length
+        : null;
+    const maxScore =
+      message.links.length > 0
+        ? Math.max(...message.links.map((l) => l.score ?? 0))
+        : null;
 
     const analysis: MessageAnalysis = {
       questionRelevanceScore: null,
@@ -303,6 +312,8 @@ export async function fillMessageAnalysis(
       dataGapDescription: null,
       dataGapDone: null,
       dataGapCancelled: null,
+      avgScore,
+      maxScore,
     };
 
     await prisma.message.update({
@@ -321,11 +332,19 @@ export async function fillMessageAnalysis(
               category,
               categorySuggestions: partialAnalysis?.categorySuggestions ?? [],
               shortQuestion: partialAnalysis?.shortQuestion ?? null,
+              avgScore,
+              maxScore,
+              questionSentiment: partialAnalysis?.questionSentiment ?? null,
+              language: partialAnalysis?.language ?? null,
             },
             update: {
               category,
               categorySuggestions: partialAnalysis?.categorySuggestions ?? [],
               shortQuestion: partialAnalysis?.shortQuestion ?? null,
+              avgScore,
+              maxScore,
+              questionSentiment: partialAnalysis?.questionSentiment ?? null,
+              language: partialAnalysis?.language ?? null,
             },
           },
         },

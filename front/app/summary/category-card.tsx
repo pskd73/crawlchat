@@ -30,17 +30,6 @@ export default function CategoryCard({
     }
     return data.reverse();
   }, [summary.dailyMessages]);
-  const lowRatingQuery = useMemo(() => {
-    const content =
-      summary.lowRatingQueries[0]?.userMessage?.llmMessage?.content;
-    if (typeof content === "string") {
-      return {
-        content,
-        score: summary.lowRatingQueries[0]?.maxScore,
-      };
-    }
-    return null;
-  }, [summary.lowRatingQueries]);
 
   function renderTooltip(props: any) {
     return (
@@ -60,7 +49,7 @@ export default function CategoryCard({
     >
       <div className="h-fit">
         <Link
-          to={`/questions?category=${title}`}
+          to={`/questions?category=${encodeURIComponent(title)}`}
           className="flex items-center gap-2 link link-primary link-hover"
         >
           <TbFolder />

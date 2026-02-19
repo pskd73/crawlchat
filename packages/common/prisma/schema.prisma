@@ -284,6 +284,9 @@ type MessageAnalysis {
 
   categorySuggestions CategorySuggestion[]
   resolved Boolean?
+
+  avgScore Float?
+  maxScore Float?
 }
 
 type LlmMessage {
