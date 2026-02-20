@@ -2,18 +2,19 @@ import { Queue } from "bullmq";
 import Redis from "ioredis";
 
 const redisUrl = process.env.REDIS_URL!;
-const isTls = redisUrl.startsWith("rediss://");
+const parsedRedisUrl = new URL(redisUrl);
+const isTls = parsedRedisUrl.protocol === "rediss:";
 export const BULLMQ_PREFIX = "{bull}";
 
-export const redis = new Redis(redisUrl, {
+const redisOptions = {
   maxRetriesPerRequest: null,
   family: 0,
   ...(isTls && {
-    tls: {
-      rejectUnauthorized: false,
-    },
+    tls: {},
   }),
-});
+};
+
+export const redis = new Redis(redisUrl, redisOptions);
 
 export const GROUP_QUEUE_NAME = process.env.GROUP_QUEUE_NAME!;
 export const ITEM_QUEUE_NAME = process.env.ITEM_QUEUE_NAME!;
