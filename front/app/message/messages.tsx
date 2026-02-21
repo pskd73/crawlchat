@@ -409,13 +409,13 @@ export default function MessagesLayout({ loaderData }: Route.ComponentProps) {
                             />
                           )}
                           <div
-                            className="tooltip tooltip-right min-w-0 flex-1"
+                            className="min-w-0 tooltip tooltip-right"
                             data-tip={
                               pair.responseMessage?.analysis?.shortQuestion
                             }
                           >
                             <RouterLink
-                              className="link link-hover block truncate"
+                              className="link link-hover block truncate max-w-fit"
                               to={`/questions/${pair.queryMessage?.id}`}
                             >
                               {getMessageContent(pair.queryMessage)}
