@@ -11,7 +11,8 @@ router.get("/", async (req, res) => {
   try {
     rateLimiter.check();
   } catch (error) {
-    res.status(503).json({
+    res.status(200).json({
+      status: "ok",
       message: "Rate limit exceeded",
     });
     return;
