@@ -186,28 +186,13 @@ async function getLearnMessages(message: any, client: any, botUserId: string) {
   });
 }
 
-app.message(async ({ message, say, client, context }) => {
-  const scrape = await prisma.scrape.findFirst({
-    where: {
-      slackTeamId: context.teamId,
-    },
-  });
-
-  if (!scrape) {
-    await say({
-      text: "You need to integrate your Slack with CrawlChat.app first!",
-    });
-    return;
-  }
-
-  // Check if the bot is mentioned in the message
-  const messageText = (message as any).text || "";
-  const botMentionPattern = new RegExp(`<@${context.botUserId}>`, "i");
-
-  if (!botMentionPattern.test(messageText)) return;
-
-  console.log("Bot mentioned:", context.botUserId, "in message:", messageText);
-
+async function answerMessage(
+  message: any,
+  client: any,
+  context: any,
+  scrape: any,
+  say: any
+) {
   try {
     await client.reactions.add({
       token: context.botToken,
@@ -304,6 +289,31 @@ ${history}
       name: LOADING_REACTION,
     });
   } catch {}
+}
+
+app.message(async ({ message, say, client, context }) => {
+  const scrape = await prisma.scrape.findFirst({
+    where: {
+      slackTeamId: context.teamId,
+    },
+  });
+
+  if (!scrape) {
+    await say({
+      text: "You need to integrate your Slack with CrawlChat.app first!",
+    });
+    return;
+  }
+
+  // Check if the bot is mentioned in the message
+  const messageText = (message as any).text || "";
+  const botMentionPattern = new RegExp(`<@${context.botUserId}>`, "i");
+
+  if (!botMentionPattern.test(messageText)) return;
+
+  console.log("Bot mentioned:", context.botUserId, "in message:", messageText);
+
+  await answerMessage(message, client, context, scrape, say);
 });
 
 async function getReactionMessage(client: any, event: any) {
@@ -352,7 +362,8 @@ async function handleReaction(
   event: any,
   client: any,
   context: any,
-  type: "added" | "removed"
+  type: "added" | "removed",
+  say: any
 ) {
   if (event.reaction === "+1" || event.reaction === "-1") {
     const message = await getReactionMessage(client, event);
@@ -397,14 +408,34 @@ async function handleReaction(
       });
     } catch {}
   }
+
+  if (type === "added" && event.reaction === "speech_balloon") {
+    const message = await getReactionMessage(client, event);
+    if (!message) return;
+
+    const scrape = await prisma.scrape.findFirst({
+      where: {
+        slackTeamId: context.teamId,
+      },
+    });
+    if (!scrape) return;
+
+    await answerMessage(
+      { ...message, channel: event.item.channel },
+      client,
+      context,
+      scrape,
+      say
+    );
+  }
 }
 
-app.event("reaction_added", async ({ event, client, context }) => {
-  await handleReaction(event, client, context, "added");
+app.event("reaction_added", async ({ event, client, context, say }) => {
+  await handleReaction(event, client, context, "added", say);
 });
 
-app.event("reaction_removed", async ({ event, client, context }) => {
-  await handleReaction(event, client, context, "removed");
+app.event("reaction_removed", async ({ event, client, context, say }) => {
+  await handleReaction(event, client, context, "removed", say);
 });
 
 (async () => {

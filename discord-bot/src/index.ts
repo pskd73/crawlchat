@@ -324,6 +324,79 @@ async function isMessageFromChannels(
   return false;
 }
 
+async function answerMessage(message: DiscordMessage, scrape: Scrape) {
+  const { stopTyping } = await sendTyping(message.channel as TextChannel);
+
+  const previousMessages = await getPreviousMessages(message);
+  const history =
+    previousMessages
+      .sort((a, b) => a.createdTimestamp - b.createdTimestamp)
+      .map(
+        (m) =>
+          `${m.author.displayName} (${m.createdAt.toLocaleString()}): ${cleanReply(m.content)}`
+      )
+      .map(cleanContent)
+      .join("\n\n") || "No context available";
+
+  const messages = [await makeMessage(message, scrape)];
+
+  const publicThreadId =
+    message.channel.type === ChannelType.PublicThread
+      ? message.channel.id
+      : undefined;
+  let response = "Something went wrong";
+  let discordThread = null;
+
+  if (
+    scrape.discordConfig?.replyAsThread &&
+    message.channel.type !== ChannelType.PublicThread
+  ) {
+    const shortQuery = cleanContent(
+      removeBotMentions(message.content)
+    ).substring(0, 50);
+    discordThread = await message.startThread({
+      name: `Response to: ${shortQuery}${shortQuery.length > 50 ? "..." : ""}`,
+      autoArchiveDuration: ThreadAutoArchiveDuration.ThreeDays,
+    });
+  }
+
+  const {
+    answer,
+    error,
+    message: answerMessage,
+  } = await query(scrape.id, messages, createToken(scrape.userId), {
+    prompt: `${defaultPrompt}\n\n<message-history>\n\n${history}</message-history>`,
+    clientThreadId: discordThread?.id ?? publicThreadId,
+    fingerprint: message.author.id,
+  });
+
+  if (error) {
+    response = `‼️ Attention required: ${error}`;
+  }
+  if (answer) {
+    response = answer;
+  }
+
+  stopTyping();
+
+  let replyResult;
+
+  if (discordThread) {
+    replyResult = await discordThread.send(response);
+  } else {
+    replyResult = await message.reply(response);
+  }
+
+  await prisma.message.update({
+    where: { id: answerMessage.id },
+    data: {
+      discordMessageId: replyResult.id,
+    },
+  });
+
+  return replyResult;
+}
+
 client.once(Events.ClientReady, (readyClient) => {
   console.log(`Ready! Logged in as ${readyClient.user.tag}`);
 });
@@ -353,76 +426,7 @@ client.on(Events.MessageCreate, async (message) => {
       return;
     }
 
-    const { stopTyping } = await sendTyping(message.channel as TextChannel);
-
-    const previousMessages = await getPreviousMessages(message);
-    const history =
-      previousMessages
-        .sort((a, b) => a.createdTimestamp - b.createdTimestamp)
-        .map(
-          (m) =>
-            `${m.author.displayName} (${m.createdAt.toLocaleString()}): ${cleanReply(m.content)}`
-        )
-        .map(cleanContent)
-        .join("\n\n") || "No context available";
-
-    const messages = [await makeMessage(message, scrape)];
-
-    const publicThreadId =
-      message.channel.type === ChannelType.PublicThread
-        ? message.channel.id
-        : undefined;
-    let response = "Something went wrong";
-    let discordThread = null;
-
-    if (
-      scrape.discordConfig?.replyAsThread &&
-      message.channel.type !== ChannelType.PublicThread
-    ) {
-      const shortQuery = cleanContent(
-        removeBotMentions(message.content)
-      ).substring(0, 50);
-      discordThread = await message.startThread({
-        name: `Response to: ${shortQuery}${
-          shortQuery.length > 50 ? "..." : ""
-        }`,
-        autoArchiveDuration: ThreadAutoArchiveDuration.ThreeDays,
-      });
-    }
-
-    const {
-      answer,
-      error,
-      message: answerMessage,
-    } = await query(scrape.id, messages, createToken(scrape.userId), {
-      prompt: `${defaultPrompt}\n\n<message-history>\n\n${history}</message-history>`,
-      clientThreadId: discordThread?.id ?? publicThreadId,
-      fingerprint: message.author.id,
-    });
-
-    if (error) {
-      response = `‼️ Attention required: ${error}`;
-    }
-    if (answer) {
-      response = answer;
-    }
-
-    stopTyping();
-
-    let replyResult;
-
-    if (discordThread) {
-      replyResult = await discordThread.send(response);
-    } else {
-      replyResult = await message.reply(response);
-    }
-
-    await prisma.message.update({
-      where: { id: answerMessage.id },
-      data: {
-        discordMessageId: replyResult.id,
-      },
-    });
+    await answerMessage(message, scrape);
   } else if (
     message.channel.type === ChannelType.PublicThread &&
     message.channel.parent?.id &&
@@ -565,6 +569,10 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
 
       thread.send(answer);
     }
+  }
+
+  if (emojiStr === "💬") {
+    await answerMessage(await reaction.message.fetch(), scrape);
   }
 });
 
