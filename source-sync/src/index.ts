@@ -15,6 +15,7 @@ import {
   scheduleUrl,
   scheduleUrls,
 } from "./source/schedule";
+import healthRouter from "./routes/health";
 
 declare global {
   namespace Express {
@@ -34,10 +35,7 @@ const PORT = process.env.PORT || 3007;
 
 app.use(express.json());
 app.use(cors());
-
-app.get("/health", (req, res) => {
-  res.json({ status: "ok" });
-});
+app.use("/health", healthRouter);
 
 app.post(
   "/update-group",

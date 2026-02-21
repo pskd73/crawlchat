@@ -146,4 +146,6 @@ export default [
   route("ticket/:number", "widget/ticket.tsx"),
   route("w/not-found", "widget/not-found.tsx"),
   route("embed.js", "embed-script.ts"),
+
+  route("health", "health.ts"),
 ] satisfies RouteConfig;

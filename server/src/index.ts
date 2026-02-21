@@ -42,6 +42,7 @@ import { randomUUID } from "crypto";
 import { handleWs } from "./routes/socket";
 import apiRouter from "./routes/api";
 import adminRouter from "./routes/admin";
+import healthRouter from "./routes/health";
 import githubBotRouter from "./github-bot";
 import {
   makeTextSearchRegexTool,
@@ -88,6 +89,7 @@ app.use(cors());
 app.use("/api", apiRouter);
 app.use("/admin", adminRouter);
 app.use("/github", githubBotRouter);
+app.use("/health", healthRouter);
 expressWs.app.ws("/", handleWs);
 
 app.get("/", function (req: Request, res: Response) {
