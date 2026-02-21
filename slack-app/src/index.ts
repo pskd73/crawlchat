@@ -7,12 +7,39 @@ if (!process.env.SLACK_SIGNING_SECRET) {
 }
 
 import { App } from "@slack/bolt";
+import type { SayFn } from "@slack/bolt";
 import { InstallationStore } from "@slack/oauth";
-import { prisma } from "@packages/common/prisma";
+import type { Installation } from "@slack/oauth";
+import { Prisma, prisma } from "@packages/common/prisma";
 import { createToken } from "@packages/common/jwt";
 import { learn, query } from "./api";
 
 const LOADING_REACTION = "hourglass";
+
+type SlackMessage = {
+  channel: string;
+  ts: string;
+  thread_ts?: string;
+  user?: string;
+  text?: string;
+  reactions?: Array<{
+    name?: string;
+  }>;
+};
+
+type SlackContext = {
+  botToken?: string;
+  botUserId?: string;
+  teamId?: string;
+};
+
+type ReactionEvent = {
+  reaction: string;
+  item: {
+    channel: string;
+    ts: string;
+  };
+};
 
 const installationStore: InstallationStore = {
   storeInstallation: async (installation) => {
@@ -36,7 +63,7 @@ const installationStore: InstallationStore = {
       },
       data: {
         slackConfig: {
-          installation: installation as any,
+          installation: installation as unknown as Prisma.InputJsonValue,
         },
       },
     });
@@ -52,7 +79,10 @@ const installationStore: InstallationStore = {
       throw new Error("Scrape not found or configured");
     }
 
-    return scrape.slackConfig.installation as any;
+    return scrape.slackConfig.installation as unknown as Installation<
+      "v1" | "v2",
+      boolean
+    >;
   },
   deleteInstallation: async (installQuery) => {
     const scrape = await prisma.scrape.findFirst({
@@ -108,35 +138,30 @@ function cleanText(text: string) {
   return text.replace(/<@[^>]+>/g, "").trim();
 }
 
-type Message = {
+type MessageContext = {
+  ts: string;
   user?: string;
   text?: string;
 };
 
-async function getContextMessages(
-  message: any,
-  client: any,
-  botUserId: string
-) {
+async function getContextMessages(message: SlackMessage, botUserId: string) {
   return [message].map((m) => ({
     role: m.user === botUserId ? "assistant" : "user",
     content: cleanText(m.text ?? ""),
   }));
 }
 
-async function getContextHistory(message: any, client: any) {
-  let messages: Message[] = [];
+async function getContextHistory(message: SlackMessage, client: App["client"]) {
+  let messages: MessageContext[] = [];
 
-  if ((message as any).thread_ts) {
+  if (message.thread_ts) {
     const replies = await client.conversations.replies({
       channel: message.channel,
-      ts: (message as any).thread_ts,
+      ts: message.thread_ts,
     });
-    if (replies.messages) {
-      messages = replies.messages.filter(
-        (m: any) => Number(m.ts) < Number(message.ts)
-      );
-    }
+    messages = ((replies.messages ?? []) as unknown as MessageContext[]).filter(
+      (m) => Number(m.ts) < Number(message.ts)
+    );
   } else {
     const history = await client.conversations.history({
       channel: message.channel,
@@ -144,15 +169,13 @@ async function getContextHistory(message: any, client: any) {
       latest: message.ts,
       inclusive: false,
     });
-    if (history.messages) {
-      messages = history.messages;
-    }
+    messages = (history.messages ?? []) as unknown as MessageContext[];
   }
 
   return (
     messages
-      .sort((a: any, b: any) => Number(a.ts) - Number(b.ts))
-      .map((m: any) => {
+      .sort((a, b) => Number(a.ts) - Number(b.ts))
+      .map((m) => {
         const date = new Date(Number(m.ts.split(".")[0]));
         return `${m.user} (${date.toLocaleString()}): ${cleanText(m.text ?? "")}`;
       })
@@ -160,16 +183,22 @@ async function getContextHistory(message: any, client: any) {
   );
 }
 
-async function getLearnMessages(message: any, client: any, botUserId: string) {
-  let messages: Message[] = [message];
+async function getLearnMessages(
+  message: SlackMessage,
+  client: App["client"],
+  botUserId: string
+) {
+  let messages: MessageContext[] = [message];
 
-  if ((message as any).thread_ts) {
+  if (message.thread_ts) {
     const replies = await client.conversations.replies({
       channel: message.channel,
-      ts: (message as any).thread_ts,
+      ts: message.thread_ts,
     });
     if (replies.messages) {
-      messages = replies.messages.filter((m: any) => {
+      messages = (
+        (replies.messages ?? []) as unknown as MessageContext[]
+      ).filter((m) => {
         const thisTs = new Date(Number(m.ts.split(".")[0]));
         const messageTs = new Date(Number(message.ts.split(".")[0]));
         return thisTs <= messageTs;
@@ -178,7 +207,7 @@ async function getLearnMessages(message: any, client: any, botUserId: string) {
   }
 
   return messages.map((m) => {
-    const date = new Date(Number((m as any).ts.split(".")[0]));
+    const date = new Date(Number(m.ts.split(".")[0]));
     return {
       role: m.user === botUserId ? "assistant" : "user",
       content: `User (${date.toLocaleString()}): ${cleanText(m.text ?? "")}`,
@@ -187,11 +216,11 @@ async function getLearnMessages(message: any, client: any, botUserId: string) {
 }
 
 async function answerMessage(
-  message: any,
-  client: any,
-  context: any,
-  scrape: any,
-  say: any
+  message: SlackMessage,
+  client: App["client"],
+  context: SlackContext,
+  scrape: NonNullable<Awaited<ReturnType<typeof prisma.scrape.findFirst>>>,
+  say: SayFn
 ) {
   try {
     await client.reactions.add({
@@ -202,11 +231,7 @@ async function answerMessage(
     });
   } catch {}
 
-  const llmMessages = await getContextMessages(
-    message,
-    client,
-    context.botUserId!
-  );
+  const llmMessages = await getContextMessages(message, context.botUserId!);
   const history = await getContextHistory(message, client);
   const {
     answer,
@@ -236,7 +261,7 @@ Only answer the current tagged message and use previous messages only for contex
 ${history}
 </message-history>
 `,
-    fingerprint: (message as any).user,
+    fingerprint: message.user,
   });
 
   if (error) {
@@ -305,18 +330,24 @@ app.message(async ({ message, say, client, context }) => {
     return;
   }
 
-  // Check if the bot is mentioned in the message
-  const messageText = (message as any).text || "";
+  const typedMessage = message as unknown as SlackMessage;
+  const messageText = typedMessage.text || "";
   const botMentionPattern = new RegExp(`<@${context.botUserId}>`, "i");
 
   if (!botMentionPattern.test(messageText)) return;
 
   console.log("Bot mentioned:", context.botUserId, "in message:", messageText);
 
-  await answerMessage(message, client, context, scrape, say);
+  await answerMessage(
+    typedMessage,
+    client,
+    context as SlackContext,
+    scrape,
+    say
+  );
 });
 
-async function getReactionMessage(client: any, event: any) {
+async function getReactionMessage(client: App["client"], event: ReactionEvent) {
   const messageResult = await client.conversations.replies({
     channel: event.item.channel,
     ts: event.item.ts,
@@ -326,15 +357,15 @@ async function getReactionMessage(client: any, event: any) {
     return null;
   }
 
-  return messageResult.messages[0];
+  return messageResult.messages[0] as unknown as SlackMessage;
 }
 
-async function rateReaction(event: any, message: any) {
+async function rateReaction(event: ReactionEvent, message: SlackMessage) {
   const hasThumbsUp = message.reactions?.some(
-    (reaction: any) => reaction.name === "+1"
+    (reaction) => reaction.name === "+1"
   );
   const hasThumbsDown = message.reactions?.some(
-    (reaction: any) => reaction.name === "-1"
+    (reaction) => reaction.name === "-1"
   );
 
   const rating = hasThumbsDown ? "down" : hasThumbsUp ? "up" : null;
@@ -359,11 +390,11 @@ async function rateReaction(event: any, message: any) {
 }
 
 async function handleReaction(
-  event: any,
-  client: any,
-  context: any,
+  event: ReactionEvent,
+  client: App["client"],
+  context: SlackContext,
   type: "added" | "removed",
-  say: any
+  say: SayFn
 ) {
   if (event.reaction === "+1" || event.reaction === "-1") {
     const message = await getReactionMessage(client, event);
