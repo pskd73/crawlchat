@@ -1,5 +1,5 @@
 import type { Route } from "./+types/group";
-import type { Message, Scrape, Thread } from "@packages/common/prisma";
+import type { MessageSourceLink, Scrape } from "@packages/common/prisma";
 import { prisma } from "@packages/common/prisma";
 import { createToken } from "@packages/common/jwt";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -11,6 +11,8 @@ import cn from "@meltdownjs/cn";
 import { makeMeta } from "~/meta";
 import toast, { Toaster } from "react-hot-toast";
 import Avatar from "boring-avatars";
+import { extractCitations } from "@packages/common/citation";
+import { Sources } from "./chat-box";
 
 function isMongoObjectId(id: string) {
   return /^[0-9a-fA-F]{24}$/.test(id);
@@ -109,10 +111,17 @@ function UserMessage({
 function AssistantMessage({
   scrape,
   content,
+  links,
 }: {
   scrape: Scrape;
   content: string;
+  links: MessageSourceLink[];
 }) {
+  const citation = useMemo(
+    () => extractCitations(content, links),
+    [content, links]
+  );
+
   return (
     <div className="flex flex-col gap-0 rounded-box overflow-hidden bg-base-100 border-primary border-2">
       <div className="flex items-center gap-2 p-2 px-4 border-b border-base-300">
@@ -124,7 +133,15 @@ function AssistantMessage({
         <div className="font-medium">{scrape.title ?? "Assistant"}</div>
       </div>
       <div className="flex flex-col gap-2 p-4">
-        <MarkdownProse>{content}</MarkdownProse>
+        <Sources citation={citation} />
+        <MarkdownProse
+          sources={Object.values(citation.citedLinks).map((link) => ({
+            title: link?.title ?? link?.url ?? "Source",
+            url: link?.url ?? undefined,
+          }))}
+        >
+          {citation.content}
+        </MarkdownProse>
       </div>
     </div>
   );
@@ -184,7 +201,12 @@ function ChatInput({
   }
 
   return (
-    <div className="flex gap-2 border border-base-300 rounded-box p-3 px-4 bg-base-100">
+    <div
+      className={cn(
+        "flex gap-2 border border-base-300",
+        "rounded-t-box p-3 px-4 bg-base-100"
+      )}
+    >
       <div className="flex-1 flex items-center">
         <textarea
           ref={inputRef}
@@ -281,7 +303,11 @@ export default function GroupChat({ loaderData }: Route.ComponentProps) {
                   fingerprint={message.fingerprint ?? undefined}
                 />
               ) : (
-                <AssistantMessage scrape={scrape} content={message.content} />
+                <AssistantMessage
+                  scrape={scrape}
+                  content={message.content}
+                  links={message.links}
+                />
               )}
             </div>
           ))}
@@ -297,10 +323,10 @@ export default function GroupChat({ loaderData }: Route.ComponentProps) {
               disabled={isDisabled}
               placeholder={getPlaceholder()}
             />
-            <div className="bg-base-100">
+            <div className="bg-base-100 rounded-b-box">
               <div
                 className={cn(
-                  "bg-base-300/80 border border-base-300 rounded-box p-1 px-2",
+                  "bg-base-300/80 border border-base-300 rounded-b-box p-1 px-2",
                   "flex items-center gap-1 text-xs justify-between"
                 )}
               >
