@@ -138,7 +138,9 @@ export async function analyseMessage(
       );
   }
 
-  const llmConfig = getConfig("openrouter/openai/gpt-5.1");
+  const llmConfig = getConfig(
+    process.env.MESSAGE_ANALYSER_MODEL ?? "openrouter/openai/gpt-5.1"
+  );
 
   const agent = new Agent({
     id: "analyser",
@@ -256,7 +258,7 @@ export async function fillMessageAnalysis(
       (c, index, self) => index === self.findIndex((t) => t.title === c.title)
     );
 
-    const { response: partialAnalysis, cost } = await analyseMessage(
+    const { response, cost } = await analyseMessage(
       question,
       answer,
       recentQuestions,
@@ -267,8 +269,8 @@ export async function fillMessageAnalysis(
 
     if (
       options?.onFollowUpQuestion &&
-      partialAnalysis &&
-      partialAnalysis.followUpQuestions.length > 0 &&
+      response &&
+      response.followUpQuestions.length > 0 &&
       message.scrape.user.plan?.planId !== "free"
     ) {
       const hardcodedFollowUpQuestions = message.scrape.ticketingEnabled
@@ -276,19 +278,19 @@ export async function fillMessageAnalysis(
         : [];
       options.onFollowUpQuestion([
         ...hardcodedFollowUpQuestions,
-        ...partialAnalysis.followUpQuestions,
+        ...response.followUpQuestions,
       ]);
     }
 
     const cleanedCategory =
-      partialAnalysis?.category &&
+      response?.category &&
       options?.categories &&
       options?.categories.some(
         (c) =>
           c.title.trim().toLowerCase() ===
-          partialAnalysis.category?.title.trim().toLowerCase()
+          response.category?.title.trim().toLowerCase()
       )
-        ? partialAnalysis.category
+        ? response.category
         : null;
     const category =
       cleanedCategory && cleanedCategory.score > 0.9
@@ -306,13 +308,13 @@ export async function fillMessageAnalysis(
 
     const analysis: MessageAnalysis = {
       questionRelevanceScore: null,
-      questionSentiment: partialAnalysis?.questionSentiment ?? null,
-      shortQuestion: partialAnalysis?.shortQuestion ?? null,
-      followUpQuestions: partialAnalysis?.followUpQuestions ?? [],
-      language: partialAnalysis?.language ?? null,
+      questionSentiment: response?.questionSentiment ?? null,
+      shortQuestion: response?.shortQuestion ?? null,
+      followUpQuestions: response?.followUpQuestions ?? [],
+      language: response?.language ?? null,
       category,
       categorySuggestions: [],
-      resolved: partialAnalysis?.resolved ?? false,
+      resolved: response?.resolved ?? false,
       dataGapTitle: null,
       dataGapDescription: null,
       dataGapDone: null,
@@ -329,29 +331,23 @@ export async function fillMessageAnalysis(
       },
     });
 
+    const questionAnalysis: Partial<MessageAnalysis> = {
+      category,
+      categorySuggestions: response?.categorySuggestions ?? [],
+      shortQuestion: response?.shortQuestion ?? null,
+      avgScore,
+      maxScore,
+      questionSentiment: response?.questionSentiment ?? null,
+      language: response?.language ?? null,
+    };
+
     await prisma.message.update({
       where: { id: questionMessageId },
       data: {
         analysis: {
           upsert: {
-            set: {
-              category,
-              categorySuggestions: partialAnalysis?.categorySuggestions ?? [],
-              shortQuestion: partialAnalysis?.shortQuestion ?? null,
-              avgScore,
-              maxScore,
-              questionSentiment: partialAnalysis?.questionSentiment ?? null,
-              language: partialAnalysis?.language ?? null,
-            },
-            update: {
-              category,
-              categorySuggestions: partialAnalysis?.categorySuggestions ?? [],
-              shortQuestion: partialAnalysis?.shortQuestion ?? null,
-              avgScore,
-              maxScore,
-              questionSentiment: partialAnalysis?.questionSentiment ?? null,
-              language: partialAnalysis?.language ?? null,
-            },
+            set: questionAnalysis,
+            update: questionAnalysis,
           },
         },
       },
