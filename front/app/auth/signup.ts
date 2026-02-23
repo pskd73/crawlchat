@@ -117,7 +117,17 @@ export async function signUpNewUser(
       if (activeSubscription && activeSubscription.product_id) {
         const plan = productIdPlanMap[activeSubscription.product_id];
 
-        if (plan) {
+        const existingUserWithSubscription = await prisma.user.findFirst({
+          where: {
+            plan: {
+              is: {
+                subscriptionId: activeSubscription.subscription_id,
+              },
+            },
+          },
+        });
+
+        if (plan && !existingUserWithSubscription) {
           await activatePlan(user.id, plan, {
             provider: "DODO",
             subscriptionId: activeSubscription.subscription_id,
