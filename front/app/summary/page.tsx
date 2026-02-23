@@ -313,18 +313,12 @@ export async function action({ request }: Route.ActionArgs) {
     const referralId = formData.get("referralId") as string;
     const planId = formData.get("planId") as string;
 
-    const cookies = parseCookies(request.headers.get("cookie") ?? "");
-    const datafastVisitorId = cookies["datafast_visitor_id"];
-
     const gateway = dodoGateway;
 
     return await gateway.getPaymentLink(planId, {
       referralId,
       email: user!.email,
       name: user!.name,
-      meta: {
-        datafastVisitorId,
-      },
     });
   }
 }

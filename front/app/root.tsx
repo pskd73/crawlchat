@@ -13,13 +13,14 @@ import {
 import { useMemo } from "react";
 import stylesheet from "./app.css?url";
 import { crawlChatSchema } from "./landing/schema";
+import { VemetricScript } from "@vemetric/react";
 
 declare global {
   interface Window {
     ENV: {
       VITE_SERVER_WS_URL: string;
       VITE_SOURCE_SYNC_URL: string;
-      VITE_DATAFAST_ID: string;
+      VITE_VEMETRIC_TOKEN: string;
     };
   }
 }
@@ -43,7 +44,7 @@ export function loader() {
     ENV: {
       VITE_SERVER_WS_URL: process.env.VITE_SERVER_WS_URL,
       VITE_SOURCE_SYNC_URL: process.env.VITE_SOURCE_SYNC_URL,
-      VITE_DATAFAST_ID: process.env.VITE_DATAFAST_ID,
+      VITE_VEMETRIC_TOKEN: process.env.VITE_VEMETRIC_TOKEN,
     },
   };
 }
@@ -52,10 +53,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const loaderData = useLoaderData<typeof loader>();
   const location = useLocation();
   const matches = useMatches();
-  const datafastId = useMemo(() => {
+  const vemetricToken = useMemo(() => {
     if (/\/w\/[0-9a-fA-F]{24}/.test(location.pathname)) return null;
-    return loaderData?.ENV.VITE_DATAFAST_ID;
-  }, [location, loaderData?.ENV.VITE_DATAFAST_ID]);
+    return loaderData?.ENV.VITE_VEMETRIC_TOKEN;
+  }, [location, loaderData?.ENV.VITE_VEMETRIC_TOKEN]);
   const isLandingPage = matches.some((match) => match.id === "landing/page");
   const isLoginPage = matches.some((match) => match.id === "auth/login");
 
@@ -66,14 +67,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta property="og:type" content="website" />
         <meta property="og:image" content="/og-1.png" />
-        {datafastId && (
-          <script
-            defer
-            data-website-id={datafastId}
-            data-domain="crawlchat.app"
-            src="https://datafa.st/js/script.js"
-          />
-        )}
         <Meta />
         <Links />
         <script
@@ -94,6 +87,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         )}
       </head>
       <body>
+        {vemetricToken && <VemetricScript token={vemetricToken} />}
         {children}
         <ScrollRestoration />
         <Scripts />

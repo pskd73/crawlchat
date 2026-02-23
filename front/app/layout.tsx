@@ -116,9 +116,9 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
 
   useEffect(() => {
     (async () => {
-      (window as any)?.datafast?.("identify", {
-        user_id: user.id,
-        name: user.name,
+      (window as any)?.vmtrc?.("identify", {
+        identifier: user.id,
+        displayName: user.name,
       });
     })();
   }, []);

@@ -39,6 +39,7 @@
     "@rvf/zod": "^7.0.1",
     "@tailwindcss/vite": "^4.1.12",
     "@tuesdaycrowd/sentence-transformers": "^1.0.1",
+    "@vemetric/react": "^0.6.1",
     "arctic": "^3.7.0",
     "boring-avatars": "^2.0.4",
     "color": "^5.0.3",

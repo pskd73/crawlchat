@@ -22,35 +22,6 @@ export async function handleWebhook(request: Request, gateway: PaymentGateway) {
       return Response.json({ message: "User not found" }, { status: 400 });
     }
 
-    if (
-      webhook.paymentId &&
-      webhook.metadata?.datafastVisitorId &&
-      webhook.paymentAmount &&
-      webhook.paymentCurrency
-    ) {
-      const res = await fetch("https://datafa.st/api/v1/payments", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${process.env.DATAFAST_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          amount: webhook.paymentAmount / 100,
-          currency: webhook.paymentCurrency,
-          transaction_id: webhook.paymentId,
-          datafast_visitor_id: webhook.metadata.datafast_visitor_id,
-        }),
-      });
-
-      if (!res.ok) {
-        console.error(
-          "Error sending payment to Datafast",
-          res.statusText,
-          await res.text()
-        );
-      }
-    }
-
     if (webhook.type === "created" && webhook.plan) {
       await activatePlan(user.id, webhook.plan, {
         provider: gateway.provider,
