@@ -39,7 +39,6 @@ import moment from "moment";
 import cn from "@meltdownjs/cn";
 import { makeMeta } from "~/meta";
 import { dodoGateway } from "~/payment/gateway-dodo";
-import { track } from "~/components/track";
 import { getMessagesSummary } from "~/messages-summary";
 import { UniqueUsers } from "./unique-users";
 import { calcUniqueUsers } from "./calc-unique-users";
@@ -456,10 +455,6 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
       .slice(0, 20)
       .map(([title, d]) => ({ title, count: d.count }));
   }, [loaderData.messagesSummary.tags, tagsOrder]);
-
-  useEffect(() => {
-    track("dashboard", {});
-  }, []);
 
   useEffect(() => {
     if (containerRef.current) {
