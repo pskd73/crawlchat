@@ -490,12 +490,14 @@ export function AssistantMessage({
   links,
   rating,
   pullUp,
+  last,
 }: {
   id: string;
   content: string;
   links: MessageSourceLink[];
   rating: MessageRating | null;
   pullUp: boolean;
+  last: boolean;
 }) {
   const {
     rate,
@@ -557,6 +559,12 @@ export function AssistantMessage({
         >
           {citation.content}
         </MarkdownProse>
+
+        {chat.askStage !== "idle" && last && (
+          <div className="font-mono">
+            <span className="chat-status-text">Making the answer...</span>
+          </div>
+        )}
 
         {chat.askStage === "idle" && (
           <div className="flex items-center gap-2">
@@ -1006,6 +1014,7 @@ export default function ScrapeWidget() {
                     links={message.links}
                     rating={message.rating}
                     pullUp={chat.allMessages[index - 1]?.role === "user"}
+                    last={index === chat.allMessages.length - 1}
                   />
                 )}
                 {(chat.askStage === "asked" ||

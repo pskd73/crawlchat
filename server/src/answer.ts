@@ -304,21 +304,41 @@ Just use this block, don't ask the user to enter the email. Use it only if the t
   );
 
   const flow = makeRagFlow(ragAgent, messages, query);
+  let lastMessage = null;
 
-  while (
-    await flow.stream(({ delta, content, role }) => {
-      if (delta !== undefined && delta !== null) {
-        options?.listen?.({
-          type: "stream-delta",
-          delta,
-          role,
-          content,
-        });
-      }
-    })
-  ) {}
+  for (let i = 0; i < 3; i++) {
+    while (
+      await flow.stream(({ delta, content, role }) => {
+        if (delta !== undefined && delta !== null) {
+          options?.listen?.({
+            type: "stream-delta",
+            delta,
+            role,
+            content,
+          });
+        }
+      })
+    ) {}
+    lastMessage = flow.getLastMessage();
 
-  const lastMessage = flow.getLastMessage();
+    if (lastMessage?.llmMessage?.content) {
+      break;
+    }
+
+    console.log("Retrying...", i + 1);
+    flow.addMessage({
+      llmMessage: {
+        role: "user",
+        content: "Please answer the question again.",
+      },
+    });
+    flow.addNextAgents(["rag-agent"]);
+  }
+
+  if (!lastMessage?.llmMessage?.content) {
+    throw new Error("Failed to answer the question");
+  }
+
   const usage = flow.getUsage();
   const toolCalls: ToolCall[] = flow.flowState.toolCalls.map((toolCall) => ({
     toolName: toolCall.toolName,
