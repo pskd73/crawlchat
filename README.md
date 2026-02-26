@@ -4,7 +4,7 @@
 
 [![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/crawlchat-20260205?referralCode=SYKJpN&utm_medium=integration&utm_source=template&utm_campaign=generic)
 
-You can self host it yourself or let [CrawlChat](https://crawlchat.app/pricing) handle it for you!
+You cannot self host it yourself or let [CrawlChat](https://crawlchat.app/pricing) handle it for you!
 
 ## Services
 
