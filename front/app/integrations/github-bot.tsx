@@ -6,6 +6,7 @@ import {
   SettingsSection,
   SettingsSectionProvider,
 } from "~/components/settings-section";
+import { useDirtyForm } from "~/components/use-dirty-form";
 import { prisma } from "@packages/common/prisma";
 import { getAuthUser } from "~/auth/middleware";
 import { TbArrowRight, TbBrandGithub } from "react-icons/tb";
@@ -73,6 +74,12 @@ export default function GitHubIntegrations({
   const autoReplyFetcher = useFetcher();
   const promptFetcher = useFetcher();
 
+  const form = useDirtyForm({
+    githubRepoName: loaderData.scrape.githubRepoName ?? "",
+    githubAutoReply: loaderData.scrape.githubAutoReply ?? true,
+    githubPrompt: loaderData.scrape.githubPrompt ?? "",
+  });
+
   useFetcherToast(fetcher);
   useFetcherToast(promptFetcher);
 
@@ -103,12 +110,14 @@ export default function GitHubIntegrations({
             title={"Repository"}
             description="Enter your GitHub repository in the format 'owner/repo' (e.g., 'crawlchat/crawlchat')."
             fetcher={fetcher}
+            dirty={form.isDirty("githubRepoName")}
           >
             <input
               className="input w-full"
               name="githubRepoName"
               placeholder="Ex: crawlchat/crawlchat"
-              defaultValue={loaderData.scrape.githubRepoName ?? ""}
+              value={(form.getValue("githubRepoName") as string) ?? ""}
+              onChange={form.handleChange("githubRepoName")}
             />
           </SettingsSection>
 
@@ -117,6 +126,7 @@ export default function GitHubIntegrations({
             title={"Auto-reply"}
             description="Automatically reply to new GitHub issues and discussions when they are created. The bot will only reply if it has relevant knowledge about the topic."
             fetcher={autoReplyFetcher}
+            dirty={form.isDirty("githubAutoReply")}
           >
             <input type="hidden" name="from-github-auto-reply" value="on" />
             <label className="label">
@@ -124,7 +134,8 @@ export default function GitHubIntegrations({
                 type="checkbox"
                 className="toggle"
                 name="githubAutoReply"
-                defaultChecked={loaderData.scrape.githubAutoReply ?? true}
+                checked={(form.getValue("githubAutoReply") as boolean) ?? true}
+                onChange={form.handleChange("githubAutoReply")}
               />
               Active
             </label>
@@ -135,11 +146,13 @@ export default function GitHubIntegrations({
             title={"GitHub Prompt"}
             description="Customize the prompt used when the bot responds to GitHub issues and discussions. If not set, the default chat prompt will be used. Maximum 1000 characters."
             fetcher={promptFetcher}
+            dirty={form.isDirty("githubPrompt")}
           >
             <textarea
               className="textarea textarea-bordered w-full"
               name="githubPrompt"
-              defaultValue={loaderData.scrape.githubPrompt ?? ""}
+              value={(form.getValue("githubPrompt") as string) ?? ""}
+              onChange={form.handleChange("githubPrompt")}
               placeholder="Enter a custom prompt for GitHub responses."
               rows={4}
               maxLength={1000}

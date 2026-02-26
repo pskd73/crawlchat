@@ -14,6 +14,7 @@ import { getPagesCount, planMap } from "@packages/common/user-plan";
 import { makeMeta } from "~/meta";
 import { getPaymentGateway } from "~/payment/factory";
 import { showModal } from "~/components/daisy-utils";
+import { useDirtyForm } from "./components/use-dirty-form";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -122,6 +123,13 @@ export default function SettingsPage({ loaderData }: Route.ComponentProps) {
   const nameFetcher = useFetcher();
   const customerPortalFetcher = useFetcher();
 
+  const dirtyForm = useDirtyForm({
+    name: loaderData.user.name,
+    weeklyUpdates: loaderData.user.settings?.weeklyUpdates,
+    ticketUpdates: loaderData.user.settings?.ticketEmailUpdates,
+    dataGapUpdates: loaderData.user.settings?.dataGapEmailUpdates,
+  });
+
   const credits = loaderData.user.plan!.credits!;
   const limits = loaderData.user.plan!.limits;
   const plan = loaderData.plan!;
@@ -136,12 +144,14 @@ export default function SettingsPage({ loaderData }: Route.ComponentProps) {
               fetcher={nameFetcher}
               title="Name"
               description="Set your name to be displayed in the dashboard"
+              dirty={dirtyForm.isDirty("name")}
             >
               <input
                 className="input max-w-lg"
                 name="name"
                 defaultValue={loaderData.user.name ?? ""}
                 placeholder="Your name"
+                onChange={dirtyForm.handleChange("name")}
               />
             </SettingsSection>
 
@@ -150,6 +160,7 @@ export default function SettingsPage({ loaderData }: Route.ComponentProps) {
               fetcher={weeklyUpdatesFetcher}
               title="Weekly Updates"
               description="Enable weekly updates to be sent to your email."
+              dirty={dirtyForm.isDirty("weeklyUpdates")}
             >
               <input type="hidden" name="from-weekly-updates" value="true" />
               <label className="label">
@@ -160,6 +171,7 @@ export default function SettingsPage({ loaderData }: Route.ComponentProps) {
                     loaderData.user.settings?.weeklyUpdates ?? true
                   }
                   className="toggle"
+                  onChange={dirtyForm.handleChange("weeklyUpdates")}
                 />
                 Receive weekly email summary
               </label>
@@ -170,6 +182,7 @@ export default function SettingsPage({ loaderData }: Route.ComponentProps) {
               fetcher={ticketUpdatesFetcher}
               title="Ticket Updates"
               description="Enable ticket updates to be sent to your email."
+              dirty={dirtyForm.isDirty("ticketUpdates")}
             >
               <input type="hidden" name="from-ticket-updates" value="true" />
               <label className="label">
@@ -180,6 +193,7 @@ export default function SettingsPage({ loaderData }: Route.ComponentProps) {
                   defaultChecked={
                     loaderData.user.settings?.ticketEmailUpdates ?? true
                   }
+                  onChange={dirtyForm.handleChange("ticketUpdates")}
                 />
                 Receive ticket updates
               </label>
@@ -190,6 +204,7 @@ export default function SettingsPage({ loaderData }: Route.ComponentProps) {
               fetcher={dataGapUpdatesFetcher}
               title="Data Gap Alerts"
               description="Enable data gap alerts to be sent to your email."
+              dirty={dirtyForm.isDirty("dataGapUpdates")}
             >
               <input type="hidden" name="from-data-gap-updates" value="true" />
               <label className="label">
@@ -200,6 +215,7 @@ export default function SettingsPage({ loaderData }: Route.ComponentProps) {
                   defaultChecked={
                     loaderData.user.settings?.dataGapEmailUpdates ?? true
                   }
+                  onChange={dirtyForm.handleChange("dataGapUpdates")}
                 />
                 Receive data gap alerts
               </label>

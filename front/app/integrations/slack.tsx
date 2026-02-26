@@ -6,6 +6,7 @@ import {
   SettingsSection,
   SettingsSectionProvider,
 } from "~/components/settings-section";
+import { useDirtyForm } from "~/components/use-dirty-form";
 import { prisma } from "@packages/common/prisma";
 import { getAuthUser } from "~/auth/middleware";
 import { TbArrowRight, TbBrandSlack } from "react-icons/tb";
@@ -72,6 +73,10 @@ export default function SlackIntegrations({
 }: Route.ComponentProps) {
   const teamIdFetcher = useFetcher();
   const broadcastFetcher = useFetcher();
+  const form = useDirtyForm({
+    slackTeamId: loaderData.scrape.slackTeamId ?? "",
+    replyBroadcast: loaderData.scrape.slackConfig?.replyBroadcast ?? false,
+  });
 
   useFetcherToast(broadcastFetcher);
 
@@ -108,12 +113,14 @@ export default function SlackIntegrations({
             title={"Slack Team Id"}
             description="Slack team ID is unique to your workspace. You can find it in the URL of your workspace."
             fetcher={teamIdFetcher}
+            dirty={form.isDirty("slackTeamId")}
           >
             <input
               className="input w-full"
               name="slackTeamId"
               placeholder="Ex: T060PNXZXXX"
-              defaultValue={loaderData.scrape.slackTeamId ?? ""}
+              value={(form.getValue("slackTeamId") as string) ?? ""}
+              onChange={form.handleChange("slackTeamId")}
             />
           </SettingsSection>
 
@@ -123,6 +130,7 @@ export default function SlackIntegrations({
               title={"Broadcast the reply"}
               description="Enable this if you want to broadcast the reply to the channel along with the reply as thread."
               fetcher={broadcastFetcher}
+              dirty={form.isDirty("replyBroadcast")}
             >
               <input type="hidden" name="from-broadcast" value="true" />
               <label className="label">
@@ -130,9 +138,10 @@ export default function SlackIntegrations({
                   type="checkbox"
                   className="toggle"
                   name="replyBroadcast"
-                  defaultChecked={
-                    loaderData.scrape.slackConfig?.replyBroadcast ?? false
+                  checked={
+                    (form.getValue("replyBroadcast") as boolean) ?? false
                   }
+                  onChange={form.handleChange("replyBroadcast")}
                 />
                 Broadcast the reply
               </label>

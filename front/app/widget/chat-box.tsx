@@ -209,7 +209,7 @@ function ChatInput() {
     if (chat.askStage !== "idle") {
       return "Planning...";
     }
-    return scrape.widgetConfig?.textInputPlaceholder ?? "Ask your question";
+    return scrape.widgetConfig?.textInputPlaceholder || "Ask your question";
   }
 
   function handleKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>) {

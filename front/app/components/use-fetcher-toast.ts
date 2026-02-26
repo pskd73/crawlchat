@@ -3,22 +3,22 @@ import { useEffect } from "react";
 import toast from "react-hot-toast";
 
 export function useFetcherToast(
-  fetcher: FetcherWithComponents<any>,
+  fetcher?: FetcherWithComponents<any>,
   options?: {
     title?: string;
     description?: string;
   }
 ) {
   useEffect(() => {
-    if (!fetcher.data) return;
+    if (!fetcher?.data) return;
 
-    if (fetcher.data.error) {
-      toast.error(fetcher.data.error);
+    if (fetcher?.data.error) {
+      toast.error(fetcher?.data.error);
       return;
     }
 
-    if (fetcher.data) {
+    if (fetcher?.data) {
       toast.success(options?.title ?? options?.description ?? "Done");
     }
-  }, [fetcher.data]);
+  }, [fetcher?.data]);
 }

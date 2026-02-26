@@ -2,6 +2,7 @@ import cn from "@meltdownjs/cn";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { TbCheck } from "react-icons/tb";
 import { Link, useLocation, type FetcherWithComponents } from "react-router";
+import { useFetcherToast } from "./use-fetcher-toast";
 
 export function SettingsSection({
   id,
@@ -18,6 +19,7 @@ export function SettingsSection({
   saveIcon,
   multipart = false,
   dirty = false,
+  toastOptions,
 }: {
   id?: string;
   children?: React.ReactNode;
@@ -33,6 +35,10 @@ export function SettingsSection({
   saveIcon?: React.ReactNode;
   multipart?: boolean;
   dirty?: boolean;
+  toastOptions?: {
+    title?: string;
+    description?: string;
+  };
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const [targeted, setTargeted] = useState(false);
@@ -60,6 +66,8 @@ export function SettingsSection({
       setTargeted(false);
     }
   }, [id, location.hash]);
+
+  useFetcherToast(fetcher, toastOptions ?? { title: "Saved" });
 
   function render() {
     return (

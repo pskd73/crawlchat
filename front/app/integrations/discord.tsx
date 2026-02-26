@@ -6,17 +6,12 @@ import {
   SettingsSection,
   SettingsSectionProvider,
 } from "~/components/settings-section";
+import { useDirtyForm } from "~/components/use-dirty-form";
 import { prisma } from "@packages/common/prisma";
 import { getAuthUser } from "~/auth/middleware";
-import {
-  TbArrowRight,
-  TbBrandDiscord,
-  TbCrown,
-  TbInfoCircle,
-} from "react-icons/tb";
+import { TbArrowRight, TbBrandDiscord, TbInfoCircle } from "react-icons/tb";
 import { authoriseScrapeUser, getSessionScrapeId } from "~/auth/scrape-session";
 import { MultiSelect } from "~/components/multi-select";
-import { useState } from "react";
 import { makeMeta } from "~/meta";
 import { Page } from "~/components/page";
 
@@ -119,9 +114,12 @@ export async function action({ request }: Route.ActionArgs) {
 function ChannelNames() {
   const { scrape } = useLoaderData<typeof loader>();
   const fetcher = useFetcher();
-  const [value, setValue] = useState<string[]>(
-    scrape.discordConfig?.onlyChannelNames?.split(",") ?? []
-  );
+  const form = useDirtyForm({
+    onlyChannelNames:
+      scrape.discordConfig?.onlyChannelNames?.split(",").filter(Boolean) ?? [],
+  });
+  const valueString =
+    (form.getValue("onlyChannelNames") as string[])?.join(",") ?? "";
 
   return (
     <SettingsSection
@@ -129,14 +127,13 @@ function ChannelNames() {
       title="Channel names"
       description="Configure the channels from which the bot will answer the queries. If none mentioned, it will answer everywhere on the server."
       fetcher={fetcher}
+      dirty={form.isDirty("onlyChannelNames")}
     >
-      <input type="hidden" name="onlyChannelNames" value={value.join(",")} />
+      <input type="hidden" name="onlyChannelNames" value={valueString} />
       <MultiSelect
         placeholder="Ex: ask-ai, help, etc."
-        value={value}
-        onChange={(value) => {
-          setValue(value);
-        }}
+        value={(form.getValue("onlyChannelNames") as string[]) ?? []}
+        onChange={(v) => form.setValue("onlyChannelNames", v)}
       />
     </SettingsSection>
   );
@@ -145,10 +142,9 @@ function ChannelNames() {
 function ImageAttachments() {
   const { scrape } = useLoaderData<typeof loader>();
   const fetcher = useFetcher();
-
-  function isAllowed(plans: string[]) {
-    return plans.includes(scrape.user.plan?.planId ?? "free");
-  }
+  const form = useDirtyForm({
+    sendImages: scrape.discordConfig?.sendImages ?? false,
+  });
 
   return (
     <SettingsSection
@@ -156,6 +152,7 @@ function ImageAttachments() {
       title="Image attachments"
       description="Should the bot send the attached images to the bot? Very helpful when users attach screenshots and ask questions about them. Make sure the AI model supports image inputs."
       fetcher={fetcher}
+      dirty={form.isDirty("sendImages")}
     >
       <div className="flex gap-2">
         <input type="hidden" name="from-send-images" value="on" />
@@ -164,7 +161,8 @@ function ImageAttachments() {
             type="checkbox"
             name="sendImages"
             className="toggle"
-            defaultChecked={scrape.discordConfig?.sendImages ?? false}
+            checked={(form.getValue("sendImages") as boolean) ?? false}
+            onChange={form.handleChange("sendImages")}
           />
           Active
         </label>
@@ -178,6 +176,10 @@ export default function DiscordIntegrations({
 }: Route.ComponentProps) {
   const discordServerIdFetcher = useFetcher();
   const replyAsThreadFetcher = useFetcher();
+  const form = useDirtyForm({
+    discordServerId: loaderData.scrape.discordServerId ?? "",
+    replyAsThread: loaderData.scrape.discordConfig?.replyAsThread ?? false,
+  });
 
   return (
     <Page title={"Discord bot"} icon={<TbBrandDiscord />}>
@@ -236,12 +238,14 @@ export default function DiscordIntegrations({
             }
             description="Integrate CrawlChat with your Discord server to bother answer the queries and also to learn from the conversations."
             fetcher={discordServerIdFetcher}
+            dirty={form.isDirty("discordServerId")}
           >
             <input
               className="input w-full"
               name="discordServerId"
               placeholder="Enter your Discord server ID"
-              defaultValue={loaderData.scrape.discordServerId ?? ""}
+              value={(form.getValue("discordServerId") as string) ?? ""}
+              onChange={form.handleChange("discordServerId")}
             />
           </SettingsSection>
 
@@ -252,6 +256,7 @@ export default function DiscordIntegrations({
             title="Reply as thread"
             description="Reply to messages as threads instead of just sending it as reply. Keeps the channel clutter free and better organization."
             fetcher={replyAsThreadFetcher}
+            dirty={form.isDirty("replyAsThread")}
           >
             <input type="hidden" name="from-reply-as-thread" value="on" />
             <label className="label">
@@ -259,9 +264,8 @@ export default function DiscordIntegrations({
                 type="checkbox"
                 name="replyAsThread"
                 className="toggle"
-                defaultChecked={
-                  loaderData.scrape.discordConfig?.replyAsThread ?? false
-                }
+                checked={(form.getValue("replyAsThread") as boolean) ?? false}
+                onChange={form.handleChange("replyAsThread")}
               />
               Active
             </label>

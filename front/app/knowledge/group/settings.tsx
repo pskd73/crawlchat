@@ -22,7 +22,6 @@ import { createToken } from "@packages/common/jwt";
 import { MultiSelect, type SelectValue } from "~/components/multi-select";
 import { Client } from "@notionhq/client";
 import { DataList } from "~/components/data-list";
-import { Select } from "~/components/select";
 import { getConfluencePages } from "@packages/common/confluence";
 import {
   getLinearIssueStatuses,
@@ -34,6 +33,7 @@ import type { FileUpload } from "@mjackson/form-data-parser";
 import { parseFormData } from "@mjackson/form-data-parser";
 import { v4 as uuidv4 } from "uuid";
 import { useFetcherToast } from "~/components/use-fetcher-toast";
+import { useDirtyForm } from "~/components/use-dirty-form";
 
 function getNotionPageTitle(page: any): string | undefined {
   if (!page.properties) {
@@ -330,28 +330,16 @@ export async function action({ request, params }: Route.ActionArgs) {
 
 function AutoUpdateSettings({ group }: { group: KnowledgeGroup }) {
   const fetcher = useFetcher();
+  const dirtyForm = useDirtyForm({
+    updateFrequency: group.updateFrequency ?? undefined,
+  });
   const autoUpdateCollection = useMemo(() => {
     const allOptions = [
-      {
-        label: "Never",
-        value: "never",
-      },
-      {
-        label: "Every hour",
-        value: "hourly",
-      },
-      {
-        label: "Every day",
-        value: "daily",
-      },
-      {
-        label: "Every week",
-        value: "weekly",
-      },
-      {
-        label: "Every month",
-        value: "monthly",
-      },
+      { label: "Never", value: "never" },
+      { label: "Every hour", value: "hourly" },
+      { label: "Every day", value: "daily" },
+      { label: "Every week", value: "weekly" },
+      { label: "Every month", value: "monthly" },
     ];
 
     if (group.type === "youtube_channel") {
@@ -369,13 +357,20 @@ function AutoUpdateSettings({ group }: { group: KnowledgeGroup }) {
       fetcher={fetcher}
       title="Auto update"
       description="If enabled, the knowledge group will be updated automatically every day at the specified time."
+      dirty={dirtyForm.isDirty("updateFrequency")}
     >
-      <Select
-        label="Select frequency"
-        options={autoUpdateCollection}
-        defaultValue={group.updateFrequency ?? undefined}
+      <select
+        className="select"
         name="updateFrequency"
-      />
+        value={dirtyForm.getValue("updateFrequency") ?? ""}
+        onChange={dirtyForm.handleChange("updateFrequency")}
+      >
+        {autoUpdateCollection.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
       {group.nextUpdateAt && (
         <div className="text-sm flex items-center">
           Next update at{" "}
@@ -390,6 +385,9 @@ function AutoUpdateSettings({ group }: { group: KnowledgeGroup }) {
 
 function RemoveStalePagesSettings({ group }: { group: KnowledgeGroup }) {
   const fetcher = useFetcher();
+  const dirtyForm = useDirtyForm({
+    removeStalePages: group.removeStalePages ?? false,
+  });
 
   return (
     <SettingsSection
@@ -397,13 +395,15 @@ function RemoveStalePagesSettings({ group }: { group: KnowledgeGroup }) {
       fetcher={fetcher}
       title="Remove stale pages"
       description="If enabled, pages that are no longer found in the source will be automatically removed after each sync."
+      dirty={dirtyForm.isDirty("removeStalePages")}
     >
       <input type="hidden" name="from-remove-stale-pages" value={"true"} />
       <label className="label">
         <input
           type="checkbox"
           name="removeStalePages"
-          defaultChecked={group.removeStalePages ?? false}
+          checked={dirtyForm.getValue("removeStalePages") ?? false}
+          onChange={dirtyForm.handleChange("removeStalePages")}
           className="toggle"
         />
         Active
@@ -422,12 +422,13 @@ function SkipPagesRegex({
   placeholder?: string;
 }) {
   const fetcher = useFetcher();
-  const [values, setValues] = useState<string[]>(
-    group.skipPageRegex?.split(",").filter(Boolean) ?? []
+  const dirtyForm = useDirtyForm({
+    skipPageRegex: group.skipPageRegex?.split(",").filter(Boolean) ?? [],
+  });
+  const valueString = useMemo(
+    () => dirtyForm.getValue("skipPageRegex")?.join(",") ?? "",
+    [dirtyForm.values]
   );
-  const valueString = useMemo(() => {
-    return values.join(",");
-  }, [values]);
 
   return (
     <SettingsSection
@@ -435,11 +436,12 @@ function SkipPagesRegex({
       fetcher={fetcher}
       title="Skip pages"
       description="Specify the regex of the URLs that you don't want it to scrape. You can give multiple regexes."
+      dirty={dirtyForm.isDirty("skipPageRegex")}
     >
       <input value={valueString} name="skipPageRegex" type="hidden" />
       <MultiSelect
-        value={values}
-        onChange={setValues}
+        value={dirtyForm.getValue("skipPageRegex") ?? []}
+        onChange={(v) => dirtyForm.setValue("skipPageRegex", v)}
         placeholder={placeholder ?? "Ex: /admin, /dashboard"}
         selectValues={pages}
       />
@@ -451,10 +453,19 @@ function WebSettings({ group }: { group: KnowledgeGroup }) {
   const matchPrefixFetcher = useFetcher();
   const htmlTagsToRemoveFetcher = useFetcher();
   const include404Pages = useFetcher();
-  const skipRegexFetcher = useFetcher();
   const scrollSelectorFetcher = useFetcher();
   const loadDynamicallyFetcher = useFetcher();
   const itemContextFetcher = useFetcher();
+
+  const form = useDirtyForm({
+    matchPrefix: group.matchPrefix ?? false,
+    include404: group.include404 ?? false,
+    removeHtmlTags: group.removeHtmlTags ?? "",
+    itemContext: group.itemContext ?? "",
+    scrollSelector: group.scrollSelector ?? "",
+    loadDynamically: group.loadDynamically ?? false,
+  });
+
   const details = useMemo(() => {
     return [
       {
@@ -481,13 +492,15 @@ function WebSettings({ group }: { group: KnowledgeGroup }) {
         fetcher={matchPrefixFetcher}
         title="Match prefix"
         description="If enabled, it scrapes only the pages whose prefix is the same as the group URL"
+        dirty={form.isDirty("matchPrefix")}
       >
         <input type="hidden" name="from-match-prefix" value={"true"} />
         <label className="label">
           <input
             type="checkbox"
             name="matchPrefix"
-            defaultChecked={group.matchPrefix ?? false}
+            checked={(form.getValue("matchPrefix") as boolean) ?? false}
+            onChange={form.handleChange("matchPrefix")}
             className="toggle"
           />
           Active
@@ -499,13 +512,15 @@ function WebSettings({ group }: { group: KnowledgeGroup }) {
         fetcher={include404Pages}
         title="Include 404 pages"
         description="If disabled, it will not upsert the pages which respond with 404 not found."
+        dirty={form.isDirty("include404")}
       >
         <input type="hidden" name="from-include-404" value={"true"} />
         <label className="label">
           <input
             type="checkbox"
             name="include404"
-            defaultChecked={group.include404 ?? false}
+            checked={(form.getValue("include404") as boolean) ?? false}
+            onChange={form.handleChange("include404")}
             className="toggle"
           />
           Active
@@ -517,10 +532,12 @@ function WebSettings({ group }: { group: KnowledgeGroup }) {
         fetcher={htmlTagsToRemoveFetcher}
         title="HTML tags to remove"
         description="You can specify the HTML selectors whose content is not added to the document. It is recommended to use this to remove junk content such as side menus, headers, footers, etc. You can give multiple selectors comma separated."
+        dirty={form.isDirty("removeHtmlTags")}
       >
         <input
           placeholder="Ex: #sidebar, #header, #footer"
-          defaultValue={group.removeHtmlTags ?? ""}
+          value={(form.getValue("removeHtmlTags") as string) ?? ""}
+          onChange={form.handleChange("removeHtmlTags")}
           name="removeHtmlTags"
           className="input"
         />
@@ -536,10 +553,12 @@ function WebSettings({ group }: { group: KnowledgeGroup }) {
         fetcher={itemContextFetcher}
         title="Item context"
         description="Pass context for the group knowledge. Usefule to segregate the data between types. Example: v1, v2, node, bun, etc."
+        dirty={form.isDirty("itemContext")}
       >
         <input
           name="itemContext"
-          defaultValue={group.itemContext ?? ""}
+          value={(form.getValue("itemContext") as string) ?? ""}
+          onChange={form.handleChange("itemContext")}
           placeholder="Ex: v1, v2, node, bun, etc."
           className="input"
         />
@@ -553,11 +572,13 @@ function WebSettings({ group }: { group: KnowledgeGroup }) {
         fetcher={scrollSelectorFetcher}
         title="Scroll selector"
         description="Specify the selector of the element to scroll to. It is useful to scrape pages that have infinite scroll."
+        dirty={form.isDirty("scrollSelector")}
       >
         <input
           placeholder="Ex: #panel"
           className="input"
-          defaultValue={group.scrollSelector ?? ""}
+          value={(form.getValue("scrollSelector") as string) ?? ""}
+          onChange={form.handleChange("scrollSelector")}
           name="scrollSelector"
         />
       </SettingsSection>
@@ -567,13 +588,15 @@ function WebSettings({ group }: { group: KnowledgeGroup }) {
         fetcher={loadDynamicallyFetcher}
         title="Load dynamically"
         description="If enabled, it will load the page dynamically. It is useful to scrape pages that have infinite scroll."
+        dirty={form.isDirty("loadDynamically")}
       >
         <input type="hidden" name="from-load-dynamically" value={"true"} />
         <label className="label">
           <input
             type="checkbox"
             name="loadDynamically"
-            defaultChecked={group.loadDynamically ?? false}
+            checked={(form.getValue("loadDynamically") as boolean) ?? false}
+            onChange={form.handleChange("loadDynamically")}
             className="toggle"
           />
           Active
@@ -586,12 +609,16 @@ function WebSettings({ group }: { group: KnowledgeGroup }) {
 function GithubIssuesSettings({ group }: { group: KnowledgeGroup }) {
   const allowedStatesFetcher = useFetcher();
   const githubIssuesTypeFetcher = useFetcher();
-  const [allowedStates, setAllowedStates] = useState<string[]>(
-    group.allowedGithubIssueStates?.split(",").filter(Boolean) ?? []
+  const form = useDirtyForm({
+    allowedGithubIssueStates:
+      group.allowedGithubIssueStates?.split(",").filter(Boolean) ?? [],
+    githubIssuesType: group.githubIssuesType ?? "all",
+  });
+  const allowedStatesString = useMemo(
+    () =>
+      (form.getValue("allowedGithubIssueStates") as string[])?.join(",") ?? "",
+    [form.values]
   );
-  const allowedStatesString = useMemo(() => {
-    return allowedStates.join(",");
-  }, [allowedStates]);
 
   const stateOptions: Array<SelectValue> = [
     { title: "Open", value: "open" },
@@ -600,18 +627,9 @@ function GithubIssuesSettings({ group }: { group: KnowledgeGroup }) {
 
   const details = useMemo(() => {
     return [
-      {
-        label: "Repo",
-        value: group.githubUrl,
-      },
-      {
-        label: "Updated at",
-        value: <Timestamp date={group.updatedAt} />,
-      },
-      {
-        label: "Status",
-        value: <GroupStatus status={group.status} />,
-      },
+      { label: "Repo", value: group.githubUrl },
+      { label: "Updated at", value: <Timestamp date={group.updatedAt} /> },
+      { label: "Status", value: <GroupStatus status={group.status} /> },
     ];
   }, [group]);
 
@@ -623,6 +641,7 @@ function GithubIssuesSettings({ group }: { group: KnowledgeGroup }) {
         fetcher={allowedStatesFetcher}
         title="Allowed issue states"
         description="Select the states of issues to fetch. You can select multiple states. Default it fetches all closed issues."
+        dirty={form.isDirty("allowedGithubIssueStates")}
       >
         <input
           value={allowedStatesString}
@@ -630,8 +649,8 @@ function GithubIssuesSettings({ group }: { group: KnowledgeGroup }) {
           type="hidden"
         />
         <MultiSelect
-          value={allowedStates}
-          onChange={setAllowedStates}
+          value={(form.getValue("allowedGithubIssueStates") as string[]) ?? []}
+          onChange={(v) => form.setValue("allowedGithubIssueStates", v)}
           placeholder="Select states to fetch"
           selectValues={stateOptions}
         />
@@ -642,11 +661,13 @@ function GithubIssuesSettings({ group }: { group: KnowledgeGroup }) {
         fetcher={githubIssuesTypeFetcher}
         title="Issues type"
         description="Specify the type of issues to fetch. Either fetch all issues, only issues, or only pull requests."
+        dirty={form.isDirty("githubIssuesType")}
       >
         <select
           name="githubIssuesType"
           className="select"
-          defaultValue={group.githubIssuesType ?? "all"}
+          value={(form.getValue("githubIssuesType") as string) ?? "all"}
+          onChange={form.handleChange("githubIssuesType")}
         >
           <option value="all">All</option>
           <option value="only_issues">Only issues</option>
@@ -661,24 +682,15 @@ function GithubIssuesSettings({ group }: { group: KnowledgeGroup }) {
 
 function GithubDiscussionsSettings({ group }: { group: KnowledgeGroup }) {
   const onlyAnsweredFetcher = useFetcher();
-  const [onlyAnswered, setOnlyAnswered] = useState<boolean>(
-    (group as any).onlyAnsweredDiscussions ?? false
-  );
+  const dirtyForm = useDirtyForm({
+    onlyAnsweredDiscussions: (group as any).onlyAnsweredDiscussions ?? false,
+  });
 
   const details = useMemo(() => {
     return [
-      {
-        label: "Repo",
-        value: group.url,
-      },
-      {
-        label: "Updated at",
-        value: <Timestamp date={group.updatedAt} />,
-      },
-      {
-        label: "Status",
-        value: <GroupStatus status={group.status} />,
-      },
+      { label: "Repo", value: group.url },
+      { label: "Updated at", value: <Timestamp date={group.updatedAt} /> },
+      { label: "Status", value: <GroupStatus status={group.status} /> },
     ];
   }, [group]);
 
@@ -690,17 +702,18 @@ function GithubDiscussionsSettings({ group }: { group: KnowledgeGroup }) {
         fetcher={onlyAnsweredFetcher}
         title="Only answered"
         description="If enabled, only fetch discussions that have been marked as answered. By default, all discussions are fetched."
+        dirty={dirtyForm.isDirty("onlyAnsweredDiscussions")}
       >
         <input
           type="hidden"
           name="onlyAnsweredDiscussions"
-          value={onlyAnswered ? "on" : ""}
+          value={dirtyForm.getValue("onlyAnsweredDiscussions") ? "on" : ""}
         />
         <label className="label cursor-pointer justify-start gap-4">
           <input
             type="checkbox"
-            checked={onlyAnswered}
-            onChange={(e) => setOnlyAnswered(e.target.checked)}
+            checked={dirtyForm.getValue("onlyAnsweredDiscussions") ?? false}
+            onChange={dirtyForm.handleChange("onlyAnsweredDiscussions")}
             className="toggle"
           />
           <span className="label-text">Only fetch answered discussions</span>
@@ -765,19 +778,20 @@ function LinearSettings({
 }) {
   const skipIssueStatusesFetcher = useFetcher();
   const skipProjectStatusesFetcher = useFetcher();
-
-  const [skipIssueStatuses, setSkipIssueStatuses] = useState<string[]>(
-    group.linearSkipIssueStatuses?.split(",").filter(Boolean) ?? []
+  const dirtyForm = useDirtyForm({
+    linearSkipIssueStatuses:
+      group.linearSkipIssueStatuses?.split(",").filter(Boolean) ?? [],
+    linearSkipProjectStatuses:
+      group.linearSkipProjectStatuses?.split(",").filter(Boolean) ?? [],
+  });
+  const skipIssueStatusesString = useMemo(
+    () => dirtyForm.getValue("linearSkipIssueStatuses")?.join(",") ?? "",
+    [dirtyForm.values]
   );
-  const [skipProjectStatuses, setSkipProjectStatuses] = useState<string[]>(
-    group.linearSkipProjectStatuses?.split(",").filter(Boolean) ?? []
+  const skipProjectStatusesString = useMemo(
+    () => dirtyForm.getValue("linearSkipProjectStatuses")?.join(",") ?? "",
+    [dirtyForm.values]
   );
-  const skipIssueStatusesString = useMemo(() => {
-    return skipIssueStatuses.join(",");
-  }, [skipIssueStatuses]);
-  const skipProjectStatusesString = useMemo(() => {
-    return skipProjectStatuses.join(",");
-  }, [skipProjectStatuses]);
 
   return (
     <div className="flex flex-col gap-4">
@@ -787,6 +801,7 @@ function LinearSettings({
           fetcher={skipIssueStatusesFetcher}
           title="Skip issue statuses"
           description="Specify the statuses of the issues that you don't want it to scrape. You can give multiple statuses."
+          dirty={dirtyForm.isDirty("linearSkipIssueStatuses")}
         >
           <input
             value={skipIssueStatusesString}
@@ -794,8 +809,8 @@ function LinearSettings({
             type="hidden"
           />
           <MultiSelect
-            value={skipIssueStatuses}
-            onChange={setSkipIssueStatuses}
+            value={dirtyForm.getValue("linearSkipIssueStatuses") ?? []}
+            onChange={(v) => dirtyForm.setValue("linearSkipIssueStatuses", v)}
             placeholder="Select statuses to skip"
             selectValues={linearIssueStatuses}
           />
@@ -808,6 +823,7 @@ function LinearSettings({
           fetcher={skipProjectStatusesFetcher}
           title="Skip project statuses"
           description="Specify the statuses of the projects that you don't want it to scrape. You can give multiple statuses."
+          dirty={dirtyForm.isDirty("linearSkipProjectStatuses")}
         >
           <input
             value={skipProjectStatusesString}
@@ -815,8 +831,8 @@ function LinearSettings({
             type="hidden"
           />
           <MultiSelect
-            value={skipProjectStatuses}
-            onChange={setSkipProjectStatuses}
+            value={dirtyForm.getValue("linearSkipProjectStatuses") ?? []}
+            onChange={(v) => dirtyForm.setValue("linearSkipProjectStatuses", v)}
             placeholder="Select statuses to skip"
             selectValues={linearProjectStatuses}
           />
@@ -831,12 +847,13 @@ function LinearSettings({
 
 function YouTubeSettings({ group }: { group: KnowledgeGroup }) {
   const youtubeUrlsFetcher = useFetcher();
-  const [youtubeUrls, setYoutubeUrls] = useState<string[]>(
-    group.urls?.map((item) => item.url).filter(Boolean) ?? []
+  const dirtyForm = useDirtyForm({
+    youtubeUrls: group.urls?.map((item) => item.url).filter(Boolean) ?? [],
+  });
+  const youtubeUrlsString = useMemo(
+    () => dirtyForm.getValue("youtubeUrls")?.join(",") ?? "",
+    [dirtyForm.values]
   );
-  const youtubeUrlsString = useMemo(() => {
-    return youtubeUrls.join(",");
-  }, [youtubeUrls]);
 
   return (
     <div className="flex flex-col gap-4">
@@ -845,11 +862,12 @@ function YouTubeSettings({ group }: { group: KnowledgeGroup }) {
         fetcher={youtubeUrlsFetcher}
         title="YouTube Video URLs"
         description="Add multiple YouTube video URLs to extract transcripts from. Each URL will be processed and added to your knowledge base."
+        dirty={dirtyForm.isDirty("youtubeUrls")}
       >
         <input value={youtubeUrlsString} name="youtubeUrls" type="hidden" />
         <MultiSelect
-          value={youtubeUrls}
-          onChange={setYoutubeUrls}
+          value={dirtyForm.getValue("youtubeUrls") ?? []}
+          onChange={(v) => dirtyForm.setValue("youtubeUrls", v)}
           placeholder="https://www.youtube.com/watch?v=..."
         />
       </SettingsSection>
@@ -862,12 +880,13 @@ function YouTubeSettings({ group }: { group: KnowledgeGroup }) {
 
 function YouTubeChannelSettings({ group }: { group: KnowledgeGroup }) {
   const skipUrlsFetcher = useFetcher();
-  const [skipUrls, setSkipUrls] = useState<string[]>(
-    group.skipPageRegex?.split(",").filter(Boolean) ?? []
+  const dirtyForm = useDirtyForm({
+    skipPageRegex: group.skipPageRegex?.split(",").filter(Boolean) ?? [],
+  });
+  const skipUrlsString = useMemo(
+    () => dirtyForm.getValue("skipPageRegex")?.join(",") ?? "",
+    [dirtyForm.values]
   );
-  const skipUrlsString = useMemo(() => {
-    return skipUrls.join(",");
-  }, [skipUrls]);
 
   return (
     <>
@@ -876,11 +895,12 @@ function YouTubeChannelSettings({ group }: { group: KnowledgeGroup }) {
         fetcher={skipUrlsFetcher}
         title="Skip URLs"
         description="Specify regex patterns to skip certain videos. Videos matching any of these patterns will be excluded. You can match against video URLs, IDs, or titles."
+        dirty={dirtyForm.isDirty("skipPageRegex")}
       >
         <input value={skipUrlsString} name="skipPageRegex" type="hidden" />
         <MultiSelect
-          value={skipUrls}
-          onChange={setSkipUrls}
+          value={dirtyForm.getValue("skipPageRegex") ?? []}
+          onChange={(v) => dirtyForm.setValue("skipPageRegex", v)}
           placeholder="Ex: /watch\\?v=.*, /shorts/.*"
         />
       </SettingsSection>

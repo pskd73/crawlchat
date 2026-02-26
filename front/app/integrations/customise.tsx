@@ -9,12 +9,13 @@ import type {
 import { prisma } from "@packages/common/prisma";
 import { getAuthUser } from "~/auth/middleware";
 import { SettingsSection } from "~/components/settings-section";
+import { useDirtyForm } from "~/components/use-dirty-form";
 import { useFetcher } from "react-router";
 import {
   authoriseScrapeUser,
   getSessionScrapeId,
 } from "../auth/scrape-session";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { ChatBoxProvider } from "~/widget/use-chat-box";
 import ChatBox, { ChatboxContainer } from "~/widget/chat-box";
 import {
@@ -290,143 +291,83 @@ export default function ScrapeCustomise({ loaderData }: Route.ComponentProps) {
   const textInputPlaceholderFetcher = useFetcher();
   const hideBrandingFetcher = useFetcher();
   const currentPageContextFetcher = useFetcher();
-  const [size, setSize] = useState<WidgetSize>(
-    loaderData.scrape?.widgetConfig?.size ?? "small"
-  );
-  const [questions, setQuestions] = useState<WidgetQuestion[]>(
-    loaderData.scrape?.widgetConfig?.questions ?? []
-  );
 
-  const [primaryColor, setPrimaryColor] = useState(
-    loaderData.scrape?.widgetConfig?.primaryColor
-  );
-  const [buttonTextColor, setButtonTextColor] = useState(
-    loaderData.scrape?.widgetConfig?.buttonTextColor
-  );
-  const [buttonText, setButtonText] = useState(
-    loaderData.scrape?.widgetConfig?.buttonText
-  );
-  const [tooltip, setTooltip] = useState(
-    loaderData.scrape?.widgetConfig?.tooltip
-  );
-  const [showLogo, setShowLogo] = useState(
-    loaderData.scrape?.widgetConfig?.showLogo ?? false
-  );
-  const [logoUrl, setLogoUrl] = useState(
-    loaderData.scrape?.widgetConfig?.logoUrl
-  );
-  const [buttonLogoUrl, setButtonLogoUrl] = useState(
-    loaderData.scrape?.widgetConfig?.buttonLogoUrl
-  );
-  const [chatboxBgColor, setChatboxBgColor] = useState(
-    loaderData.scrape?.widgetConfig?.chatboxBgColor
-  );
-  const [chatboxTextColor, setChatboxTextColor] = useState(
-    loaderData.scrape?.widgetConfig?.chatboxTextColor
-  );
-  const [welcomeMessage, setWelcomeMessage] = useState(
-    loaderData.scrape?.widgetConfig?.welcomeMessage
-  );
-  const [showMcpSetup, setShowMcpSetup] = useState(
-    loaderData.scrape?.widgetConfig?.showMcpSetup ?? true
-  );
-  const [textInputPlaceholder, setTextInputPlaceholder] = useState(
-    loaderData.scrape?.widgetConfig?.textInputPlaceholder
-  );
-  const [applyColorsToChatbox, setApplyColorsToChatbox] = useState(
-    loaderData.scrape?.widgetConfig?.applyColorsToChatbox ?? false
-  );
-  const [title, setTitle] = useState(loaderData.scrape?.widgetConfig?.title);
-  const [hideBranding, setHideBranding] = useState(
-    loaderData.scrape?.widgetConfig?.hideBranding ?? false
-  );
-  const [currentPageContext, setCurrentPageContext] = useState(
-    loaderData.scrape?.widgetConfig?.currentPageContext ?? false
-  );
+  const config = loaderData.scrape?.widgetConfig;
+  const form = useDirtyForm({
+    primaryColor: config?.primaryColor ?? null,
+    buttonTextColor: config?.buttonTextColor ?? null,
+    buttonText: config?.buttonText ?? null,
+    buttonLogoUrl: config?.buttonLogoUrl ?? null,
+    chatboxBgColor: config?.chatboxBgColor ?? null,
+    chatboxTextColor: config?.chatboxTextColor ?? null,
+    title: config?.title ?? null,
+    logoUrl: config?.logoUrl ?? null,
+    size: (config?.size ?? "small") as WidgetSize,
+    welcomeMessage: config?.welcomeMessage ?? null,
+    questions: config?.questions ?? [],
+    textInputPlaceholder: config?.textInputPlaceholder ?? null,
+    showMcpSetup: config?.showMcpSetup ?? true,
+    currentPageContext: config?.currentPageContext ?? false,
+    hideBranding: config?.hideBranding ?? false,
+  });
+
   const [previewType, setPreviewType] = useState<"home" | "chat">("home");
 
   const canHideBranding = useMemo(() => {
     return !!loaderData.scrape?.user?.plan?.brandRemoval?.subscriptionId;
   }, [loaderData.scrape?.user?.plan?.brandRemoval?.subscriptionId]);
 
-  useEffect(() => {
-    setQuestions(loaderData.scrape?.widgetConfig?.questions ?? []);
-  }, [loaderData.scrape?.widgetConfig?.questions]);
-
-  useEffect(() => {
-    setSize(loaderData.scrape?.widgetConfig?.size ?? "small");
-  }, [loaderData.scrape?.widgetConfig?.size]);
-
   const liveScrape = useMemo(() => {
     return {
       ...loaderData.scrape!,
       widgetConfig: {
         ...loaderData.scrape?.widgetConfig,
-        size,
-        primaryColor,
-        buttonTextColor,
-        buttonText,
-        tooltip,
-        showLogo,
-        questions,
-        welcomeMessage,
-        showMcpSetup,
-        textInputPlaceholder,
-        logoUrl,
-        applyColorsToChatbox,
-        title,
-        hideBranding,
-        currentPageContext,
-        chatboxBgColor,
-        chatboxTextColor,
-        buttonLogoUrl,
+        size: form.getValue("size"),
+        primaryColor: form.getValue("primaryColor"),
+        buttonTextColor: form.getValue("buttonTextColor"),
+        buttonText: form.getValue("buttonText"),
+        tooltip: config?.tooltip,
+        showLogo: config?.showLogo ?? false,
+        questions: form.getValue("questions"),
+        welcomeMessage: form.getValue("welcomeMessage"),
+        showMcpSetup: form.getValue("showMcpSetup"),
+        textInputPlaceholder: form.getValue("textInputPlaceholder"),
+        logoUrl: form.getValue("logoUrl"),
+        applyColorsToChatbox: config?.applyColorsToChatbox ?? false,
+        title: form.getValue("title"),
+        hideBranding: form.getValue("hideBranding"),
+        currentPageContext: form.getValue("currentPageContext"),
+        chatboxBgColor: form.getValue("chatboxBgColor"),
+        chatboxTextColor: form.getValue("chatboxTextColor"),
+        buttonLogoUrl: form.getValue("buttonLogoUrl"),
       },
     };
-  }, [
-    loaderData.scrape,
-    size,
-    primaryColor,
-    buttonTextColor,
-    buttonText,
-    tooltip,
-    showLogo,
-    questions,
-    welcomeMessage,
-    showMcpSetup,
-    textInputPlaceholder,
-    logoUrl,
-    applyColorsToChatbox,
-    title,
-    hideBranding,
-    currentPageContext,
-    chatboxBgColor,
-    chatboxTextColor,
-    buttonLogoUrl,
-  ]);
+  }, [loaderData.scrape, form.values, config]);
 
   function addQuestion() {
-    setQuestions([...questions, { text: "" }]);
+    form.setValue("questions", (prev) => [
+      ...((prev ?? []) as WidgetQuestion[]),
+      { text: "" },
+    ]);
   }
 
   function removeQuestion(index: number) {
-    setQuestions(questions.filter((_, i) => i !== index));
+    form.setValue("questions", (prev) => {
+      const questions = (prev ?? []) as WidgetQuestion[];
+      return questions.filter((_, i) => i !== index);
+    });
   }
 
-  function clearPrimaryColor() {
-    setPrimaryColor(null);
-  }
-
-  function clearButtonTextColor() {
-    setButtonTextColor(null);
-  }
-
-  function clearChatboxBgColor() {
-    setChatboxBgColor(null);
-  }
-
-  function clearChatboxTextColor() {
-    setChatboxTextColor(null);
-  }
+  const askAiButtonDirty =
+    form.isDirty("primaryColor") ||
+    form.isDirty("buttonTextColor") ||
+    form.isDirty("buttonText") ||
+    form.isDirty("buttonLogoUrl");
+  const chatboxDirty =
+    form.isDirty("chatboxBgColor") ||
+    form.isDirty("chatboxTextColor") ||
+    form.isDirty("title") ||
+    form.isDirty("logoUrl");
 
   return (
     <Page title={"Customise"} icon={<TbColorSwatch />}>
@@ -437,6 +378,7 @@ export default function ScrapeCustomise({ loaderData }: Route.ComponentProps) {
             title="Ask AI button"
             description="Customise the Ask AI button appearance"
             fetcher={askAIButtonFetcher}
+            dirty={askAiButtonDirty}
           >
             <input type="hidden" name="from-ask-ai-button" value={"true"} />
 
@@ -445,17 +387,17 @@ export default function ScrapeCustomise({ loaderData }: Route.ComponentProps) {
                 <ColorPicker
                   name="primaryColor"
                   label="Background"
-                  color={primaryColor}
-                  setColor={setPrimaryColor}
-                  onClear={clearPrimaryColor}
+                  color={form.getValue("primaryColor") as string | null}
+                  setColor={(c) => form.setValue("primaryColor", c)}
+                  onClear={() => form.setValue("primaryColor", null)}
                 />
 
                 <ColorPicker
                   name="buttonTextColor"
                   label="Text color"
-                  color={buttonTextColor}
-                  setColor={setButtonTextColor}
-                  onClear={clearButtonTextColor}
+                  color={form.getValue("buttonTextColor") as string | null}
+                  setColor={(c) => form.setValue("buttonTextColor", c)}
+                  onClear={() => form.setValue("buttonTextColor", null)}
                 />
               </div>
 
@@ -467,8 +409,8 @@ export default function ScrapeCustomise({ loaderData }: Route.ComponentProps) {
                     type="text"
                     placeholder="Button text"
                     name="buttonText"
-                    value={buttonText ?? ""}
-                    onChange={(e) => setButtonText(e.target.value)}
+                    value={(form.getValue("buttonText") as string) ?? ""}
+                    onChange={form.handleChange("buttonText")}
                   />
                 </fieldset>
 
@@ -479,8 +421,8 @@ export default function ScrapeCustomise({ loaderData }: Route.ComponentProps) {
                     type="text"
                     placeholder="Logo URL"
                     name="buttonLogoUrl"
-                    value={buttonLogoUrl ?? ""}
-                    onChange={(e) => setButtonLogoUrl(e.target.value)}
+                    value={(form.getValue("buttonLogoUrl") as string) ?? ""}
+                    onChange={form.handleChange("buttonLogoUrl")}
                   />
                 </fieldset>
               </div>
@@ -492,6 +434,7 @@ export default function ScrapeCustomise({ loaderData }: Route.ComponentProps) {
             title="Chatbox"
             description="Customise the chatbox appearance"
             fetcher={chatboxFetcher}
+            dirty={chatboxDirty}
           >
             <input type="hidden" name="from-chatbox" value={"true"} />
 
@@ -500,17 +443,17 @@ export default function ScrapeCustomise({ loaderData }: Route.ComponentProps) {
                 <ColorPicker
                   name="chatboxBgColor"
                   label="Background"
-                  color={chatboxBgColor}
-                  setColor={setChatboxBgColor}
-                  onClear={clearChatboxBgColor}
+                  color={form.getValue("chatboxBgColor") as string | null}
+                  setColor={(c) => form.setValue("chatboxBgColor", c)}
+                  onClear={() => form.setValue("chatboxBgColor", null)}
                 />
 
                 <ColorPicker
                   name="chatboxTextColor"
                   label="Text color"
-                  color={chatboxTextColor}
-                  setColor={setChatboxTextColor}
-                  onClear={clearChatboxTextColor}
+                  color={form.getValue("chatboxTextColor") as string | null}
+                  setColor={(c) => form.setValue("chatboxTextColor", c)}
+                  onClear={() => form.setValue("chatboxTextColor", null)}
                 />
               </div>
 
@@ -522,8 +465,8 @@ export default function ScrapeCustomise({ loaderData }: Route.ComponentProps) {
                     type="text"
                     placeholder="Ex: Assistant"
                     name="title"
-                    value={title ?? ""}
-                    onChange={(e) => setTitle(e.target.value)}
+                    value={(form.getValue("title") as string) ?? ""}
+                    onChange={form.handleChange("title")}
                   />
                 </fieldset>
 
@@ -534,8 +477,8 @@ export default function ScrapeCustomise({ loaderData }: Route.ComponentProps) {
                     type="text"
                     placeholder="Logo URL"
                     name="logoUrl"
-                    value={logoUrl ?? ""}
-                    onChange={(e) => setLogoUrl(e.target.value)}
+                    value={(form.getValue("logoUrl") as string) ?? ""}
+                    onChange={form.handleChange("logoUrl")}
                   />
                 </fieldset>
               </div>
@@ -547,12 +490,15 @@ export default function ScrapeCustomise({ loaderData }: Route.ComponentProps) {
             title="Widget size"
             description="Set the size of the widget to be when it's embedded on your website"
             fetcher={sizeFetcher}
+            dirty={form.isDirty("size")}
           >
             <select
               className="select w-full max-w-xs"
               name="size"
-              value={size}
-              onChange={(e) => setSize(e.target.value as WidgetSize)}
+              value={(form.getValue("size") as string) ?? "small"}
+              onChange={(e) =>
+                form.setValue("size", e.target.value as WidgetSize)
+              }
             >
               <option value="small">Small</option>
               <option value="large">Large</option>
@@ -564,12 +510,13 @@ export default function ScrapeCustomise({ loaderData }: Route.ComponentProps) {
             title="Welcome message"
             description="Add your custom welcome message to the widget. Supports markdown."
             fetcher={welcomeMessageFetcher}
+            dirty={form.isDirty("welcomeMessage")}
           >
             <textarea
               className="textarea textarea-bordered w-full"
               name="welcomeMessage"
-              value={welcomeMessage ?? ""}
-              onChange={(e) => setWelcomeMessage(e.target.value)}
+              value={(form.getValue("welcomeMessage") as string) ?? ""}
+              onChange={form.handleChange("welcomeMessage")}
               placeholder="Hi, I'm the CrawlChat bot. How can I help you today?"
               rows={4}
             />
@@ -580,31 +527,37 @@ export default function ScrapeCustomise({ loaderData }: Route.ComponentProps) {
             title="Example questions"
             description="Show few example questions when a user visits the widget for the first time"
             fetcher={questionsFetcher}
+            dirty={form.isDirty("questions")}
           >
             <input type="hidden" name="from-questions" value={"true"} />
-            {questions.map((question, i) => (
-              <div key={i} className="flex gap-2 items-center">
-                <input
-                  className="input w-full"
-                  type="text"
-                  name={"questions"}
-                  placeholder={"Ex: How to use the product?"}
-                  value={question.text}
-                  onChange={(e) => {
-                    const newQuestions = [...questions];
-                    newQuestions[i].text = e.target.value;
-                    setQuestions(newQuestions);
-                  }}
-                />
-                <button
-                  className="btn btn-error btn-soft btn-square"
-                  type="button"
-                  onClick={() => removeQuestion(i)}
-                >
-                  <TbTrash />
-                </button>
-              </div>
-            ))}
+            {(form.getValue("questions") as WidgetQuestion[])?.map(
+              (question, i) => (
+                <div key={i} className="flex gap-2 items-center">
+                  <input
+                    className="input w-full"
+                    type="text"
+                    name={"questions"}
+                    placeholder={"Ex: How to use the product?"}
+                    value={question.text}
+                    onChange={(e) => {
+                      form.setValue("questions", (prev) => {
+                        const questions = (prev ?? []) as WidgetQuestion[];
+                        const next = [...questions];
+                        next[i] = { ...next[i], text: e.target.value };
+                        return next;
+                      });
+                    }}
+                  />
+                  <button
+                    className="btn btn-error btn-soft btn-square"
+                    type="button"
+                    onClick={() => removeQuestion(i)}
+                  >
+                    <TbTrash />
+                  </button>
+                </div>
+              )
+            )}
             <div>
               <button className="btn" type="button" onClick={addQuestion}>
                 <TbPlus />
@@ -618,13 +571,14 @@ export default function ScrapeCustomise({ loaderData }: Route.ComponentProps) {
             title="Text input placeholder"
             description="Set the placeholder text for the text input field"
             fetcher={textInputPlaceholderFetcher}
+            dirty={form.isDirty("textInputPlaceholder")}
           >
             <input
               className="input w-full"
               type="text"
               name="textInputPlaceholder"
-              value={textInputPlaceholder ?? ""}
-              onChange={(e) => setTextInputPlaceholder(e.target.value)}
+              value={(form.getValue("textInputPlaceholder") as string) ?? ""}
+              onChange={form.handleChange("textInputPlaceholder")}
               placeholder="Ex: Ask me anything about the product"
             />
           </SettingsSection>
@@ -634,6 +588,7 @@ export default function ScrapeCustomise({ loaderData }: Route.ComponentProps) {
             title="MCP setup instructions"
             description="Show the MCP client setup instrctions on the widget"
             fetcher={mcpSetupFetcher}
+            dirty={form.isDirty("showMcpSetup")}
           >
             <input type="hidden" name="from-mcp-setup" value={"true"} />
             <label className="label">
@@ -641,8 +596,8 @@ export default function ScrapeCustomise({ loaderData }: Route.ComponentProps) {
                 type="checkbox"
                 className="toggle"
                 name="showMcpSetup"
-                checked={showMcpSetup}
-                onChange={(e) => setShowMcpSetup(e.target.checked)}
+                checked={(form.getValue("showMcpSetup") as boolean) ?? true}
+                onChange={form.handleChange("showMcpSetup")}
               />
               Show it
             </label>
@@ -653,6 +608,7 @@ export default function ScrapeCustomise({ loaderData }: Route.ComponentProps) {
             title="Current page context"
             description="Include the current page in the context of the conversation"
             fetcher={currentPageContextFetcher}
+            dirty={form.isDirty("currentPageContext")}
           >
             <input
               type="hidden"
@@ -664,8 +620,10 @@ export default function ScrapeCustomise({ loaderData }: Route.ComponentProps) {
                 type="checkbox"
                 className="toggle"
                 name="currentPageContext"
-                checked={currentPageContext}
-                onChange={(e) => setCurrentPageContext(e.target.checked)}
+                checked={
+                  (form.getValue("currentPageContext") as boolean) ?? false
+                }
+                onChange={form.handleChange("currentPageContext")}
               />
               Enable
             </label>
@@ -676,6 +634,7 @@ export default function ScrapeCustomise({ loaderData }: Route.ComponentProps) {
             title="Hide branding"
             description="Hide CrawlChat branding from the widget"
             fetcher={hideBrandingFetcher}
+            dirty={form.isDirty("hideBranding")}
           >
             <input type="hidden" name="from-hide-branding" value={"true"} />
             <label className="label">
@@ -683,9 +642,9 @@ export default function ScrapeCustomise({ loaderData }: Route.ComponentProps) {
                 type="checkbox"
                 className="toggle"
                 name="hideBranding"
-                checked={hideBranding}
+                checked={(form.getValue("hideBranding") as boolean) ?? false}
                 disabled={!canHideBranding}
-                onChange={(e) => setHideBranding(e.target.checked)}
+                onChange={form.handleChange("hideBranding")}
               />
               Hide branding
               {!canHideBranding && (
@@ -731,10 +690,10 @@ export default function ScrapeCustomise({ loaderData }: Route.ComponentProps) {
 
           <div className="flex justify-center">
             <AskAIButton
-              logoUrl={buttonLogoUrl}
-              bg={primaryColor}
-              color={buttonTextColor}
-              text={buttonText}
+              logoUrl={form.getValue("buttonLogoUrl") as string | null}
+              bg={form.getValue("primaryColor") as string | null}
+              color={form.getValue("buttonTextColor") as string | null}
+              text={form.getValue("buttonText") as string | null}
             />
           </div>
 

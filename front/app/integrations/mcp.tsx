@@ -7,6 +7,7 @@ import {
   SettingsSection,
   SettingsSectionProvider,
 } from "~/components/settings-section";
+import { useDirtyForm } from "~/components/use-dirty-form";
 import { prisma } from "@packages/common/prisma";
 import { MarkdownProse } from "~/widget/markdown-prose";
 import { authoriseScrapeUser, getSessionScrapeId } from "~/auth/scrape-session";
@@ -60,6 +61,9 @@ export async function action({ request }: Route.ActionArgs) {
 
 export default function ScrapeMcp({ loaderData }: Route.ComponentProps) {
   const toolNameFetcher = useFetcher();
+  const form = useDirtyForm({
+    mcpToolName: loaderData.scrape.mcpToolName ?? "",
+  });
 
   const name = makeMcpName(loaderData.scrape);
   const mcpCommand = makeMcpCommand(loaderData.scrape.id, name);
@@ -97,12 +101,14 @@ export default function ScrapeMcp({ loaderData }: Route.ComponentProps) {
             description="MCP clients rely on this name to identify when to use this tool. Give it a descriptive name. Should be alphanumeric and _ only."
             fetcher={toolNameFetcher}
             id="search-tool-name"
+            dirty={form.isDirty("mcpToolName")}
           >
             <input
               type="text"
               className="input"
               name="mcpToolName"
-              defaultValue={loaderData.scrape.mcpToolName ?? ""}
+              value={(form.getValue("mcpToolName") as string) ?? ""}
+              onChange={form.handleChange("mcpToolName")}
               placeholder="Ex: search_mytool_documentation"
               pattern="^[a-zA-Z0-9_]+$"
             />

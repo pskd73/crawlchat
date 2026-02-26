@@ -15,6 +15,7 @@ import { prisma } from "@packages/common/prisma";
 import { getAuthUser } from "~/auth/middleware";
 import {
   TbCheck,
+  TbCopy,
   TbCrown,
   TbFolder,
   TbListCheck,
@@ -37,6 +38,7 @@ import { makeMeta } from "~/meta";
 import { Timestamp } from "~/components/timestamp";
 import { hideModal, showModal } from "~/components/daisy-utils";
 import { models, oldModels } from "@packages/common";
+import { useDirtyForm } from "~/components/use-dirty-form";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -221,6 +223,9 @@ Chatbase is better for simple website Q&A use cases.`,
 
 function TicketingSettings({ scrape }: { scrape: Scrape }) {
   const fetcher = useFetcher();
+  const dirtyForm = useDirtyForm({
+    ticketingEnabled: scrape.ticketingEnabled ?? false,
+  });
 
   useEffect(() => {
     if (fetcher.data) {
@@ -234,6 +239,7 @@ function TicketingSettings({ scrape }: { scrape: Scrape }) {
       title="Support tickets"
       description="Enable the support tickets for this collection to start receiving support tickets either when the AI has no answer for a given question or the user choses to create a ticket."
       fetcher={fetcher}
+      dirty={dirtyForm.isDirty("ticketingEnabled")}
     >
       <input type="hidden" name="from-ticketing-enabled" value={"true"} />
       <label className="label">
@@ -242,6 +248,7 @@ function TicketingSettings({ scrape }: { scrape: Scrape }) {
           className="toggle"
           name="ticketing"
           defaultChecked={scrape.ticketingEnabled ?? false}
+          onChange={dirtyForm.handleChange("ticketingEnabled")}
         />
         Active
       </label>
@@ -265,17 +272,11 @@ function oldModelToModel(oldModel: string) {
 function AiModelSettings({ scrape }: { scrape: Scrape }) {
   const modelFetcher = useFetcher();
   const [searchParams] = useSearchParams();
-  const [selectedModel, setSelectedModel] = useState<string>(
-    scrape.llmModel
+  const dirtyForm = useDirtyForm({
+    llmModel: scrape.llmModel
       ? oldModelToModel(scrape.llmModel)
-      : "openrouter/openai/gpt-4o-mini"
-  );
-
-  useEffect(() => {
-    if (searchParams.get("model")) {
-      setSelectedModel(searchParams.get("model") as string);
-    }
-  }, [searchParams]);
+      : "openrouter/openai/gpt-4o-mini",
+  });
 
   return (
     <SettingsSection
@@ -283,7 +284,7 @@ function AiModelSettings({ scrape }: { scrape: Scrape }) {
       title="AI Model"
       description="Select the AI model to use for the messages across channels."
       fetcher={modelFetcher}
-      dirty={selectedModel !== scrape.llmModel}
+      dirty={dirtyForm.isDirty("llmModel")}
       actionRight={
         <Link to={`/ai-models`} className="btn btn-ghost btn-primary">
           Compare
@@ -291,8 +292,8 @@ function AiModelSettings({ scrape }: { scrape: Scrape }) {
       }
     >
       <select
-        value={selectedModel}
-        onChange={(e) => setSelectedModel(e.target.value)}
+        value={dirtyForm.getValue("llmModel")}
+        onChange={dirtyForm.handleChange("llmModel")}
         className="select"
         name="llmModel"
       >
@@ -308,6 +309,9 @@ function AiModelSettings({ scrape }: { scrape: Scrape }) {
 
 function ShowSourcesSetting({ scrape, user }: { scrape: Scrape; user: User }) {
   const showSourcesFetcher = useFetcher();
+  const dirtyForm = useDirtyForm({
+    showSources: scrape.showSources ?? false,
+  });
 
   function isAllowed() {
     return ["starter", "pro", "grow", "accelerate"].includes(
@@ -321,6 +325,7 @@ function ShowSourcesSetting({ scrape, user }: { scrape: Scrape; user: User }) {
       title="Show sources"
       description="Show the sources that the chatbot used from the knowledge base. It will be visible on the chat widget under every answer and on Discord/Slack messages."
       fetcher={showSourcesFetcher}
+      dirty={dirtyForm.isDirty("showSources")}
     >
       <div className="flex gap-2">
         <input type="hidden" name="from-show-sources" value={"true"} />
@@ -331,6 +336,7 @@ function ShowSourcesSetting({ scrape, user }: { scrape: Scrape; user: User }) {
             disabled={!isAllowed()}
             type="checkbox"
             className="toggle"
+            onChange={dirtyForm.handleChange("showSources")}
           />
           Active
         </label>
@@ -350,6 +356,9 @@ function AnalyseMessageSettings({
   user: User;
 }) {
   const fetcher = useFetcher();
+  const dirtyForm = useDirtyForm({
+    analyseMessage: scrape.analyseMessage ?? false,
+  });
 
   function isAllowed() {
     return ["starter", "pro", "grow", "accelerate"].includes(
@@ -363,6 +372,7 @@ function AnalyseMessageSettings({
       title="Post answer analysis"
       description="Enable this to analyze the answer given by the AI and find out if there is any data gap in the knowledge base. It also analyzes more details from the question such as the sentiment, category and more. It uses one message credit per question."
       fetcher={fetcher}
+      dirty={dirtyForm.isDirty("analyseMessage")}
     >
       <div className="flex gap-2">
         <input type="hidden" name="from-analyse-message" value={"true"} />
@@ -373,6 +383,7 @@ function AnalyseMessageSettings({
             name="analyseMessage"
             defaultChecked={scrape.analyseMessage ?? false}
             disabled={!isAllowed()}
+            onChange={dirtyForm.handleChange("analyseMessage")}
           />
           Active
         </label>
@@ -391,6 +402,9 @@ function ChatPromptSettings({ scrape }: { scrape: Scrape }) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [productName, setProductName] = useState<string>("");
   const formRef = useRef<HTMLFormElement>(null);
+  const dirtyForm = useDirtyForm({
+    chatPrompt: scrape.chatPrompt ?? "",
+  });
 
   function handleUsePrompt() {
     if (textareaRef.current && productName) {
@@ -403,7 +417,7 @@ function ChatPromptSettings({ scrape }: { scrape: Scrape }) {
       setProductName("");
       setSelectedPrompt("product-expert");
       hideModal("browse-prompts");
-      promptFetcher.submit(formRef.current);
+      dirtyForm.setValue("chatPrompt", textareaRef.current.value);
     }
   }
 
@@ -425,6 +439,7 @@ function ChatPromptSettings({ scrape }: { scrape: Scrape }) {
             <TbFolder />
           </button>
         }
+        dirty={dirtyForm.isDirty("chatPrompt")}
       >
         <textarea
           ref={textareaRef}
@@ -433,6 +448,7 @@ function ChatPromptSettings({ scrape }: { scrape: Scrape }) {
           defaultValue={scrape.chatPrompt ?? ""}
           placeholder="Enter a custom chat prompt for this scrape."
           rows={5}
+          onChange={dirtyForm.handleChange("chatPrompt")}
         />
       </SettingsSection>
 
@@ -504,7 +520,7 @@ function ChatPromptSettings({ scrape }: { scrape: Scrape }) {
           </div>
         </div>
         <form method="dialog" className="modal-backdrop">
-          <button>close</button>
+          <button type="button">close</button>
         </form>
       </dialog>
     </>
@@ -512,31 +528,33 @@ function ChatPromptSettings({ scrape }: { scrape: Scrape }) {
 }
 
 function CategorySettings({ scrape }: { scrape: Scrape }) {
-  const [categories, setCategories] = useState<ScrapeMessageCategory[]>(
-    scrape.messageCategories
-  );
   const fetcher = useFetcher();
+  const dirtyForm = useDirtyForm({
+    categories: scrape.messageCategories,
+  });
 
   function handleAddCategory() {
-    setCategories([
-      ...categories,
+    dirtyForm.setValue("categories", (prev) => [
+      ...prev,
       { title: "", description: "", createdAt: new Date() },
     ]);
   }
 
   function handleDeleteCategory(index: number) {
-    setCategories(categories.filter((_, i) => i !== index));
+    dirtyForm.setValue("categories", (prev) =>
+      prev.filter((_, i) => i !== index)
+    );
   }
 
   function handleChangeCategoryTitle(index: number, title: string) {
-    setCategories((cat) =>
-      cat.map((c, i) => (i === index ? { ...c, title } : c))
+    dirtyForm.setValue("categories", (prev) =>
+      prev.map((c, i) => (i === index ? { ...c, title } : c))
     );
   }
 
   function handleChangeCategoryDescription(index: number, description: string) {
-    setCategories((cat) =>
-      cat.map((c, i) => (i === index ? { ...c, description } : c))
+    dirtyForm.setValue("categories", (prev) =>
+      prev.map((c, i) => (i === index ? { ...c, description } : c))
     );
   }
 
@@ -552,58 +570,59 @@ function CategorySettings({ scrape }: { scrape: Scrape }) {
           <TbPlus />
         </button>
       }
+      dirty={dirtyForm.isAnyDirty}
     >
-      {categories.length > 0 && (
+      {dirtyForm.getValue("categories")?.length > 0 && (
         <div className="flex gap-2">
           <div className="flex flex-col gap-2 w-full">
             <input
               type="hidden"
               name="categories"
-              value={JSON.stringify(categories)}
+              value={JSON.stringify(dirtyForm.getValue("categories"))}
             />
-            {categories.map((category, index) => (
-              <div key={index} className="flex gap-2 w-full items-end">
-                <fieldset className="fieldset flex-1">
-                  <legend className="fieldset-legend">Title</legend>
-                  <input
-                    type="text"
-                    className="input"
-                    name="category-title"
-                    defaultValue={category.title}
-                    placeholder="Ex: Pricing"
-                    value={category.title}
-                    onChange={(e) =>
-                      handleChangeCategoryTitle(index, e.target.value)
-                    }
-                  />
-                </fieldset>
+            {dirtyForm
+              .getValue("categories")
+              ?.map((category: ScrapeMessageCategory, index: number) => (
+                <div key={index} className="flex gap-2 w-full items-end">
+                  <fieldset className="fieldset flex-1">
+                    <legend className="fieldset-legend">Title</legend>
+                    <input
+                      type="text"
+                      className="input"
+                      name="category-title"
+                      placeholder="Ex: Pricing"
+                      value={category.title}
+                      onChange={(e) =>
+                        handleChangeCategoryTitle(index, e.target.value)
+                      }
+                    />
+                  </fieldset>
 
-                <fieldset className="fieldset flex-2">
-                  <legend className="fieldset-legend">Description</legend>
-                  <input
-                    type="text"
-                    className="input w-full"
-                    name="category-title"
-                    defaultValue={category.title}
-                    placeholder="Ex: Everything about pricing, plans, credits, etc."
-                    value={category.description}
-                    onChange={(e) =>
-                      handleChangeCategoryDescription(index, e.target.value)
-                    }
-                  />
-                </fieldset>
+                  <fieldset className="fieldset flex-2">
+                    <legend className="fieldset-legend">Description</legend>
+                    <input
+                      type="text"
+                      className="input w-full"
+                      name="category-title"
+                      placeholder="Ex: Everything about pricing, plans, credits, etc."
+                      value={category.description}
+                      onChange={(e) =>
+                        handleChangeCategoryDescription(index, e.target.value)
+                      }
+                    />
+                  </fieldset>
 
-                <fieldset className="fieldset">
-                  <button
-                    className="btn btn-error btn-soft btn-square"
-                    type="button"
-                    onClick={() => handleDeleteCategory(index)}
-                  >
-                    <TbTrash />
-                  </button>
-                </fieldset>
-              </div>
-            ))}
+                  <fieldset className="fieldset">
+                    <button
+                      className="btn btn-error btn-soft btn-square"
+                      type="button"
+                      onClick={() => handleDeleteCategory(index)}
+                    >
+                      <TbTrash />
+                    </button>
+                  </fieldset>
+                </div>
+              ))}
           </div>
         </div>
       )}
@@ -619,8 +638,13 @@ export default function ScrapeSettings({ loaderData }: Route.ComponentProps) {
   const privateFetcher = useFetcher();
 
   const [deleteConfirm, setDeleteConfirm] = useState(false);
-  const [minScore, setMinScore] = useState(loaderData.scrape.minScore ?? 0);
-  const [_private, setPrivate] = useState(loaderData.scrape.private ?? false);
+
+  const dirtyForm = useDirtyForm({
+    minScore: loaderData.scrape.minScore,
+    private: loaderData.scrape.private,
+    title: loaderData.scrape.title,
+    slug: loaderData.scrape.slug,
+  });
 
   useEffect(() => {
     if (deleteConfirm) {
@@ -646,6 +670,11 @@ export default function ScrapeSettings({ loaderData }: Route.ComponentProps) {
     });
   }
 
+  function copyId() {
+    navigator.clipboard.writeText(loaderData.scrape.id);
+    toast.success("Copied to clipboard");
+  }
+
   return (
     <Page title="Settings" icon={<TbSettings />}>
       <SettingsSectionProvider>
@@ -657,8 +686,15 @@ export default function ScrapeSettings({ loaderData }: Route.ComponentProps) {
                 value: <Timestamp date={loaderData.scrape.createdAt} />,
               },
               {
-                label: "Id",
-                value: loaderData.scrape.id,
+                label: "Collection ID",
+                value: (
+                  <div className="flex items-center gap-2 overflow-hidden">
+                    <code>{loaderData.scrape.id}</code>
+                    <button className="btn btn-square btn-xs" onClick={copyId}>
+                      <TbCopy />
+                    </button>
+                  </div>
+                ),
               },
             ]}
           />
@@ -668,6 +704,7 @@ export default function ScrapeSettings({ loaderData }: Route.ComponentProps) {
             title="Name"
             description="Give it a name. It will be shown on chat screen."
             fetcher={nameFetcher}
+            dirty={dirtyForm.isDirty("title")}
           >
             <input
               type="text"
@@ -675,6 +712,7 @@ export default function ScrapeSettings({ loaderData }: Route.ComponentProps) {
               name="title"
               defaultValue={loaderData.scrape.title ?? ""}
               placeholder="Enter a name for this scrape."
+              onChange={dirtyForm.handleChange("title")}
             />
           </SettingsSection>
 
@@ -683,6 +721,7 @@ export default function ScrapeSettings({ loaderData }: Route.ComponentProps) {
             title="Slug"
             description="Give it a slug and you can use it in the URL to access the chatbot. Should be 4-16 characters long and can only contain lowercase letters, numbers, and hyphens."
             fetcher={slugFetcher}
+            dirty={dirtyForm.isDirty("slug")}
           >
             <input
               type="text"
@@ -692,6 +731,7 @@ export default function ScrapeSettings({ loaderData }: Route.ComponentProps) {
               placeholder="Ex: remotion"
               pattern="^[a-z0-9\-]{4,32}$"
               required
+              onChange={dirtyForm.handleChange("slug")}
             />
           </SettingsSection>
 
@@ -700,11 +740,12 @@ export default function ScrapeSettings({ loaderData }: Route.ComponentProps) {
             title="Visibility type"
             description="Configure if the bot is public or private."
             fetcher={privateFetcher}
+            dirty={dirtyForm.isDirty("private")}
           >
             <input
               type="hidden"
               name="visibility-type"
-              value={_private ? "private" : "public"}
+              value={dirtyForm.getValue("private") ? "private" : "public"}
             />
             <RadioCard
               options={[
@@ -723,8 +764,10 @@ export default function ScrapeSettings({ loaderData }: Route.ComponentProps) {
                     "It will be private bot and only work with Discord Bots, Slack bots and team members.",
                 },
               ]}
-              value={_private ? "private" : "public"}
-              onChange={(value) => setPrivate(value === "private")}
+              value={dirtyForm.getValue("private") ? "private" : "public"}
+              onChange={(value) =>
+                dirtyForm.setValue("private", value === "private")
+              }
             />
           </SettingsSection>
 
@@ -737,20 +780,23 @@ export default function ScrapeSettings({ loaderData }: Route.ComponentProps) {
             title="Min score"
             description="Configure the minimum score (relevance score) required for the knowledge base to have to be considered for a question. If it is too high, it will not be able to answer questions as much. If it is too low, it will answer questions that are not relevant."
             fetcher={minScoreFetcher}
+            dirty={dirtyForm.isDirty("minScore")}
           >
             <div className="flex gap-2">
               <input
                 type="range"
                 min={0}
                 max="1"
-                defaultValue={minScore}
+                defaultValue={(dirtyForm.getValue("minScore") as number) ?? 0}
                 className="range"
                 step={0.01}
-                onChange={(e) => setMinScore(parseFloat(e.target.value))}
+                onChange={(e) =>
+                  dirtyForm.setValue("minScore", parseFloat(e.target.value))
+                }
                 name="minScore"
               />
               <div className="badge badge-lg badge-soft badge-primary">
-                {minScore}
+                {(dirtyForm.getValue("minScore") as number) ?? 0}
               </div>
             </div>
           </SettingsSection>
