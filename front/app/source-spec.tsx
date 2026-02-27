@@ -8,7 +8,7 @@ import {
 } from "react-icons/tb";
 import { FaConfluence } from "react-icons/fa";
 import { SiDocusaurus, SiLinear } from "react-icons/si";
-import {
+import type {
   KnowledgeGroupType,
   KnowledgeGroupUpdateFrequency,
 } from "@packages/common/prisma";
