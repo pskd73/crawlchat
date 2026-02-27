@@ -399,6 +399,9 @@ app.post("/answer/:scrapeId", authenticate, async (req, res) => {
   let thread = await prisma.thread.findFirst({
     where: { scrapeId: scrape.id, isDefault: true },
   });
+  if (!req.body.version) {
+    throw new Error("version required");
+  }
   if (req.body.clientThreadId) {
     thread = await prisma.thread.findFirst({
       where: { clientThreadId: req.body.clientThreadId },
