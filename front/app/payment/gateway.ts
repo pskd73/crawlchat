@@ -14,7 +14,8 @@ export type PaymentGatewayWebhookType =
   | "renewed"
   | "payment_success";
 
-export type PaymentGatewayWebhook = {
+export type PaymentGatewaySubscriptionWebhook = {
+  webhookType: "subscription";
   email: string;
   type: PaymentGatewayWebhookType;
   subscriptionStatus?: PaymentGatewaySubscriptionStatus;
@@ -26,6 +27,17 @@ export type PaymentGatewayWebhook = {
   paymentAmount?: number | null;
   paymentCurrency?: string | null;
 };
+
+export type PaymentGatewayTopupWebhook = {
+  webhookType: "topup";
+  email: string;
+  productId: string;
+  credits: number;
+};
+
+export type PaymentGatewayWebhook =
+  | PaymentGatewaySubscriptionWebhook
+  | PaymentGatewayTopupWebhook;
 
 export type PaymentGatewaySubscription = {
   id: string;

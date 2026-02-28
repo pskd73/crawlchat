@@ -22,6 +22,20 @@ export async function handleWebhook(request: Request, gateway: PaymentGateway) {
       return Response.json({ message: "User not found" }, { status: 400 });
     }
 
+    if (webhook.webhookType === "topup") {
+      await prisma.$runCommandRaw({
+        update: "User",
+        updates: [
+          {
+            q: { email: webhook.email },
+            u: { $inc: { "plan.credits.messages": webhook.credits } },
+            multi: false,
+          },
+        ],
+      });
+      return Response.json({ message: "Added topup" });
+    }
+
     if (webhook.type === "created" && webhook.plan) {
       await activatePlan(user.id, webhook.plan, {
         provider: gateway.provider,

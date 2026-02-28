@@ -58,7 +58,14 @@ export const lemonsqueezyGateway: PaymentGateway = {
       throw new Error(JSON.stringify({ error: "Plan not found", status: 401 }));
     }
 
-    return { email, type, productId, plan, subscriptionId };
+    return {
+      webhookType: "subscription",
+      email,
+      type,
+      productId,
+      plan,
+      subscriptionId,
+    };
   },
 
   getSubscription: async (subscriptionId) => {
@@ -99,6 +106,7 @@ export const lemonsqueezyGateway: PaymentGateway = {
 
     throw new Error("Plan not found");
   },
+
   getCustomerPortalUrl: async (subscriptionId) => {
     const res = await fetch(
       `https://api.lemonsqueezy.com/v1/subscriptions/${subscriptionId}`,

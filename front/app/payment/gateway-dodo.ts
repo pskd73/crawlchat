@@ -52,6 +52,15 @@ export const productIdPlanMap: Record<string, Plan> = {
   pdt_lpFZp5sBEu5bzKwCbE5Y8: PLAN_HOBBY,
 };
 
+export const topupProductIdMap: Record<string, number> = {
+  pdt_Bd3tewxGoSpthFEmhNq64: 1000,
+  pdt_0NZB5fBcjnMwFyjqWxLXG: 3000,
+  pdt_0NWpIy5atI7vpkeWe1AVP: 8000,
+
+  // dev
+  pdt_0NZUPFnIVqj3VLPvp5NNW: 1000,
+};
+
 export const planProductIdMap: Record<string, string> = {
   [PLAN_HOBBY.id]: "pdt_IcrpqSx48qoCenz4lnLi1",
   [PLAN_STARTER.id]: "pdt_vgCVfRAaCT99LM1Dfk5qF",
@@ -108,9 +117,20 @@ export const dodoGateway: PaymentGateway = {
     const payload = JSON.parse(body);
     console.log("Dodo webhook", headers.get("webhook-id"));
 
+    if (payload.data.product_cart && payload.data.product_cart.length > 0) {
+      const productId = payload.data.product_cart[0].product_id;
+      return {
+        webhookType: "topup",
+        email: payload.data.customer.email,
+        type: "payment_success",
+        productId,
+        credits: topupProductIdMap[productId],
+      };
+    }
+
+    const productId = payload.data.product_id;
     const email = payload.data.customer.email;
     const eventName = typeMap[payload.type];
-    const productId = payload.data.product_id;
     const plan = productIdPlanMap[productId];
     const subscriptionId = payload.data.subscription_id;
     const metadata = payload.data.metadata;
@@ -119,6 +139,7 @@ export const dodoGateway: PaymentGateway = {
     const paymentCurrency = payload.data.currency;
 
     return {
+      webhookType: "subscription",
       email,
       type: eventName,
       productId,
@@ -173,8 +194,9 @@ export const dodoGateway: PaymentGateway = {
 
     const checkoutSession = await getDodoClient().checkoutSessions.create(body);
 
-    return { url: checkoutSession.checkout_url };
+    return { url: checkoutSession.checkout_url as string };
   },
+
   getCustomerPortalUrl: async (subscriptionId) => {
     const client = getDodoClient();
     const subscription = await client.subscriptions.retrieve(subscriptionId);

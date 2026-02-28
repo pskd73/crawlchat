@@ -27,6 +27,7 @@ export default [
     route("app", "summary/page.tsx"),
     route("app/users", "users/page.tsx"),
     route("profile", "profile.tsx"),
+    route("profile/topup", "topup.tsx"),
 
     route("settings", "settings/scrape.tsx"),
     route("settings/helpdesk", "settings/helpdesk.tsx"),

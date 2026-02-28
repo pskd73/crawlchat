@@ -1,8 +1,13 @@
 import type { Route } from "./+types/profile";
 import type { Prisma } from "@packages/common/prisma";
 import { Page } from "~/components/page";
-import { TbArrowRight, TbCrown, TbSettings } from "react-icons/tb";
-import { redirect, useFetcher } from "react-router";
+import {
+  TbArrowRight,
+  TbCrown,
+  TbMessagePlus,
+  TbSettings,
+} from "react-icons/tb";
+import { Link, redirect, useFetcher } from "react-router";
 import { getAuthUser } from "~/auth/middleware";
 import { prisma } from "@packages/common/prisma";
 import {
@@ -58,7 +63,7 @@ export async function loader({ request }: Route.LoaderArgs) {
   };
 }
 
-export function meta({ data }: Route.MetaArgs) {
+export function meta() {
   return makeMeta({
     title: "Profile - CrawlChat",
   });
@@ -227,6 +232,12 @@ export default function SettingsPage({ loaderData }: Route.ComponentProps) {
               description="Manage your plan and billing"
               actionRight={
                 <>
+                  {loaderData.subscription && (
+                    <Link to="/profile/topup" className="btn btn-neutral">
+                      <TbMessagePlus />
+                      Topup Credits
+                    </Link>
+                  )}
                   {loaderData.subscription && (
                     <customerPortalFetcher.Form method="post">
                       <input
