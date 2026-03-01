@@ -23,6 +23,7 @@
     "dev": "turbo run dev",
     "dev:core": "turbo run dev --filter=server --filter=front --filter=source-sync",
     "prettier": "turbo run prettier",
+    "prettier:fix": "turbo run prettier -- --write",
     "generate": "turbo run generate",
     "test": "turbo run test",
     "clean" : "turbo run clean && rm -rf packages/**/dist && rm -rf packages/**/node_modules && rm -rf node_modules && rm -rf .cache && rm -rf packages/**/.turbo && rm -rf .turbo"

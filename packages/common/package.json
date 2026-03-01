@@ -65,6 +65,10 @@
     "./express-auth": {
       "default": "./dist/express-auth.js",
       "types": "./dist/express-auth.d.ts"
+    },
+    "./credit-transaction": {
+      "default": "./dist/credit-transaction.js",
+      "types": "./dist/credit-transaction.d.ts"
     }
   },
   "typesVersions": {
@@ -110,6 +114,9 @@
       ],
       "express-auth": [
         "./dist/express-auth.d.ts"
+      ],
+      "credit-transaction": [
+        "./dist/credit-transaction.d.ts"
       ]
     }
   },

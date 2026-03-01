@@ -1,4 +1,5 @@
 import { prisma } from "./prisma";
+import { addCreditTransaction } from "./credit-transaction";
 import type {
   PlanCredits,
   PlanLimits,
@@ -342,8 +343,15 @@ export const activatePlan = async (
 export const consumeCredits = async (
   userId: string,
   type: "messages" | "scrapes",
-  amount: number
+  credits: number,
+  messageId?: string,
+  amount?: number,
+  description?: string
 ) => {
+  if (type !== "messages") {
+    throw new Error("Only message credits are supported for transactions");
+  }
+
   await prisma.user.update({
     where: { id: userId },
     data: {
@@ -365,7 +373,7 @@ export const consumeCredits = async (
                   scrapes: PLAN_FREE.credits.scrapes,
                 },
                 update: {
-                  [type]: { decrement: amount },
+                  [type]: { decrement: credits },
                 },
               },
             },
@@ -374,6 +382,16 @@ export const consumeCredits = async (
       },
     },
   });
+
+  await addCreditTransaction(
+    userId,
+    "usage",
+    "message",
+    description || "Message consumed",
+    -credits,
+    amount,
+    messageId
+  );
 };
 
 export const resetCredits = async (userId: string, planId?: string) => {

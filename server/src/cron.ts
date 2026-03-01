@@ -5,6 +5,7 @@ import { prisma } from "@packages/common/prisma";
 import { exit } from "process";
 import { cleanupMessages } from "./cleanup";
 import { createToken } from "@packages/common/jwt";
+import { updateAllCreditSnapshots } from "@packages/common/credit-transaction";
 
 async function weeklyUpdate() {
   const scrapes = await prisma.scrape.findMany({
@@ -59,6 +60,14 @@ async function main() {
   }
   if (jobName === "weekly-update") {
     return await weeklyUpdate();
+  }
+  if (jobName === "update-credit-snapshots") {
+    const purpose = getCliArg("purpose") as "message";
+    if (!purpose) {
+      console.error("purpose argument is required for update-credit-snapshots");
+      exit(1);
+    }
+    return await updateAllCreditSnapshots(purpose);
   }
 
   console.error("Invalid job name", jobName);

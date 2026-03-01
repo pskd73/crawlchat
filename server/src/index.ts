@@ -238,8 +238,6 @@ app.get("/mcp/:scrapeId", async (req, res) => {
   const result = await indexer.search(scrape.id, query);
   const processed = await indexer.process(query, result);
 
-  await consumeCredits(scrape.userId, "messages", creditsUsed);
-
   const message: FlowMessage<CustomMessage> = {
     llmMessage: {
       role: "assistant",
@@ -263,6 +261,14 @@ app.get("/mcp/:scrapeId", async (req, res) => {
       questionId: questionMessage.id,
     },
   });
+
+  await consumeCredits(
+    scrape.userId,
+    "messages",
+    creditsUsed,
+    questionMessage.id
+  );
+
   await prisma.message.update({
     where: { id: questionMessage.id },
     data: { answerId: answerMessage.id },
@@ -896,7 +902,7 @@ app.post("/ticket/:scrapeId", authenticate, async (req, res) => {
 
   const creditsUsed = 1;
 
-  await prisma.message.create({
+  const newMessage = await prisma.message.create({
     data: {
       threadId: thread.id,
       scrapeId: scrape.id,
@@ -913,7 +919,7 @@ app.post("/ticket/:scrapeId", authenticate, async (req, res) => {
     },
   });
 
-  await consumeCredits(scrape.userId, "messages", creditsUsed);
+  await consumeCredits(scrape.userId, "messages", creditsUsed, newMessage.id);
 
   await fetch(`${process.env.FRONT_URL}/email-alert`, {
     method: "POST",

@@ -37,6 +37,21 @@ model User {
   apiActions          ApiAction[]
   apiKeys             ApiKey[]
   articles            Article[]
+  creditTransactions    CreditTransaction[]
+  creditSnapshots     CreditSnapshot[]
+}
+
+model CreditSnapshot {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String   @db.ObjectId
+  purpose     CreditTransactionPurpose
+  balance     Float
+  updatedAt   DateTime
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, purpose])
+  @@index([userId])
 }
 
 enum ScrapeStatus {
@@ -211,6 +226,7 @@ model Scrape {
   scrapeUsers           ScrapeUser[]
   apiActions            ApiAction[]
   articles              Article[]
+  creditTransactions    CreditTransaction[]
 
   @@index([slug])
 }
@@ -734,6 +750,16 @@ enum ArticlePurpose {
   guide
 }
 
+enum CreditTransactionType {
+  topup
+  refund
+  usage
+}
+
+enum CreditTransactionPurpose {
+  message
+}
+
 model Article {
   id              String   @id @default(auto()) @map("_id") @db.ObjectId
   userId          String   @db.ObjectId
@@ -748,4 +774,24 @@ model Article {
 
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   scrape          Scrape   @relation(fields: [scrapeId], references: [id], onDelete: Cascade)
+}
+
+model CreditTransaction {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId        String   @db.ObjectId
+  credits       Float
+  amount        Float?
+  description   String
+  scrapeId      String?  @db.ObjectId
+  messageId     String?  @db.ObjectId
+  type          CreditTransactionType
+  purpose       CreditTransactionPurpose
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scrape        Scrape?  @relation(fields: [scrapeId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
 }

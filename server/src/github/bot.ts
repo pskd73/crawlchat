@@ -424,7 +424,12 @@ async function answer(data: {
     },
   });
 
-  await consumeCredits(scrape.userId, "messages", answer.creditsUsed);
+  await consumeCredits(
+    scrape.userId,
+    "messages",
+    answer.creditsUsed,
+    questionMessage.id
+  );
 }
 
 const router = Router();
