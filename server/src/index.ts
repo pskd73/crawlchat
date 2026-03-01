@@ -266,7 +266,9 @@ app.get("/mcp/:scrapeId", async (req, res) => {
     scrape.userId,
     "messages",
     creditsUsed,
-    questionMessage.id
+    questionMessage.id,
+    0,
+    "MCP"
   );
 
   await prisma.message.update({
@@ -919,7 +921,14 @@ app.post("/ticket/:scrapeId", authenticate, async (req, res) => {
     },
   });
 
-  await consumeCredits(scrape.userId, "messages", creditsUsed, newMessage.id);
+  await consumeCredits(
+    scrape.userId,
+    "messages",
+    creditsUsed,
+    newMessage.id,
+    0,
+    "Ticket"
+  );
 
   await fetch(`${process.env.FRONT_URL}/email-alert`, {
     method: "POST",
@@ -1063,7 +1072,14 @@ app.post("/compose/:scrapeId", authenticate, async (req, res) => {
   const response = flow.getLastMessage().llmMessage.content as string;
   const { slate: newSlate, details, title: newTitle } = JSON.parse(response);
 
-  await consumeCredits(scrape.userId, "messages", llmConfig.creditsPerMessage);
+  await consumeCredits(
+    scrape.userId,
+    "messages",
+    llmConfig.creditsPerMessage,
+    undefined,
+    flow.getUsage().cost,
+    "Compose"
+  );
 
   res.json({
     content,
@@ -1221,7 +1237,14 @@ app.post("/fix-message", authenticate, async (req, res) => {
   const content = (flow.getLastMessage().llmMessage.content as string) ?? "";
   const { correctAnswer, title } = JSON.parse(content);
 
-  await consumeCredits(userId, "messages", 1);
+  await consumeCredits(
+    userId,
+    "messages",
+    1,
+    undefined,
+    flow.getUsage().cost,
+    "Fix Message"
+  );
 
   res.json({ content: correctAnswer, title });
 });
@@ -1324,7 +1347,14 @@ ${text}`,
   const parsed = JSON.parse(response);
   const facts = parsed.facts || [];
 
-  await consumeCredits(scrape.userId, "messages", llmConfig.creditsPerMessage);
+  await consumeCredits(
+    scrape.userId,
+    "messages",
+    llmConfig.creditsPerMessage,
+    undefined,
+    flow.getUsage().cost,
+    "Extract Facts"
+  );
 
   res.json({ facts });
 });
@@ -1405,7 +1435,14 @@ Fact to check: ${fact}`,
       : 0;
   const reason = parsed.reason || "";
 
-  await consumeCredits(scrape.userId, "messages", llmConfig.creditsPerMessage);
+  await consumeCredits(
+    scrape.userId,
+    "messages",
+    llmConfig.creditsPerMessage,
+    undefined,
+    flow.getUsage().cost,
+    "Fact Check"
+  );
 
   res.json({ fact, score, reason });
 });

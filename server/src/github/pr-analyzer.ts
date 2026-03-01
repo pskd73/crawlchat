@@ -147,7 +147,14 @@ export async function analyzeDiff(
   }
   lines.push("");
 
-  await consumeCredits(userId, "messages", 6);
+  await consumeCredits(
+    userId,
+    "messages",
+    6,
+    undefined,
+    flow.getUsage().cost,
+    "PR Analyzer"
+  );
 
   return lines.join("\n");
 }

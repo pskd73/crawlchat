@@ -453,7 +453,8 @@ export async function saveAnswer(
     scrape.userId,
     "messages",
     answer.creditsUsed,
-    questionMessageId
+    questionMessageId,
+    answer.llmCost
   );
 
   if (scrape.analyseMessage) {

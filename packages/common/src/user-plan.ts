@@ -340,6 +340,10 @@ export const activatePlan = async (
   });
 };
 
+function safeNegative(number: number) {
+  return number !== 0 ? -number : number;
+}
+
 export const consumeCredits = async (
   userId: string,
   type: "messages" | "scrapes",
@@ -388,8 +392,8 @@ export const consumeCredits = async (
     "usage",
     "message",
     description || "Message consumed",
-    -credits,
-    amount,
+    safeNegative(credits),
+    amount ? safeNegative(amount) : undefined,
     messageId
   );
 };
