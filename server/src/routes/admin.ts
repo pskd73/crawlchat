@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { prisma } from "@packages/common/prisma";
+import { prisma, User } from "@packages/common/prisma";
 import { adminAuthenticate } from "@packages/common/express-auth";
-import { PLAN_FREE, planMap } from "@packages/common/user-plan";
+import { activatePlan, PLAN_FREE, planMap } from "@packages/common/user-plan";
 import { addCreditTransaction } from "@packages/common/credit-transaction";
 
 const router = Router();
@@ -124,35 +124,16 @@ router.get("/metrics", async (req, res) => {
   });
 });
 
-router.post("/migrate-plan-credits", async (req, res) => {
-  const email = req.body.email as string;
-  if (!email) {
-    res.status(400).json({ message: "Email is required" });
-    return;
-  }
-
-  const user = await prisma.user.findUnique({
-    where: { email },
-  });
-
-  if (!user) {
-    res.status(404).json({ message: "User not found" });
-    return;
-  }
-
+async function migratePlanCredits(user: User) {
   const messageCredits = user.plan?.credits?.messages ?? 0;
 
   if (messageCredits <= 0) {
-    res.json({
-      success: true,
-      migrated: false,
-      message: "No message credits to migrate",
-    });
+    console.log(`No message credits to migrate for user ${user.id}`);
     return;
   }
 
   if (!user.plan?.planId) {
-    res.status(400).json({ message: "User has no plan" });
+    console.log(`User ${user.id} has no plan to migrate`);
     return;
   }
 
@@ -213,13 +194,43 @@ router.post("/migrate-plan-credits", async (req, res) => {
       },
     },
   });
+}
+
+async function fillPlan(user: User) {
+  if (user.plan) {
+    return;
+  }
+  console.log(`Filling plan for user ${user.id}`);
+  activatePlan(user.id, PLAN_FREE, {
+    provider: "CUSTOM",
+    subscriptionId: "custom",
+    orderId: "custom",
+    expiresAt: new Date(),
+  });
+}
+
+router.post("/migrate-plan-credits", async (req, res) => {
+  const users = await prisma.user.findMany({
+    select: {
+      id: true,
+    },
+  });
+
+  for (const { id } of users) {
+    const user = await prisma.user.findUnique({
+      where: { id },
+    });
+
+    if (!user) {
+      continue;
+    }
+
+    await fillPlan(user);
+    await migratePlanCredits(user);
+  }
 
   res.json({
     success: true,
-    migrated: true,
-    userId: user.id,
-    email: user.email,
-    creditsMigrated: messageCredits,
   });
 });
 
