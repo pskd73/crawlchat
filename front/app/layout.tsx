@@ -20,7 +20,6 @@ import { UpgradeModal } from "~/components/upgrade-modal";
 import { showModal } from "~/components/daisy-utils";
 import { createToken } from "@packages/common/jwt";
 import { getLatestChangelog } from "~/changelog/fetch";
-import { getBalance, getTotal } from "@packages/common/credit-transaction";
 import { getUserMessageCredits } from "./user-message-credits";
 
 export function meta() {
