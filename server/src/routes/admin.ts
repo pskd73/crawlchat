@@ -151,12 +151,32 @@ router.post("/migrate-plan-credits", async (req, res) => {
     return;
   }
 
+  if (!user.plan?.planId) {
+    res.status(400).json({ message: "User has no plan" });
+    return;
+  }
+
+  const plan = planMap[user.plan.planId];
+
   await addCreditTransaction(
     user.id,
     "migration",
     "message",
     `Migrated plan credits for ${user.plan?.planId ?? "unknown"} plan`,
-    messageCredits,
+    plan.credits.messages,
+    undefined,
+    undefined,
+    undefined
+  );
+
+  const used = plan.credits.messages - messageCredits;
+
+  await addCreditTransaction(
+    user.id,
+    "usage",
+    "message",
+    "Initial usage",
+    -used,
     undefined,
     undefined,
     undefined
