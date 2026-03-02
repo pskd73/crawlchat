@@ -36,15 +36,15 @@ export async function handleStream(
         cost: chunkUsage.cost ?? 0,
       };
     }
-    if (chunk.choices && chunk.choices[0].delta.role) {
+    if (chunk.choices && chunk.choices[0]?.delta?.role) {
       role = chunk.choices[0].delta.role;
     }
 
-    if (chunk.choices && chunk.choices[0].delta.content) {
+    if (chunk.choices && chunk.choices[0]?.delta?.content) {
       content += chunk.choices[0].delta.content;
     }
 
-    if (chunk.choices && chunk.choices[0].delta.tool_calls) {
+    if (chunk.choices && chunk.choices[0]?.delta?.tool_calls) {
       if (!toolCall) {
         toolCall = chunk.choices[0].delta as any;
         if (toolCall?.tool_calls) {
