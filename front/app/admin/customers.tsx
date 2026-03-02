@@ -7,6 +7,7 @@ import { PLAN_FREE, planMap } from "@packages/common/user-plan";
 import { adminEmails } from "./emails";
 import { Bar, BarChart, CartesianGrid, Tooltip, XAxis, YAxis } from "recharts";
 import { useEffect, useRef, useState } from "react";
+import { getUserMessageCredits } from "~/user-message-credits";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const loggedInUser = await getAuthUser(request);
@@ -41,8 +42,10 @@ export async function loader({ request }: Route.LoaderArgs) {
 
       const usedScrapes = scrapes;
 
+      const messageCredits = await getUserMessageCredits(user.id);
+
       const allowedMessages = plan.credits.messages;
-      const remainingMessages = user.plan?.credits?.messages ?? 0;
+      const remainingMessages = messageCredits.balance;
       const usedMessages = allowedMessages - remainingMessages;
 
       const billingCycleStart =

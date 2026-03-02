@@ -158,6 +158,13 @@ router.post("/migrate-plan-credits", async (req, res) => {
 
   const plan = planMap[user.plan.planId];
 
+  await prisma.creditTransaction.deleteMany({
+    where: {
+      userId: user.id,
+      purpose: "message",
+    },
+  });
+
   await addCreditTransaction(
     user.id,
     "migration",
