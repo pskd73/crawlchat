@@ -114,6 +114,8 @@ export default [
     ]),
 
     route("case-study/:slug", "landing/case-study/page.tsx"),
+
+    route("compare/:slug", "landing/compare/page.tsx"),
   ]),
 
   ...prefix("admin-fowl", [

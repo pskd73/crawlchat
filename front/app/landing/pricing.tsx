@@ -1,12 +1,7 @@
 import { allActivePlans } from "@packages/common/user-plan";
 import { makeMeta } from "~/meta";
 import { topupPlans } from "~/topup";
-import {
-  Container,
-  CustomTestimonials,
-  Pricing,
-  PricingFeatures,
-} from "./page";
+import { Container, Pricing, PricingFeatures } from "./page";
 
 export function meta() {
   return makeMeta({
@@ -33,8 +28,6 @@ export default function Landing() {
       <Container>
         <PricingFeatures />
       </Container>
-
-      <CustomTestimonials />
     </>
   );
 }

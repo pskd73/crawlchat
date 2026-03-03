@@ -1157,27 +1157,27 @@ export function Footer() {
 
             <ul className="flex flex-col gap-4">
               <li>
-                <FooterLink href="/blog/crawlchat-vs-kapa-ai">
+                <FooterLink href="/compare/crawlchat-vs-kapaai">
                   CrawlChat vs Kapa.ai
                 </FooterLink>
               </li>
               <li>
-                <FooterLink href="/blog/crawlchat-vs-docsbot-ai">
+                <FooterLink href="/compare/crawlchat-vs-docsbot">
                   CrawlChat vs DocsBot.ai
                 </FooterLink>
               </li>
               <li>
-                <FooterLink href="/blog/crawlchat-vs-chatbase">
+                <FooterLink href="/compare/crawlchat-vs-chatbase">
                   CrawlChat vs Chatbase
                 </FooterLink>
               </li>
               <li>
-                <FooterLink href="/blog/mava-vs-crawlchat">
+                <FooterLink href="/compare/crawlchat-vs-mava">
                   CrawlChat vs Mava.app
                 </FooterLink>
               </li>
               <li>
-                <FooterLink href="/blog/crawlchat-vs-sitegpt">
+                <FooterLink href="/compare/crawlchat-vs-sitegpt">
                   CrawlChat vs SiteGPT
                 </FooterLink>
               </li>
