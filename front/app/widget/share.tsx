@@ -1,18 +1,18 @@
-import type { Route } from "./+types/share";
+import cn from "@meltdownjs/cn";
+import { extractCitations } from "@packages/common/citation";
 import type {
-  Scrape,
   Message,
   MessageSourceLink,
+  Scrape,
 } from "@packages/common/prisma";
 import { prisma } from "@packages/common/prisma";
 import { useMemo } from "react";
-import { extractCitations } from "@packages/common/citation";
-import { MarkdownProse } from "./markdown-prose";
 import { RiChatVoiceAiFill } from "react-icons/ri";
-import { MessageCopyButton, Sources } from "~/widget/chat-box";
 import { TbAlertCircle } from "react-icons/tb";
-import cn from "@meltdownjs/cn";
 import { makeMeta } from "~/meta";
+import { MessageCopyButton, Sources } from "~/widget/chat-box";
+import type { Route } from "./+types/share";
+import { MarkdownProse } from "./markdown-prose";
 import { ChatBoxProvider } from "./use-chat-box";
 
 export async function loader({ params }: Route.LoaderArgs) {

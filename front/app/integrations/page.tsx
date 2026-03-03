@@ -1,17 +1,17 @@
-import type { Route } from "./+types/page";
-import { Page } from "~/components/page";
-import { getAuthUser } from "~/auth/middleware";
+import cn from "@meltdownjs/cn";
+import { useMemo } from "react";
 import {
-  TbRobotFace,
-  TbCode,
   TbBrandDiscord,
-  TbPlug,
   TbBrandSlack,
+  TbCode,
   TbColorSwatch,
+  TbPlug,
+  TbRobotFace,
 } from "react-icons/tb";
 import { Outlet, useLocation, useNavigate } from "react-router";
-import { useMemo } from "react";
-import cn from "@meltdownjs/cn";
+import { getAuthUser } from "~/auth/middleware";
+import { Page } from "~/components/page";
+import type { Route } from "./+types/page";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);

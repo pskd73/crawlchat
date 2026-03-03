@@ -13,9 +13,9 @@ import {
   PLAN_STARTER_YEARLY,
   type Plan,
 } from "@packages/common/user-plan";
-import type { PaymentGateway, PaymentGatewayWebhookType } from "./gateway";
-import { Webhook } from "standardwebhooks";
 import { DodoPayments } from "dodopayments";
+import { Webhook } from "standardwebhooks";
+import type { PaymentGateway, PaymentGatewayWebhookType } from "./gateway";
 
 async function validateRequest(headers: Headers, body: string) {
   const webhook = new Webhook(process.env.DODO_WEBHOOK_SECRET!);

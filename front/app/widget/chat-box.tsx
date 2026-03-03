@@ -1,53 +1,52 @@
+import cn from "@meltdownjs/cn";
+import { extractCitations } from "@packages/common/citation";
 import type {
-  MessageSourceLink,
   MessageRating,
+  MessageSourceLink,
   WidgetSize,
 } from "@packages/common/prisma";
 import {
+  forwardRef,
   useEffect,
   useMemo,
   useRef,
   useState,
-  type PropsWithChildren,
-  forwardRef,
   type ButtonHTMLAttributes,
+  type PropsWithChildren,
 } from "react";
+import toast from "react-hot-toast";
+import { RiChatVoiceAiFill } from "react-icons/ri";
+import { SiClaude } from "react-icons/si";
 import {
   TbArrowUp,
-  TbHelp,
-  TbMessage,
-  TbThumbUp,
-  TbThumbDown,
-  TbShare2,
-  TbX,
-  TbTrash,
-  TbFileDescription,
+  TbChartBar,
+  TbCheck,
   TbChevronDown,
   TbChevronUp,
   TbCopy,
-  TbCheck,
-  TbMenu2,
-  TbChartBar,
   TbFile,
+  TbFileDescription,
+  TbHelp,
+  TbMenu2,
+  TbMessage,
+  TbShare2,
+  TbThumbDown,
+  TbThumbUp,
+  TbTrash,
   TbUsersGroup,
+  TbX,
 } from "react-icons/tb";
-import { MarkdownProse } from "~/widget/markdown-prose";
+import { CursorIcon } from "~/components/cursor-icon";
+import { MCPIcon } from "~/components/mcp-icon";
 import { track } from "~/components/track";
-import { extractCitations } from "@packages/common/citation";
 import {
-  makeClaudeDeepLink,
   makeClaudeMcpJson,
   makeCursorDeepLink,
   makeMcpCommand,
   makeMcpName,
 } from "~/mcp-command";
+import { MarkdownProse } from "~/widget/markdown-prose";
 import { useChatBoxContext } from "./use-chat-box";
-import cn from "@meltdownjs/cn";
-import toast from "react-hot-toast";
-import { RiChatVoiceAiFill } from "react-icons/ri";
-import { MCPIcon } from "~/components/mcp-icon";
-import { CursorIcon } from "~/components/cursor-icon";
-import { SiClaude } from "react-icons/si";
 
 export function useChatBoxDimensions(
   size: WidgetSize | null,

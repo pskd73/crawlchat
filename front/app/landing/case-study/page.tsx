@@ -1,7 +1,5 @@
-import { Link, redirect, useLoaderData } from "react-router";
-import { ChannelCard, Container, SourceCard } from "../page";
-import type { Route } from "./+types/page";
-import { companies } from "./companies";
+import cn from "@meltdownjs/cn";
+import { useMemo, type PropsWithChildren } from "react";
 import {
   TbArrowRight,
   TbCalendar,
@@ -9,9 +7,11 @@ import {
   TbCircleFilled,
   TbX,
 } from "react-icons/tb";
-import { useMemo, type PropsWithChildren, type ReactNode } from "react";
-import cn from "@meltdownjs/cn";
+import { Link, redirect, useLoaderData } from "react-router";
 import { makeMeta } from "~/meta";
+import { ChannelCard, Container, SourceCard } from "../page";
+import type { Route } from "./+types/page";
+import { companies } from "./companies";
 
 export function loader({ params: { slug } }: Route.LoaderArgs) {
   const company = companies[slug as keyof typeof companies];

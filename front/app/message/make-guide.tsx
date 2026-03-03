@@ -1,14 +1,13 @@
-import { TbBook2, TbCheck } from "react-icons/tb";
-import { getAuthUser } from "~/auth/middleware";
-import { Page } from "~/components/page";
 import { prisma } from "@packages/common/prisma";
-import { authoriseScrapeUser, getSessionScrapeId } from "~/auth/scrape-session";
-import type { Route } from "./+types/make-guide";
-import { ComposerSection, useComposer } from "~/compose";
-import { getMessageContent } from "./messages";
 import { useEffect } from "react";
-import { useFetcher } from "react-router";
-import { redirect } from "react-router";
+import { TbBook2, TbCheck } from "react-icons/tb";
+import { redirect, useFetcher } from "react-router";
+import { getAuthUser } from "~/auth/middleware";
+import { authoriseScrapeUser, getSessionScrapeId } from "~/auth/scrape-session";
+import { Page } from "~/components/page";
+import { ComposerSection, useComposer } from "~/compose";
+import type { Route } from "./+types/make-guide";
+import { getMessageContent } from "./messages";
 
 export async function loader({ request, params }: Route.LoaderArgs) {
   const user = await getAuthUser(request);

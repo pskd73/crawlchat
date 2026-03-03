@@ -1,16 +1,16 @@
+import { render } from "@react-email/render";
+import ChatVerifyEmail from "emails/chat-verify-email";
+import DataGapAlertEmail from "emails/data-gap-alert";
+import InvitationEmail from "emails/invitation";
+import LoginEmail from "emails/login";
+import LowCreditsEmail from "emails/low-credits";
+import TeamJoinEmail from "emails/team-join";
+import TicketAdminCreateEmail from "emails/ticket-admin-create";
+import TicketUserCreateEmail from "emails/ticket-user-create";
+import WeeklyEmail from "emails/weekly";
+import WelcomeEmail from "emails/welcome";
 import React from "react";
 import { Resend } from "resend";
-import { render } from "@react-email/render";
-import WelcomeEmail from "emails/welcome";
-import InvitationEmail from "emails/invitation";
-import TeamJoinEmail from "emails/team-join";
-import LowCreditsEmail from "emails/low-credits";
-import LoginEmail from "emails/login";
-import DataGapAlertEmail from "emails/data-gap-alert";
-import TicketUserCreateEmail from "emails/ticket-user-create";
-import TicketAdminCreateEmail from "emails/ticket-admin-create";
-import ChatVerifyEmail from "emails/chat-verify-email";
-import WeeklyEmail from "emails/weekly";
 import type { MessagesSummary } from "./messages-summary";
 
 if (!process.env.SELF_HOSTED && !process.env.RESEND_KEY) {

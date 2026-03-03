@@ -1,6 +1,6 @@
-import type { Prisma, User } from "@packages/common/prisma";
-import { redirect } from "react-router";
+import type { Prisma } from "@packages/common/prisma";
 import { prisma } from "@packages/common/prisma";
+import { redirect } from "react-router";
 import { getSession } from "~/session";
 
 export async function getAuthUser(

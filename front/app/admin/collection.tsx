@@ -1,10 +1,7 @@
-import { getAuthUser } from "~/auth/middleware";
-import type { Route } from "./+types/collection";
-import { redirect, useLoaderData } from "react-router";
 import { prisma } from "@packages/common/prisma";
-import { getTotalPageChunks } from "~/knowledge/group/page-chunks";
-import { DataList } from "~/components/data-list";
-import { makeMeta } from "~/meta";
+import moment from "moment";
+import { useEffect, useRef, useState } from "react";
+import { redirect, useLoaderData } from "react-router";
 import {
   Bar,
   BarChart,
@@ -14,8 +11,11 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { useEffect, useRef, useState } from "react";
-import moment from "moment";
+import { getAuthUser } from "~/auth/middleware";
+import { DataList } from "~/components/data-list";
+import { getTotalPageChunks } from "~/knowledge/group/page-chunks";
+import { makeMeta } from "~/meta";
+import type { Route } from "./+types/collection";
 import { adminEmails } from "./emails";
 
 export async function loader({ request, params }: Route.LoaderArgs) {

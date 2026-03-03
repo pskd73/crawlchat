@@ -1,14 +1,14 @@
-import type { Route } from "./+types/page";
+import cn from "@meltdownjs/cn";
+import { createToken } from "@packages/common/jwt";
+import { useEffect, useMemo, useRef, useState } from "react";
+import toast from "react-hot-toast";
+import { TbCheck } from "react-icons/tb";
+import { useFetcher } from "react-router";
 import { getAuthUser } from "~/auth/middleware";
 import { authoriseScrapeUser, getSessionScrapeId } from "~/auth/scrape-session";
 import { Page } from "~/components/page";
-import { createToken } from "@packages/common/jwt";
-import { useFetcher } from "react-router";
-import { useEffect, useState, useRef, useMemo } from "react";
-import cn from "@meltdownjs/cn";
-import toast from "react-hot-toast";
-import { TbCheck } from "react-icons/tb";
 import { SettingsSection } from "~/components/settings-section";
+import type { Route } from "./+types/page";
 
 type FactWithScore = {
   fact: string;

@@ -1,7 +1,7 @@
 import { useContext } from "react";
-import { EditActionContext } from "./use-edit-action";
-import { type FetcherWithComponents } from "react-router";
 import { TbCheck, TbTrash } from "react-icons/tb";
+import { type FetcherWithComponents } from "react-router";
+import { EditActionContext } from "./use-edit-action";
 
 export function SaveForm({
   fetcher,

@@ -1,4 +1,4 @@
-import { Container, HeadingHighlight } from "../page";
+import { SiDocusaurus, SiLinear } from "react-icons/si";
 import {
   TbBrandDiscord,
   TbBrandGithub,
@@ -14,10 +14,10 @@ import {
   TbUpload,
   TbWorld,
 } from "react-icons/tb";
-import { makeMeta } from "~/meta";
-import { Channels, Connectors, UseCaseHero, UseCaseIssues } from "./component";
-import { SiDocusaurus, SiLinear } from "react-icons/si";
 import { MCPIcon } from "~/components/mcp-icon";
+import { makeMeta } from "~/meta";
+import { Container, HeadingHighlight } from "../page";
+import { Channels, Connectors, UseCaseHero, UseCaseIssues } from "./component";
 
 export function meta() {
   return makeMeta({

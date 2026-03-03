@@ -1,11 +1,11 @@
 // utils/schema.ts
 import type {
-  Organization,
-  WebSite,
+  BreadcrumbList,
   FAQPage,
+  Organization,
   Question,
   SoftwareApplication,
-  BreadcrumbList,
+  WebSite,
 } from "schema-dts";
 
 export const crawlChatOrganization: Organization = {

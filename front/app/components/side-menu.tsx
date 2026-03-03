@@ -1,6 +1,13 @@
+import cn from "@meltdownjs/cn";
 import type { Scrape, User } from "@packages/common/prisma";
 import type { Plan } from "@packages/common/user-plan";
-import type { FetcherWithComponents } from "react-router";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type PropsWithChildren,
+} from "react";
 import {
   TbBook,
   TbBrandDiscord,
@@ -30,19 +37,12 @@ import {
   TbUsers,
   TbWorld,
 } from "react-icons/tb";
+import type { FetcherWithComponents } from "react-router";
 import { Link, NavLink } from "react-router";
 import { numberToKMB } from "~/components/number-util";
-import {
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type PropsWithChildren,
-} from "react";
-import { Logo } from "./logo";
-import { ScrapePrivacyBadge } from "~/components/scrape-type-badge";
 import { PlanIconBadge } from "~/components/plan-icon-badge";
-import cn from "@meltdownjs/cn";
+import { ScrapePrivacyBadge } from "~/components/scrape-type-badge";
+import { Logo } from "./logo";
 
 type MenuItemType = {
   label: string;

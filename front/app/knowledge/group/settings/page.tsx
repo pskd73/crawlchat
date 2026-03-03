@@ -1,46 +1,46 @@
-import type { Route } from "./+types/page";
-import type {
-  KnowledgeGroupUpdateFrequency,
-  Prisma,
-  GithubIssuesType,
-} from "@packages/common/prisma";
-import { prisma } from "@packages/common/prisma";
-import { getNextUpdateTime } from "@packages/common/knowledge-group";
-import { getAuthUser } from "~/auth/middleware";
-import { authoriseScrapeUser, getSessionScrapeId } from "~/auth/scrape-session";
-import {
-  SettingsContainer,
-  SettingsSection,
-  SettingsSectionProvider,
-} from "~/components/settings-section";
-import { useEffect, useMemo, useState } from "react";
-import { redirect, useFetcher } from "react-router";
-import { GroupStatus } from "../status";
-import { TbEraser, TbTrash } from "react-icons/tb";
-import { createToken } from "@packages/common/jwt";
-import type { SelectValue } from "~/components/multi-select";
+import type { FileUpload } from "@mjackson/form-data-parser";
+import { parseFormData } from "@mjackson/form-data-parser";
 import { Client } from "@notionhq/client";
-import { DataList } from "~/components/data-list";
 import { getConfluencePages } from "@packages/common/confluence";
+import { createToken } from "@packages/common/jwt";
+import { getNextUpdateTime } from "@packages/common/knowledge-group";
 import {
   getLinearIssueStatuses,
   getLinearProjectStatuses,
   LinearClient,
 } from "@packages/common/linear";
-import { Timestamp } from "~/components/timestamp";
-import type { FileUpload } from "@mjackson/form-data-parser";
-import { parseFormData } from "@mjackson/form-data-parser";
+import type {
+  GithubIssuesType,
+  KnowledgeGroupUpdateFrequency,
+  Prisma,
+} from "@packages/common/prisma";
+import { prisma } from "@packages/common/prisma";
+import { useEffect, useMemo, useState } from "react";
+import { TbEraser, TbTrash } from "react-icons/tb";
+import { redirect, useFetcher } from "react-router";
 import { v4 as uuidv4 } from "uuid";
+import { getAuthUser } from "~/auth/middleware";
+import { authoriseScrapeUser, getSessionScrapeId } from "~/auth/scrape-session";
+import { DataList } from "~/components/data-list";
+import type { SelectValue } from "~/components/multi-select";
+import {
+  SettingsContainer,
+  SettingsSection,
+  SettingsSectionProvider,
+} from "~/components/settings-section";
+import { Timestamp } from "~/components/timestamp";
 import { getSourceSpec } from "~/source-spec";
-import { WebSettings } from "./web";
-import { GithubIssuesSettings } from "./github-issues";
-import { GithubDiscussionsSettings } from "./github-discussions";
-import { LinearSettings } from "./linear";
-import { YouTubeSettings } from "./youtube";
-import { UploadSettings } from "./upload";
+import { GroupStatus } from "../status";
+import type { Route } from "./+types/page";
 import { AutoSyncSettings } from "./auto-sync";
-import { SkipPagesRegex } from "./skip-pages-regex";
+import { GithubDiscussionsSettings } from "./github-discussions";
+import { GithubIssuesSettings } from "./github-issues";
+import { LinearSettings } from "./linear";
 import { RemoveStalePagesSettings } from "./remove-stale-pages";
+import { SkipPagesRegex } from "./skip-pages-regex";
+import { UploadSettings } from "./upload";
+import { WebSettings } from "./web";
+import { YouTubeSettings } from "./youtube";
 
 function getNotionPageTitle(page: any): string | undefined {
   if (!page.properties) {

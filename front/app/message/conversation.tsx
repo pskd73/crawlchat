@@ -1,30 +1,26 @@
+import cn from "@meltdownjs/cn";
+import { extractCitations } from "@packages/common/citation";
+import { prisma, type Message } from "@packages/common/prisma";
+import { useEffect, useMemo } from "react";
+import { toast } from "react-hot-toast";
 import {
-  TbBrandTwitter,
-  TbChevronDown,
   TbConfetti,
-  TbMarkdown,
   TbMessage,
   TbMessages,
-  TbPencil,
   TbPointer,
   TbShare,
   TbTrash,
 } from "react-icons/tb";
-import { Page } from "~/components/page";
-import { makeMeta } from "~/meta";
-import type { Route } from "./+types/conversation";
+import { Link, redirect, useFetcher } from "react-router";
 import { getAuthUser } from "~/auth/middleware";
 import { authoriseScrapeUser, getSessionScrapeId } from "~/auth/scrape-session";
-import { prisma, type Message } from "@packages/common/prisma";
-import { Link, redirect, useFetcher } from "react-router";
-import cn from "@meltdownjs/cn";
+import { Page } from "~/components/page";
 import { ScoreBadge } from "~/components/score-badge";
-import { CreditsUsedBadge } from "./credits-used-badge";
-import { useEffect, useMemo } from "react";
-import { extractCitations } from "@packages/common/citation";
+import { makeMeta } from "~/meta";
 import { MarkdownProse } from "~/widget/markdown-prose";
+import type { Route } from "./+types/conversation";
+import { CreditsUsedBadge } from "./credits-used-badge";
 import { SentimentBadge } from "./sentiment-badge";
-import { toast } from "react-hot-toast";
 
 export async function loader({ request, params }: Route.LoaderArgs) {
   const user = await getAuthUser(request);

@@ -1,7 +1,7 @@
 import { Outlet, redirect } from "react-router";
-import { CTA, Footer, LandingPage, Nav } from "./page";
 import { getAuthUser } from "~/auth/middleware";
 import type { Route } from "./+types/layout";
+import { CTA, Footer, LandingPage, Nav } from "./page";
 
 let githubStars = 0;
 let githubStarsUpdatedAt = 0;

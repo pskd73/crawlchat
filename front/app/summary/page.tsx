@@ -1,4 +1,13 @@
-import type { Route } from "./+types/page";
+import cn from "@meltdownjs/cn";
+import { prisma } from "@packages/common/prisma";
+import moment from "moment";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type HTMLAttributes,
+} from "react";
 import {
   TbChartLine,
   TbConfetti,
@@ -11,44 +20,34 @@ import {
   TbThumbDown,
   TbUser,
 } from "react-icons/tb";
-import { getAuthUser } from "~/auth/middleware";
-import { prisma } from "@packages/common/prisma";
-import { Page } from "~/components/page";
-import {
-  XAxis,
-  CartesianGrid,
-  Tooltip,
-  Line,
-  ComposedChart,
-  Bar,
-} from "recharts";
-import {
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type HTMLAttributes,
-} from "react";
-import { commitSession } from "~/session";
-import { getSession } from "~/session";
 import { redirect, useSearchParams } from "react-router";
+import {
+  Bar,
+  CartesianGrid,
+  ComposedChart,
+  Line,
+  Tooltip,
+  XAxis,
+} from "recharts";
+import type { Payload } from "recharts/types/component/DefaultTooltipContent";
+import { getAuthUser } from "~/auth/middleware";
 import { showModal } from "~/components/daisy-utils";
 import { EmptyState } from "~/components/empty-state";
-import moment from "moment";
-import cn from "@meltdownjs/cn";
+import { Page } from "~/components/page";
+import { getMessagesSummary } from "~/messages-summary";
 import { makeMeta } from "~/meta";
 import { dodoGateway } from "~/payment/gateway-dodo";
-import { getMessagesSummary } from "~/messages-summary";
-import { UniqueUsers } from "./unique-users";
-import { calcUniqueUsers } from "./calc-unique-users";
-import type { Payload } from "recharts/types/component/DefaultTooltipContent";
-import LanguageDistribution from "./language-distribution";
-import { TopPages } from "./top-pages";
+import { commitSession, getSession } from "~/session";
+import type { Route } from "./+types/page";
 import { BRIGHT_COLORS } from "./bright-colors";
+import { calcUniqueUsers } from "./calc-unique-users";
 import CategoryCard from "./category-card";
+import LanguageDistribution from "./language-distribution";
+import { NewCollectionModal } from "./new-collection-modal";
 import StatCard from "./stat-card";
 import Tags from "./tags";
-import { NewCollectionModal } from "./new-collection-modal";
+import { TopPages } from "./top-pages";
+import { UniqueUsers } from "./unique-users";
 
 function monoString(str: string) {
   return str.trim().toLowerCase().replace(/^\n+/, "").replace(/\n+$/, "");

@@ -1,6 +1,5 @@
-import { prisma } from "./prisma";
-import { Prisma, ScrapeUser } from "./prisma";
 import { verifyToken } from "./jwt";
+import { prisma, Prisma, ScrapeUser } from "./prisma";
 
 export enum AuthMode {
   jwt,

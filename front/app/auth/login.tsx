@@ -1,12 +1,10 @@
-import type { Route } from "./+types/login";
-import { redirect, useFetcher, useLoaderData } from "react-router";
-import { authenticator } from ".";
-import { commitSession, getSession } from "~/session";
+import cn from "@meltdownjs/cn";
+import { RateLimiter } from "@packages/common/rate-limiter";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { TbArrowRight, TbCircleCheck, TbCircleX } from "react-icons/tb";
-import { getAuthUser } from "./middleware";
+import { redirect, useFetcher, useLoaderData } from "react-router";
+import { getClientIp } from "~/client-ip";
 import { Logo } from "~/components/logo";
-import { makeMeta } from "~/meta";
 import {
   AntonTestimonial,
   EgelhausTestimonial,
@@ -14,9 +12,11 @@ import {
   JonnyTestimonial,
   MauritsTestimonial,
 } from "~/landing/page";
-import cn from "@meltdownjs/cn";
-import { RateLimiter } from "@packages/common/rate-limiter";
-import { getClientIp } from "~/client-ip";
+import { makeMeta } from "~/meta";
+import { commitSession, getSession } from "~/session";
+import { authenticator } from ".";
+import type { Route } from "./+types/login";
+import { getAuthUser } from "./middleware";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request, { dontRedirect: true });

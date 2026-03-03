@@ -1,19 +1,17 @@
-import type { Route } from "./+types/helpdesk";
-import { makeMeta } from "~/meta";
-import { prisma } from "@packages/common/prisma";
-import { getAuthUser } from "~/auth/middleware";
-import { getSessionScrapeId, authoriseScrapeUser } from "~/auth/scrape-session";
-import { Page } from "~/components/page";
-import { TbSettings } from "react-icons/tb";
-import { useState, useMemo } from "react";
-import { SettingsSection } from "~/components/settings-section";
-import { useFetcher } from "react-router";
-import { Helpdesk } from "~/helpdesk/layout";
-import type { HelpdeskConfig } from "@packages/common/prisma";
-import { createToken } from "@packages/common/jwt";
 import cn from "@meltdownjs/cn";
-import { TbPlus, TbTrash } from "react-icons/tb";
-import type { Scrape } from "@packages/common/prisma";
+import { createToken } from "@packages/common/jwt";
+import type { HelpdeskConfig, Scrape } from "@packages/common/prisma";
+import { prisma } from "@packages/common/prisma";
+import { useMemo, useState } from "react";
+import { TbPlus, TbSettings, TbTrash } from "react-icons/tb";
+import { useFetcher } from "react-router";
+import { getAuthUser } from "~/auth/middleware";
+import { authoriseScrapeUser, getSessionScrapeId } from "~/auth/scrape-session";
+import { Page } from "~/components/page";
+import { SettingsSection } from "~/components/settings-section";
+import { Helpdesk } from "~/helpdesk/layout";
+import { makeMeta } from "~/meta";
+import type { Route } from "./+types/helpdesk";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);

@@ -1,6 +1,6 @@
-import type { Route } from "./+types/profile";
 import type { Prisma } from "@packages/common/prisma";
-import { Page } from "~/components/page";
+import { prisma } from "@packages/common/prisma";
+import { getPagesCount, planMap } from "@packages/common/user-plan";
 import {
   TbArrowRight,
   TbCrown,
@@ -9,16 +9,16 @@ import {
 } from "react-icons/tb";
 import { Link, redirect, useFetcher } from "react-router";
 import { getAuthUser } from "~/auth/middleware";
-import { prisma } from "@packages/common/prisma";
+import { showModal } from "~/components/daisy-utils";
+import { Page } from "~/components/page";
 import {
   SettingsContainer,
   SettingsSection,
   SettingsSectionProvider,
 } from "~/components/settings-section";
-import { getPagesCount, planMap } from "@packages/common/user-plan";
 import { makeMeta } from "~/meta";
 import { getPaymentGateway } from "~/payment/factory";
-import { showModal } from "~/components/daisy-utils";
+import type { Route } from "./+types/profile";
 import { useDirtyForm } from "./components/use-dirty-form";
 import { getUserMessageCredits } from "./user-message-credits";
 

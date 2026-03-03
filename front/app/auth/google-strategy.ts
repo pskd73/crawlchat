@@ -1,5 +1,5 @@
-import { OAuth2Strategy } from "remix-auth-oauth2";
 import type { OAuth2Tokens } from "arctic";
+import { OAuth2Strategy } from "remix-auth-oauth2";
 
 /**
  * @see https://developers.google.com/identity/protocols/oauth2/scopes

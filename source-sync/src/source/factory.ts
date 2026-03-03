@@ -1,12 +1,12 @@
 import { KnowledgeGroupType } from "@packages/common/prisma";
-import { WebSource } from "./source-web";
-import { NotionSource } from "./source-notion";
-import { GithubIssuesSource } from "./source-github-issues";
-import { GithubDiscussionsSource } from "./source-github-discussions";
-import { TextSource } from "./source-text";
 import { ConfluenceSource } from "./confluence";
+import { GithubDiscussionsSource } from "./source-github-discussions";
+import { GithubIssuesSource } from "./source-github-issues";
 import { LinearIssuesSource } from "./source-linear";
 import { LinearProjectsSource } from "./source-linear-projects";
+import { NotionSource } from "./source-notion";
+import { TextSource } from "./source-text";
+import { WebSource } from "./source-web";
 import { YoutubeChannelSource } from "./source-youtube-channel";
 import { YoutubeVideosSource } from "./source-youtube-videos";
 

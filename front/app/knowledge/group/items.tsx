@@ -1,22 +1,22 @@
-import type { Route } from "./+types/items";
-import { getAuthUser } from "~/auth/middleware";
-import { prisma } from "@packages/common/prisma";
+import cn from "@meltdownjs/cn";
 import type { ScrapeItemStatus } from "@packages/common/prisma";
+import { prisma } from "@packages/common/prisma";
 import {
   TbCheck,
-  TbRefresh,
-  TbX,
-  TbStack,
   TbChevronLeft,
   TbChevronRight,
   TbPageBreak,
+  TbRefresh,
+  TbStack,
+  TbX,
 } from "react-icons/tb";
 import { Link, Outlet, useLoaderData } from "react-router";
+import { getAuthUser } from "~/auth/middleware";
 import { authoriseScrapeUser, getSessionScrapeId } from "~/auth/scrape-session";
 import { EmptyState } from "~/components/empty-state";
-import { makeMeta } from "~/meta";
-import cn from "@meltdownjs/cn";
 import { Timestamp } from "~/components/timestamp";
+import { makeMeta } from "~/meta";
+import type { Route } from "./+types/items";
 
 function isUrl(url: string) {
   return url.startsWith("https");

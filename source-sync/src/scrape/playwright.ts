@@ -1,5 +1,5 @@
-import { chromium, Page } from "playwright";
 import type { Browser } from "playwright";
+import { chromium, Page } from "playwright";
 
 let browser: Browser | null = null;
 

@@ -1,6 +1,6 @@
 import type { Location } from "@packages/common/prisma";
-import { useMemo } from "react";
 import { getCountryData, type TCountryCode } from "countries-list";
+import { useMemo } from "react";
 
 export function CountryFlag({ location }: { location: Location }) {
   const country = useMemo(

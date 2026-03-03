@@ -1,4 +1,5 @@
-import type { Route } from "./+types/page";
+import cn from "@meltdownjs/cn";
+import { createToken } from "@packages/common/jwt";
 import type {
   Message,
   MessageRating,
@@ -8,18 +9,17 @@ import type {
   User,
 } from "@packages/common/prisma";
 import { prisma } from "@packages/common/prisma";
-import { createToken } from "@packages/common/jwt";
-import { commitSession, getSession } from "~/session";
-import { data, redirect, type Session } from "react-router";
-import { fetchIpDetails, getClientIp } from "~/client-ip";
-import { ChatBoxProvider } from "~/widget/use-chat-box";
-import { sanitizeScrape, sanitizeThread } from "~/sanitize";
-import { getAuthUser } from "~/auth/middleware";
 import { Toaster } from "react-hot-toast";
-import cn from "@meltdownjs/cn";
-import ChatBox, { ChatboxContainer } from "~/widget/chat-box";
-import { makeMeta } from "~/meta";
+import { data, redirect, type Session } from "react-router";
+import { getAuthUser } from "~/auth/middleware";
+import { fetchIpDetails, getClientIp } from "~/client-ip";
 import { sendChatVerifyEmail } from "~/email";
+import { makeMeta } from "~/meta";
+import { sanitizeScrape, sanitizeThread } from "~/sanitize";
+import { commitSession, getSession } from "~/session";
+import ChatBox, { ChatboxContainer } from "~/widget/chat-box";
+import { ChatBoxProvider } from "~/widget/use-chat-box";
+import type { Route } from "./+types/page";
 
 function isMongoObjectId(id: string) {
   return /^[0-9a-fA-F]{24}$/.test(id);

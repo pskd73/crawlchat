@@ -1,3 +1,9 @@
+import type {
+  KnowledgeGroupType,
+  KnowledgeGroupUpdateFrequency,
+} from "@packages/common/prisma";
+import { FaConfluence } from "react-icons/fa";
+import { SiDocusaurus, SiLinear } from "react-icons/si";
 import {
   TbBook2,
   TbBrandGithub,
@@ -6,12 +12,6 @@ import {
   TbUpload,
   TbWorld,
 } from "react-icons/tb";
-import { FaConfluence } from "react-icons/fa";
-import { SiDocusaurus, SiLinear } from "react-icons/si";
-import type {
-  KnowledgeGroupType,
-  KnowledgeGroupUpdateFrequency,
-} from "@packages/common/prisma";
 
 export type SourceFields = {
   url?: {

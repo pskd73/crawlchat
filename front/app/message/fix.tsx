@@ -1,4 +1,6 @@
-import type { Route } from "./+types/fix";
+import { createToken } from "@packages/common/jwt";
+import type { ApiAction } from "@packages/common/prisma";
+import { prisma } from "@packages/common/prisma";
 import {
   TbAlertTriangle,
   TbCheck,
@@ -6,24 +8,22 @@ import {
   TbMessage,
   TbSettingsBolt,
 } from "react-icons/tb";
-import { Page } from "~/components/page";
-import { prisma } from "@packages/common/prisma";
-import { getAuthUser } from "~/auth/middleware";
-import { authoriseScrapeUser, getSessionScrapeId } from "~/auth/scrape-session";
 import {
   Link,
   redirect,
   useFetcher,
   type FetcherWithComponents,
 } from "react-router";
-import { createToken } from "@packages/common/jwt";
-import { makeMeta } from "~/meta";
-import { makeMessagePairs } from "./analyse";
-import type { ApiAction } from "@packages/common/prisma";
-import { QuestionAnswer } from "./message";
+import { getAuthUser } from "~/auth/middleware";
+import { authoriseScrapeUser, getSessionScrapeId } from "~/auth/scrape-session";
+import { Page } from "~/components/page";
 import { SettingsSection } from "~/components/settings-section";
 import { useFetcherToast } from "~/components/use-fetcher-toast";
 import { ComposerSection, useComposer } from "~/compose";
+import { makeMeta } from "~/meta";
+import type { Route } from "./+types/fix";
+import { makeMessagePairs } from "./analyse";
+import { QuestionAnswer } from "./message";
 
 export async function loader({ params, request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);

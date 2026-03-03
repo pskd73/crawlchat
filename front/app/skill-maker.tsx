@@ -1,12 +1,12 @@
-import { TbCopy, TbCode, TbDownload } from "react-icons/tb";
-import { Page } from "./components/page";
-import { getAuthUser } from "./auth/middleware";
-import { authoriseScrapeUser, getSessionScrapeId } from "./auth/scrape-session";
-import type { Route } from "./+types/skill-maker";
 import { createToken } from "@packages/common/jwt";
+import { prisma, type Message, type Thread } from "@packages/common/prisma";
 import { useEffect } from "react";
 import toast from "react-hot-toast";
-import { prisma, type Message, type Thread } from "@packages/common/prisma";
+import { TbCode, TbCopy, TbDownload } from "react-icons/tb";
+import type { Route } from "./+types/skill-maker";
+import { getAuthUser } from "./auth/middleware";
+import { authoriseScrapeUser, getSessionScrapeId } from "./auth/scrape-session";
+import { Page } from "./components/page";
 import { ComposerSection, useComposer } from "./compose";
 
 const DEFAULT_FORMAT_TEXT = `Create a SINGLE skill.md file following Skill authoring best practices:

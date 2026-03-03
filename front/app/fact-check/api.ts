@@ -1,7 +1,7 @@
-import { getAuthUser } from "~/auth/middleware";
-import type { Route } from "./+types/api";
-import { authoriseScrapeUser, getSessionScrapeId } from "~/auth/scrape-session";
 import { createToken } from "@packages/common/jwt";
+import { getAuthUser } from "~/auth/middleware";
+import { authoriseScrapeUser, getSessionScrapeId } from "~/auth/scrape-session";
+import type { Route } from "./+types/api";
 
 export async function action({ request }: Route.ActionArgs) {
   const user = await getAuthUser(request);

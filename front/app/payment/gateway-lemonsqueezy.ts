@@ -4,8 +4,8 @@ import {
   PLAN_STARTER,
   type Plan,
 } from "@packages/common/user-plan";
-import type { PaymentGateway, PaymentGatewayWebhookType } from "./gateway";
 import crypto from "crypto";
+import type { PaymentGateway, PaymentGatewayWebhookType } from "./gateway";
 
 function validateRequest(headers: Headers, body: string) {
   const xSignature = headers.get("x-signature");

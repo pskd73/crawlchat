@@ -6,6 +6,8 @@ if (!process.env.APP_ID) {
   process.exit(0);
 }
 
+import { createToken } from "@packages/common/jwt";
+import { MessageRating, prisma, Scrape } from "@packages/common/prisma";
 import {
   ActivityType,
   ChannelType,
@@ -20,8 +22,6 @@ import {
   ThreadAutoArchiveDuration,
 } from "discord.js";
 import { learn, query } from "./api";
-import { createToken } from "@packages/common/jwt";
-import { MessageRating, prisma, Scrape } from "@packages/common/prisma";
 
 type DiscordMessage = Message<boolean>;
 

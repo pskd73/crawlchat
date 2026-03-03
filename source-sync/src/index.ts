@@ -1,21 +1,21 @@
-import express from "express";
-import cors from "cors";
-import type { Express, Request, Response } from "express";
 import {
   authenticate,
   AuthMode,
   authoriseScrapeUser,
 } from "@packages/common/express-auth";
-import "./worker";
 import { Prisma, prisma } from "@packages/common/prisma";
+import cors from "cors";
+import type { Express, Request, Response } from "express";
+import express from "express";
 import { v4 as uuidv4 } from "uuid";
+import healthRouter from "./routes/health";
 import {
   getPendingUrls,
   scheduleGroup,
   scheduleUrl,
   scheduleUrls,
 } from "./source/schedule";
-import healthRouter from "./routes/health";
+import "./worker";
 
 declare global {
   namespace Express {

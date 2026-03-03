@@ -1,24 +1,24 @@
-import type { Route } from "./+types/new-group";
+import cn from "@meltdownjs/cn";
+import type { FileUpload } from "@mjackson/form-data-parser";
+import { parseFormData } from "@mjackson/form-data-parser";
+import { createToken } from "@packages/common/jwt";
 import type {
   KnowledgeGroupStatus,
   KnowledgeGroupType,
 } from "@packages/common/prisma";
-import type { FileUpload } from "@mjackson/form-data-parser";
+import { prisma } from "@packages/common/prisma";
+import { useEffect, useMemo, useState } from "react";
+import toast from "react-hot-toast";
 import { TbBook2, TbCheck } from "react-icons/tb";
 import { redirect, useFetcher } from "react-router";
-import { getAuthUser } from "~/auth/middleware";
-import { Page } from "~/components/page";
-import { createToken } from "@packages/common/jwt";
-import { parseFormData } from "@mjackson/form-data-parser";
-import { useEffect, useMemo, useState } from "react";
-import { prisma } from "@packages/common/prisma";
-import { authoriseScrapeUser, getSessionScrapeId } from "~/auth/scrape-session";
-import { RadioCard } from "~/components/radio-card";
-import toast from "react-hot-toast";
-import { makeMeta } from "~/meta";
-import cn from "@meltdownjs/cn";
 import { v4 as uuidv4 } from "uuid";
+import { getAuthUser } from "~/auth/middleware";
+import { authoriseScrapeUser, getSessionScrapeId } from "~/auth/scrape-session";
+import { Page } from "~/components/page";
+import { RadioCard } from "~/components/radio-card";
+import { makeMeta } from "~/meta";
 import { getSourceSpec, sourceSpecs } from "~/source-spec";
+import type { Route } from "./+types/new-group";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);

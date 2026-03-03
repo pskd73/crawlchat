@@ -1,12 +1,4 @@
 import {
-  LandingPage,
-  Container,
-  Nav,
-  Footer,
-  CTA,
-  Heading,
-} from "~/landing/page";
-import {
   TbBolt,
   TbChartBar,
   TbCircleFilled,
@@ -14,6 +6,7 @@ import {
   TbShieldLock,
   TbTicket,
 } from "react-icons/tb";
+import { Container, Heading } from "~/landing/page";
 import { makeMeta } from "~/meta";
 
 export function meta() {

@@ -1,4 +1,4 @@
-import type { Route } from "./+types/customise";
+import cn from "@meltdownjs/cn";
 import type {
   Message,
   Scrape,
@@ -7,17 +7,7 @@ import type {
   WidgetSize,
 } from "@packages/common/prisma";
 import { prisma } from "@packages/common/prisma";
-import { getAuthUser } from "~/auth/middleware";
-import { SettingsSection } from "~/components/settings-section";
-import { useDirtyForm } from "~/components/use-dirty-form";
-import { useFetcher } from "react-router";
-import {
-  authoriseScrapeUser,
-  getSessionScrapeId,
-} from "../auth/scrape-session";
 import { useMemo, useState } from "react";
-import { ChatBoxProvider } from "~/widget/use-chat-box";
-import ChatBox, { ChatboxContainer } from "~/widget/chat-box";
 import {
   TbColorSwatch,
   TbHome,
@@ -26,9 +16,19 @@ import {
   TbTrash,
   TbX,
 } from "react-icons/tb";
-import cn from "@meltdownjs/cn";
-import { makeMeta } from "~/meta";
+import { useFetcher } from "react-router";
+import { getAuthUser } from "~/auth/middleware";
 import { Page } from "~/components/page";
+import { SettingsSection } from "~/components/settings-section";
+import { useDirtyForm } from "~/components/use-dirty-form";
+import { makeMeta } from "~/meta";
+import ChatBox, { ChatboxContainer } from "~/widget/chat-box";
+import { ChatBoxProvider } from "~/widget/use-chat-box";
+import {
+  authoriseScrapeUser,
+  getSessionScrapeId,
+} from "../auth/scrape-session";
+import type { Route } from "./+types/customise";
 
 function cleanColor(color: string | null | undefined) {
   return color && ["null", "#abcdef"].includes(color) ? null : color;

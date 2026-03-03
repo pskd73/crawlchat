@@ -1,8 +1,8 @@
 import { getAuthUser } from "~/auth/middleware";
-import { getSession } from "~/session";
-import { getSetupProgressInput } from "./make";
 import { authoriseScrapeUser } from "~/auth/scrape-session";
+import { getSession } from "~/session";
 import type { Route } from "./+types/api";
+import { getSetupProgressInput } from "./make";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request, { redirectTo: "/login" });

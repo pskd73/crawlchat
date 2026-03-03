@@ -1,11 +1,11 @@
-import { prisma } from "./prisma";
-import { addCreditTransaction, getBalance } from "./credit-transaction";
 import type {
   PlanLimits,
   PlanType,
   UserPlan,
   UserPlanProvider,
 } from "@prisma/client";
+import { addCreditTransaction, getBalance } from "./credit-transaction";
+import { prisma } from "./prisma";
 
 type PlanResetType = "monthly" | "yearly" | "one-time" | "on-payment";
 type PlanCategory = "BASE" | "SERVICE" | "TOPUP";

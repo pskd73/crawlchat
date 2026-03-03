@@ -6,12 +6,12 @@ if (!process.env.SLACK_SIGNING_SECRET) {
   process.exit(0);
 }
 
-import { App } from "@slack/bolt";
-import type { SayFn } from "@slack/bolt";
-import { InstallationStore } from "@slack/oauth";
-import type { Installation } from "@slack/oauth";
-import { Prisma, prisma } from "@packages/common/prisma";
 import { createToken } from "@packages/common/jwt";
+import { Prisma, prisma } from "@packages/common/prisma";
+import type { SayFn } from "@slack/bolt";
+import { App } from "@slack/bolt";
+import type { Installation } from "@slack/oauth";
+import { InstallationStore } from "@slack/oauth";
 import { learn, query } from "./api";
 
 const LOADING_REACTION = "hourglass";

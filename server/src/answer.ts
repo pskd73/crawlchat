@@ -1,31 +1,30 @@
-import {
-  ApiAction,
-  ApiActionCall,
-  MessageSourceLink,
-  Prisma,
-  prisma,
-  RichBlockConfig,
-  MessageChannel,
-  Scrape,
-  Thread,
-  ScrapeItem,
-  ToolCall,
-} from "@packages/common/prisma";
-import { getConfig, LlmConfig } from "./llm/config";
-import { makeRagAgent, makeRagFlow } from "./llm/flow";
+import { Role, Usage } from "@packages/agentic";
+import { extractCitations } from "@packages/common/citation";
+import { addCreditTransaction } from "@packages/common/credit-transaction";
 import {
   getQueryString,
   MultimodalContent,
   removeImages,
 } from "@packages/common/llm-message";
-import { Role, Usage } from "@packages/agentic";
-import { FlowMessage } from "./llm/flow";
-import { CustomMessage, DataGap } from "./llm/custom-message";
-import { fillMessageAnalysis } from "./analyse-message";
+import {
+  ApiAction,
+  ApiActionCall,
+  MessageChannel,
+  MessageSourceLink,
+  Prisma,
+  prisma,
+  RichBlockConfig,
+  Scrape,
+  ScrapeItem,
+  Thread,
+  ToolCall,
+} from "@packages/common/prisma";
 import { ensureRepoCloned } from "@packages/flash";
-import { extractCitations } from "@packages/common/citation";
+import { fillMessageAnalysis } from "./analyse-message";
+import { getConfig, LlmConfig } from "./llm/config";
+import { CustomMessage, DataGap } from "./llm/custom-message";
+import { FlowMessage, makeRagAgent, makeRagFlow } from "./llm/flow";
 import { retry } from "./retry";
-import { addCreditTransaction } from "@packages/common/credit-transaction";
 
 export type StreamDeltaEvent = {
   type: "stream-delta";

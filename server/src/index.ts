@@ -1,31 +1,32 @@
-import express from "express";
-import type { Express, NextFunction, Request, Response } from "express";
-import ws from "express-ws";
-import cors from "cors";
-import { prisma } from "@packages/common/prisma";
+import { Agent, Flow, multiLinePrompt } from "@packages/agentic";
+import { name } from "@packages/common";
+import { chunk } from "@packages/common/chunk";
+import { extractCitations } from "@packages/common/citation";
+import { addCreditTransaction } from "@packages/common/credit-transaction";
 import {
   authenticate,
   AuthMode,
   authoriseScrapeUser,
 } from "@packages/common/express-auth";
-import { v4 as uuidv4 } from "uuid";
+import { createToken } from "@packages/common/jwt";
+import { MultimodalContent } from "@packages/common/llm-message";
+import { getNextNumber } from "@packages/common/mongo-counter";
 import {
   Message,
   MessageAttachment,
   MessageChannel,
+  prisma,
   Prisma,
   Thread,
 } from "@packages/common/prisma";
-import { makeIndexer } from "@packages/indexer";
-import { name } from "@packages/common";
 import { hasEnoughCredits } from "@packages/common/user-plan";
-import { CustomMessage } from "./llm/custom-message";
-import { makeSearchTool, SearchToolContext } from "./llm/search-tool";
-import { extractCitations } from "@packages/common/citation";
-import { multiLinePrompt, Agent } from "@packages/agentic";
-import { FlowMessage } from "./llm/flow";
-import { chunk } from "@packages/common/chunk";
-import { Flow } from "@packages/agentic";
+import { makeIndexer } from "@packages/indexer";
+import cors from "cors";
+import { randomUUID } from "crypto";
+import type { Express, NextFunction, Request, Response } from "express";
+import express from "express";
+import ws from "express-ws";
+import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
 import {
   baseAnswerer,
@@ -33,22 +34,20 @@ import {
   saveAnswer,
   updateLastMessageAt,
 } from "./answer";
-import { createToken } from "@packages/common/jwt";
-import { MultimodalContent } from "@packages/common/llm-message";
-import { draftRateLimiter, mcpRateLimiter } from "./rate-limiter";
-import { getConfig } from "./llm/config";
-import { getNextNumber } from "@packages/common/mongo-counter";
-import { randomUUID } from "crypto";
-import { handleWs } from "./routes/socket";
-import apiRouter from "./routes/api";
-import adminRouter from "./routes/admin";
-import healthRouter from "./routes/health";
 import githubBotRouter from "./github/bot";
+import { getConfig } from "./llm/config";
+import { CustomMessage } from "./llm/custom-message";
+import { FlowMessage } from "./llm/flow";
+import { makeSearchTool, SearchToolContext } from "./llm/search-tool";
 import {
   makeTextSearchRegexTool,
   TextSearchToolContext,
 } from "./llm/text-search-tool";
-import { addCreditTransaction } from "@packages/common/credit-transaction";
+import { draftRateLimiter, mcpRateLimiter } from "./rate-limiter";
+import adminRouter from "./routes/admin";
+import apiRouter from "./routes/api";
+import healthRouter from "./routes/health";
+import { handleWs } from "./routes/socket";
 
 declare global {
   namespace Express {

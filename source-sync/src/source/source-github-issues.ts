@@ -4,7 +4,7 @@ import {
   getIssues,
   getIssueTimeline,
 } from "../github-api";
-import { GroupForSource, UpdateItemResponse, Source } from "./interface";
+import { GroupForSource, Source, UpdateItemResponse } from "./interface";
 import { GroupData, ItemData } from "./queue";
 import { scheduleUrls } from "./schedule";
 

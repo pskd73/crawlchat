@@ -1,4 +1,5 @@
 import cn from "@meltdownjs/cn";
+import type { ReactNode } from "react";
 import {
   Badge,
   ChannelCard,
@@ -6,7 +7,6 @@ import {
   HeadingDescription,
   SourceCard,
 } from "../page";
-import type { ReactNode } from "react";
 
 export function UseCaseHero({
   title,

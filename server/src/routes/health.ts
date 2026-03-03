@@ -1,9 +1,9 @@
-import { Router } from "express";
-import { prisma } from "@packages/common/prisma";
-import { Pinecone } from "@pinecone-database/pinecone";
 import { Agent, handleStream } from "@packages/agentic";
-import { getConfig } from "../llm/config";
+import { prisma } from "@packages/common/prisma";
 import { RateLimiter } from "@packages/common/rate-limiter";
+import { Pinecone } from "@pinecone-database/pinecone";
+import { Router } from "express";
+import { getConfig } from "../llm/config";
 
 const aiRateLimiter = new RateLimiter(2, "health-ai");
 const rateLimiter = new RateLimiter(20, "health");

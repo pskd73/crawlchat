@@ -1,25 +1,25 @@
-import type { Route } from "./+types/layout";
-import { Outlet, useFetcher } from "react-router";
-import { AppContext, useApp } from "~/components/app-context";
-import { getAuthUser } from "~/auth/middleware";
-import { SideMenu } from "~/components/side-menu";
-import { useEffect } from "react";
+import cn from "@meltdownjs/cn";
+import { createToken } from "@packages/common/jwt";
+import { prisma } from "@packages/common/prisma";
 import {
+  allActivePlans,
   getPagesCount,
   PLAN_FREE,
-  allActivePlans,
+  planMap,
 } from "@packages/common/user-plan";
-import { planMap } from "@packages/common/user-plan";
-import { prisma } from "@packages/common/prisma";
-import { getSession } from "~/session";
-import { fetchDataGaps } from "~/data-gaps/fetch";
+import { useEffect } from "react";
 import { Toaster } from "react-hot-toast";
-import cn from "@meltdownjs/cn";
-import { makeMeta } from "~/meta";
-import { UpgradeModal } from "~/components/upgrade-modal";
-import { showModal } from "~/components/daisy-utils";
-import { createToken } from "@packages/common/jwt";
+import { Outlet, useFetcher } from "react-router";
+import { getAuthUser } from "~/auth/middleware";
 import { getLatestChangelog } from "~/changelog/fetch";
+import { AppContext, useApp } from "~/components/app-context";
+import { showModal } from "~/components/daisy-utils";
+import { SideMenu } from "~/components/side-menu";
+import { UpgradeModal } from "~/components/upgrade-modal";
+import { fetchDataGaps } from "~/data-gaps/fetch";
+import { makeMeta } from "~/meta";
+import { getSession } from "~/session";
+import type { Route } from "./+types/layout";
 import { getUserMessageCredits } from "./user-message-credits";
 
 export function meta() {

@@ -1,21 +1,20 @@
-import type { Route } from "./+types/mcp";
 import type { Prisma } from "@packages/common/prisma";
+import { prisma } from "@packages/common/prisma";
 import { useFetcher } from "react-router";
 import { getAuthUser } from "~/auth/middleware";
+import { authoriseScrapeUser, getSessionScrapeId } from "~/auth/scrape-session";
+import { MCPIcon } from "~/components/mcp-icon";
+import { Page } from "~/components/page";
 import {
   SettingsContainer,
   SettingsSection,
   SettingsSectionProvider,
 } from "~/components/settings-section";
 import { useDirtyForm } from "~/components/use-dirty-form";
-import { prisma } from "@packages/common/prisma";
-import { MarkdownProse } from "~/widget/markdown-prose";
-import { authoriseScrapeUser, getSessionScrapeId } from "~/auth/scrape-session";
-import { makeCursorMcpJson, makeMcpName } from "~/mcp-command";
-import { makeMcpCommand } from "~/mcp-command";
+import { makeCursorMcpJson, makeMcpCommand, makeMcpName } from "~/mcp-command";
 import { makeMeta } from "~/meta";
-import { Page } from "~/components/page";
-import { MCPIcon } from "~/components/mcp-icon";
+import { MarkdownProse } from "~/widget/markdown-prose";
+import type { Route } from "./+types/mcp";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);

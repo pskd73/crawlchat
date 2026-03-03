@@ -1,4 +1,4 @@
-import { UpdateItemResponse, Source } from "./interface";
+import { Source, UpdateItemResponse } from "./interface";
 import { ItemData } from "./queue";
 
 export class TextSource implements Source {

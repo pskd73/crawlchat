@@ -1,3 +1,4 @@
+import { getEventTypes, getMe } from "@packages/common/cal";
 import type {
   ApiAction,
   ApiActionData,
@@ -6,9 +7,7 @@ import type {
   CalActionConfig,
   LinearConfig,
 } from "libs/prisma";
-import { useEffect, useMemo, useState } from "react";
-import { createContext } from "react";
-import { getEventTypes, getMe } from "@packages/common/cal";
+import { createContext, useEffect, useMemo, useState } from "react";
 
 type CalEventType = {
   id: number;

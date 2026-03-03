@@ -1,7 +1,7 @@
+import type { MetaTag } from "@packages/common/prisma";
 import * as cheerio from "cheerio";
 import TurndownService from "turndown";
 import { markdownToText } from "./markdown";
-import type { MetaTag } from "@packages/common/prisma";
 // @ts-ignore
 import * as turndownPluginGfm from "turndown-plugin-gfm";
 

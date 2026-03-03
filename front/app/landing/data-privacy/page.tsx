@@ -1,9 +1,8 @@
-import { marked } from "marked";
-import { LandingPage } from "../page";
-import { Container } from "../page";
 import fs from "fs";
+import { marked } from "marked";
 import path from "path";
 import { makeMeta } from "~/meta";
+import { Container, LandingPage } from "../page";
 import type { Route } from "./+types/page";
 
 export function meta() {

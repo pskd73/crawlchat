@@ -1,18 +1,18 @@
-import type { Route } from "./+types/group";
+import cn from "@meltdownjs/cn";
+import { extractCitations } from "@packages/common/citation";
+import { createToken } from "@packages/common/jwt";
 import type { MessageSourceLink, Scrape } from "@packages/common/prisma";
 import { prisma } from "@packages/common/prisma";
-import { createToken } from "@packages/common/jwt";
+import Avatar from "boring-avatars";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { TbArrowUp, TbShare, TbUser } from "react-icons/tb";
+import toast, { Toaster } from "react-hot-toast";
 import { RiChatVoiceAiFill } from "react-icons/ri";
+import { TbArrowUp, TbShare } from "react-icons/tb";
+import { makeMeta } from "~/meta";
+import type { Route } from "./+types/group";
+import { Sources } from "./chat-box";
 import { MarkdownProse } from "./markdown-prose";
 import { useScrapeChat } from "./use-chat";
-import cn from "@meltdownjs/cn";
-import { makeMeta } from "~/meta";
-import toast, { Toaster } from "react-hot-toast";
-import Avatar from "boring-avatars";
-import { extractCitations } from "@packages/common/citation";
-import { Sources } from "./chat-box";
 
 function isMongoObjectId(id: string) {
   return /^[0-9a-fA-F]{24}$/.test(id);

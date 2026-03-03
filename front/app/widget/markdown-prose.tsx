@@ -1,6 +1,8 @@
-import Markdown from "react-markdown";
-import remarkGfm from "remark-gfm";
+import cn from "@meltdownjs/cn";
+import type { Scrape, Thread } from "@packages/common/prisma";
 import hljs from "highlight.js";
+import "highlight.js/styles/xt256.min.css";
+import { jsonrepair } from "jsonrepair";
 import { useState, type PropsWithChildren } from "react";
 import {
   TbArrowRight,
@@ -8,12 +10,10 @@ import {
   TbCircleCheckFilled,
   TbCopy,
 } from "react-icons/tb";
-import { jsonrepair } from "jsonrepair";
-import cn from "@meltdownjs/cn";
+import Markdown from "react-markdown";
 import type { FetcherWithComponents } from "react-router";
-import type { Scrape, Thread } from "@packages/common/prisma";
+import remarkGfm from "remark-gfm";
 import "./markdown-prose.css";
-import "highlight.js/styles/xt256.min.css";
 const linkifyRegex = require("remark-linkify-regex");
 
 const RichCreateTicket = ({

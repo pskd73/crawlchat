@@ -1,5 +1,4 @@
 import type { UserPlan } from "@packages/common/prisma";
-import type { Plan } from "@packages/common/user-plan";
 import { TbCrown } from "react-icons/tb";
 
 export function PlanIconBadge({ userPlan }: { userPlan: UserPlan | null }) {

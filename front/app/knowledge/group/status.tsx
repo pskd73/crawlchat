@@ -1,7 +1,7 @@
+import cn from "@meltdownjs/cn";
 import type { KnowledgeGroupStatus } from "@packages/common/prisma";
 import { useMemo } from "react";
 import { TbBook, TbCheck, TbLoader, TbX } from "react-icons/tb";
-import cn from "@meltdownjs/cn";
 
 export function GroupStatus({ status }: { status: KnowledgeGroupStatus }) {
   const ui = useMemo(() => {

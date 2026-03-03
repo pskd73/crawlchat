@@ -1,23 +1,23 @@
-import { Worker, Job, QueueEvents } from "bullmq";
 import { prisma } from "@packages/common/prisma";
 import { makeIndexer } from "@packages/indexer";
+import { Job, QueueEvents, Worker } from "bullmq";
 import { makeSource } from "./source/factory";
 import {
-  ITEM_QUEUE_NAME,
-  GROUP_QUEUE_NAME,
   BULLMQ_PREFIX,
+  GROUP_QUEUE_NAME,
   GroupData,
-  itemQueue,
-  ItemData,
-  redis,
   groupQueue,
+  ITEM_QUEUE_NAME,
+  ItemData,
+  itemQueue,
+  redis,
 } from "./source/queue";
-import { upsertFailedItem, upsertItem } from "./source/upsert-item";
 import {
   decrementPendingUrls,
   getPendingUrls,
   scheduleGroup,
 } from "./source/schedule";
+import { upsertFailedItem, upsertItem } from "./source/upsert-item";
 
 const itemEvents = new QueueEvents(ITEM_QUEUE_NAME, {
   connection: redis,

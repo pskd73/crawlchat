@@ -1,18 +1,17 @@
-import type { Route } from "./+types/embed";
 import { prisma } from "@packages/common/prisma";
+import { TbCode } from "react-icons/tb";
+import { Link } from "react-router";
 import { getAuthUser } from "~/auth/middleware";
+import { authoriseScrapeUser, getSessionScrapeId } from "~/auth/scrape-session";
+import { Page } from "~/components/page";
 import {
   SettingsContainer,
   SettingsSection,
   SettingsSectionProvider,
 } from "~/components/settings-section";
-import { useMemo } from "react";
-import { authoriseScrapeUser, getSessionScrapeId } from "~/auth/scrape-session";
-import { MarkdownProse } from "~/widget/markdown-prose";
 import { makeMeta } from "~/meta";
-import { Page } from "~/components/page";
-import { TbCode, TbWorld } from "react-icons/tb";
-import { Link } from "react-router";
+import { MarkdownProse } from "~/widget/markdown-prose";
+import type { Route } from "./+types/embed";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);

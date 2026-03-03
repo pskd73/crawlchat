@@ -1,7 +1,7 @@
 import { multiLinePrompt } from "@packages/agentic";
 import { prisma } from "@packages/common/prisma";
-import { z } from "zod";
 import { randomFetchId } from "@packages/indexer";
+import { z } from "zod";
 import { CustomMessage } from "./custom-message";
 
 const DEFAULT_SNIPPET_WINDOW = 80;

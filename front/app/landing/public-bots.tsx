@@ -1,8 +1,8 @@
-import { Container } from "~/landing/page";
-import type { Route } from "./+types/public-bots";
-import { TbArrowRight } from "react-icons/tb";
 import cn from "@meltdownjs/cn";
+import { TbArrowRight } from "react-icons/tb";
+import { Container } from "~/landing/page";
 import { makeMeta } from "~/meta";
+import type { Route } from "./+types/public-bots";
 
 export function meta() {
   return makeMeta({

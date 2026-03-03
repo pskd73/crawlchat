@@ -1,5 +1,8 @@
 {
   "packageManager": "npm@8.5.0",
+  "devDependencies": {
+    "prettier-plugin-organize-imports": "^4.3.0"
+  },
   "workspaces": [
     "packages/*",
     "front",

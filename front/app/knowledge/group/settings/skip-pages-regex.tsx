@@ -1,8 +1,8 @@
 import type { KnowledgeGroup } from "@packages/common/prisma";
 import { useMemo } from "react";
 import { useFetcher } from "react-router";
-import { MultiSelect } from "~/components/multi-select";
 import type { SelectValue } from "~/components/multi-select";
+import { MultiSelect } from "~/components/multi-select";
 import { SettingsSection } from "~/components/settings-section";
 import { useDirtyForm } from "~/components/use-dirty-form";
 

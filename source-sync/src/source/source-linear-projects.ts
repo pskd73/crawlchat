@@ -1,6 +1,6 @@
-import { GroupForSource, UpdateItemResponse, Source } from "./interface";
-import { GroupData, ItemData } from "./queue";
 import { LinearClient, PaginationOrderBy } from "@packages/common/linear";
+import { GroupForSource, Source, UpdateItemResponse } from "./interface";
+import { GroupData, ItemData } from "./queue";
 import { scheduleUrls } from "./schedule";
 
 export class LinearProjectsSource implements Source {

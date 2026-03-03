@@ -1,14 +1,14 @@
-import crypto from "crypto";
-import { Router } from "express";
-import type { Request, Response } from "express";
-import { baseAnswerer, saveAnswer } from "../answer";
 import { extractCitations } from "@packages/common/citation";
-import { createToken } from "@packages/common/jwt";
-import { hasEnoughCredits } from "@packages/common/user-plan";
-import { Scrape, Thread, prisma } from "@packages/common/prisma";
-import { getToken } from "./token";
-import { analyze } from "./pr-analyzer";
 import { addCreditTransaction } from "@packages/common/credit-transaction";
+import { createToken } from "@packages/common/jwt";
+import { Scrape, Thread, prisma } from "@packages/common/prisma";
+import { hasEnoughCredits } from "@packages/common/user-plan";
+import crypto from "crypto";
+import type { Request, Response } from "express";
+import { Router } from "express";
+import { baseAnswerer, saveAnswer } from "../answer";
+import { analyze } from "./pr-analyzer";
+import { getToken } from "./token";
 
 type GitHubPostResponse = {
   id: number;

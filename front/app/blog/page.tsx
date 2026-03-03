@@ -1,12 +1,12 @@
-import { readPost } from "./posts";
-import type { Route } from "./+types/page";
-import { redirect } from "react-router";
-import { Container } from "~/landing/page";
-import { TbClock } from "react-icons/tb";
 import moment from "moment";
+import { TbClock } from "react-icons/tb";
 import Markdown from "react-markdown";
+import { redirect } from "react-router";
 import remarkGfm from "remark-gfm";
+import { Container } from "~/landing/page";
 import { makeMeta } from "~/meta";
+import type { Route } from "./+types/page";
+import { readPost } from "./posts";
 
 export function loader({ params }: Route.LoaderArgs) {
   try {

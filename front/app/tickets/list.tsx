@@ -1,19 +1,17 @@
-import type { Route } from "./+types/list";
-import type { Thread, Prisma, TicketStatus } from "@packages/common/prisma";
-import { TbChevronLeft, TbChevronRight, TbTicket } from "react-icons/tb";
-import { Page } from "~/components/page";
-import { getAuthUser } from "~/auth/middleware";
-import { prisma } from "@packages/common/prisma";
-import { authoriseScrapeUser, getSessionScrapeId } from "~/auth/scrape-session";
-import { redirect } from "react-router";
-import { Link as RouterLink } from "react-router";
-import { useMemo } from "react";
-import { EmptyState } from "~/components/empty-state";
-import moment from "moment";
 import cn from "@meltdownjs/cn";
+import type { Prisma, Thread, TicketStatus } from "@packages/common/prisma";
+import { prisma } from "@packages/common/prisma";
+import { useMemo } from "react";
 import toast from "react-hot-toast";
-import { makeMeta } from "~/meta";
+import { TbChevronLeft, TbChevronRight, TbTicket } from "react-icons/tb";
+import { redirect, Link as RouterLink } from "react-router";
+import { getAuthUser } from "~/auth/middleware";
+import { authoriseScrapeUser, getSessionScrapeId } from "~/auth/scrape-session";
+import { EmptyState } from "~/components/empty-state";
+import { Page } from "~/components/page";
 import { Timestamp } from "~/components/timestamp";
+import { makeMeta } from "~/meta";
+import type { Route } from "./+types/list";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);

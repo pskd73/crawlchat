@@ -1,4 +1,7 @@
-import type { Route } from "./+types/page";
+import cn from "@meltdownjs/cn";
+import { prisma, type ScrapeUser } from "@packages/common/prisma";
+import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import {
   TbCheck,
   TbCrown,
@@ -10,18 +13,15 @@ import {
   TbUsers,
   TbUserX,
 } from "react-icons/tb";
-import { Page } from "~/components/page";
+import { redirect, useFetcher } from "react-router";
 import { getAuthUser } from "~/auth/middleware";
 import { authoriseScrapeUser, getSessionScrapeId } from "~/auth/scrape-session";
-import { prisma, type ScrapeUser } from "@packages/common/prisma";
-import { redirect, useFetcher } from "react-router";
-import { useEffect, useState } from "react";
-import { sendInvitationEmail, sendTeamJoinEmail } from "~/email";
 import { hideModal, showModal } from "~/components/daisy-utils";
-import toast from "react-hot-toast";
-import cn from "@meltdownjs/cn";
-import { makeMeta } from "~/meta";
+import { Page } from "~/components/page";
 import { Timestamp } from "~/components/timestamp";
+import { sendInvitationEmail, sendTeamJoinEmail } from "~/email";
+import { makeMeta } from "~/meta";
+import type { Route } from "./+types/page";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);

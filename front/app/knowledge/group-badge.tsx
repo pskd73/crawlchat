@@ -1,4 +1,3 @@
-import { getSourceSpec } from "~/source-spec";
 import type { KnowledgeGroupType } from "@prisma/client";
 import { useMemo } from "react";
 import {
@@ -7,6 +6,7 @@ import {
   TbBrandSlack,
   TbPencil,
 } from "react-icons/tb";
+import { getSourceSpec } from "~/source-spec";
 
 export function KnowledgeGroupBadge({
   type,

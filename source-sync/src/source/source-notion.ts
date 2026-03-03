@@ -1,8 +1,8 @@
 import { Client, ListCommentsResponse } from "@notionhq/client";
 import { NotionToMarkdown } from "notion-to-md";
-import { GroupForSource, UpdateItemResponse, Source } from "./interface";
+import { GroupForSource, Source, UpdateItemResponse } from "./interface";
 import { GroupData, ItemData } from "./queue";
-import { scheduleUrl, scheduleUrls } from "./schedule";
+import { scheduleUrls } from "./schedule";
 
 function getPageTitle(page: any): string | undefined {
   if (!page.properties) {

@@ -1,9 +1,9 @@
-import { prisma } from "./prisma";
 import type {
-  CreditTransactionType,
-  CreditTransactionPurpose,
   CreditTransaction,
+  CreditTransactionPurpose,
+  CreditTransactionType,
 } from "@prisma/client";
+import { prisma } from "./prisma";
 
 export async function getBalance(
   userId: string,

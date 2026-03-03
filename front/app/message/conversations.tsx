@@ -1,6 +1,7 @@
-import type { Route } from "./+types/conversations";
-import type { Message, Prisma, Thread } from "@packages/common/prisma";
-import { Page } from "~/components/page";
+import cn from "@meltdownjs/cn";
+import type { Message, Prisma } from "@packages/common/prisma";
+import { prisma } from "@packages/common/prisma";
+import Avatar from "boring-avatars";
 import {
   TbChevronLeft,
   TbChevronRight,
@@ -11,21 +12,20 @@ import {
   TbTicket,
   TbUsersGroup,
 } from "react-icons/tb";
+import { Link, redirect, useLoaderData } from "react-router";
 import { getAuthUser } from "~/auth/middleware";
 import { authoriseScrapeUser, getSessionScrapeId } from "~/auth/scrape-session";
-import { prisma } from "@packages/common/prisma";
-import { getMessagesScore } from "~/score";
-import { Link, redirect, useLoaderData } from "react-router";
-import { ViewSwitch } from "./view-switch";
-import { CountryFlag } from "./country-flag";
+import { ChannelBadge } from "~/components/channel-badge";
 import { EmptyState } from "~/components/empty-state";
-import cn from "@meltdownjs/cn";
+import { Page } from "~/components/page";
+import { ScoreBadge } from "~/components/score-badge";
 import { Timestamp } from "~/components/timestamp";
 import { makeMeta } from "~/meta";
-import { ScoreBadge } from "~/components/score-badge";
-import { ChannelBadge } from "~/components/channel-badge";
+import { getMessagesScore } from "~/score";
+import type { Route } from "./+types/conversations";
+import { CountryFlag } from "./country-flag";
 import { getMessageContent } from "./messages";
-import Avatar from "boring-avatars";
+import { ViewSwitch } from "./view-switch";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);

@@ -1,11 +1,11 @@
 import dotenv from "dotenv";
 dotenv.config();
 
+import { getNextUpdateTime } from "@packages/common/knowledge-group";
 import { prisma } from "@packages/common/prisma";
 import { exit } from "process";
-import { getNextUpdateTime } from "@packages/common/knowledge-group";
-import { scheduleGroup } from "./source/schedule";
 import { v4 as uuidv4 } from "uuid";
+import { scheduleGroup } from "./source/schedule";
 
 async function updateKnowledgeGroup(groupId: string) {
   console.log(`Updating knowledge group ${groupId}`);

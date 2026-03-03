@@ -1,13 +1,13 @@
-import type { Route } from "./+types/customers";
 import { prisma } from "@packages/common/prisma";
-import { redirect, Link } from "react-router";
+import { PLAN_FREE, planMap } from "@packages/common/user-plan";
+import { useEffect, useRef, useState } from "react";
+import { Link, redirect } from "react-router";
+import { Bar, BarChart, CartesianGrid, Tooltip, XAxis, YAxis } from "recharts";
 import { getAuthUser } from "~/auth/middleware";
 import { makeMeta } from "~/meta";
-import { PLAN_FREE, planMap } from "@packages/common/user-plan";
-import { adminEmails } from "./emails";
-import { Bar, BarChart, CartesianGrid, Tooltip, XAxis, YAxis } from "recharts";
-import { useEffect, useRef, useState } from "react";
 import { getUserMessageCredits } from "~/user-message-credits";
+import type { Route } from "./+types/customers";
+import { adminEmails } from "./emails";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const loggedInUser = await getAuthUser(request);

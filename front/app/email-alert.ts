@@ -1,18 +1,17 @@
+import { getBalance } from "@packages/common/credit-transaction";
 import { prisma } from "@packages/common/prisma";
+import moment from "moment";
 import type { Route } from "./+types/email-alert";
-import { getJwtAuthUser } from "./jwt";
 import { authoriseScrapeUser } from "./auth/scrape-session";
 import {
   sendDataGapAlertEmail,
   sendLowCreditsEmail,
   sendNewTicketAdminEmail,
   sendNewTicketUserEmail,
-  sendReactEmail,
   sendWeeklyUpdateEmail,
 } from "./email";
+import { getJwtAuthUser } from "./jwt";
 import { getMessagesSummary, type MessagesSummary } from "./messages-summary";
-import moment from "moment";
-import { getBalance } from "@packages/common/credit-transaction";
 
 export async function action({ request }: Route.LoaderArgs) {
   const user = await getJwtAuthUser(request);

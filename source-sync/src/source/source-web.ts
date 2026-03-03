@@ -1,7 +1,7 @@
-import { GroupData, ItemData } from "./queue";
 import { scrapeWithLinks, StatusCodeError } from "../scrape/crawl";
 import { getMetaTitle } from "../scrape/parse";
 import { GroupForSource, Source, UpdateItemResponse } from "./interface";
+import { GroupData, ItemData } from "./queue";
 import { scheduleUrl } from "./schedule";
 
 export class WebSource implements Source {

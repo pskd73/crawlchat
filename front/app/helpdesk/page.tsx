@@ -1,12 +1,12 @@
-import type { Route } from "./+types/page";
+import cn from "@meltdownjs/cn";
+import type { Article } from "@packages/common/prisma";
 import { prisma } from "@packages/common/prisma";
 import { useContext } from "react";
-import cn from "@meltdownjs/cn";
 import { TbBook2 } from "react-icons/tb";
-import type { Article } from "@packages/common/prisma";
+import { sanitizeScrape } from "~/sanitize";
+import type { Route } from "./+types/page";
 import { HelpdeskContext } from "./context";
 import { Container } from "./layout";
-import { sanitizeScrape } from "~/sanitize";
 
 export async function loader({ params }: Route.LoaderArgs) {
   const scrape = await prisma.scrape.findFirstOrThrow({

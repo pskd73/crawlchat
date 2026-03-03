@@ -1,5 +1,5 @@
-import { test } from "node:test";
 import assert from "node:assert";
+import { test } from "node:test";
 import { splitMarkdown } from "../scrape/markdown-splitter";
 
 test("splitMarkdown returns simple markdown", async () => {

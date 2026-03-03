@@ -1,77 +1,73 @@
-import "./lexical-editor.css";
+import { $createCodeNode, CodeHighlightNode, CodeNode } from "@lexical/code";
+import { $isLinkNode, LinkNode, TOGGLE_LINK_COMMAND } from "@lexical/link";
 import {
-  TbArrowUp,
-  TbCopy,
-  TbPencil,
-  TbBold,
-  TbItalic,
-  TbUnderline,
-  TbStrikethrough,
-  TbList,
-  TbListNumbers,
-  TbQuote,
-  TbCode,
-  TbArrowBack,
-  TbArrowForward,
-  TbRefresh,
-  TbLink,
-} from "react-icons/tb";
-import { Page } from "./components/page";
-import { getAuthUser } from "./auth/middleware";
-import { authoriseScrapeUser, getSessionScrapeId } from "./auth/scrape-session";
-import type { Route } from "./+types/compose";
-import { createToken } from "@packages/common/jwt";
-import { useFetcher } from "react-router";
-import { useEffect, useRef, useState } from "react";
-import cn from "@meltdownjs/cn";
-import toast from "react-hot-toast";
-import { prisma, type Message, type Thread } from "@packages/common/prisma";
-import { LexicalComposer } from "@lexical/react/LexicalComposer";
-import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
-import { ContentEditable } from "@lexical/react/LexicalContentEditable";
-import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
-import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
-import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
-import { ListPlugin } from "@lexical/react/LexicalListPlugin";
-import { TabIndentationPlugin } from "@lexical/react/LexicalTabIndentationPlugin";
-import { LinkPlugin } from "@lexical/react/LexicalLinkPlugin";
-import {
-  $getRoot,
-  type EditorState,
-  FORMAT_TEXT_COMMAND,
-  UNDO_COMMAND,
-  REDO_COMMAND,
-} from "lexical";
+  $isListNode,
+  INSERT_ORDERED_LIST_COMMAND,
+  INSERT_UNORDERED_LIST_COMMAND,
+  ListItemNode,
+  ListNode,
+} from "@lexical/list";
 import {
   $convertFromMarkdownString,
   $convertToMarkdownString,
   TRANSFORMERS,
 } from "@lexical/markdown";
+import { LexicalComposer } from "@lexical/react/LexicalComposer";
+import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+import { ContentEditable } from "@lexical/react/LexicalContentEditable";
+import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
+import { LinkPlugin } from "@lexical/react/LexicalLinkPlugin";
+import { ListPlugin } from "@lexical/react/LexicalListPlugin";
+import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
+import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
+import { TabIndentationPlugin } from "@lexical/react/LexicalTabIndentationPlugin";
 import {
-  HeadingNode,
-  QuoteNode,
+  $createHeadingNode,
   $createQuoteNode,
   $isHeadingNode,
-  $createHeadingNode,
+  HeadingNode,
+  QuoteNode,
 } from "@lexical/rich-text";
-import {
-  ListItemNode,
-  ListNode,
-  INSERT_UNORDERED_LIST_COMMAND,
-  INSERT_ORDERED_LIST_COMMAND,
-  $isListNode,
-} from "@lexical/list";
-import { CodeNode, CodeHighlightNode, $createCodeNode } from "@lexical/code";
-import {
-  LinkNode,
-  $createLinkNode,
-  $isLinkNode,
-  TOGGLE_LINK_COMMAND,
-} from "@lexical/link";
 import { $setBlocksType } from "@lexical/selection";
-import { $getSelection, $isRangeSelection } from "lexical";
 import { $findMatchingParent } from "@lexical/utils";
-import { $createParagraphNode } from "lexical";
+import cn from "@meltdownjs/cn";
+import { createToken } from "@packages/common/jwt";
+import { prisma, type Message, type Thread } from "@packages/common/prisma";
+import {
+  $createParagraphNode,
+  $getRoot,
+  $getSelection,
+  $isRangeSelection,
+  FORMAT_TEXT_COMMAND,
+  REDO_COMMAND,
+  UNDO_COMMAND,
+  type EditorState,
+} from "lexical";
+import { useEffect, useRef, useState } from "react";
+import toast from "react-hot-toast";
+import {
+  TbArrowBack,
+  TbArrowForward,
+  TbArrowUp,
+  TbBold,
+  TbCode,
+  TbCopy,
+  TbItalic,
+  TbLink,
+  TbList,
+  TbListNumbers,
+  TbPencil,
+  TbQuote,
+  TbRefresh,
+  TbStrikethrough,
+  TbUnderline,
+} from "react-icons/tb";
+import { useFetcher } from "react-router";
+import type { Route } from "./+types/compose";
+import { getAuthUser } from "./auth/middleware";
+import { authoriseScrapeUser, getSessionScrapeId } from "./auth/scrape-session";
+import { Page } from "./components/page";
+import "./lexical-editor.css";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);

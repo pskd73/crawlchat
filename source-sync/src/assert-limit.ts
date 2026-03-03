@@ -1,5 +1,4 @@
-import { prisma } from "@packages/common/prisma";
-import { UserPlan } from "@packages/common/prisma";
+import { prisma, UserPlan } from "@packages/common/prisma";
 import { getPagesCount, PLAN_FREE } from "@packages/common/user-plan";
 
 export const assertLimit = async (

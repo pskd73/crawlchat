@@ -1,4 +1,4 @@
-import { Container, HeadingHighlight } from "../page";
+import { SiConfluence, SiLinear } from "react-icons/si";
 import {
   TbAi,
   TbBrain,
@@ -14,8 +14,8 @@ import {
   TbUpload,
 } from "react-icons/tb";
 import { makeMeta } from "~/meta";
+import { Container, HeadingHighlight } from "../page";
 import { Channels, Connectors, UseCaseHero, UseCaseIssues } from "./component";
-import { SiConfluence, SiLinear } from "react-icons/si";
 
 export function meta() {
   return makeMeta({

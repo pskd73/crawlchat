@@ -1,10 +1,10 @@
-import { prisma } from "@packages/common/prisma";
-import type { PaymentGateway } from "./gateway";
-import { activatePlan, PLAN_FREE, planMap } from "@packages/common/user-plan";
 import {
   addCreditTransaction,
   getBalance,
 } from "@packages/common/credit-transaction";
+import { prisma } from "@packages/common/prisma";
+import { activatePlan, PLAN_FREE, planMap } from "@packages/common/user-plan";
+import type { PaymentGateway } from "./gateway";
 
 export async function handleWebhook(request: Request, gateway: PaymentGateway) {
   const body = await request.text();

@@ -1,6 +1,6 @@
+import cn from "@meltdownjs/cn";
 import { useEffect } from "react";
 import { TbMoodSad, TbX } from "react-icons/tb";
-import cn from "@meltdownjs/cn";
 
 export default function NotFound() {
   useEffect(() => {

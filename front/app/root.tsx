@@ -1,4 +1,5 @@
-import type { Route } from "./+types/root";
+import { VemetricScript } from "@vemetric/react";
+import { useMemo } from "react";
 import {
   isRouteErrorResponse,
   Links,
@@ -10,10 +11,9 @@ import {
   useLocation,
   useMatches,
 } from "react-router";
-import { useMemo } from "react";
+import type { Route } from "./+types/root";
 import stylesheet from "./app.css?url";
 import { crawlChatSchema } from "./landing/schema";
-import { VemetricScript } from "@vemetric/react";
 
 declare global {
   interface Window {

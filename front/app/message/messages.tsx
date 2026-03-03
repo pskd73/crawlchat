@@ -1,3 +1,5 @@
+import cn from "@meltdownjs/cn";
+import { getQueryString } from "@packages/common/llm-message";
 import type {
   CategorySuggestion,
   Message,
@@ -5,7 +7,9 @@ import type {
   Scrape,
   ScrapeItem,
 } from "@packages/common/prisma";
-import type { Route } from "./+types/messages";
+import { prisma } from "@packages/common/prisma";
+import Avatar from "boring-avatars";
+import type { PropsWithChildren } from "react";
 import {
   TbChevronLeft,
   TbChevronRight,
@@ -17,26 +21,22 @@ import {
   TbPointer,
   TbX,
 } from "react-icons/tb";
-import { Page } from "~/components/page";
-import { getAuthUser } from "~/auth/middleware";
-import { prisma } from "@packages/common/prisma";
-import { makeMessagePairs } from "./analyse";
-import { authoriseScrapeUser, getSessionScrapeId } from "~/auth/scrape-session";
 import { Link as RouterLink, useLocation, useNavigate } from "react-router";
-import { CountryFlag } from "./country-flag";
-import { Rating } from "./rating-badge";
-import { EmptyState } from "~/components/empty-state";
-import { ScoreBadge } from "~/components/score-badge";
+import { getAuthUser } from "~/auth/middleware";
+import { authoriseScrapeUser, getSessionScrapeId } from "~/auth/scrape-session";
 import { ChannelBadge } from "~/components/channel-badge";
-import { getQueryString } from "@packages/common/llm-message";
-import cn from "@meltdownjs/cn";
+import { EmptyState } from "~/components/empty-state";
+import { Page } from "~/components/page";
+import { ScoreBadge } from "~/components/score-badge";
 import { Timestamp } from "~/components/timestamp";
 import { makeMeta } from "~/meta";
-import type { PropsWithChildren } from "react";
+import type { Route } from "./+types/messages";
+import { makeMessagePairs } from "./analyse";
+import { CountryFlag } from "./country-flag";
 import { CreditsUsedBadge } from "./credits-used-badge";
-import { SentimentBadge } from "./sentiment-badge";
-import Avatar from "boring-avatars";
 import { LanguageBadge } from "./language-badge";
+import { Rating } from "./rating-badge";
+import { SentimentBadge } from "./sentiment-badge";
 import { ViewSwitch } from "./view-switch";
 
 function isLowRating(message: Message) {

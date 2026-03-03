@@ -1,19 +1,16 @@
-import type { Route } from "./+types/page";
-import type { CreditTransaction } from "@packages/common/prisma";
-import { TbCoins, TbChevronLeft, TbChevronRight } from "react-icons/tb";
-import { Page } from "~/components/page";
-import { getAuthUser } from "~/auth/middleware";
-import {
-  getCreditTransactions,
-  getBalance,
-} from "@packages/common/credit-transaction";
-import { Link as RouterLink, useSearchParams } from "react-router";
-import { EmptyState } from "~/components/empty-state";
 import cn from "@meltdownjs/cn";
-import { makeMeta } from "~/meta";
-import { Timestamp } from "~/components/timestamp";
-import { getSession } from "~/session";
+import { getCreditTransactions } from "@packages/common/credit-transaction";
+import type { CreditTransaction } from "@packages/common/prisma";
+import { TbChevronLeft, TbChevronRight, TbCoins } from "react-icons/tb";
+import { Link as RouterLink, useSearchParams } from "react-router";
+import { getAuthUser } from "~/auth/middleware";
 import { authoriseScrapeUser } from "~/auth/scrape-session";
+import { EmptyState } from "~/components/empty-state";
+import { Page } from "~/components/page";
+import { Timestamp } from "~/components/timestamp";
+import { makeMeta } from "~/meta";
+import { getSession } from "~/session";
+import type { Route } from "./+types/page";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);

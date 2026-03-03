@@ -1,11 +1,11 @@
 import dotenv from "dotenv";
 dotenv.config();
 
+import { updateAllCreditSnapshots } from "@packages/common/credit-transaction";
+import { createToken } from "@packages/common/jwt";
 import { prisma } from "@packages/common/prisma";
 import { exit } from "process";
 import { cleanupMessages } from "./cleanup";
-import { createToken } from "@packages/common/jwt";
-import { updateAllCreditSnapshots } from "@packages/common/credit-transaction";
 
 async function weeklyUpdate() {
   const scrapes = await prisma.scrape.findMany({

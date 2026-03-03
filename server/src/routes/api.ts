@@ -1,9 +1,9 @@
-import { Router } from "express";
-import { prisma } from "@packages/common/prisma";
 import {
   authenticate,
   authoriseScrapeUser,
 } from "@packages/common/express-auth";
+import { prisma } from "@packages/common/prisma";
+import { Router } from "express";
 
 const router = Router();
 

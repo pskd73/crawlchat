@@ -1,8 +1,8 @@
-import { getAuthUser } from "~/auth/middleware";
-import type { Route } from "./+types/subscription-details";
-import { redirect } from "react-router";
 import { prisma } from "@packages/common/prisma";
+import { redirect } from "react-router";
+import { getAuthUser } from "~/auth/middleware";
 import { getPaymentGateway } from "~/payment/factory";
+import type { Route } from "./+types/subscription-details";
 import { adminEmails } from "./emails";
 
 export async function loader({ request }: Route.LoaderArgs) {

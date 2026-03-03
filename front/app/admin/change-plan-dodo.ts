@@ -1,9 +1,9 @@
-import { getAuthUser } from "~/auth/middleware";
-import type { Route } from "./+types/change-plan-dodo";
-import { redirect } from "react-router";
 import { prisma } from "@packages/common/prisma";
-import { planMap, activatePlan } from "@packages/common/user-plan";
+import { activatePlan, planMap } from "@packages/common/user-plan";
+import { redirect } from "react-router";
+import { getAuthUser } from "~/auth/middleware";
 import { getDodoClient, planProductIdMap } from "~/payment/gateway-dodo";
+import type { Route } from "./+types/change-plan-dodo";
 import { adminEmails } from "./emails";
 
 export async function loader({ request }: Route.LoaderArgs) {

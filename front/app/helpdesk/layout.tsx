@@ -1,6 +1,13 @@
-import type { Route } from "./+types/layout";
-import { makeMeta } from "~/meta";
+import cn from "@meltdownjs/cn";
+import { createToken } from "@packages/common/jwt";
+import type {
+  HelpdeskConfig,
+  Message,
+  Scrape,
+  Thread,
+} from "@packages/common/prisma";
 import { prisma } from "@packages/common/prisma";
+import Color from "color";
 import {
   useContext,
   useEffect,
@@ -9,32 +16,18 @@ import {
   useState,
   type HTMLProps,
 } from "react";
-import cn from "@meltdownjs/cn";
-import Color from "color";
-import {
-  TbArrowRight,
-  TbArrowUp,
-  TbBook2,
-  TbSparkles,
-  TbTicket,
-} from "react-icons/tb";
-import { ChatBoxProvider, useChatBoxContext } from "~/widget/use-chat-box";
-import type {
-  Article,
-  HelpdeskConfig,
-  Message,
-  Scrape,
-  Thread,
-} from "@packages/common/prisma";
-import { getSession } from "~/session";
-import ChatBox from "~/widget/chat-box";
-import { HelpdeskContext, HelpdeskProvider } from "./context";
-import { createToken } from "@packages/common/jwt";
 import { Toaster } from "react-hot-toast";
+import { TbArrowRight, TbArrowUp, TbSparkles, TbTicket } from "react-icons/tb";
+import { Outlet, redirect } from "react-router";
 import { MCPIcon } from "~/components/mcp-icon";
 import { makeCursorMcpConfig, makeMcpName } from "~/mcp-command";
-import { Outlet, redirect } from "react-router";
+import { makeMeta } from "~/meta";
 import { sanitizeScrape, sanitizeThread } from "~/sanitize";
+import { getSession } from "~/session";
+import ChatBox from "~/widget/chat-box";
+import { ChatBoxProvider, useChatBoxContext } from "~/widget/use-chat-box";
+import type { Route } from "./+types/layout";
+import { HelpdeskContext, HelpdeskProvider } from "./context";
 
 const DEFAULT_HELPDESK_CONFIG = {
   enabled: false,

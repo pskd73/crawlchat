@@ -1,15 +1,15 @@
-import type { Route } from "./+types/page";
-import { TbUsers } from "react-icons/tb";
-import { getAuthUser } from "~/auth/middleware";
 import { prisma } from "@packages/common/prisma";
+import { useMemo } from "react";
+import { TbUsers } from "react-icons/tb";
+import { useSearchParams } from "react-router";
+import { getAuthUser } from "~/auth/middleware";
+import { authoriseScrapeUser, getSessionScrapeId } from "~/auth/scrape-session";
 import { Page } from "~/components/page";
 import { makeMeta } from "~/meta";
-import { UniqueUsers, FIELD_LABELS } from "~/summary/unique-users";
-import type { UniqueUser } from "~/summary/unique-users";
 import { calcUniqueUsers } from "~/summary/calc-unique-users";
-import { authoriseScrapeUser, getSessionScrapeId } from "~/auth/scrape-session";
-import { useSearchParams } from "react-router";
-import { useMemo } from "react";
+import type { UniqueUser } from "~/summary/unique-users";
+import { FIELD_LABELS, UniqueUsers } from "~/summary/unique-users";
+import type { Route } from "./+types/page";
 
 const DATE_RANGE_OPTIONS = [
   { value: 7, label: "Last week" },

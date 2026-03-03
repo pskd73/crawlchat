@@ -1,3 +1,7 @@
+import cn from "@meltdownjs/cn";
+import { models } from "@packages/common";
+import { TbArrowRight, TbCheck, TbCoins, TbX } from "react-icons/tb";
+import { Link } from "react-router";
 import { makeMeta } from "~/meta";
 import {
   Container,
@@ -5,10 +9,6 @@ import {
   HeadingDescription,
   HeadingHighlight,
 } from "./page";
-import { models } from "@packages/common";
-import { TbArrowRight, TbCheck, TbCoins, TbX } from "react-icons/tb";
-import cn from "@meltdownjs/cn";
-import { Link } from "react-router";
 
 export function meta() {
   return makeMeta({

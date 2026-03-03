@@ -1,6 +1,13 @@
-import type { Route } from "./+types/page";
+import cn from "@meltdownjs/cn";
+import type { User } from "@packages/common/prisma";
+import { prisma } from "@packages/common/prisma";
+import { type Plan, allActivePlans } from "@packages/common/user-plan";
 import type { HTMLAttributes, PropsWithChildren, ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
+import { Toaster } from "react-hot-toast";
+import { FaConfluence, FaMicrophone } from "react-icons/fa";
+import { RiChatVoiceAiFill } from "react-icons/ri";
+import { SiDocusaurus, SiLinear, SiN8N, SiOpenai } from "react-icons/si";
 import {
   TbArrowRight,
   TbBook,
@@ -16,13 +23,13 @@ import {
   TbChartBar,
   TbChartBarOff,
   TbCheck,
-  TbClock,
   TbChevronDown,
   TbChevronRight,
   TbChevronUp,
   TbCircleCheckFilled,
   TbCircleFilled,
   TbCircleXFilled,
+  TbClock,
   TbCode,
   TbColorSwatch,
   TbCrown,
@@ -56,22 +63,15 @@ import {
   TbVideo,
   TbWorld,
 } from "react-icons/tb";
-import { prisma } from "@packages/common/prisma";
-import type { User } from "@packages/common/prisma";
-import { track } from "~/components/track";
-import { type Plan, allActivePlans } from "@packages/common/user-plan";
 import { Link, useLoaderData } from "react-router";
 import { cache as changelogCache } from "~/changelog/fetch";
-import { makeMeta } from "~/meta";
-import cn from "@meltdownjs/cn";
-import { SiDocusaurus, SiLinear, SiN8N, SiOpenai } from "react-icons/si";
-import { FaConfluence, FaMicrophone } from "react-icons/fa";
 import { Logo } from "~/components/logo";
 import { MCPIcon } from "~/components/mcp-icon";
-import { Toaster } from "react-hot-toast";
-import { RiChatVoiceAiFill } from "react-icons/ri";
-import { topupPlans } from "~/topup";
 import { numberToKMB } from "~/components/number-util";
+import { track } from "~/components/track";
+import { makeMeta } from "~/meta";
+import { topupPlans } from "~/topup";
+import type { Route } from "./+types/page";
 
 export function meta() {
   return makeMeta({

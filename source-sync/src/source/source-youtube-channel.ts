@@ -1,7 +1,7 @@
-import { GroupForSource, UpdateItemResponse, Source } from "./interface";
+import { fetchChannelVideos, fetchYouTubeVideoData } from "../youtube";
+import { GroupForSource, Source, UpdateItemResponse } from "./interface";
 import { GroupData, ItemData } from "./queue";
 import { scheduleUrls } from "./schedule";
-import { fetchChannelVideos, fetchYouTubeVideoData } from "../youtube";
 
 export class YoutubeChannelSource implements Source {
   async updateGroup(jobData: GroupData, group: GroupForSource): Promise<void> {

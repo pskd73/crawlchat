@@ -1,5 +1,5 @@
-import { createContext, useEffect, useState } from "react";
 import type { HelpdeskConfig, Scrape } from "@packages/common/prisma";
+import { createContext, useEffect, useState } from "react";
 
 export function useHelpdesk({
   config,

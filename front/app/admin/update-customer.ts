@@ -1,8 +1,8 @@
-import { getAuthUser } from "~/auth/middleware";
-import type { Route } from "./+types/update-customer";
 import { redirect } from "react-router";
-import { adminEmails } from "./emails";
+import { getAuthUser } from "~/auth/middleware";
 import { getDodoClient } from "~/payment/gateway-dodo";
+import type { Route } from "./+types/update-customer";
+import { adminEmails } from "./emails";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);

@@ -1,11 +1,11 @@
+import cn from "@meltdownjs/cn";
 import type { Location, MessageChannel } from "@packages/common/prisma";
 import Avatar from "boring-avatars";
-import { CountryFlag } from "~/message/country-flag";
+import { TbArrowDown, TbArrowUp } from "react-icons/tb";
+import { Link } from "react-router";
 import { ChannelBadge } from "~/components/channel-badge";
 import { Timestamp } from "~/components/timestamp";
-import { Link } from "react-router";
-import { TbArrowUp, TbArrowDown } from "react-icons/tb";
-import cn from "@meltdownjs/cn";
+import { CountryFlag } from "~/message/country-flag";
 
 export type UniqueUser = {
   fingerprint: string;

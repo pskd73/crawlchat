@@ -1,6 +1,6 @@
+import FingerprintJS from "@fingerprintjs/fingerprintjs";
 import type { Message } from "@packages/common/prisma";
 import { useEffect, useMemo, useRef, useState } from "react";
-import FingerprintJS from "@fingerprintjs/fingerprintjs";
 
 export type AskStage =
   | "idle"

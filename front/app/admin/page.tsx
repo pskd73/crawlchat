@@ -1,20 +1,16 @@
-import type { Route } from "./+types/page";
 import type {
-  User,
   KnowledgeGroup,
-  Scrape,
   Message,
+  Scrape,
   Thread,
+  User,
 } from "@packages/common/prisma";
-import { getAuthUser } from "~/auth/middleware";
-import { Link, redirect, useLoaderData } from "react-router";
 import { prisma } from "@packages/common/prisma";
-import { MarkdownProse } from "~/widget/markdown-prose";
-import { TbChartBarOff, TbConfetti, TbFolder } from "react-icons/tb";
+import moment from "moment";
+import { useEffect, useRef, useState } from "react";
 import { toast, Toaster } from "react-hot-toast";
-import { makeMeta } from "~/meta";
-import { SearchTypeBadge } from "~/message/search-type-badge";
-import { ChannelBadge } from "~/components/channel-badge";
+import { TbChartBarOff, TbConfetti, TbFolder } from "react-icons/tb";
+import { Link, redirect, useLoaderData } from "react-router";
 import {
   Bar,
   BarChart,
@@ -24,11 +20,15 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { useEffect, useRef, useState } from "react";
-import moment from "moment";
-import { adminEmails } from "./emails";
+import { getAuthUser } from "~/auth/middleware";
+import { ChannelBadge } from "~/components/channel-badge";
 import { ScoreBadge } from "~/components/score-badge";
 import { getMessageContent } from "~/message/messages";
+import { SearchTypeBadge } from "~/message/search-type-badge";
+import { makeMeta } from "~/meta";
+import { MarkdownProse } from "~/widget/markdown-prose";
+import type { Route } from "./+types/page";
+import { adminEmails } from "./emails";
 
 type UserDetail = {
   user: User;

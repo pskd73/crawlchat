@@ -1,8 +1,8 @@
 import cn from "@meltdownjs/cn";
 import { useContext, useEffect, useMemo, useRef } from "react";
 import { TbArrowRight, TbMenu2, TbX } from "react-icons/tb";
-import { AppContext } from "~/components/app-context";
 import Markdown from "react-markdown";
+import { AppContext } from "~/components/app-context";
 
 function extractFirstParagraph(markdown: string): string {
   const lines = markdown.split("\n");

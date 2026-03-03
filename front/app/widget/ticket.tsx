@@ -1,3 +1,7 @@
+import cn from "@meltdownjs/cn";
+import { prisma } from "@packages/common/prisma";
+import TicketAdminMessageEmail from "emails/ticket-admin-message";
+import TicketUserMessageEmail from "emails/ticket-user-message";
 import type {
   Prisma,
   Scrape,
@@ -5,7 +9,9 @@ import type {
   Thread,
   TicketAuthorRole,
 } from "libs/prisma";
-import type { Route } from "./+types/ticket";
+import { useEffect, useMemo, useState } from "react";
+import toast, { Toaster } from "react-hot-toast";
+import { RiChatVoiceAiFill } from "react-icons/ri";
 import {
   TbAlertCircle,
   TbArrowRight,
@@ -14,19 +20,13 @@ import {
   TbMessage,
   TbUser,
 } from "react-icons/tb";
-import { prisma } from "@packages/common/prisma";
-import { RiChatVoiceAiFill } from "react-icons/ri";
-import { useEffect, useMemo, useRef, useState } from "react";
 import { useFetcher } from "react-router";
 import { getAuthUser } from "~/auth/middleware";
-import { MarkdownProse } from "./markdown-prose";
-import { sendReactEmail } from "~/email";
-import toast, { Toaster } from "react-hot-toast";
-import cn from "@meltdownjs/cn";
-import TicketUserMessageEmail from "emails/ticket-user-message";
 import { Timestamp } from "~/components/timestamp";
-import TicketAdminMessageEmail from "emails/ticket-admin-message";
+import { sendReactEmail } from "~/email";
 import { makeMeta } from "~/meta";
+import type { Route } from "./+types/ticket";
+import { MarkdownProse } from "./markdown-prose";
 
 function getRole(thread?: Thread | null, scrapeUsers?: ScrapeUser[] | null) {
   const role: "agent" | "user" =

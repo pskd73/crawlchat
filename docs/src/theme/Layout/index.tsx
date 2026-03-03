@@ -1,10 +1,9 @@
-import React from "react";
+import { useHistory } from "@docusaurus/router";
+import type { WrapperProps } from "@docusaurus/types";
 import Layout from "@theme-original/Layout";
 import type LayoutType from "@theme/Layout";
+import { CrawlChatScript, useCrawlChatSidePanel } from "crawlchat-client";
 import type { ReactNode } from "react";
-import type { WrapperProps } from "@docusaurus/types";
-import { useHistory } from "@docusaurus/router";
-import { useCrawlChatSidePanel, CrawlChatScript } from "crawlchat-client";
 
 type Props = WrapperProps<typeof LayoutType>;
 

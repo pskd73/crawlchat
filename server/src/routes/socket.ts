@@ -1,12 +1,10 @@
-import { prisma } from "@packages/common/prisma";
 import { createToken, verifyToken } from "@packages/common/jwt";
+import { prisma, ScrapeItem } from "@packages/common/prisma";
 import { hasEnoughCredits } from "@packages/common/user-plan";
-import { socketAskRateLimiter } from "../rate-limiter";
-import { baseAnswerer, saveAnswer, type AnswerListener } from "../answer";
-import { retry } from "../retry";
 import expressWs from "express-ws";
-import { ScrapeItem } from "@packages/common/prisma";
 import type WebSocket from "ws";
+import { baseAnswerer, saveAnswer, type AnswerListener } from "../answer";
+import { socketAskRateLimiter } from "../rate-limiter";
 
 function makeMessage(type: string, data: unknown) {
   return JSON.stringify({ type, data });

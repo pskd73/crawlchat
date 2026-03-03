@@ -1,10 +1,10 @@
-import { Container } from "./layout";
-import { prisma } from "@packages/common/prisma";
-import Markdown from "react-markdown";
-import type { Route } from "./+types/article";
-import { TbArrowLeft } from "react-icons/tb";
-import { Link } from "react-router";
 import cn from "@meltdownjs/cn";
+import { prisma } from "@packages/common/prisma";
+import { TbArrowLeft } from "react-icons/tb";
+import Markdown from "react-markdown";
+import { Link } from "react-router";
+import type { Route } from "./+types/article";
+import { Container } from "./layout";
 
 export async function loader({ params }: Route.LoaderArgs) {
   const article = await prisma.article.findFirstOrThrow({

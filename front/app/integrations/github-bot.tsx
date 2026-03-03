@@ -1,19 +1,19 @@
-import type { Route } from "./+types/github-bot";
 import type { Prisma } from "@packages/common/prisma";
+import { prisma } from "@packages/common/prisma";
+import { TbArrowRight, TbBrandGithub } from "react-icons/tb";
 import { useFetcher } from "react-router";
+import { getAuthUser } from "~/auth/middleware";
+import { authoriseScrapeUser, getSessionScrapeId } from "~/auth/scrape-session";
+import { Page } from "~/components/page";
 import {
   SettingsContainer,
   SettingsSection,
   SettingsSectionProvider,
 } from "~/components/settings-section";
 import { useDirtyForm } from "~/components/use-dirty-form";
-import { prisma } from "@packages/common/prisma";
-import { getAuthUser } from "~/auth/middleware";
-import { TbArrowRight, TbBrandGithub } from "react-icons/tb";
-import { authoriseScrapeUser, getSessionScrapeId } from "~/auth/scrape-session";
 import { useFetcherToast } from "~/components/use-fetcher-toast";
 import { makeMeta } from "~/meta";
-import { Page } from "~/components/page";
+import type { Route } from "./+types/github-bot";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);

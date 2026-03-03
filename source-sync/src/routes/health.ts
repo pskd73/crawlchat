@@ -1,7 +1,7 @@
-import { Router } from "express";
 import { prisma } from "@packages/common/prisma";
-import { Pinecone } from "@pinecone-database/pinecone";
 import { RateLimiter } from "@packages/common/rate-limiter";
+import { Pinecone } from "@pinecone-database/pinecone";
+import { Router } from "express";
 import { redis } from "../source/queue";
 
 const rateLimiter = new RateLimiter(20, "health");

@@ -1,9 +1,13 @@
-import type { Route } from "./+types/message";
+import cn from "@meltdownjs/cn";
+import { extractCitations } from "@packages/common/citation";
+import { getImagesCount, getQueryString } from "@packages/common/llm-message";
 import type {
   ApiAction,
   CategorySuggestion,
   Message,
 } from "@packages/common/prisma";
+import { prisma } from "@packages/common/prisma";
+import { useMemo, useState } from "react";
 import {
   TbFolder,
   TbMessage,
@@ -14,26 +18,22 @@ import {
   TbSettingsBolt,
   TbStarFilled,
 } from "react-icons/tb";
-import { MarkdownProse } from "~/widget/markdown-prose";
-import { useMemo, useState } from "react";
-import { makeMessagePairs, type MessagePair } from "./analyse";
-import { prisma } from "@packages/common/prisma";
 import { Link, Link as RouterLink, useFetcher } from "react-router";
-import { CountryFlag } from "./country-flag";
-import { extractCitations } from "@packages/common/citation";
-import { DataList } from "~/components/data-list";
 import { getAuthUser } from "~/auth/middleware";
 import { authoriseScrapeUser, getSessionScrapeId } from "~/auth/scrape-session";
-import { Rating } from "./rating-badge";
-import { Page } from "~/components/page";
 import { ChannelBadge } from "~/components/channel-badge";
-import cn from "@meltdownjs/cn";
+import { DataList } from "~/components/data-list";
+import { Page } from "~/components/page";
 import { ScoreBadge } from "~/components/score-badge";
 import { Timestamp } from "~/components/timestamp";
 import { makeMeta } from "~/meta";
-import { getImagesCount, getQueryString } from "@packages/common/llm-message";
-import { SentimentBadge } from "./sentiment-badge";
+import { MarkdownProse } from "~/widget/markdown-prose";
+import type { Route } from "./+types/message";
+import { makeMessagePairs, type MessagePair } from "./analyse";
+import { CountryFlag } from "./country-flag";
+import { Rating } from "./rating-badge";
 import { SearchTypeBadge } from "./search-type-badge";
+import { SentimentBadge } from "./sentiment-badge";
 
 export async function loader({ request, params }: Route.LoaderArgs) {
   const user = await getAuthUser(request);

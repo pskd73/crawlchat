@@ -1,11 +1,11 @@
 import { allActivePlans } from "@packages/common/user-plan";
+import { makeMeta } from "~/meta";
 import {
   Container,
   CustomTestimonials,
   OpenSource,
   PricingFeatures,
 } from "./page";
-import { makeMeta } from "~/meta";
 
 export function meta() {
   return makeMeta({

@@ -1,20 +1,20 @@
-import type { Route } from "./+types/link-item";
-import { prisma } from "@packages/common/prisma";
-import { getAuthUser } from "~/auth/middleware";
-import { useEffect, useState } from "react";
-import { redirect, useFetcher } from "react-router";
-import { TbBook2, TbRefresh, TbTrash } from "react-icons/tb";
-import { authoriseScrapeUser, getSessionScrapeId } from "~/auth/scrape-session";
-import { Page } from "~/components/page";
+import cn from "@meltdownjs/cn";
 import { createToken } from "@packages/common/jwt";
 import type { Prisma, ScrapeItem } from "@packages/common/prisma";
+import { prisma } from "@packages/common/prisma";
+import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
+import { TbBook2, TbRefresh, TbTrash } from "react-icons/tb";
+import Markdown from "react-markdown";
+import { redirect, useFetcher } from "react-router";
+import remarkGfm from "remark-gfm";
+import { getAuthUser } from "~/auth/middleware";
+import { authoriseScrapeUser, getSessionScrapeId } from "~/auth/scrape-session";
+import { Page } from "~/components/page";
 import { SettingsSection } from "~/components/settings-section";
 import { useFetcherToast } from "~/components/use-fetcher-toast";
-import cn from "@meltdownjs/cn";
-import Markdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import toast from "react-hot-toast";
 import { makeMeta } from "~/meta";
+import type { Route } from "./+types/link-item";
 
 export async function loader({ params, request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);

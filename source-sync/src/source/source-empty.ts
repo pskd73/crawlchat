@@ -1,4 +1,4 @@
-import { GroupForSource, UpdateItemResponse, Source } from "./interface";
+import { GroupForSource, Source, UpdateItemResponse } from "./interface";
 import { GroupData, ItemData } from "./queue";
 
 export class EmptySource implements Source {

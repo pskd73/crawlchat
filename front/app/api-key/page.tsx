@@ -1,25 +1,25 @@
-import type { Route } from "./+types/page";
+import cn from "@meltdownjs/cn";
+import type { ApiKey } from "@packages/common/prisma";
+import { prisma } from "@packages/common/prisma";
+import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import {
-  TbKey,
-  TbPlus,
   TbCopy,
-  TbTrash,
   TbEye,
   TbEyeOff,
+  TbKey,
+  TbPlus,
+  TbTrash,
 } from "react-icons/tb";
-import { Page } from "~/components/page";
-import { EmptyState } from "~/components/empty-state";
+import { useFetcher } from "react-router";
 import { getAuthUser } from "~/auth/middleware";
 import { authoriseScrapeUser, getSessionScrapeId } from "~/auth/scrape-session";
-import { prisma } from "@packages/common/prisma";
-import type { ApiKey } from "@packages/common/prisma";
-import { useFetcher } from "react-router";
-import { useEffect, useState } from "react";
 import { hideModal, showModal } from "~/components/daisy-utils";
-import toast from "react-hot-toast";
-import cn from "@meltdownjs/cn";
-import { makeMeta } from "~/meta";
+import { EmptyState } from "~/components/empty-state";
+import { Page } from "~/components/page";
 import { Timestamp } from "~/components/timestamp";
+import { makeMeta } from "~/meta";
+import type { Route } from "./+types/page";
 
 function maskApiKey(apiKey: string) {
   if (apiKey.length <= 4) {

@@ -1,17 +1,17 @@
 import type { Prisma } from "@packages/common/prisma";
-import type { Route } from "./+types/settings";
-import { redirect, useFetcher } from "react-router";
+import { prisma } from "@packages/common/prisma";
 import { TbSettings } from "react-icons/tb";
+import { redirect, useFetcher } from "react-router";
+import { getAuthUser } from "~/auth/middleware";
+import { getSessionScrapeId } from "~/auth/scrape-session";
+import { Page } from "~/components/page";
 import {
   SettingsContainer,
   SettingsSection,
   SettingsSectionProvider,
 } from "~/components/settings-section";
-import { Page } from "~/components/page";
-import { getAuthUser } from "~/auth/middleware";
 import { getSession } from "~/session";
-import { prisma } from "@packages/common/prisma";
-import { getSessionScrapeId } from "~/auth/scrape-session";
+import type { Route } from "./+types/settings";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);

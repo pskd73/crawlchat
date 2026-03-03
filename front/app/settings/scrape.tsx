@@ -1,18 +1,15 @@
-import type { Route } from "./+types/scrape";
+import cn from "@meltdownjs/cn";
+import { models, oldModels } from "@packages/common";
+import { createToken } from "@packages/common/jwt";
 import type {
   Prisma,
   Scrape,
   ScrapeMessageCategory,
   User,
 } from "@packages/common/prisma";
-import { Link, redirect, useFetcher, useSearchParams } from "react-router";
-import {
-  SettingsContainer,
-  SettingsSection,
-  SettingsSectionProvider,
-} from "~/components/settings-section";
 import { prisma } from "@packages/common/prisma";
-import { getAuthUser } from "~/auth/middleware";
+import { useEffect, useRef, useState } from "react";
+import toast from "react-hot-toast";
 import {
   TbCheck,
   TbCopy,
@@ -26,19 +23,22 @@ import {
   TbTrash,
   TbWorld,
 } from "react-icons/tb";
-import { Page } from "~/components/page";
-import { useEffect, useRef, useState } from "react";
+import { Link, redirect, useFetcher, useSearchParams } from "react-router";
+import { getAuthUser } from "~/auth/middleware";
 import { authoriseScrapeUser, getSessionScrapeId } from "~/auth/scrape-session";
-import { createToken } from "@packages/common/jwt";
-import { RadioCard } from "~/components/radio-card";
-import { DataList } from "~/components/data-list";
-import toast from "react-hot-toast";
-import cn from "@meltdownjs/cn";
-import { makeMeta } from "~/meta";
-import { Timestamp } from "~/components/timestamp";
 import { hideModal, showModal } from "~/components/daisy-utils";
-import { models, oldModels } from "@packages/common";
+import { DataList } from "~/components/data-list";
+import { Page } from "~/components/page";
+import { RadioCard } from "~/components/radio-card";
+import {
+  SettingsContainer,
+  SettingsSection,
+  SettingsSectionProvider,
+} from "~/components/settings-section";
+import { Timestamp } from "~/components/timestamp";
 import { useDirtyForm } from "~/components/use-dirty-form";
+import { makeMeta } from "~/meta";
+import type { Route } from "./+types/scrape";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);

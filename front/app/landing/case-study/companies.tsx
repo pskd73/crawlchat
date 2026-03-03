@@ -1,5 +1,4 @@
 import {
-  TbApi,
   TbBrandDiscord,
   TbBrandGithub,
   TbBrandNotion,
@@ -8,12 +7,12 @@ import {
   TbPointer,
   TbWorld,
 } from "react-icons/tb";
+import { MCPIcon } from "~/components/mcp-icon";
 import {
   AntonTestimonial,
   EgelhausTestimonial,
   JonnyTestimonial,
 } from "../page";
-import { MCPIcon } from "~/components/mcp-icon";
 
 type CaseStudyCompany = {
   title: string;

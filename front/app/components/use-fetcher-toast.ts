@@ -1,6 +1,6 @@
-import type { FetcherWithComponents } from "react-router";
 import { useEffect } from "react";
 import toast from "react-hot-toast";
+import type { FetcherWithComponents } from "react-router";
 
 export function useFetcherToast(
   fetcher?: FetcherWithComponents<any>,

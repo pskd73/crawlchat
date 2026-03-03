@@ -1,8 +1,8 @@
 import type { User } from "@packages/common/prisma";
 import { Authenticator } from "remix-auth";
+import { sendLoginEmail } from "~/email";
 import { sessionStorage } from "~/session";
 import { EmailLinkStrategy } from "./email-strategy";
-import { sendLoginEmail } from "~/email";
 import { GoogleStrategy } from "./google-strategy";
 import { signUpNewUser } from "./signup";
 
