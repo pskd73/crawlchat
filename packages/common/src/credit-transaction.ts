@@ -147,11 +147,15 @@ export async function updateAllCreditSnapshots(
 }
 
 export async function getCreditTransactions(
-  userId: string,
+  userId?: string,
   scrapeId?: string,
   page: number = 1,
   limit: number = 50
 ): Promise<{ transactions: CreditTransaction[]; total: number }> {
+  if (!userId && !scrapeId) {
+    throw new Error("Either userId or scrapeId must be provided");
+  }
+
   const skip = (page - 1) * limit;
 
   const [transactions, total] = await Promise.all([

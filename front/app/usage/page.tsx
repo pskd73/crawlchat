@@ -30,7 +30,7 @@ export async function loader({ request }: Route.LoaderArgs) {
   const limit = 50;
 
   const { transactions, total } = await getCreditTransactions(
-    user!.id,
+    view === "collection" ? undefined : user!.id,
     view === "collection" ? scrapeId : undefined,
     page,
     limit
