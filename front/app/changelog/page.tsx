@@ -1,3 +1,4 @@
+import cn from "@meltdownjs/cn";
 import moment from "moment";
 import { TbClock } from "react-icons/tb";
 import Markdown from "react-markdown";
@@ -29,7 +30,12 @@ export default function BlogPage({ loaderData }: Route.ComponentProps) {
       <Container>
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-2 max-w-[760px] mx-auto">
-            <h1 className="text-5xl font-medium text-center leading-tight">
+            <h1
+              className={cn(
+                "text-5xl text-center leading-tight",
+                "font-brand mt-16"
+              )}
+            >
               {loaderData.post.title}
             </h1>
             <p className="opacity-60 text-center text-lg">
