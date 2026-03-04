@@ -31,6 +31,9 @@ export async function query(
 
   if (result.status === 400) {
     error = (await result.json()).message;
+  } else if (result.status !== 200) {
+    console.error(await result.text());
+    error = `Unknown error: ${result.status}`;
   } else {
     answerJson = await result.json();
     answer = answerJson.content;
