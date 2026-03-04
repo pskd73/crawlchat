@@ -149,5 +149,7 @@ export default [
   route("w/not-found", "widget/not-found.tsx"),
   route("embed.js", "embed-script.ts"),
 
+  route("github-chat/:org/:repo", "github-chat/page.tsx"),
+
   route("health", "health.ts"),
 ] satisfies RouteConfig;
