@@ -1275,7 +1275,7 @@ export function Footer() {
               className="block mt-4"
             >
               <img
-                src="https://status.crawlchat.app/api/badge/6/uptime?style=for-the-badge"
+                src="https://status.crawlchat.app/api/badge/7/uptime?style=for-the-badge"
                 alt="CrawlChat uptime status"
               />
             </a>
