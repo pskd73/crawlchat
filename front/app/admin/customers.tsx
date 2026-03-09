@@ -124,6 +124,7 @@ export async function loader({ request }: Route.LoaderArgs) {
         email: user.email,
         planName: plan.name,
         planId: plan.id,
+        planStatus: user.plan?.status ?? "EXPIRED",
         allowedScrapes,
         usedScrapes,
         allowedMessages,
@@ -200,7 +201,13 @@ export async function loader({ request }: Route.LoaderArgs) {
     };
   });
 
-  return { customers: customerData, dailyCosts };
+  const sortedCustomerData = customerData.sort((a, b) => {
+    if (a.planStatus === "ACTIVE" && b.planStatus !== "ACTIVE") return -1;
+    if (a.planStatus !== "ACTIVE" && b.planStatus === "ACTIVE") return 1;
+    return 0;
+  });
+
+  return { customers: sortedCustomerData, dailyCosts };
 }
 
 export function meta() {
@@ -291,7 +298,7 @@ export default function Customers({ loaderData }: Route.ComponentProps) {
             <tr>
               <th>Email</th>
               <th>Plan</th>
-              <th>Collections</th>
+              <th>Plan Status</th>
               <th>Messages</th>
               <th>Billing Cycle Start</th>
               <th>Cost [B]</th>
@@ -317,7 +324,15 @@ export default function Customers({ loaderData }: Route.ComponentProps) {
                   </span>
                 </td>
                 <td>
-                  {customer.usedScrapes} / {customer.allowedScrapes}
+                  <span
+                    className={`badge badge-soft ${
+                      customer.planStatus === "ACTIVE"
+                        ? "badge-success"
+                        : "badge-error"
+                    }`}
+                  >
+                    {customer.planStatus}
+                  </span>
                 </td>
                 <td>
                   {customer.usedMessages} / {customer.allowedMessages}
