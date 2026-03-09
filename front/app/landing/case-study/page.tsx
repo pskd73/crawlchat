@@ -66,14 +66,18 @@ export default function CaseStudyLayout() {
               <div
                 className={cn(
                   "w-full h-auto my-4",
-                  company.darkLogo && "bg-black p-6 rounded-box"
+                  "flex justify-center items-center gap-2",
+                  company.darkLogo && "bg-black p-4 rounded-box"
                 )}
               >
                 <img
                   src={company.logo}
                   alt={company.title}
-                  className="w-full h-auto"
+                  className="max-h-[50px]"
                 />
+                {company.logoLabel && (
+                  <p className="text-4xl font-medium">{company.logoLabel}</p>
+                )}
               </div>
 
               <div className="bg-base-200 border border-base-300 rounded-box">

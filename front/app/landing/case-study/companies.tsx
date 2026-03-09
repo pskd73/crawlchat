@@ -1,7 +1,9 @@
 import {
+  TbBrandChrome,
   TbBrandDiscord,
   TbBrandGithub,
   TbBrandNotion,
+  TbBrandSlack,
   TbBrandYoutube,
   TbCode,
   TbPointer,
@@ -11,6 +13,7 @@ import { MCPIcon } from "~/components/mcp-icon";
 import {
   AntonTestimonial,
   EgelhausTestimonial,
+  HarshTestimonial,
   JonnyTestimonial,
 } from "../page";
 
@@ -18,6 +21,7 @@ type CaseStudyCompany = {
   title: string;
   logo: string;
   darkLogo?: boolean;
+  logoLabel?: string;
   description: string;
   overview: React.ReactNode;
   challengesSummary: React.ReactNode;
@@ -108,7 +112,7 @@ export const companies: Record<string, CaseStudyCompany> = {
       "Repetitive questions are answered on the documentation pages",
       "Developers get instant help in their IDEs using MCP",
     ],
-    testimonial: <JonnyTestimonial small />,
+    testimonial: <JonnyTestimonial />,
   },
   polotno: {
     title: "Polotno",
@@ -153,7 +157,7 @@ export const companies: Record<string, CaseStudyCompany> = {
       },
       {
         icon: <TbWorld />,
-        title: "Conversations",
+        title: "Threads",
         tooltip: "Community conversations",
       },
     ],
@@ -186,7 +190,7 @@ export const companies: Record<string, CaseStudyCompany> = {
       "Developers get instant help in their IDEs using MCP",
       "Find data gaps in the documentation and improve it",
     ],
-    testimonial: <AntonTestimonial small />,
+    testimonial: <AntonTestimonial />,
   },
   postiz: {
     title: "Postiz",
@@ -284,6 +288,105 @@ export const companies: Record<string, CaseStudyCompany> = {
       </span>,
       "360 degree visibility into the questions asked",
     ],
-    testimonial: <EgelhausTestimonial small />,
+    testimonial: <EgelhausTestimonial />,
+  },
+  localstack: {
+    title: "LocalStack",
+    logo: "/used-by/localstack.png",
+    description:
+      "Learn more about how LocalStack uses CrawlChat to power their documentation.",
+    overview: (
+      <div>
+        <p>
+          <a
+            href="https://localstack.dev/"
+            target="_blank"
+            className="link link-primary link-hover"
+          >
+            LocalStack
+          </a>{" "}
+          is a fully functional local AWS cloud stack that lets developers
+          develop and test their cloud and serverless apps offline. It provides
+          a local testing environment that emulates AWS services, enabling
+          faster development cycles without relying on remote cloud resources.
+        </p>
+        <p className="mt-2">
+          LocalStack has extensive documentation and a vibrant community. They
+          added <span className="font-semibold">~6,000 pages</span> to their
+          knowledge base spanning docs, YouTube videos, GitHub issues, codebase,
+          and Slack conversations. By integrating CrawlChat, LocalStack now
+          delivers AI-powered support wherever their users need it.
+        </p>
+      </div>
+    ),
+    challengesSummary: <p></p>,
+    challenges: [
+      "Users needed quick answers across documentation, Slack, and other platforms",
+      "Repetitive questions consumed valuable support time",
+      "No unified knowledge base across multiple sources",
+      "Needed to support developers in their IDEs via MCP",
+    ],
+    sources: [
+      {
+        icon: <TbWorld />,
+        title: "Docs",
+        tooltip: "Documentation website",
+      },
+      {
+        icon: <TbBrandYoutube />,
+        title: "YouTube",
+        tooltip: "YouTube videos",
+      },
+      {
+        icon: <TbBrandGithub />,
+        title: "Issues",
+        tooltip: "GitHub issues",
+      },
+      {
+        icon: <TbCode />,
+        title: "Codebase",
+        tooltip: "GitHub codebase",
+      },
+      {
+        icon: <TbBrandSlack />,
+        title: "Slack",
+        tooltip: "Slack conversations",
+      },
+    ],
+    channels: [
+      {
+        icon: <TbWorld />,
+        title: "Docs",
+        tooltip: "Docs site widget",
+      },
+      {
+        icon: <TbBrandSlack />,
+        title: "Slack",
+        tooltip: "Slack bot",
+      },
+      {
+        icon: <MCPIcon />,
+        title: "MCP",
+        tooltip: "MCP server",
+      },
+      {
+        icon: <TbCode />,
+        title: "API",
+        tooltip: "API integration",
+      },
+    ],
+    resultsSummary:
+      "By integrating CrawlChat, LocalStack was able to achieve following results:",
+    results: [
+      "24/7 AI-powered documentation support",
+      "Unified answers across docs site, Slack, MCP, and APIs",
+      <span>
+        <TbBrandChrome className="inline" /> Chrome extension to compose answers
+        on other platforms
+      </span>,
+      "Developers get instant help in their IDEs using MCP",
+    ],
+    testimonial: <HarshTestimonial />,
+    logoLabel: "LocalStack",
   },
 };

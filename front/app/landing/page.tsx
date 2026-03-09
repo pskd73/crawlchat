@@ -1345,6 +1345,20 @@ function CaseStudyDropdown() {
             Postiz
           </Link>
         </li>
+
+        <li>
+          <Link
+            className="flex gap-2 items-center group"
+            to="/case-study/localstack"
+          >
+            <img
+              src="/used-by/localstack.png"
+              alt="LocalStack"
+              className="max-h-5 inline-block grayscale group-hover:grayscale-0 transition-all"
+            />
+            LocalStack
+          </Link>
+        </li>
       </ul>
     </div>
   );
