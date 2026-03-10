@@ -26,7 +26,12 @@ export type IpDetails = {
   timezone?: string;
 };
 
-export async function fetchIpDetails(ip: string): Promise<IpDetails | null> {
+async function fetchIpifyDetails(ip: string): Promise<IpDetails | null> {
+  if (!process.env.IPIFY_API_KEY) {
+    console.warn("IPIFY API key is not set");
+    return null;
+  }
+
   const response = await fetch(
     `https://geo.ipify.org/api/v2/country,city?apiKey=${process.env.IPIFY_API_KEY}&ipAddress=${ip}`
   );
@@ -51,4 +56,50 @@ export async function fetchIpDetails(ip: string): Promise<IpDetails | null> {
     lng: data.location.lng,
     timezone: data.location.timezone,
   };
+}
+
+export async function fetchGeoIpDetails(ip: string): Promise<IpDetails | null> {
+  if (
+    !process.env.GEOIP_HOST ||
+    !process.env.GEOIP_USERNAME ||
+    !process.env.GEOIP_PASSWORD
+  ) {
+    console.warn("GeoIP host, username, or password is not set");
+    return null;
+  }
+
+  const authHeader = `Basic ${Buffer.from(
+    `${process.env.GEOIP_USERNAME ?? ""}:${process.env.GEOIP_PASSWORD ?? ""}`
+  ).toString("base64")}`;
+
+  const response = await fetch(`${process.env.GEOIP_HOST}/${ip}`, {
+    headers: {
+      Authorization: authHeader,
+    },
+  });
+
+  if (response.status !== 200) {
+    console.warn(
+      "Failed to fetch IP details with GeoIP",
+      response.status,
+      await response.text()
+    );
+    return null;
+  }
+
+  const data = await response.json();
+
+  return {
+    ip,
+    country: data.country,
+    region: data.stateprov,
+    city: data.city,
+    lat: data.latitude,
+    lng: data.longitude,
+    timezone: data.timezone,
+  };
+}
+
+export async function fetchIpDetails(ip: string): Promise<IpDetails | null> {
+  return fetchGeoIpDetails(ip);
 }
