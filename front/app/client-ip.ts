@@ -1,17 +1,24 @@
 export function getClientIp(req: Request) {
   const headers = req.headers;
 
+  const cfConnectingIp = headers.get("cf-connecting-ip");
+  if (cfConnectingIp) {
+    return cfConnectingIp.trim();
+  }
+
   const xForwardedFor = headers.get("x-forwarded-for");
   if (xForwardedFor) {
-    const ips = xForwardedFor.split(",").map((ip) => ip.trim());
-    return ips[ips.length - 1];
+    const firstIp = xForwardedFor
+      .split(",")
+      .map((ip) => ip.trim())
+      .find(Boolean);
+    if (firstIp) {
+      return firstIp;
+    }
   }
 
   const fallbackIp =
-    headers.get("x-real-ip") ||
-    headers.get("cf-connecting-ip") ||
-    headers.get("x-client-ip") ||
-    null;
+    headers.get("x-real-ip") || headers.get("x-client-ip") || null;
 
   return fallbackIp;
 }
