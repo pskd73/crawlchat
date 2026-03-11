@@ -20,6 +20,7 @@ import { fetchDataGaps } from "~/data-gaps/fetch";
 import { makeMeta } from "~/meta";
 import { getSession } from "~/session";
 import type { Route } from "./+types/layout";
+import { planProductIdMap } from "./payment/gateway-dodo";
 import { getUserMessageCredits } from "./user-message-credits";
 
 export function meta() {
@@ -89,6 +90,11 @@ export async function loader({ request }: Route.LoaderArgs) {
   const owner = scrape?.user ?? user!;
   const messageCredits = await getUserMessageCredits(owner.id);
 
+  const plans = allActivePlans.map((plan) => ({
+    ...plan,
+    url: `/checkout/${planProductIdMap[plan.id]}`,
+  }));
+
   return {
     user: user!,
     plan,
@@ -98,7 +104,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     openTickets,
     scrape,
     dataGapMessages,
-    plans: allActivePlans,
+    plans,
     usedPages,
     scrapeUsers,
     token,
