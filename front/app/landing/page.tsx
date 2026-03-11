@@ -335,9 +335,9 @@ function WorksStep({
             <div className="tooltip" data-tip={title}>
               <div
                 className={cn(
-                  "text-5xl opacity-70 group-hover:opacity-100",
-                  "transition-all duration-200",
-                  "group-hover:text-primary"
+                  "text-2xl opacity-70 group-hover:opacity-100",
+                  "transition-all duration-500",
+                  "group-hover:text-primary group-hover:scale-140 group-hover:rotate-360"
                 )}
               >
                 {icon}
@@ -372,7 +372,13 @@ function Works() {
         steps.
       </HeadingDescription>
 
-      <div className="flex flex-col md:flex-row gap-16 items-center md:items-start">
+      <div
+        className={cn(
+          "flex flex-col md:flex-row",
+          "gap-16 items-center md:items-start",
+          "mt-8"
+        )}
+      >
         <WorksStep
           title="Make knowledge base"
           cards={[
@@ -434,7 +440,7 @@ function Works() {
         </WorksStep>
 
         <WorksStep
-          title="Analyse performance"
+          title="Observe"
           cards={[
             [<TbChartBar />, "Daily logs"],
             [<TbFolder />, "Categories"],
@@ -1493,7 +1499,7 @@ function Hero() {
 
   const features = [
     {
-      text: "Build knowledge base",
+      text: "Make knowledge base",
     },
     {
       text: "Integrate chatbot",
