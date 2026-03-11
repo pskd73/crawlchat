@@ -22,6 +22,7 @@ import {
   TbBrandNotion,
   TbBrandSlack,
   TbBrandX,
+  TbBrandYoutube,
   TbChartBar,
   TbChartBarOff,
   TbChevronDown,
@@ -39,8 +40,10 @@ import {
   TbDatabase,
   TbFile,
   TbFolder,
+  TbGlobe,
   TbHelpCircleFilled,
   TbInfoCircleFilled,
+  TbLanguage,
   TbLock,
   TbMail,
   TbMenu2,
@@ -52,6 +55,7 @@ import {
   TbPlayerPauseFilled,
   TbPlayerPlayFilled,
   TbPlug,
+  TbPlus,
   TbPointer,
   TbRobotFace,
   TbScoreboard,
@@ -299,22 +303,48 @@ export function HeadingDescription({ children }: PropsWithChildren) {
 }
 
 function WorksStep({
-  img,
   title,
   children,
+  cards,
 }: PropsWithChildren<{
-  img: string;
   title: string;
+  cards: Array<[ReactNode, string]>;
 }>) {
   return (
-    <div className="flex flex-col gap-4 flex-1 items-center max-w-[400px]">
+    <div
+      className={cn("flex flex-col gap-4 flex-1", "items-center max-w-[400px]")}
+    >
       <div
         className={cn(
-          "max-w-[300px] mx-auto rounded-box overflow-hidden",
-          "border border-primary mb-4"
+          "grid grid-cols-3",
+          "mb-4",
+          "rounded-box border border-base-300",
+          "gap-px bg-base-300"
         )}
       >
-        <img src={img} alt={title} className="w-full h-full" />
+        {cards.map(([icon, title], index) => (
+          <div
+            key={index}
+            className={cn(
+              "p-4 flex flex-col items-center justify-center",
+              "gap-1 bg-base-100 group",
+              "first:rounded-tl-box nth-[3]:rounded-tr-box",
+              "last:rounded-br-box nth-[4]:rounded-bl-box"
+            )}
+          >
+            <div className="tooltip" data-tip={title}>
+              <div
+                className={cn(
+                  "text-5xl opacity-70 group-hover:opacity-100",
+                  "transition-all duration-200",
+                  "group-hover:text-primary"
+                )}
+              >
+                {icon}
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
 
       <h4 className="text-2xl font-brand">{title}</h4>
@@ -344,8 +374,15 @@ function Works() {
 
       <div className="flex flex-col md:flex-row gap-16 items-center md:items-start">
         <WorksStep
-          img="/new-landing/knowledge-base.png"
           title="Make knowledge base"
+          cards={[
+            [<TbGlobe />, "Discord"],
+            [<TbBrandNotion />, "Notion"],
+            [<TbBrandGithub />, "GitHub Issues & Discussions"],
+            [<TbBrandYoutube />, "Youtube Videos"],
+            [<SiLinear />, "Linear Issues & Projects"],
+            [<TbPlus />, "+5 more"],
+          ]}
         >
           Add your existing documents or web pages to create your knowledge
           base. Import documentation from multiple{" "}
@@ -370,7 +407,18 @@ function Works() {
           </span>{" "}
           sources in minutes.
         </WorksStep>
-        <WorksStep img="/new-landing/integrate-chatbot.png" title="Integrate">
+
+        <WorksStep
+          title="Integrate"
+          cards={[
+            [<TbGlobe />, "Web embed"],
+            [<TbBrandDiscord />, "Discord"],
+            [<TbBrandSlack />, "Slack"],
+            [<MCPIcon />, "MCP"],
+            [<TbCode />, "API"],
+            [<TbPlus />, "+5 more"],
+          ]}
+        >
           Embed the Ask AI widget on your website, Discord server, or Slack
           workspace. Customize the bot's UI and{" "}
           <span
@@ -384,9 +432,17 @@ function Works() {
           </span>{" "}
           of the bot
         </WorksStep>
+
         <WorksStep
-          img="/new-landing/analyse-performance.png"
           title="Analyse performance"
+          cards={[
+            [<TbChartBar />, "Daily logs"],
+            [<TbFolder />, "Categories"],
+            [<TbUsers />, "User analytics"],
+            [<TbMail />, "Email reports"],
+            [<TbLanguage />, "Geo & Language analytics"],
+            [<TbPlus />, "Many more"],
+          ]}
         >
           Monitor all messages and conversations. Track performance{" "}
           <span
@@ -1064,7 +1120,7 @@ export function Footer() {
               </li>
             </ul>
           </div>
-          <div className="flex-[1]">
+          <div className="flex-1">
             <ul className="flex flex-col gap-4">
               <li>
                 <FooterLink href="/">Home</FooterLink>
@@ -1094,7 +1150,7 @@ export function Footer() {
               </li>
             </ul>
           </div>
-          <div className="flex-[1]">
+          <div className="flex-1">
             <ul className="flex flex-col gap-4">
               <li>
                 <FooterLink href="/terms">Terms</FooterLink>
@@ -2051,7 +2107,7 @@ function Gallery() {
   const steps = [
     {
       title: "Dashboard",
-      img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/gallery/dashboard-v2.png",
+      img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/gallery/march-2026/summary.png",
       icon: <TbDashboard />,
     },
     {
@@ -2066,33 +2122,33 @@ function Gallery() {
     },
     {
       title: "Add your docs",
-      img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/gallery/add-knowledge-group-v2.png",
+      img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/gallery/march-2026/new-group.png",
       icon: <TbBook />,
     },
     {
       title: "View knowledge",
-      img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/gallery/knowledge-groups.png",
+      img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/gallery/march-2026/groups.png",
       icon: <TbBook2 />,
     },
     {
       title: "Embed AI",
-      img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/gallery/customise-chatbot.png",
+      img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/gallery/march-2026/customise-widget.png",
       icon: <TbCode />,
     },
     {
       title: "Categories",
-      img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/gallery/categories.png",
+      img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/gallery/march-2026/categories.png",
       icon: <TbFolder />,
       new: true,
     },
     {
       title: "Conversations",
-      img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/gallery/messages.png",
+      img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/gallery/march-2026/questions.png",
       icon: <TbMessage />,
     },
     {
       title: "Data gaps",
-      img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/gallery/data-gaps.png",
+      img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/gallery/march-2026/data-gaps.png",
       icon: <TbChartBarOff />,
     },
   ];
@@ -2402,10 +2458,7 @@ function SourcesChannels() {
           {Array.from(Array(4)).map((_, i) => (
             <div key={i} className="flex gap-4 animate-infinite-scroll">
               {sources.map((source, index) => (
-                <div
-                  key={`${i}-${source.title}-${index}`}
-                  className="flex-shrink-0"
-                >
+                <div key={`${i}-${source.title}-${index}`} className="shrink-0">
                   <SourceCard
                     icon={source.icon}
                     title={source.title}
@@ -2721,7 +2774,7 @@ export function OpenSource() {
         <span>now!</span>
       </h3>
 
-      <p className="text-2xl text-center max-w-3xl">
+      <p className="text-2xl text-center max-w-3xl opacity-70">
         Want to <span className="text-accent">self-host</span> it for yourself?
         Now you can run the entire platform on your servers and customise it to
         your needs. Or{" "}
