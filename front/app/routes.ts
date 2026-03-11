@@ -152,5 +152,7 @@ export default [
 
   route("github.com/:org/:repo", "github-chat/page.tsx"),
 
+  route("checkout/:productId", "checkout.tsx"),
+
   route("health", "health.ts"),
 ] satisfies RouteConfig;

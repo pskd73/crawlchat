@@ -1,6 +1,6 @@
-import { allActivePlans } from "@packages/common/user-plan";
+import { allActivePlans, topupPlans } from "@packages/common/user-plan";
 import { makeMeta } from "~/meta";
-import { topupPlans } from "~/topup";
+import { planProductIdMap, productIdTopupMap } from "~/payment/gateway-dodo";
 import { Container, Pricing, PricingFeatures } from "./page";
 
 export function meta() {
@@ -12,9 +12,17 @@ export function meta() {
 }
 
 export async function loader() {
+  const plans = allActivePlans.map((plan) => ({
+    ...plan,
+    url: `/checkout/${planProductIdMap[plan.id]}`,
+  }));
+
   return {
-    plans: allActivePlans,
-    topupPlans,
+    plans,
+    topupPlans: topupPlans.map((plan) => ({
+      ...plan,
+      purchaseUrl: `/checkout/${productIdTopupMap[Number(plan.id)]}`,
+    })),
   };
 }
 

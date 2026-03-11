@@ -22,7 +22,6 @@ export type Plan = {
   resetType: PlanResetType;
   limits: PlanLimits;
   description?: string;
-  checkoutLink?: string;
   popular?: boolean;
 };
 
@@ -161,8 +160,6 @@ export const PLAN_LAUNCH: Plan = {
   resetType: "monthly",
   category: "BASE",
   description: "Get started with CrawlChat",
-  checkoutLink:
-    "https://checkout.dodopayments.com/buy/pdt_0NVYGTDXnMxIdEJ8TCPQR?quantity=1&redirect_url=https://crawlchat.app%2Fprofile%23billing",
 };
 
 export const PLAN_LAUNCH_YEARLY: Plan = {
@@ -181,8 +178,6 @@ export const PLAN_LAUNCH_YEARLY: Plan = {
   resetType: "yearly",
   category: "BASE",
   description: "Get started with CrawlChat",
-  checkoutLink:
-    "https://checkout.dodopayments.com/buy/pdt_0NVYGgRC1GaW0ogaIngH7?quantity=1&redirect_url=https://crawlchat.app%2Fprofile%23billing",
 };
 
 export const PLAN_GROW: Plan = {
@@ -201,8 +196,6 @@ export const PLAN_GROW: Plan = {
   resetType: "monthly",
   category: "BASE",
   description: "For growing teams and projects",
-  checkoutLink:
-    "https://checkout.dodopayments.com/buy/pdt_0NVYGpvQOVQSs6XD7nWFg?quantity=1&redirect_url=https://crawlchat.app%2Fprofile%23billing",
   popular: true,
 };
 
@@ -222,8 +215,6 @@ export const PLAN_GROW_YEARLY: Plan = {
   resetType: "yearly",
   category: "BASE",
   description: "For growing teams and projects",
-  checkoutLink:
-    "https://checkout.dodopayments.com/buy/pdt_0NVYGypdaV3R7ZKvSkJvd?quantity=1&redirect_url=https://crawlchat.app%2Fprofile%23billing",
   popular: true,
 };
 
@@ -243,8 +234,6 @@ export const PLAN_ACCELERATE: Plan = {
   resetType: "monthly",
   category: "BASE",
   description: "For teams that need more power",
-  checkoutLink:
-    "https://checkout.dodopayments.com/buy/pdt_0NVYHBbhSr7JUmQtMcTiV?quantity=1&redirect_url=https://crawlchat.app%2Fprofile%23billing",
 };
 
 export const PLAN_ACCELERATE_YEARLY: Plan = {
@@ -263,8 +252,6 @@ export const PLAN_ACCELERATE_YEARLY: Plan = {
   resetType: "yearly",
   category: "BASE",
   description: "For teams that need more power",
-  checkoutLink:
-    "https://checkout.dodopayments.com/buy/pdt_0NVYHOktAtrFNDT4qYVhb?quantity=1&redirect_url=https://crawlchat.app%2Fprofile%23billing",
 };
 
 export const planMap: Record<string, Plan> = {
@@ -291,6 +278,27 @@ export const allActivePlans: Plan[] = [
   PLAN_GROW_YEARLY,
   PLAN_ACCELERATE,
   PLAN_ACCELERATE_YEARLY,
+];
+
+export const topupPlans = [
+  {
+    id: "1000",
+    credits: 1000,
+    price: 18,
+    description: "Best when billing cycle is just a week away.",
+  },
+  {
+    id: "3000",
+    credits: 3000,
+    price: 52,
+    description: "Best when billing cycle is a couple of weeks away.",
+  },
+  {
+    id: "5000",
+    credits: 5000,
+    price: 84,
+    description: "Best when you exhausted the credits in first week.",
+  },
 ];
 
 export const activatePlan = async (

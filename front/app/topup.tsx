@@ -1,7 +1,8 @@
 import cn from "@meltdownjs/cn";
-import { planMap } from "@packages/common/user-plan";
+import { planMap, topupPlans } from "@packages/common/user-plan";
 import { useEffect, useRef, useState } from "react";
 import { TbMessagePlus } from "react-icons/tb";
+import { useLoaderData } from "react-router";
 import type { Route } from "./+types/topup";
 import { getAuthUser } from "./auth/middleware";
 import { Page } from "./components/page";
@@ -12,33 +13,7 @@ import {
 } from "./components/settings-section";
 import { makeMeta } from "./meta";
 import { getPaymentGateway } from "./payment/factory";
-
-export const topupPlans = [
-  {
-    id: "1000",
-    credits: 1000,
-    price: 18,
-    purchaseUrl:
-      "https://checkout.dodopayments.com/buy/pdt_Bd3tewxGoSpthFEmhNq64?quantity=1&redirect_url=https://crawlchat.app%2Fprofile%23billing",
-    description: "Best when billing cycle is just a week away.",
-  },
-  {
-    id: "3000",
-    credits: 3000,
-    price: 52,
-    purchaseUrl:
-      "https://checkout.dodopayments.com/buy/pdt_0NZB5fBcjnMwFyjqWxLXG?quantity=1&redirect_url=https://crawlchat.app%2Fprofile%23billing",
-    description: "Best when billing cycle is a couple of weeks away.",
-  },
-  {
-    id: "5000",
-    credits: 5000,
-    price: 84,
-    purchaseUrl:
-      "https://checkout.dodopayments.com/buy/pdt_0NWpIy5atI7vpkeWe1AVP?quantity=1&redirect_url=https://crawlchat.app%2Fprofile%23billing",
-    description: "Best when you exhausted the credits in first week.",
-  },
-];
+import { productIdTopupMap } from "./payment/gateway-dodo";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -57,6 +32,10 @@ export async function loader({ request }: Route.LoaderArgs) {
     user: user!,
     subscription,
     plan,
+    topupPlans: topupPlans.map((plan) => ({
+      ...plan,
+      purchaseUrl: `/checkout/${productIdTopupMap[Number(plan.id)]}`,
+    })),
   };
 }
 
@@ -67,6 +46,7 @@ export function meta() {
 }
 
 export default function TopupPage() {
+  const { topupPlans } = useLoaderData<typeof loader>();
   const [confirm, setConfirm] = useState(false);
   const timeout = useRef<NodeJS.Timeout | null>(null);
 

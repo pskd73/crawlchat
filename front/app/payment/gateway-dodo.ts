@@ -50,36 +50,68 @@ export const productIdPlanMap: Record<string, Plan> = {
   pdt_CDgenxMUiAKjzBDVROTDr: PLAN_STARTER,
   pdt_7tO1wC3NRoQsCXh8oIFEi: PLAN_PRO,
   pdt_lpFZp5sBEu5bzKwCbE5Y8: PLAN_HOBBY,
+
+  pdt_0NaFsqyzyCDgNB37gJhrT: PLAN_LAUNCH,
+  pdt_0NaFxFr1XldIkBjI1YYIS: PLAN_LAUNCH_YEARLY,
+  pdt_0NaFwx1kUsZLJQO6f4WFy: PLAN_GROW,
+  pdt_0NaFxPvglJzndmDyjBYgD: PLAN_GROW_YEARLY,
+  pdt_0NaFx7ZENUtuIUJdvynL3: PLAN_ACCELERATE,
+  pdt_0NaFxW5BmwmDHUTJhVSLh: PLAN_ACCELERATE_YEARLY,
 };
+
+export const planProductIdMap: Record<string, string> =
+  process.env.PAYMENT_ENV === "test"
+    ? {
+        [PLAN_HOBBY.id]: "pdt_lpFZp5sBEu5bzKwCbE5Y8",
+        [PLAN_STARTER.id]: "pdt_CDgenxMUiAKjzBDVROTDr",
+        [PLAN_PRO.id]: "pdt_7tO1wC3NRoQsCXh8oIFEi",
+
+        [PLAN_LAUNCH.id]: "pdt_0NaFsqyzyCDgNB37gJhrT",
+        [PLAN_LAUNCH_YEARLY.id]: "pdt_0NaFxFr1XldIkBjI1YYIS",
+        [PLAN_GROW.id]: "pdt_0NaFwx1kUsZLJQO6f4WFy",
+        [PLAN_GROW_YEARLY.id]: "pdt_0NaFxPvglJzndmDyjBYgD",
+        [PLAN_ACCELERATE.id]: "pdt_0NaFx7ZENUtuIUJdvynL3",
+        [PLAN_ACCELERATE_YEARLY.id]: "pdt_0NaFxW5BmwmDHUTJhVSLh",
+      }
+    : {
+        [PLAN_HOBBY.id]: "pdt_IcrpqSx48qoCenz4lnLi1",
+        [PLAN_STARTER.id]: "pdt_vgCVfRAaCT99LM1Dfk5qF",
+        [PLAN_PRO.id]: "pdt_P68hLo9a0At8cgn4WbzBe",
+        [PLAN_STARTER_YEARLY.id]: "pdt_uAHyWAsgys9afUnn9NjAM",
+        [PLAN_PRO_YEARLY.id]: "pdt_5dCrGhvBslGdT2fIxQjuy",
+        [PLAN_HOBBY_YEARLY.id]: "pdt_boJZHUL9XLprkefonKtuT",
+
+        [PLAN_LAUNCH.id]: "pdt_0NVYGTDXnMxIdEJ8TCPQR",
+        [PLAN_LAUNCH_YEARLY.id]: "pdt_0NVYGgRC1GaW0ogaIngH7",
+        [PLAN_GROW.id]: "pdt_0NVYGpvQOVQSs6XD7nWFg",
+        [PLAN_GROW_YEARLY.id]: "pdt_0NVYGypdaV3R7ZKvSkJvd",
+        [PLAN_ACCELERATE.id]: "pdt_0NVYHBbhSr7JUmQtMcTiV",
+        [PLAN_ACCELERATE_YEARLY.id]: "pdt_0NVYHOktAtrFNDT4qYVhb",
+      };
 
 export const topupProductIdMap: Record<string, number> = {
   pdt_Bd3tewxGoSpthFEmhNq64: 1000,
   pdt_0NZB5fBcjnMwFyjqWxLXG: 3000,
-  pdt_0NWpIy5atI7vpkeWe1AVP: 8000,
+  pdt_0NWpIy5atI7vpkeWe1AVP: 5000,
 
   // dev
   pdt_0NZUPFnIVqj3VLPvp5NNW: 1000,
+  pdt_0NaG1FeShKcTHj3HYcBOH: 3000,
+  pdt_0NaG1MXFo6eLIfvwQVCLi: 5000,
 };
 
-export const planProductIdMap: Record<string, string> = {
-  [PLAN_HOBBY.id]: "pdt_IcrpqSx48qoCenz4lnLi1",
-  [PLAN_STARTER.id]: "pdt_vgCVfRAaCT99LM1Dfk5qF",
-  [PLAN_PRO.id]: "pdt_P68hLo9a0At8cgn4WbzBe",
-  [PLAN_STARTER_YEARLY.id]: "pdt_uAHyWAsgys9afUnn9NjAM",
-  [PLAN_PRO_YEARLY.id]: "pdt_5dCrGhvBslGdT2fIxQjuy",
-  [PLAN_HOBBY_YEARLY.id]: "pdt_boJZHUL9XLprkefonKtuT",
-
-  [PLAN_LAUNCH.id]: "pdt_0NVYGTDXnMxIdEJ8TCPQR",
-  [PLAN_LAUNCH_YEARLY.id]: "pdt_0NVYGgRC1GaW0ogaIngH7",
-  [PLAN_GROW.id]: "pdt_0NVYGpvQOVQSs6XD7nWFg",
-  [PLAN_GROW_YEARLY.id]: "pdt_0NVYGypdaV3R7ZKvSkJvd",
-  [PLAN_ACCELERATE.id]: "pdt_0NVYHBbhSr7JUmQtMcTiV",
-  [PLAN_ACCELERATE_YEARLY.id]: "pdt_0NVYHOktAtrFNDT4qYVhb",
-
-  // [PLAN_HOBBY.id]: "pdt_lpFZp5sBEu5bzKwCbE5Y8",
-  // [PLAN_STARTER.id]: "pdt_CDgenxMUiAKjzBDVROTDr",
-  // [PLAN_PRO.id]: "pdt_7tO1wC3NRoQsCXh8oIFEi",
-};
+export const productIdTopupMap: Record<number, string> =
+  process.env.PAYMENT_ENV === "test"
+    ? {
+        1000: "pdt_0NZUPFnIVqj3VLPvp5NNW",
+        3000: "pdt_0NaG1FeShKcTHj3HYcBOH",
+        5000: "pdt_0NaG1MXFo6eLIfvwQVCLi",
+      }
+    : {
+        1000: "pdt_Bd3tewxGoSpthFEmhNq64",
+        3000: "pdt_0NZB5fBcjnMwFyjqWxLXG",
+        5000: "pdt_0NWpIy5atI7vpkeWe1AVP",
+      };
 
 const typeMap: Record<string, PaymentGatewayWebhookType> = {
   "subscription.active": "created",
@@ -158,36 +190,25 @@ export const dodoGateway: PaymentGateway = {
     };
   },
 
-  async getPaymentLink(planId, options) {
+  async getPaymentLink(productId, email) {
     const body: DodoPayments.CheckoutSessions.CheckoutSessionCreateParams = {
       product_cart: [
         {
-          product_id: planProductIdMap[planId],
+          product_id: productId,
           quantity: 1,
         },
       ],
     };
-    if (options?.referralId) {
-      body.metadata = {
-        affonso_referral: options.referralId,
-      };
-    }
-    if (options?.meta) {
-      body.metadata = {
-        ...body.metadata,
-        ...options.meta,
-      };
-    }
-    if (options?.email) {
-      const customer = await getCustomer(options.email);
+    if (email) {
+      const customer = await getCustomer(email);
       if (customer) {
         body.customer = {
           customer_id: customer.customer_id,
         };
+        body.show_saved_payment_methods = true;
       } else {
         body.customer = {
-          name: options.name ?? "",
-          email: options.email ?? "",
+          email,
         };
       }
     }

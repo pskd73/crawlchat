@@ -1,7 +1,11 @@
 import cn from "@meltdownjs/cn";
 import type { User } from "@packages/common/prisma";
 import { prisma } from "@packages/common/prisma";
-import { type Plan, allActivePlans } from "@packages/common/user-plan";
+import {
+  type Plan,
+  allActivePlans,
+  topupPlans,
+} from "@packages/common/user-plan";
 import type { HTMLAttributes, PropsWithChildren, ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 import { Toaster } from "react-hot-toast";
@@ -70,7 +74,7 @@ import { MCPIcon } from "~/components/mcp-icon";
 import { numberToKMB } from "~/components/number-util";
 import { track } from "~/components/track";
 import { makeMeta } from "~/meta";
-import { topupPlans } from "~/topup";
+import { planProductIdMap, productIdTopupMap } from "~/payment/gateway-dodo";
 import type { Route } from "./+types/page";
 
 export function meta() {
@@ -145,13 +149,21 @@ export async function loader({ request }: Route.LoaderArgs) {
     .filter((post) => post.tags?.includes("focus"))
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
 
+  const plans = allActivePlans.map((plan) => ({
+    ...plan,
+    url: `/checkout/${planProductIdMap[plan.id]}`,
+  }));
+
   return {
     messagesThisWeek: cache.messagesThisWeek,
     messagesDay: cache.messagesDay,
     messagesMonth: cache.messagesMonth,
-    plans: allActivePlans,
+    plans,
     focusChangelog,
-    topupPlans,
+    topupPlans: topupPlans.map((plan) => ({
+      ...plan,
+      purchaseUrl: `/checkout/${productIdTopupMap[Number(plan.id)]}`,
+    })),
   };
 }
 
@@ -884,7 +896,7 @@ function CreditsPopover() {
   );
 }
 
-function PlanBox({ plan }: { plan: Plan }) {
+function PlanBox({ plan, url }: { plan: Plan; url: string }) {
   return (
     <PricingBox
       period={plan.resetType === "monthly" ? "month" : "year"}
@@ -905,7 +917,7 @@ function PlanBox({ plan }: { plan: Plan }) {
         { text: `${plan.limits.scrapes} collections` },
         { text: `${plan.limits.teamMembers} team members` },
       ]}
-      href={plan.checkoutLink}
+      href={url}
       payLabel="Start free trial"
       popular={plan.popular}
     />
@@ -916,13 +928,13 @@ export function PricingBoxes({
   plans,
   yearly,
 }: {
-  plans: Plan[];
+  plans: Array<Plan & { url: string }>;
   yearly: boolean;
 }) {
   const resetType = yearly ? "yearly" : "monthly";
   return plans
     .filter((plan) => plan.resetType === resetType)
-    .map((plan) => <PlanBox key={plan.id} plan={plan} />);
+    .map((plan) => <PlanBox key={plan.id} plan={plan} url={plan.url} />);
 }
 
 export function PricingSwitch({
@@ -1868,9 +1880,9 @@ export function CristianTestimonial() {
 
 export function CustomTestimonials() {
   const columns = [
-    [<JonnyTestimonial />, <AntonTestimonial />],
-    [<MauritsTestimonial />, <EgelhausTestimonial />],
-    [<HarshTestimonial />, <CristianTestimonial />],
+    [<JonnyTestimonial key={1} />, <AntonTestimonial key={2} />],
+    [<MauritsTestimonial key={3} />, <EgelhausTestimonial key={4} />],
+    [<HarshTestimonial key={5} />, <CristianTestimonial key={6} />],
   ];
   return (
     <div className="mt-32 flex flex-col gap-10">

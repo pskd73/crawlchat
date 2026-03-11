@@ -32,7 +32,6 @@ import { EmptyState } from "~/components/empty-state";
 import { Page } from "~/components/page";
 import { getMessagesSummary } from "~/messages-summary";
 import { makeMeta } from "~/meta";
-import { dodoGateway } from "~/payment/gateway-dodo";
 import { commitSession, getSession } from "~/session";
 import type { Route } from "./+types/page";
 import { calcUniqueUsers } from "./calc-unique-users";
@@ -369,19 +368,6 @@ export async function action({ request }: Route.ActionArgs) {
       headers: {
         "Set-Cookie": await commitSession(session),
       },
-    });
-  }
-
-  if (intent === "payment-link") {
-    const referralId = formData.get("referralId") as string;
-    const planId = formData.get("planId") as string;
-
-    const gateway = dodoGateway;
-
-    return await gateway.getPaymentLink(planId, {
-      referralId,
-      email: user!.email,
-      name: user!.name,
     });
   }
 }

@@ -87,24 +87,8 @@ export const lemonsqueezyGateway: PaymentGateway = {
     };
   },
 
-  getPaymentLink: async (planId) => {
-    if (planId === PLAN_HOBBY.id) {
-      return {
-        url: "https://beestack.lemonsqueezy.com/buy/19cd8f91-a20d-4563-8557-2325c425d87e",
-      };
-    }
-    if (planId === PLAN_STARTER.id) {
-      return {
-        url: "https://beestack.lemonsqueezy.com/buy/a13beb2a-f886-4a9a-a337-bd82e745396a",
-      };
-    }
-    if (planId === PLAN_PRO.id) {
-      return {
-        url: "https://beestack.lemonsqueezy.com/buy/3a487266-72de-492d-8884-335c576f89c0",
-      };
-    }
-
-    throw new Error("Plan not found");
+  getPaymentLink: async (productId) => {
+    return { url: `https://beestack.lemonsqueezy.com/buy/${productId}` };
   },
 
   getCustomerPortalUrl: async (subscriptionId) => {
