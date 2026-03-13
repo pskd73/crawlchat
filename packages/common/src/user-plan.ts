@@ -4,7 +4,7 @@ import type {
   UserPlan,
   UserPlanProvider,
 } from "@prisma/client";
-import { addCreditTransaction, getBalance } from "./credit-transaction";
+import { getBalance } from "./credit-transaction";
 import { prisma } from "./prisma";
 
 type PlanResetType = "monthly" | "yearly" | "one-time" | "on-payment";
@@ -309,9 +309,11 @@ export const activatePlan = async (
     subscriptionId,
     orderId,
     expiresAt,
+    activatedAt,
   }: {
     provider: UserPlanProvider;
     subscriptionId?: string;
+    activatedAt?: Date;
     orderId?: string;
     expiresAt?: Date;
   }
@@ -328,22 +330,11 @@ export const activatePlan = async (
         status: "ACTIVE",
         limits: plan.limits,
         expiresAt,
-        activatedAt: new Date(),
+        activatedAt: activatedAt ?? new Date(),
         creditsResetAt: new Date(),
       },
     },
   });
-
-  await addCreditTransaction(
-    userId,
-    "subscription",
-    "message",
-    `Subscription credits for ${plan.name} plan`,
-    plan.credits.messages,
-    undefined,
-    undefined,
-    undefined
-  );
 };
 
 export async function hasEnoughCredits(

@@ -169,6 +169,7 @@ export const dodoGateway: PaymentGateway = {
     const paymentId = payload.data.payment_id;
     const paymentAmount = payload.data.total_amount;
     const paymentCurrency = payload.data.currency;
+    const subscriptionCreatedAt = new Date(payload.data.created_at);
 
     return {
       webhookType: "subscription",
@@ -181,6 +182,7 @@ export const dodoGateway: PaymentGateway = {
       paymentId,
       paymentAmount,
       paymentCurrency,
+      subscriptionCreatedAt,
     };
   },
 

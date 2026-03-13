@@ -175,3 +175,14 @@ export async function getCreditTransactions(
 
   return { transactions, total };
 }
+
+export async function clearBalance(
+  userId: string,
+  purpose: CreditTransactionPurpose,
+  description: string
+) {
+  const balance = await getBalance(userId, purpose);
+  if (balance > 0) {
+    await addCreditTransaction(userId, "usage", purpose, description, -balance);
+  }
+}
