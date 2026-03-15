@@ -1,8 +1,10 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
+import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { Prisma, prisma } from "@packages/common/prisma";
 import { getCollectionSummary } from "@packages/common/summary";
-import { Router } from "express";
+import { Request, Router } from "express";
+import { randomUUID } from "node:crypto";
 import { z } from "zod";
 
 const router = Router();
@@ -17,6 +19,15 @@ const sessions = new Map<
   string,
   {
     transport: SSEServerTransport;
+    user: ApiUser;
+    server: McpServer;
+  }
+>();
+
+const streamableSessions = new Map<
+  string,
+  {
+    transport: StreamableHTTPServerTransport;
     user: ApiUser;
     server: McpServer;
   }
@@ -39,6 +50,20 @@ async function getApiUser(apiKey: string | undefined) {
   });
 
   return apiKeyRecord?.user ?? null;
+}
+
+function getHeaderValue(header: string | string[] | undefined) {
+  if (typeof header === "string") {
+    return header;
+  }
+  if (Array.isArray(header)) {
+    return header[0];
+  }
+  return undefined;
+}
+
+async function getRequestUser(req: Request) {
+  return getApiUser(getHeaderValue(req.headers["x-api-key"]));
 }
 
 function ensureScrapeAccess(user: ApiUser, scrapeId: string) {
@@ -367,14 +392,7 @@ function createMcpServer(user: ApiUser) {
 }
 
 router.get("/sse", async (req, res) => {
-  const apiKey = req.headers["x-api-key"];
-  const user = await getApiUser(
-    typeof apiKey === "string"
-      ? apiKey
-      : Array.isArray(apiKey)
-        ? apiKey[0]
-        : undefined
-  );
+  const user = await getRequestUser(req);
 
   if (!user) {
     res.status(401).json({ error: "Invalid authorization" });
@@ -398,14 +416,7 @@ router.get("/sse", async (req, res) => {
 });
 
 router.post("/messages", async (req, res) => {
-  const apiKey = req.headers["x-api-key"];
-  const user = await getApiUser(
-    typeof apiKey === "string"
-      ? apiKey
-      : Array.isArray(apiKey)
-        ? apiKey[0]
-        : undefined
-  );
+  const user = await getRequestUser(req);
 
   if (!user) {
     res.status(401).json({ error: "Invalid authorization" });
@@ -430,6 +441,50 @@ router.post("/messages", async (req, res) => {
   }
 
   await session.transport.handlePostMessage(req, res, req.body);
+});
+
+router.all("/", async (req, res) => {
+  const user = await getRequestUser(req);
+
+  if (!user) {
+    res.status(401).json({ error: "Invalid authorization" });
+    return;
+  }
+
+  const sessionId = getHeaderValue(req.headers["mcp-session-id"]);
+  if (sessionId) {
+    const session = streamableSessions.get(sessionId);
+    if (!session) {
+      res.status(404).json({ error: "Session not found" });
+      return;
+    }
+    if (session.user.id !== user.id) {
+      res.status(401).json({ error: "Invalid authorization" });
+      return;
+    }
+    await session.transport.handleRequest(req, res, req.body);
+    return;
+  }
+
+  const transport = new StreamableHTTPServerTransport({
+    sessionIdGenerator: randomUUID,
+    onsessioninitialized: (newSessionId) => {
+      streamableSessions.set(newSessionId, {
+        transport,
+        user,
+        server,
+      });
+    },
+    onsessionclosed: (closedSessionId) => {
+      streamableSessions.delete(closedSessionId);
+    },
+  });
+  const server = createMcpServer(user);
+  await server.connect(transport);
+  await transport.handleRequest(req, res, req.body);
+  if (!transport.sessionId) {
+    await transport.close();
+  }
 });
 
 export default router;
