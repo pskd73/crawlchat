@@ -1,8 +1,20 @@
 import cn from "@meltdownjs/cn";
 import type { Message } from "@packages/common/prisma";
 import { prisma } from "@packages/common/prisma";
+import { useMemo, useState } from "react";
 import toast from "react-hot-toast";
-import { TbChartBarOff, TbCheck, TbCopy, TbMessage, TbX } from "react-icons/tb";
+import {
+  TbBattery1,
+  TbBattery2,
+  TbBattery3,
+  TbChartBarOff,
+  TbCheck,
+  TbChevronDown,
+  TbChevronUp,
+  TbCopy,
+  TbMessage,
+  TbX,
+} from "react-icons/tb";
 import { Link, useFetcher } from "react-router";
 import { getAuthUser } from "~/auth/middleware";
 import { authoriseScrapeUser, getSessionScrapeId } from "~/auth/scrape-session";
@@ -74,6 +86,20 @@ export async function action({ request }: Route.ActionArgs) {
 export function DataGapCard({ message }: { message: Message }) {
   const acceptFetcher = useFetcher();
   const rejectFetcher = useFetcher();
+  const [expanded, setExpanded] = useState(false);
+  const maxScore = useMemo(
+    () =>
+      message.links.reduce(
+        (max, source) => Math.max(max, source.score ?? 0),
+        0
+      ),
+    [message.links]
+  );
+  const strength = useMemo(() => {
+    if (maxScore < 0.3) return "Weak";
+    if (maxScore <= 0.75) return "Moderate";
+    return "Strong";
+  }, [maxScore]);
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(
@@ -85,8 +111,8 @@ export function DataGapCard({ message }: { message: Message }) {
   return (
     <div
       className={cn(
-        "p-4 rounded-box bg-base-100 shadow",
-        "border border-base-300"
+        "p-4 flex flex-col gap-2",
+        "border-b border-base-300 last:border-b-0"
       )}
     >
       <div className="flex flex-col gap-2">
@@ -96,14 +122,40 @@ export function DataGapCard({ message }: { message: Message }) {
             "gap-2 md:justify-between"
           )}
         >
-          <div>
+          <div className="flex flex-col gap-1">
             <div>{message.dataGap!.title}</div>
-            <Timestamp
-              date={message.createdAt}
-              className="text-base-content/50"
-            />
+            <div className="flex items-center gap-2">
+              <div
+                className="tooltip tooltip-right"
+                data-tip={`${strength} - ${maxScore.toFixed(2)}`}
+              >
+                <div
+                  className={cn(
+                    "badge badge-soft",
+                    strength === "Weak" && "badge-warning",
+                    strength === "Moderate" && "badge-info",
+                    strength === "Strong" && "badge-primary"
+                  )}
+                >
+                  {strength === "Weak" && <TbBattery1 />}
+                  {strength === "Moderate" && <TbBattery2 />}
+                  {strength === "Strong" && <TbBattery3 />}
+                </div>
+              </div>
+              <Timestamp
+                date={message.createdAt}
+                className="text-base-content/50"
+              />
+            </div>
           </div>
           <div className="flex gap-2 flex-col md:flex-row">
+            <button
+              className="btn btn-square"
+              onClick={() => setExpanded((e) => !e)}
+            >
+              {expanded ? <TbChevronUp /> : <TbChevronDown />}
+            </button>
+
             <div className="join">
               <Link
                 className="btn btn-square join-item"
@@ -151,6 +203,12 @@ export function DataGapCard({ message }: { message: Message }) {
           </div>
         </div>
       </div>
+
+      {expanded && (
+        <div className="text-base-content/60">
+          {message.dataGap!.description}
+        </div>
+      )}
     </div>
   );
 }
@@ -168,13 +226,13 @@ export default function DataGapsPage({ loaderData }: Route.ComponentProps) {
         </div>
       )}
       {loaderData.messages.length > 0 && (
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-4">
           <div className="text-base-content/50">
             These topics were asked but not found in the knowledge base. Review
             each one and either add it to your knowledge base or cancel it if
             it's not relevant.
           </div>
-          <div className="flex flex-col gap-4">
+          <div className={cn("border border-base-300 rounded-box bg-base-100")}>
             {loaderData.messages.map((message) => (
               <DataGapCard key={message.id} message={message} />
             ))}

@@ -133,6 +133,11 @@ export async function action({ request }: Route.ActionArgs) {
   if (formData.has("categories")) {
     update.messageCategories = JSON.parse(formData.get("categories") as string);
   }
+  if (formData.has("dataGapMinScore")) {
+    update.dataGapMinScore = parseFloat(
+      formData.get("dataGapMinScore") as string
+    );
+  }
 
   const scrape = await prisma.scrape.update({
     where: { id: scrapeId },
@@ -630,6 +635,41 @@ function CategorySettings({ scrape }: { scrape: Scrape }) {
   );
 }
 
+function DataGapMinScoreSettings({ scrape }: { scrape: Scrape }) {
+  const fetcher = useFetcher();
+  const dirtyForm = useDirtyForm({
+    dataGapMinScore: scrape.dataGapMinScore ?? 0.2,
+  });
+
+  return (
+    <SettingsSection
+      id="data-gap-min-score"
+      title="Data gap min score"
+      description="Configure the minimum score (relevance score) required to consider a answer as a data gap when the AI does not find the answer in the knowledge base. High -> Few data gaps, Low -> Many data gaps."
+      fetcher={fetcher}
+      dirty={dirtyForm.isDirty("dataGapMinScore")}
+    >
+      <div className="flex gap-2">
+        <input
+          type="range"
+          min={0}
+          max="1"
+          defaultValue={dirtyForm.getValue("dataGapMinScore") as number}
+          onChange={(e) =>
+            dirtyForm.setValue("dataGapMinScore", parseFloat(e.target.value))
+          }
+          name="dataGapMinScore"
+          className="range"
+          step={0.01}
+        />
+        <div className="badge badge-lg badge-soft badge-primary">
+          {dirtyForm.getValue("dataGapMinScore") as number}
+        </div>
+      </div>
+    </SettingsSection>
+  );
+}
+
 export default function ScrapeSettings({ loaderData }: Route.ComponentProps) {
   const nameFetcher = useFetcher();
   const deleteFetcher = useFetcher();
@@ -807,6 +847,8 @@ export default function ScrapeSettings({ loaderData }: Route.ComponentProps) {
             scrape={loaderData.scrape}
             user={loaderData.scrape.user}
           />
+
+          <DataGapMinScoreSettings scrape={loaderData.scrape} />
 
           <ShowSourcesSetting
             scrape={loaderData.scrape}

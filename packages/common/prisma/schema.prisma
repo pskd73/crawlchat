@@ -213,6 +213,7 @@ model Scrape {
   showSources           Boolean?
   analyseMessage        Boolean?
   lowCreditsMailSentAt  DateTime?
+  dataGapMinScore       Float?
 
   messageCategories     ScrapeMessageCategory[]
 

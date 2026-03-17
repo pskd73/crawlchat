@@ -1,6 +1,7 @@
 import { Role, Usage } from "@packages/agentic";
 import { extractCitations } from "@packages/common/citation";
 import { addCreditTransaction } from "@packages/common/credit-transaction";
+import { createToken } from "@packages/common/jwt";
 import {
   getQueryString,
   MultimodalContent,
@@ -349,13 +350,17 @@ Just use this block, don't ask the user to enter the email. Use it only if the t
     responseLength: toolCall.result.length,
   }));
 
-  const usageCredits = getUsageCredits(usage, llmConfig.creditsPerMessage);
-  console.log({ usageCredits, creditsPerMessage: llmConfig.creditsPerMessage });
+  const sources = await collectSourceLinks(
+    scrape.id,
+    flow.flowState.state.messages
+  );
+
+  const maxScore = Math.max(...sources.map((s) => s.score ?? 0));
 
   const answer: AnswerCompleteEvent = {
     type: "answer-complete",
     content: (lastMessage.llmMessage.content ?? "") as string,
-    sources: await collectSourceLinks(scrape.id, flow.flowState.state.messages),
+    sources,
     actionCalls: await collectActionCalls(
       scrape.id,
       flow.flowState.state.messages
@@ -368,7 +373,10 @@ Just use this block, don't ask the user to enter the email. Use it only if the t
     llmCost: usage.cost,
     messages: flow.flowState.state.messages,
     context: collectContext(flow.flowState.state.messages),
-    dataGap: collectDataGap(flow.flowState.state.messages),
+    dataGap:
+      maxScore > (scrape.dataGapMinScore ?? 0.2)
+        ? collectDataGap(flow.flowState.state.messages)
+        : undefined,
     question: query,
     toolCalls,
     llmConfig,
@@ -470,6 +478,23 @@ export async function saveAnswer(
         onFollowUpQuestion,
       }
     );
+  }
+
+  if (answer.dataGap) {
+    const token = createToken(scrape.userId);
+    await fetch(`${process.env.FRONT_URL}/email-alert`, {
+      method: "POST",
+      body: JSON.stringify({
+        intent: "data-gap-alert",
+        scrapeId: scrape.id,
+        messageId: newAnswerMessage.id,
+      }),
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }).catch((error) => {
+      console.error("Failed to send data gap alert", error);
+    });
   }
 
   return newAnswerMessage;

@@ -7,9 +7,17 @@ export function makeDataGapTool() {
     description: multiLinePrompt([
       "Report a gap or missing information in the knowledge base.",
       "Use this when search_data returned results but they don't match or answer the user's query.",
-      "Use this when user asks question related to the <context> but you don't have the answer.",
+      "Use this when user asks question related to the <context> but you don't have the answer for the question asked, even partially.",
+      "The title and the descriptions should be in English language.",
       "Do NOT use this if search_data returned no results.",
-      "Do NOT use this for questions unrelated to the knowledge base topic.",
+      "'Not documented' is considered as a data gap.",
+      "'No information' is considered as a data gap.",
+      "'Not available' is considered as a data gap.",
+      "'Not found' is considered as a data gap.",
+      "'Not mentioned' is considered as a data gap.",
+      "'Not provided' is considered as a data gap.",
+      "'Not documented' is considered as a data gap.",
+      "'Not documented' is considered as a data gap.",
     ]),
     schema: z.object({
       title: z.string({
@@ -27,10 +35,6 @@ export function makeDataGapTool() {
       title: string;
       description: string;
     }) => {
-      console.log("Reporting data gap");
-      console.log("Title -", title);
-      console.log("Description -", description);
-
       return {
         content: "Data gap reported successfully. Thank you for the feedback.",
         customMessage: {
