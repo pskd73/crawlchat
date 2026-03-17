@@ -1,4 +1,9 @@
-import { KnowledgeGroupType, MessageChannel, prisma } from "./prisma";
+import {
+  KnowledgeGroupType,
+  MessageChannel,
+  MessageSourceLink,
+  prisma,
+} from "./prisma";
 
 type SummaryMessage = {
   createdAt: Date;
@@ -7,7 +12,7 @@ type SummaryMessage = {
   } | null;
   rating: string | null;
   analysis: any;
-  links: any[];
+  links: MessageSourceLink[];
   fingerprint: string | null;
   channel: MessageChannel | null;
   thread: {
@@ -486,7 +491,8 @@ export async function getCollectionSummary({
   const totalLinksReferred = messages
     .filter((message) => message.llmMessage?.role === "assistant")
     .reduce(
-      (accumulator, current) => accumulator + (current.links?.length ?? 0),
+      (accumulator, current) =>
+        accumulator + (current.links?.filter((l) => l.cited).length ?? 0),
       0
     );
   const timeSaved = totalLinksReferred * 2;
