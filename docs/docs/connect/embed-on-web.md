@@ -88,12 +88,6 @@ All configuration options are set via `data-*` attributes on the script tag. Her
 | ------------- | ------ | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `data-secret` | string | -       | Secret value used to replace `{{secret}}` placeholders in API action headers. When configuring API actions, you can use `{{secret}}` as a placeholder in header values (e.g., `Authorization: Bearer {{secret}}`). The placeholder will be replaced with the value provided via `data-secret` when the action is executed. This allows you to keep secrets out of your action configuration and provide them dynamically per embed instance. Example: `data-secret="your-api-key-here"` |
 
-### Content Selection
-
-| Parameter               | Type        | Default | Description                                                                                                                                                                                                                                                                                                                           |
-| ----------------------- | ----------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `data-selectionButtons` | JSON string | -       | JSON string defining buttons shown in the text selection tooltip. Provide a JSON array of button objects, e.g. `[{"label":"Ask AI","action":"ask"},{"label":"Copy","action":"copy"}]`, where each object has a `label` (button text) and `action` (identifier used by the widget), plus optional fields such as `shortcut` or `icon`. |
-
 ### Custom Tags
 
 | Parameter    | Type   | Default | Description                                                                                                                                                                                                                                  |
