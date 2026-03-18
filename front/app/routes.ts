@@ -154,5 +154,7 @@ export default [
 
   route("checkout/:productId", "checkout.tsx"),
 
+  route("api-playground", "widget/api-playground/api.ts"),
+
   route("health", "health.ts"),
 ] satisfies RouteConfig;

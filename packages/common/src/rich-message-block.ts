@@ -35,8 +35,41 @@ export const verifyEmailBlock: RichMessageBlock = {
   }),
 };
 
+export const apiPlaygroundBlock: RichMessageBlock = {
+  schema: z.object({
+    url: z.string({
+      description: "URL of the API. Wrap path variables in {} if any.",
+    }),
+    method: z.string({
+      description:
+        "Method of the API. Should be one of GET, POST, PUT, DELETE.",
+    }),
+    fields: z.array(
+      z.object({
+        key: z.string({ description: "Key of the field" }),
+        type: z.enum(["header", "queryParam", "body", "pathParam"]),
+        required: z.boolean(),
+        description: z.string({
+          description: "Description of the field under 20 words",
+        }),
+        defaultValue: z
+          .string({
+            description:
+              "Initial value of the field as per the user description.",
+          })
+          .optional(),
+      }),
+      {
+        description:
+          "Fields of the API across headers, query params, body, and path params",
+      }
+    ),
+  }),
+};
+
 export const richMessageBlocks: Record<string, RichMessageBlock> = {
   cta: ctaBlock,
   "create-ticket": createTicketBlock,
   "verify-email": verifyEmailBlock,
+  "api-playground": apiPlaygroundBlock,
 };

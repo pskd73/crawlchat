@@ -214,6 +214,7 @@ model Scrape {
   analyseMessage        Boolean?
   lowCreditsMailSentAt  DateTime?
   dataGapMinScore       Float?
+  apiPlayground         Boolean?
 
   messageCategories     ScrapeMessageCategory[]
 

@@ -245,6 +245,18 @@ export const baseAnswererInternal: Answerer = async (
     richBlocks.push(createTicketRichBlock);
   }
 
+  if (scrape.apiPlayground && options?.channel === "widget") {
+    richBlocks.push({
+      name: "API Playground",
+      key: "api-playground",
+      payload: {},
+      prompt: `This is an interactive API playground for trying API requests.
+Always include this block whenever your response explains an API, endpoint, method, URL, headers, request body, query params, auth, or curl/HTTP example.
+Default to showing this block even if the user did not ask to "try it".
+For API-related answers, prefer including this block.`,
+    });
+  }
+
   if (options?.channel === "widget") {
     richBlocks.push({
       name: "Verify email",

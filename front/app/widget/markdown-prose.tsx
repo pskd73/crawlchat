@@ -13,6 +13,7 @@ import {
 import Markdown from "react-markdown";
 import type { FetcherWithComponents } from "react-router";
 import remarkGfm from "remark-gfm";
+import { RichAPIPlayground } from "./api-playground/rich-block";
 import "./markdown-prose.css";
 const linkifyRegex = require("remark-linkify-regex");
 
@@ -277,6 +278,9 @@ export function MarkdownProse({
                       verifyEmailFetcher={options.verifyEmailFetcher}
                     />
                   );
+                }
+                if (language === "json|api-playground") {
+                  return <RichAPIPlayground {...json} />;
                 }
               } catch (e) {
                 console.log(e);

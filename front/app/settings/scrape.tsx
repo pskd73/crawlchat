@@ -138,6 +138,9 @@ export async function action({ request }: Route.ActionArgs) {
       formData.get("dataGapMinScore") as string
     );
   }
+  if (formData.has("from-api-playground")) {
+    update.apiPlayground = formData.get("api-playground") === "on";
+  }
 
   const scrape = await prisma.scrape.update({
     where: { id: scrapeId },
@@ -670,6 +673,37 @@ function DataGapMinScoreSettings({ scrape }: { scrape: Scrape }) {
   );
 }
 
+function ApiPlaygroundSettings({ scrape }: { scrape: Scrape }) {
+  const fetcher = useFetcher();
+  const dirtyForm = useDirtyForm({
+    apiPlayground: scrape.apiPlayground ?? false,
+  });
+
+  return (
+    <SettingsSection
+      id="api-playground"
+      title="API Playground"
+      description="API Playground is an interactive widget that is shown on the web chat widget. Users can try out API requests and see the responses in real time."
+      fetcher={fetcher}
+      dirty={dirtyForm.isDirty("apiPlayground")}
+    >
+      <div className="flex gap-2">
+        <input type="hidden" name="from-api-playground" value={"true"} />
+        <label className="label">
+          <input
+            type="checkbox"
+            className="toggle"
+            name="api-playground"
+            defaultChecked={dirtyForm.getValue("apiPlayground") ?? false}
+            onChange={dirtyForm.handleChange("apiPlayground")}
+          />
+          Active
+        </label>
+      </div>
+    </SettingsSection>
+  );
+}
+
 export default function ScrapeSettings({ loaderData }: Route.ComponentProps) {
   const nameFetcher = useFetcher();
   const deleteFetcher = useFetcher();
@@ -856,6 +890,8 @@ export default function ScrapeSettings({ loaderData }: Route.ComponentProps) {
           />
 
           <CategorySettings scrape={loaderData.scrape} />
+
+          <ApiPlaygroundSettings scrape={loaderData.scrape} />
 
           <SettingsSection
             id="delete-collection"
