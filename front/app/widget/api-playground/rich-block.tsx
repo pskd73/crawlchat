@@ -34,11 +34,7 @@ type Field = {
   required: boolean;
   description: string;
   defaultValue?: string;
-};
-
-type KeyValue = {
-  key: string;
-  value: string;
+  dataType: "string" | "number" | "boolean" | "json";
 };
 
 const FIELD_TYPE_ORDER: Record<Field["type"], number> = {
@@ -57,6 +53,16 @@ function FieldInput({
   value: string;
   onChange: (value: string) => void;
 }) {
+  if (field.dataType === "json") {
+    return (
+      <textarea
+        className="textarea textarea-sm w-full"
+        placeholder={"Value"}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      />
+    );
+  }
   return (
     <input
       type="text"
@@ -91,6 +97,22 @@ function Response({ text }: { text: string }) {
   return <div>{text}</div>;
 }
 
+function castValue(value: string, dataType: Field["dataType"]) {
+  if (dataType === "string") {
+    return value;
+  }
+  if (dataType === "number") {
+    return parseFloat(value);
+  }
+  if (dataType === "boolean") {
+    return value === "true";
+  }
+  if (dataType === "json") {
+    return JSON.parse(value);
+  }
+  return value;
+}
+
 export function RichAPIPlayground({
   url,
   method,
@@ -118,9 +140,32 @@ export function RichAPIPlayground({
   }>();
 
   const canSend = useMemo(() => {
-    return fields?.every(
+    const full = fields?.every(
       (field) => !field.required || values[fieldKey(field)] !== undefined
     );
+    if (!full) return false;
+    for (const field of fields) {
+      if (field.dataType === "json") {
+        try {
+          JSON.parse(values[fieldKey(field)]!);
+        } catch {
+          return false;
+        }
+      }
+      if (field.dataType === "number") {
+        try {
+          parseFloat(values[fieldKey(field)]!);
+        } catch {
+          return false;
+        }
+      }
+      if (field.dataType === "boolean") {
+        if (!["true", "false"].includes(values[fieldKey(field)]!)) {
+          return false;
+        }
+      }
+    }
+    return true;
   }, [fields, values]);
 
   async function handleSend() {
@@ -130,17 +175,15 @@ export function RichAPIPlayground({
     const body: Record<string, string> = {};
 
     for (const field of fields) {
+      const value = castValue(values[fieldKey(field)]!, field.dataType);
       if (field.type === "pathParam") {
-        filledUrl = filledUrl?.replace(
-          `{${field.key}}`,
-          values[fieldKey(field)]!
-        );
+        filledUrl = filledUrl?.replace(`{${field.key}}`, value);
       } else if (field.type === "queryParam") {
-        queryParams[field.key] = values[fieldKey(field)]!;
+        queryParams[field.key] = value;
       } else if (field.type === "header") {
-        headers[field.key] = values[fieldKey(field)]!;
+        headers[field.key] = value;
       } else if (field.type === "body") {
-        body[field.key] = values[fieldKey(field)]!;
+        body[field.key] = value;
       }
     }
 
@@ -252,8 +295,8 @@ export function RichAPIPlayground({
                     <div className="flex items-center gap-2">
                       <span>{field.key}</span>
                       {field.required && <span className="text-error">*</span>}
-                      <span className="badge badge-sm badge-soft">
-                        {field.type}
+                      <span className="badge badge-xs badge-soft">
+                        {field.type}/{field.dataType}
                       </span>
                     </div>
                     <div className="text-xs text-base-content/50">

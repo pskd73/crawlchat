@@ -58,6 +58,7 @@ export const apiPlaygroundBlock: RichMessageBlock = {
               "Initial value of the field as per the user description.",
           })
           .optional(),
+        dataType: z.enum(["string", "number", "boolean", "json"]),
       }),
       {
         description:
