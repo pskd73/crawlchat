@@ -45,6 +45,14 @@ export async function handleWebhook(request: Request, gateway: PaymentGateway) {
       activatedAt: webhook.eventCreatedAt ?? undefined,
     });
 
+    await addCreditTransaction(
+      user.id,
+      "subscription",
+      "message",
+      "Subscription credits",
+      webhook.plan.credits.messages
+    );
+
     return Response.json({ message: "Activated subscription plan" });
   }
 
