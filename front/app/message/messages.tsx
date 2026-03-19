@@ -12,6 +12,7 @@ import { prisma } from "@packages/common/prisma";
 import Avatar from "boring-avatars";
 import type { PropsWithChildren } from "react";
 import {
+  TbApi,
   TbChevronLeft,
   TbChevronRight,
   TbConfetti,
@@ -556,6 +557,16 @@ export default function MessagesLayout({ loaderData }: Route.ComponentProps) {
                             <LanguageBadge
                               language={pair.responseMessage.analysis.language}
                             />
+                          )}
+                          {pair.responseMessage.showedApiPlayground && (
+                            <div
+                              className="tooltip"
+                              data-tip="Showed API Playground"
+                            >
+                              <div className="badge badge-secondary badge-soft">
+                                <TbApi />
+                              </div>
+                            </div>
                           )}
                         </div>
                       </td>

@@ -20,6 +20,7 @@ import {
   Thread,
   ToolCall,
 } from "@packages/common/prisma";
+import { richMessageBlocks } from "@packages/common/rich-message-block";
 import { ensureRepoCloned } from "@packages/flash";
 import { fillMessageAnalysis } from "./analyse-message";
 import { getConfig, LlmConfig } from "./llm/config";
@@ -214,6 +215,12 @@ function getUsageCredits(usage: Usage, defaultCredits: number) {
   return Math.min(10, Math.max(1, credits));
 }
 
+function collectRichBlocks(answer: string) {
+  return Object.keys(richMessageBlocks).filter((block) => {
+    return answer.includes(`json|${block}`);
+  });
+}
+
 export const baseAnswererInternal: Answerer = async (
   scrape,
   thread,
@@ -252,8 +259,11 @@ export const baseAnswererInternal: Answerer = async (
       payload: {},
       prompt: `This is an interactive API playground for trying API requests.
 Always include this block whenever your response explains an API, endpoint, method, URL, headers, request body, query params, auth, or curl/HTTP example.
+Use this whenever user asks for a HTTP API or when you are explaining an API.
+USE THIS BLOCK ALWAYS WHENEVER YOU ARE EXPLAINING AN API.
 Default to showing this block even if the user did not ask to "try it".
-For API-related answers, prefer including this block.`,
+For API-related answers, prefer including this block.
+Don't add "body" itself as a field. Add inner fields instead.`,
     });
   }
 
@@ -439,6 +449,8 @@ export async function saveAnswer(
     ),
   }));
 
+  const richBlocksUsed = collectRichBlocks(answer.content);
+
   const newAnswerMessage = await prisma.message.create({
     data: {
       threadId,
@@ -458,6 +470,7 @@ export async function saveAnswer(
       questionId: questionMessageId,
       dataGap: answer.dataGap,
       toolCalls: answer.toolCalls,
+      showedApiPlayground: richBlocksUsed.includes("api-playground"),
     },
   });
 

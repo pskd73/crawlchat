@@ -371,6 +371,7 @@ model Message {
   fingerprint               String?
   url                       String?
   toolCalls                 ToolCall[]
+  showedApiPlayground       Boolean?
 
   createdAt                 DateTime @default(now())
   updatedAt                 DateTime @updatedAt

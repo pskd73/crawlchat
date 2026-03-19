@@ -322,7 +322,9 @@ export function RichAPIPlayground({
       )}
 
       {expanded && response && (
-        <div className={cn("p-2 border-t border-base-300")}>
+        <div
+          className={cn("p-2 border-t border-base-300", "flex flex-col gap-2")}
+        >
           <div className="flex items-center gap-2">
             <span className="font-medium">Status</span>
             <span className="badge badge-sm badge-soft">{response.status}</span>

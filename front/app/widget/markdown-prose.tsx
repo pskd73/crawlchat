@@ -179,6 +179,10 @@ const RichVerifyEmail = ({
   );
 };
 
+function cleanMarkdown(markdown: string) {
+  return markdown.replace(/```\s*(!!\d+!!)\s*$/gm, "```\n$1");
+}
+
 function CodeCopyButton({ code }: { code: string }) {
   const [copied, setCopied] = useState(false);
 
@@ -193,13 +197,13 @@ function CodeCopyButton({ code }: { code: string }) {
   return (
     <div
       className={cn(
-        "absolute top-1 right-1 opacity-0 group-hover:opacity-100",
+        "absolute top-1 right-1",
         "transition-opacity duration-100",
         copied && "opacity-100"
       )}
     >
       <button
-        className={cn("btn btn-xs btn-square")}
+        className={cn("btn btn-xs btn-square btn-ghost")}
         onClick={() => copyCode(code)}
       >
         {copied ? <TbCheck /> : <TbCopy />}
@@ -298,10 +302,10 @@ export function MarkdownProse({
             }).value;
 
             return (
-              <div className="group">
+              <>
                 <div dangerouslySetInnerHTML={{ __html: highlighted }} />
                 <CodeCopyButton code={code} />
-              </div>
+              </>
             );
           },
           pre: ({ node, ...props }) => {
@@ -314,16 +318,17 @@ export function MarkdownProse({
             }
 
             return (
-              <pre
-                {...rest}
-                className="no-scrollbar"
-                style={{
-                  margin: noMarginCode ? 0 : undefined,
-                  position: "relative",
-                }}
-              >
-                {children}
-              </pre>
+              <div className="relative">
+                <pre
+                  {...rest}
+                  className="no-scrollbar"
+                  style={{
+                    margin: noMarginCode ? 0 : undefined,
+                  }}
+                >
+                  {children}
+                </pre>
+              </div>
             );
           },
           a: ({ node, ...props }) => {
@@ -370,7 +375,7 @@ export function MarkdownProse({
           },
         }}
       >
-        {children as string}
+        {cleanMarkdown(children as string)}
       </Markdown>
     </div>
   );

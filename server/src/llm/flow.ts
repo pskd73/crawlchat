@@ -103,7 +103,7 @@ export function makeRagAgent(
     "You should definitely cite sources that you used to answer the query if the id is available in the context.",
     "Add the citation wherever applicable either in middle of the sentence or at the end of the sentence.",
     "But don't add it as a separate section at the end of the answer.",
-    "Don't add the citation at the end of code block ex: ```!!8384!! instead add in in the next new line.",
+    "Don't add the citation at the end of code block. Always add it in the new line for code blocks.",
   ]);
 
   const actionTools = options?.actions
