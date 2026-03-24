@@ -5,7 +5,6 @@ import type {
   Prisma,
   Scrape,
   ScrapeMessageCategory,
-  User,
 } from "@packages/common/prisma";
 import { prisma } from "@packages/common/prisma";
 import { useEffect, useRef, useState } from "react";
@@ -13,7 +12,6 @@ import toast from "react-hot-toast";
 import {
   TbCheck,
   TbCopy,
-  TbCrown,
   TbFolder,
   TbListCheck,
   TbLock,
@@ -315,17 +313,11 @@ function AiModelSettings({ scrape }: { scrape: Scrape }) {
   );
 }
 
-function ShowSourcesSetting({ scrape, user }: { scrape: Scrape; user: User }) {
+function ShowSourcesSetting({ scrape }: { scrape: Scrape }) {
   const showSourcesFetcher = useFetcher();
   const dirtyForm = useDirtyForm({
     showSources: scrape.showSources ?? false,
   });
-
-  function isAllowed() {
-    return ["starter", "pro", "grow", "accelerate"].includes(
-      (user.plan?.planId ?? "free").replace("-yearly", "")
-    );
-  }
 
   return (
     <SettingsSection
@@ -341,38 +333,22 @@ function ShowSourcesSetting({ scrape, user }: { scrape: Scrape; user: User }) {
           <input
             name="showSources"
             defaultChecked={scrape.showSources ?? false}
-            disabled={!isAllowed()}
             type="checkbox"
             className="toggle"
             onChange={dirtyForm.handleChange("showSources")}
           />
           Active
         </label>
-        <div className="badge badge-soft badge-primary">
-          <TbCrown /> Grow
-        </div>
       </div>
     </SettingsSection>
   );
 }
 
-function AnalyseMessageSettings({
-  scrape,
-  user,
-}: {
-  scrape: Scrape;
-  user: User;
-}) {
+function AnalyseMessageSettings({ scrape }: { scrape: Scrape }) {
   const fetcher = useFetcher();
   const dirtyForm = useDirtyForm({
     analyseMessage: scrape.analyseMessage ?? false,
   });
-
-  function isAllowed() {
-    return ["starter", "pro", "grow", "accelerate"].includes(
-      (user.plan?.planId ?? "free").replace("-yearly", "")
-    );
-  }
 
   return (
     <SettingsSection
@@ -390,14 +366,10 @@ function AnalyseMessageSettings({
             className="toggle"
             name="analyseMessage"
             defaultChecked={scrape.analyseMessage ?? false}
-            disabled={!isAllowed()}
             onChange={dirtyForm.handleChange("analyseMessage")}
           />
           Active
         </label>
-        <div className="badge badge-soft badge-primary">
-          <TbCrown /> Grow
-        </div>
       </div>
     </SettingsSection>
   );
@@ -877,17 +849,11 @@ export default function ScrapeSettings({ loaderData }: Route.ComponentProps) {
 
           <AiModelSettings scrape={loaderData.scrape} />
 
-          <AnalyseMessageSettings
-            scrape={loaderData.scrape}
-            user={loaderData.scrape.user}
-          />
+          <AnalyseMessageSettings scrape={loaderData.scrape} />
 
           <DataGapMinScoreSettings scrape={loaderData.scrape} />
 
-          <ShowSourcesSetting
-            scrape={loaderData.scrape}
-            user={loaderData.scrape.user}
-          />
+          <ShowSourcesSetting scrape={loaderData.scrape} />
 
           <CategorySettings scrape={loaderData.scrape} />
 
