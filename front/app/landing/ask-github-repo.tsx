@@ -141,6 +141,72 @@ export default function AskGithubRepoPage() {
               <li>What changed in a component and what could break next?</li>
             </ul>
           </section>
+
+          <section className="border border-base-300 rounded-box p-6">
+            <h2 className="text-2xl font-brand">
+              Chat with GitHub repo in three steps
+            </h2>
+            <ol className="mt-3 list-decimal list-inside text-base-content/80 space-y-2">
+              <li>Paste a public GitHub URL.</li>
+              <li>Open the generated chat for that repository.</li>
+              <li>Ask questions and get code-aware answers instantly.</li>
+            </ol>
+            <p className="mt-3 text-base-content/80">
+              If you want to chat with github repo files quickly, this flow
+              helps you skip manual searching and go straight to understanding
+              implementation details.
+            </p>
+          </section>
+
+          <section className="border border-base-300 rounded-box p-6">
+            <h2 className="text-2xl font-brand">
+              Best way to chat with GitHub repo code
+            </h2>
+            <p className="mt-3 text-base-content/80">
+              Ask GitHub Repo gives teams a simple way to chat with github repo
+              code for onboarding, incident response, feature planning, and QA.
+              Ask detailed questions about files, functions, and architecture to
+              move faster with less context switching.
+            </p>
+            <p className="mt-3 text-base-content/80">
+              Whether you need to ask github repo questions for React, Node.js,
+              Python, Go, Java, Rust, or mixed stacks, you can use one workflow
+              to understand the codebase and make decisions with confidence.
+            </p>
+          </section>
+
+          <section className="border border-base-300 rounded-box p-6">
+            <h2 className="text-2xl font-brand">FAQ: Chat with GitHub repo</h2>
+            <div className="mt-3 space-y-4 text-base-content/80">
+              <div>
+                <h3 className="font-medium">
+                  Can I chat with any public GitHub repo?
+                </h3>
+                <p>
+                  Yes. Paste any public repository URL and start chatting with
+                  github repo content in seconds.
+                </p>
+              </div>
+              <div>
+                <h3 className="font-medium">
+                  What types of questions can I ask?
+                </h3>
+                <p>
+                  You can ask about implementation details, architecture,
+                  dependencies, API routes, and where specific logic lives.
+                </p>
+              </div>
+              <div>
+                <h3 className="font-medium">
+                  Is this useful for large repositories?
+                </h3>
+                <p>
+                  Yes. Chat with github repo workflows are especially useful for
+                  large codebases where manual navigation takes too long.
+                </p>
+              </div>
+            </div>
+          </section>
         </div>
       </div>
     </Container>
