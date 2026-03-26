@@ -122,6 +122,7 @@ export default [
   ...prefix("admin-fowl", [
     index("admin/page.tsx"),
     route("customers", "admin/customers.tsx"),
+    route("model-costs", "admin/model-costs.tsx"),
     route("user/:userId", "admin/user.tsx"),
     route("collection/:collectionId", "admin/collection.tsx"),
     route("unanswered-messages", "admin/unanswered-messages.tsx"),
