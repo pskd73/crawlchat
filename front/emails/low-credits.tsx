@@ -38,8 +38,8 @@ export default function LowCreditsEmail({
         <span style={{ fontWeight: "bold" }}>
           {scrapeTitle || "collection"}
         </span>{" "}
-        collection. Please upgrade to higher plan or top up the credits. Click
-        the folling button to go to your billing section.
+        collection. Please upgrade to an higher plan or top up the credits. Click
+        the following button to go to your billing section.
       </Container>
     </MailTemplate>
   );
