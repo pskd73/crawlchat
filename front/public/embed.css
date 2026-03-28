@@ -93,7 +93,8 @@
   overflow: hidden;
 }
 
-[data-theme="dark"] #crawlchat-sidepanel {
+[data-theme="dark"] #crawlchat-sidepanel,
+.dark #crawlchat-sidepanel {
   border-left: 1px solid #222;
 }
 

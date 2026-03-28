@@ -183,6 +183,12 @@ class CrawlChatEmbed {
 
     if (!script || script?.getAttribute("data-hide-ask-ai") === "true") return;
 
+    if (document.getElementById(this.askAIButtonId)) {
+      const button = document.getElementById(this.askAIButtonId);
+      button.classList.remove("hidden");
+      return;
+    }
+
     const text =
       this.widgetConfig.buttonText ??
       script.getAttribute("data-ask-ai-text") ??
@@ -321,12 +327,14 @@ class CrawlChatEmbed {
       sidepanel.classList.remove("hidden");
     }
 
+    this.hideAskAIButton();
     const iframe = document.getElementById(this.iframeId);
     iframe.contentWindow.postMessage("focus", "*");
   }
 
   hideSidePanel() {
     document.getElementById(this.sidepanelId)?.classList.add("hidden");
+    this.showAskAIButton();
   }
 
   mountSidePanel() {
@@ -381,7 +389,7 @@ class CrawlChatEmbed {
 
     const handleKeyDown = (e) => {
       if (e.metaKey && e.key === "i") {
-        window.crawlchatEmbed.toggleSidePanel();
+        this.toggleSidePanel();
       }
     };
 
