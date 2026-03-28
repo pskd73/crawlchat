@@ -181,12 +181,7 @@ class CrawlChatEmbed {
   async showAskAIButton() {
     const script = document.getElementById(this.scriptId);
 
-    if (
-      !script ||
-      script?.getAttribute("data-hide-ask-ai") === "true" ||
-      (this.isSidePanel() && !this.isMobile())
-    )
-      return;
+    if (!script || script?.getAttribute("data-hide-ask-ai") === "true") return;
 
     const text =
       this.widgetConfig.buttonText ??
@@ -257,8 +252,12 @@ class CrawlChatEmbed {
       div.appendChild(this.makeTooltip(this.widgetConfig.tooltip));
     }
 
-    div.addEventListener("click", function () {
-      window.crawlchatEmbed.show();
+    div.addEventListener("click", () => {
+      if (this.isSidePanel()) {
+        this.toggleSidePanel();
+      } else {
+        this.show();
+      }
       div.classList.add("hidden");
     });
 
@@ -281,20 +280,36 @@ class CrawlChatEmbed {
       sidepanel.style.width = "400px";
       sidepanel.style.height = `${window.innerHeight}px`;
 
-      const navBar = getDocusaurusNavBar();
-      if (navBar) {
-        const rect = navBar.getBoundingClientRect();
-        sidepanel.style.top = `${rect.height}px`;
-        sidepanel.style.height = `${window.innerHeight - rect.height}px`;
-      }
+      if (isDocusaurus()) {
+        const navBar = getDocusaurusNavBar();
+        if (navBar) {
+          const rect = navBar.getBoundingClientRect();
+          sidepanel.style.top = `${rect.height}px`;
+          sidepanel.style.height = `${window.innerHeight - rect.height}px`;
+        }
 
-      const { elem: container, col } = getDocusaurusMainContainer();
+        const { elem: container, col } = getDocusaurusMainContainer();
+        if (container) {
+          const rect = container.getBoundingClientRect();
+          const scroll = this.getScrollbarWidth();
+          const pad = col ? 10 : 20;
+          sidepanel.style.width = `${window.innerWidth - rect.right - scroll - pad}px`;
+        }
+      } else if (isMintlify()) {
+        const navBar = getMintlifyNavBar();
+        if (navBar) {
+          const rect = navBar.getBoundingClientRect();
+          sidepanel.style.top = `${rect.height}px`;
+          sidepanel.style.height = `${window.innerHeight - rect.height}px`;
+        }
 
-      if (container) {
-        const rect = container.getBoundingClientRect();
-        const scroll = this.getScrollbarWidth();
-        const pad = col ? 10 : 20;
-        sidepanel.style.width = `${window.innerWidth - rect.right - scroll - pad}px`;
+        const container = getMintlifyMainContainer();
+        if (container) {
+          const rect = container.getBoundingClientRect();
+          const scroll = this.getScrollbarWidth();
+          const pad = 30;
+          sidepanel.style.width = `${window.innerWidth - rect.right - scroll - pad}px`;
+        }
       }
     }
   }
@@ -315,7 +330,7 @@ class CrawlChatEmbed {
   }
 
   mountSidePanel() {
-    if (!isDocusaurus()) {
+    if (!isDocusaurus() && !isMintlify()) {
       console.warn("CrawlChat sidepanel is not supported");
       return;
     }
@@ -327,6 +342,13 @@ class CrawlChatEmbed {
     const sidepanel = document.createElement("div");
     sidepanel.id = this.sidepanelId;
     sidepanel.classList.add("hidden");
+
+    if (isDocusaurus()) {
+      sidepanel.classList.add("docusaurus");
+    }
+    if (isMintlify()) {
+      sidepanel.classList.add("mintlify");
+    }
 
     const params = new URLSearchParams({
       embed: "true",
@@ -364,7 +386,9 @@ class CrawlChatEmbed {
     };
 
     const handleNavigate = (e) => {
-      this.positionSidePanel();
+      setTimeout(() => {
+        this.positionSidePanel();
+      }, 50);
     };
 
     document.removeEventListener("keydown", handleKeyDown);
@@ -475,4 +499,21 @@ function getDocusaurusTocCol() {
 
 function getDocusaurusNavBar() {
   return document.querySelector("nav.navbar");
+}
+
+function isMintlify() {
+  return (
+    document
+      .querySelector("meta[name='generator']")
+      .getAttribute("content")
+      .toLowerCase() === "mintlify"
+  );
+}
+
+function getMintlifyNavBar() {
+  return document.getElementById("navbar-transition-maple");
+}
+
+function getMintlifyMainContainer() {
+  return document.getElementById("content-area");
 }

@@ -110,6 +110,10 @@
   display: none;
 }
 
+#crawlchat-sidepanel.mintlify {
+  z-index: 25;
+}
+
 @media (max-width: 768px) {
   #crawlchat-sidepanel {
     border: none;
