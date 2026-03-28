@@ -9,7 +9,6 @@ export type AiModel = {
   provider?: string;
   speed?: string;
   accuracy?: string;
-  imageInputs?: boolean;
   addedAt?: Date;
 };
 
@@ -151,7 +150,6 @@ export const models: Record<string, AiModel> = {
     provider: "Anthropic",
     speed: "Fast",
     accuracy: "Best",
-    imageInputs: true,
     addedAt: new Date("2026-02-18"),
   },
   "openrouter/moonshotai/kimi-k2.5": {
@@ -164,7 +162,6 @@ export const models: Record<string, AiModel> = {
     provider: "Moonshot AI",
     speed: "Medium",
     accuracy: "Good",
-    imageInputs: true,
     addedAt: new Date("2026-02-18"),
   },
   "openrouter/minimax/minimax-m2.1": {
@@ -176,7 +173,6 @@ export const models: Record<string, AiModel> = {
     provider: "Minimax",
     speed: "Medium",
     accuracy: "Good",
-    imageInputs: false,
     addedAt: new Date("2026-02-18"),
   },
   "openrouter/minimax/minimax-m2.5": {
@@ -188,7 +184,6 @@ export const models: Record<string, AiModel> = {
     provider: "Minimax",
     speed: "Medium",
     accuracy: "Good",
-    imageInputs: false,
     addedAt: new Date("2026-02-23"),
   },
   "openrouter/minimax/minimax-m2.7": {
@@ -200,7 +195,6 @@ export const models: Record<string, AiModel> = {
     provider: "Minimax",
     speed: "Medium",
     accuracy: "Good",
-    imageInputs: false,
     addedAt: new Date("2026-03-27"),
   },
   "openrouter/z-ai/glm-4.7": {
@@ -212,7 +206,6 @@ export const models: Record<string, AiModel> = {
     provider: "Z-AI",
     speed: "Medium",
     accuracy: "Good",
-    imageInputs: false,
     addedAt: new Date("2026-02-18"),
   },
   "openrouter/z-ai/glm-5": {
@@ -224,7 +217,6 @@ export const models: Record<string, AiModel> = {
     provider: "Z-AI",
     speed: "Fast",
     accuracy: "Good",
-    imageInputs: false,
     addedAt: new Date("2026-02-18"),
   },
   "openrouter/google/gemini-3-flash-preview": {
@@ -237,8 +229,8 @@ export const models: Record<string, AiModel> = {
     provider: "Google",
     speed: "Medium",
     accuracy: "Good",
-    imageInputs: true,
     addedAt: new Date("2026-02-18"),
+    deprecated: true,
   },
   "openrouter/openai/gpt-5.2": {
     model: "openai/gpt-5.2",
@@ -250,7 +242,6 @@ export const models: Record<string, AiModel> = {
     provider: "OpenAI",
     speed: "Slow",
     accuracy: "Best",
-    imageInputs: true,
     addedAt: new Date("2026-02-18"),
   },
   "openrouter/openai/gpt-5-nano": {
@@ -263,7 +254,6 @@ export const models: Record<string, AiModel> = {
     provider: "OpenAI",
     speed: "Fast",
     accuracy: "Good",
-    imageInputs: true,
     addedAt: new Date("2026-01-18"),
   },
   "openrouter/openai/gpt-5-mini": {
@@ -276,7 +266,6 @@ export const models: Record<string, AiModel> = {
     provider: "OpenAI",
     speed: "Medium",
     accuracy: "Good",
-    imageInputs: true,
     addedAt: new Date("2026-01-18"),
   },
   "openrouter/openai/gpt-5": {
@@ -289,7 +278,6 @@ export const models: Record<string, AiModel> = {
     provider: "OpenAI",
     speed: "Slow",
     accuracy: "Best",
-    imageInputs: true,
   },
   "openrouter/openai/gpt-5.1": {
     model: "openai/gpt-5.1",
@@ -301,7 +289,6 @@ export const models: Record<string, AiModel> = {
     provider: "OpenAI",
     speed: "Slow",
     accuracy: "Best",
-    imageInputs: true,
   },
   "openrouter/openai/gpt-5.4-mini": {
     model: "openai/gpt-5.4-mini",
@@ -313,7 +300,6 @@ export const models: Record<string, AiModel> = {
     provider: "OpenAI",
     speed: "Fast",
     accuracy: "Good",
-    imageInputs: true,
     addedAt: new Date("2026-03-27"),
     deprecated: true,
   },
@@ -327,7 +313,6 @@ export const models: Record<string, AiModel> = {
     provider: "Anthropic",
     speed: "Fast",
     accuracy: "Best",
-    imageInputs: true,
   },
   "openrouter/anthropic/claude-haiku-4.5": {
     model: "anthropic/claude-haiku-4.5",
@@ -339,7 +324,6 @@ export const models: Record<string, AiModel> = {
     provider: "Anthropic",
     speed: "Fast",
     accuracy: "Good",
-    imageInputs: true,
   },
   "openrouter/openai/gpt-4o-mini": {
     model: "openai/gpt-4o-mini",
@@ -351,6 +335,17 @@ export const models: Record<string, AiModel> = {
     provider: "OpenAI",
     speed: "Super fast",
     accuracy: "Basic",
-    imageInputs: false,
+  },
+  "openrouter/xiaomi/mimo-v2-pro": {
+    model: "xiaomi/mimo-v2-pro",
+    ragTopN: 4,
+    creditsPerMessage: 3,
+    baseURL: "https://openrouter.ai/api/v1",
+    supportsImages: false,
+    displayName: "MiMo V2 Pro",
+    provider: "Xiaomi",
+    speed: "Fast",
+    accuracy: "Very good",
+    addedAt: new Date("2026-03-28"),
   },
 };

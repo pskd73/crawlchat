@@ -118,7 +118,7 @@ export default function AIModels() {
                   <td>
                     <span className="whitespace-nowrap">{row.accuracy}</span>
                   </td>
-                  <td>{row.imageInputs ? <Check /> : <X />}</td>
+                  <td>{row.supportsImages ? <Check /> : <X />}</td>
                 </tr>
               ))}
             </tbody>
