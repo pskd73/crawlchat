@@ -84,18 +84,13 @@
 }
 
 :root {
-  --crawlchat-sidepanel-width: 400px;
-  --crawlchat-navbar-height: 60px;
 }
 
 #crawlchat-sidepanel {
   position: fixed;
-  top: 0;
-  right: 0;
-  height: 100%;
   transition: all 0.2s ease;
   border-left: 1px solid #e0e0e0;
-  width: var(--crawlchat-sidepanel-width);
+  overflow: hidden;
 }
 
 [data-theme="dark"] #crawlchat-sidepanel {
@@ -111,83 +106,12 @@
   opacity: 1;
 }
 
-.crawlchat-sidepanel-resize {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 4px;
-  height: 100%;
-  opacity: 0;
-  cursor: col-resize;
-  z-index: 1000;
-  background-color: #e0e0e0;
-  transition: opacity 0.2s ease;
-}
-
-.crawlchat-sidepanel-resize:hover {
-  opacity: 1;
-}
-
 #crawlchat-sidepanel.hidden {
-  right: -100%;
-}
-
-#__docusaurus.crawlchat-with-sidepanel {
-  transition: width 0.2s ease;
-  width: 100%;
-  height: 100vh;
-}
-
-#__docusaurus.crawlchat-with-sidepanel.crawlchat-sidepanel-open {
-  width: calc(100% - var(--crawlchat-sidepanel-width));
-  overflow-y: auto;
-}
-
-nav.navbar {
-  min-height: var(--crawlchat-navbar-height);
-}
-
-#crawlchat-selection-tooltip {
-  position: absolute;
-  background-color: rgba(0, 0, 0);
-  color: white;
-  padding: 8px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  white-space: nowrap;
-  pointer-events: auto;
-  z-index: 10000;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  display: flex;
-  gap: 4px;
-}
-
-#crawlchat-selection-tooltip .tooltip-button {
-  background-color: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: white;
-  padding: 6px 12px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-  white-space: nowrap;
-}
-
-#crawlchat-selection-tooltip .tooltip-button:hover {
-  background-color: rgba(255, 255, 255, 0.2);
+  display: none;
 }
 
 @media (max-width: 768px) {
-  :root {
-    --crawlchat-sidepanel-width: 100vw;
-  }
-
   #crawlchat-sidepanel {
-    border-left: none;
+    border: none;
   }
 }

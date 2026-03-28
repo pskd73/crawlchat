@@ -982,7 +982,7 @@ export function ChatboxContainer({
 }
 
 export default function ScrapeWidget() {
-  const { screen, chat, ask, scrape } = useChatBoxContext();
+  const { screen, chat, ask, scrape, sidePanel } = useChatBoxContext();
 
   function handleAsk(question: string) {
     ask(question);
@@ -991,7 +991,13 @@ export default function ScrapeWidget() {
   return (
     <>
       <Toolbar />
-      <div className="flex flex-col flex-1 overflow-auto" id="chat-box-scroll">
+      <div
+        className={cn(
+          "flex flex-col flex-1 overflow-auto",
+          sidePanel && "no-scrollbar"
+        )}
+        id="chat-box-scroll"
+      >
         {screen === "chat" && (
           <>
             {chat.allMessages.length === 0 && <NoMessages />}

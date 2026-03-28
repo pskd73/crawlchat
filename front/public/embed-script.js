@@ -272,30 +272,51 @@ class CrawlChatEmbed {
     return div;
   }
 
+  positionSidePanel() {
+    const sidepanel = document.getElementById(this.sidepanelId);
+    if (sidepanel) {
+      sidepanel.style.position = "fixed";
+      sidepanel.style.right = "0px";
+      sidepanel.style.top = "0px";
+      sidepanel.style.width = "400px";
+      sidepanel.style.height = `${window.innerHeight}px`;
+
+      const navBar = getDocusaurusNavBar();
+      if (navBar) {
+        const rect = navBar.getBoundingClientRect();
+        sidepanel.style.top = `${rect.height}px`;
+        sidepanel.style.height = `${window.innerHeight - rect.height}px`;
+      }
+
+      const toc = getDocusaurusTocCol();
+      if (toc) {
+        const rect = toc.getBoundingClientRect();
+        sidepanel.style.width = `${window.innerWidth - rect.left - 22}px`;
+      }
+    }
+  }
+
   showSidePanel() {
-    document
-      .getElementById("__docusaurus")
-      ?.classList.add("crawlchat-sidepanel-open");
-    document.getElementById(this.sidepanelId)?.classList.remove("hidden");
+    const sidepanel = document.getElementById(this.sidepanelId);
+    if (sidepanel) {
+      this.positionSidePanel();
+      sidepanel.classList.remove("hidden");
+    }
 
     const iframe = document.getElementById(this.iframeId);
     iframe.contentWindow.postMessage("focus", "*");
-    if (this.getScriptElem()?.dataset.hideToc === "true") {
-      this.hideDocusaurusToc();
-    }
   }
 
   hideSidePanel() {
-    document
-      .getElementById("__docusaurus")
-      ?.classList.remove("crawlchat-sidepanel-open");
     document.getElementById(this.sidepanelId)?.classList.add("hidden");
-    if (this.getScriptElem()?.dataset.hideToc === "true") {
-      this.showDocusaurusToc();
-    }
   }
 
   mountSidePanel() {
+    if (!isDocusaurus()) {
+      console.warn("CrawlChat sidepanel is not supported");
+      return;
+    }
+
     document
       .getElementById("__docusaurus")
       ?.classList.add("crawlchat-with-sidepanel");
@@ -303,8 +324,6 @@ class CrawlChatEmbed {
     const sidepanel = document.createElement("div");
     sidepanel.id = this.sidepanelId;
     sidepanel.classList.add("hidden");
-
-    sidepanel.appendChild(this.makeResizeDiv());
 
     const params = new URLSearchParams({
       embed: "true",
@@ -333,14 +352,28 @@ class CrawlChatEmbed {
     sidepanel.appendChild(iframe);
 
     document.body.appendChild(sidepanel);
+    this.positionSidePanel();
 
     const handleKeyDown = (e) => {
       if (e.metaKey && e.key === "i") {
         window.crawlchatEmbed.toggleSidePanel();
       }
     };
+
+    const handleMessage = (e) => {
+      try {
+        const data = JSON.parse(e.data);
+        if (data.type === "internal-link-click") {
+          this.positionSidePanel();
+        }
+      } catch {}
+    };
+
     document.removeEventListener("keydown", handleKeyDown);
     document.addEventListener("keydown", handleKeyDown);
+
+    window.removeEventListener("message", handleMessage);
+    window.addEventListener("message", handleMessage);
   }
 
   toggleSidePanel() {
@@ -351,72 +384,9 @@ class CrawlChatEmbed {
     }
   }
 
-  makeResizeDiv() {
-    const resize = document.createElement("div");
-    resize.classList.add("crawlchat-sidepanel-resize");
-
-    const handleMouseMove = (e) => {
-      const width = Math.max(Math.min(window.innerWidth - e.clientX, 560), 400);
-      document.documentElement.style.setProperty(
-        "--crawlchat-sidepanel-width",
-        `${width}px`
-      );
-      e.preventDefault();
-      e.stopPropagation();
-    };
-
-    const handleMouseUp = () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleMouseUp);
-      document.getElementById(this.sidepanelId).style.pointerEvents = "auto";
-    };
-
-    const handleMouseDown = (e) => {
-      window.addEventListener("mousemove", handleMouseMove);
-      window.addEventListener("mouseup", handleMouseUp);
-      document.getElementById(this.sidepanelId).style.pointerEvents = "none";
-      e.preventDefault();
-      e.stopPropagation();
-    };
-
-    resize.addEventListener("mousedown", handleMouseDown);
-
-    return resize;
-  }
-
   isSidePanelOpen() {
     const sidepanel = document.getElementById(this.sidepanelId);
     return !sidepanel?.classList.contains("hidden");
-  }
-
-  hideDocusaurusToc() {
-    const toc = document.querySelector(".theme-doc-toc-desktop");
-    if (!toc) return;
-    toc.parentElement.style.display = "none";
-
-    const mainCol = document.querySelector(this.tocSelector);
-    if (this.originalTocMaxWidth === null) {
-      this.originalTocMaxWidth =
-        mainCol.style.maxWidth || getComputedStyle(mainCol).maxWidth;
-    }
-    mainCol.style.setProperty("max-width", "100%", "important");
-  }
-
-  showDocusaurusToc() {
-    const toc = document.querySelector(".theme-doc-toc-desktop");
-    if (!toc) return;
-    toc.parentElement.style.display = "block";
-
-    const mainCol = document.querySelector(this.tocSelector);
-    if (this.originalTocMaxWidth) {
-      mainCol.style.setProperty(
-        "max-width",
-        this.originalTocMaxWidth,
-        "important"
-      );
-    } else {
-      mainCol.style.setProperty("max-width", "75%", "important");
-    }
   }
 
   open(options = {}) {
@@ -474,4 +444,37 @@ if (document.readyState === "complete" || window.frameElement) {
   setupCrawlChat();
 } else {
   window.addEventListener("load", setupCrawlChat);
+}
+
+function getDocusaurusMainContainer() {
+  let elem = document.querySelector(".breadcrumbs");
+
+  while (elem.parentElement) {
+    const classListStr = elem.classList.toString();
+    if (elem.classList.contains("col")) {
+      return { elem, col: true };
+    }
+    if (classListStr.includes("generatedIndexPage_")) {
+      return { elem, col: false };
+    }
+    elem = elem.parentElement;
+  }
+}
+
+function isDocusaurus() {
+  return document.getElementById("__docusaurus") !== null;
+}
+
+function getDocusaurusTocCol() {
+  let elem = document.querySelector(".table-of-contents");
+  while (elem?.parentElement) {
+    if (elem.classList.contains("col")) {
+      return elem;
+    }
+    elem = elem.parentElement;
+  }
+}
+
+function getDocusaurusNavBar() {
+  return document.querySelector("nav.navbar");
 }

@@ -4,7 +4,6 @@ export function CrawlChatScript({
   src,
   hideAskAI,
   sidePanelOpen,
-  hideToc,
   noPrimaryColor,
   secret,
   theme,
@@ -14,7 +13,6 @@ export function CrawlChatScript({
   src?: string;
   hideAskAI?: boolean;
   sidePanelOpen?: boolean;
-  hideToc?: boolean;
   noPrimaryColor?: boolean;
   secret?: string;
   theme?: "light" | "dark" | "system";
@@ -28,7 +26,6 @@ export function CrawlChatScript({
       data-sidepanel={sidePanel}
       data-hide-ask-ai={hideAskAI}
       data-sidepanel-open={sidePanelOpen}
-      data-hide-toc={hideToc}
       data-no-primary-color={noPrimaryColor}
       data-secret={secret}
       data-theme={theme}
