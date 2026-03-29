@@ -1,6 +1,7 @@
 import { prisma } from "@packages/common/prisma";
 import { useMemo } from "react";
-import { TbWorld } from "react-icons/tb";
+import { SiDocusaurus, SiMintlify } from "react-icons/si";
+import { TbCode, TbWorld } from "react-icons/tb";
 import { getAuthUser } from "~/auth/middleware";
 import { authoriseScrapeUser, getSessionScrapeId } from "~/auth/scrape-session";
 import { Page } from "~/components/page";
@@ -35,7 +36,7 @@ export function meta({ data }: Route.MetaArgs) {
 
 function makeScriptCode(scrapeId: string) {
   if (typeof window === "undefined") {
-    return { script: "", docusaurusConfig: "" };
+    return { script: "", docusaurus: "", mintlify: "" };
   }
 
   const origin = window.location.origin;
@@ -46,7 +47,7 @@ function makeScriptCode(scrapeId: string) {
   data-id="${scrapeId}"
 ></script>`;
 
-  const docusaurusConfig = `headTags: [
+  const docusaurus = `headTags: [
   {
       "tagName": "script",
       "attributes": {
@@ -58,7 +59,19 @@ function makeScriptCode(scrapeId: string) {
     },
 ],`;
 
-  return { script, docusaurusConfig };
+  const mintlify = `function inject() {
+  const script = document.createElement("script");
+  script.src = "${origin}/embed.js";
+  script.id = "crawlchat-script";
+  script.dataset.id = "${scrapeId}";
+  script.dataset.sidepanel = true; // optional
+
+  document.head.appendChild(script);
+}
+
+inject();`;
+
+  return { script, docusaurus, mintlify };
 }
 
 export default function ScrapeEmbed({ loaderData }: Route.ComponentProps) {
@@ -74,34 +87,30 @@ export default function ScrapeEmbed({ loaderData }: Route.ComponentProps) {
           <SettingsSection id="embed" title="Embed - Ask AI" description={""}>
             <div className="flex flex-col gap-2 flex-1">
               <div className="tabs tabs-lift">
-                <input
-                  type="radio"
-                  name="embed-code"
-                  className="tab"
-                  aria-label="Code"
-                  defaultChecked
-                />
+                <label className="tab gap-2">
+                  <input type="radio" name="embed-code" defaultChecked />
+                  <TbCode /> Code
+                </label>
                 <div className="tab-content bg-base-100 border-base-300 p-4">
                   <MarkdownProse>
                     {`Copy paste the \`<script>\` tag below to your website.\n
-\`\`\`json
+\`\`\`html
 ${scriptCode.script}
 \`\`\`
 `}
                   </MarkdownProse>
                 </div>
 
-                <input
-                  type="radio"
-                  name="embed-code"
-                  className="tab"
-                  aria-label="Docusaurus"
-                />
+                <label className="tab gap-2">
+                  <input type="radio" name="embed-code" />
+                  <SiDocusaurus />
+                  Docusaurus
+                </label>
                 <div className="tab-content bg-base-100 border-base-300 p-4">
                   <MarkdownProse>
                     {`Copy paste the following config in your \`docusaurus.config.ts\`.\n
 \`\`\`json
-${scriptCode.docusaurusConfig}
+${scriptCode.docusaurus}
 \`\`\`
 `}
                   </MarkdownProse>
@@ -115,6 +124,21 @@ ${scriptCode.docusaurusConfig}
                       Side Panel
                     </a>
                   </div>
+                </div>
+
+                <label className="tab gap-2">
+                  <input type="radio" name="embed-code" />
+                  <SiMintlify />
+                  Mintlify
+                </label>
+                <div className="tab-content bg-base-100 border-base-300 p-4">
+                  <MarkdownProse>
+                    {`Create \`crawlchat.js\` inside your root folder.\n
+\`\`\`js
+${scriptCode.mintlify}
+\`\`\`
+`}
+                  </MarkdownProse>
                 </div>
               </div>
             </div>

@@ -28,7 +28,7 @@ Copy the following code and past in the `<head>` section of your page. Replace v
 
 If you are running a Docusaurus website (just like this one), add the following code to your `docusaurus.config.ts` file. Replace value of `data-id` to your collection id. You can find it on [Settings](https://crawlchat.app/settings) page.
 
-```js
+```json
 headTags: [
   {
       "tagName": "script",
@@ -36,9 +36,30 @@ headTags: [
         "src": "https://crawlchat.app/embed.js",
         "id": "crawlchat-script",
         "data-id": "YOUR_COLLECTION_ID"
+        "data-sidepanel": true // optional
       },
     },
 ],
+```
+
+You can enable the chatbot widget into a [Side Panel](/connect/side-panel)
+
+## Mintlify
+
+You can embed the chatbot on Mintlify website by creating `crawlchat.js` file in root folder with following content. Replace value of `data-id` to your collection id. You can find it on [Settings](https://crawlchat.app/settings) page.
+
+```js
+function inject() {
+  const script = document.createElement("script");
+  script.src = "https://crawlchat.app/embed.js";
+  script.id = "crawlchat-script";
+  script.dataset.id = "YOUR_COLLECTION_ID";
+  script.dataset.sidepanel = true; // optional
+
+  document.head.appendChild(script);
+}
+
+inject();
 ```
 
 You can enable the chatbot widget into a [Side Panel](/connect/side-panel)

@@ -141,11 +141,6 @@ export function makeRagAgent(
       "Use these tools when the user asks about code, file structure, or wants to explore the codebase.",
       "Start with 'tree' to understand the project structure, then use 'grep' or 'find' to locate specific code.",
       "Use 'ls' to explore specific directories in detail.",
-      "You need to give citation to the files that are used to answer the question.",
-      "The citation should be in the format of !!<uniqueId>!! that is passed in the context.",
-      "Give the citation in place, not as a seperate section at the end of the answer.",
-      "Don't add the citation in headers and code blocks. Always have it either in regular text or as a new line.",
-      "You must add the citation for sure. Don't skip it.",
     ]);
   }
 

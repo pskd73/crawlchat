@@ -6,7 +6,6 @@ import { jsonrepair } from "jsonrepair";
 import { useState, type PropsWithChildren } from "react";
 import {
   TbArrowRight,
-  TbBrandGithub,
   TbCheck,
   TbCircleCheckFilled,
   TbCopy,
@@ -343,30 +342,6 @@ export function MarkdownProse({
 
             if (typeof children !== "string") {
               return <a {...rest}>{children}</a>;
-            }
-
-            const githubRepoMatch = children.match(
-              /!!([^\s]+):([^\s]+):([^\s]+)!!/
-            );
-
-            if (githubRepoMatch) {
-              const [, repo, branch, filePath] = githubRepoMatch;
-              const filename = filePath.split("/").pop()?.replace(/#L\d+/, "");
-              return (
-                <a
-                  href={`https://github.com/${repo}/blob/${branch}/${filePath}`}
-                  target="_blank"
-                  className={cn(
-                    "border border-base-300 rounded-box",
-                    "no-underline inline-flex items-center px-3 gap-2",
-                    "translate-y-[2px] bg-primary/5 text-primary",
-                    "opacity-50 hover:opacity-100 text-sm"
-                  )}
-                >
-                  <TbBrandGithub />
-                  <span>{filename}</span>
-                </a>
-              );
             }
 
             const defaultNode = <a {...rest}>{children}</a>;
