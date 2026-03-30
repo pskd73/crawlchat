@@ -1,6 +1,5 @@
-import { Container } from "@react-email/components";
-import { MailTemplate } from "./template";
 import { emailConfig } from "./config";
+import { MailTemplate } from "./template";
 
 export default function LowCreditsEmail({
   name,
@@ -26,10 +25,8 @@ export default function LowCreditsEmail({
         href: `${emailConfig.baseUrl}/profile#billing`,
       }}
     >
-      <Container style={{ marginBottom: "10px" }}>
-        Hello {name || "there"} 👋
-      </Container>
-      <Container>
+      <p style={{ marginBottom: "10px" }}>Hello {name || "there"} 👋</p>
+      <p>
         You have{" "}
         <span style={{ fontWeight: "bold" }}>
           {credits ?? 0} {creditType ?? ""} credits
@@ -38,9 +35,9 @@ export default function LowCreditsEmail({
         <span style={{ fontWeight: "bold" }}>
           {scrapeTitle || "collection"}
         </span>{" "}
-        collection. Please upgrade to an higher plan or top up the credits. Click
-        the following button to go to your billing section.
-      </Container>
+        collection. Please upgrade to an higher plan or top up the credits.
+        Click the following button to go to your billing section.
+      </p>
     </MailTemplate>
   );
 }

@@ -1,6 +1,5 @@
-import { Text, Markdown } from "@react-email/components";
-import { MailTemplate } from "./template";
 import { emailConfig } from "./config";
+import { MailTemplate } from "./template";
 
 export default function InvitationEmail({
   scrapeTitle,
@@ -23,11 +22,11 @@ export default function InvitationEmail({
         href: url,
       }}
     >
-      <Text>
+      <p>
         Hi there! You have been invited to the team of {scrapeTitle} by{" "}
         {invitedBy}. Click the following button to singup and accept the
         invitation.
-      </Text>
+      </p>
     </MailTemplate>
   );
 }

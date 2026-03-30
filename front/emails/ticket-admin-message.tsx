@@ -1,6 +1,5 @@
-import { Text } from "@react-email/components";
-import { MailTemplate } from "./template";
 import { emailConfig } from "./config";
+import { MailTemplate } from "./template";
 import { TicketTags } from "./ticket-admin-create";
 
 export default function TicketAdminMessageEmail({
@@ -32,11 +31,11 @@ export default function TicketAdminMessageEmail({
         href: url,
       }}
     >
-      <Text>
+      <p>
         You have a new message on a ticket. Use the below button or this link to
         view the ticket. Anyone with this link can view and reply to the ticket.
-      </Text>
-      <Text>
+      </p>
+      <p>
         <span style={{ opacity: 0.5 }}>Email</span>
         <br />
         {email ?? "user@example.com"}
@@ -53,8 +52,8 @@ export default function TicketAdminMessageEmail({
         <span style={{ opacity: 0.5 }}>Message</span>
         <br />
         {message ?? "Sample message"}
-      </Text>
-      <Text style={{ opacity: 0.5 }}>{url}</Text>
+      </p>
+      <p style={{ opacity: 0.5 }}>{url}</p>
     </MailTemplate>
   );
 }

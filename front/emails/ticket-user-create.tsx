@@ -1,6 +1,5 @@
-import { Text } from "@react-email/components";
-import { MailTemplate } from "./template";
 import { emailConfig } from "./config";
+import { MailTemplate } from "./template";
 
 export default function TicketUserCreateEmail({
   scrapeTitle,
@@ -27,14 +26,12 @@ export default function TicketUserCreateEmail({
         href: url,
       }}
     >
-      <Text>
+      <p>
         Ticket has been created! Use the below button or this link to view the
         ticket. Anyone with this link can view and reply to the ticket.
-      </Text>
-      <Text style={{ fontWeight: "bold" }}>
-        {title ?? "Sample ticket title"}
-      </Text>
-      <Text style={{ opacity: 0.5 }}>{url}</Text>
+      </p>
+      <p style={{ fontWeight: "bold" }}>{title ?? "Sample ticket title"}</p>
+      <p style={{ opacity: 0.5 }}>{url}</p>
     </MailTemplate>
   );
 }

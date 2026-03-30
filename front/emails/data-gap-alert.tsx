@@ -1,6 +1,5 @@
-import { Text, Markdown } from "@react-email/components";
-import { MailTemplate } from "./template";
 import { emailConfig } from "./config";
+import { MailTemplate } from "./template";
 
 export default function DataGapAlertEmail({
   title,
@@ -21,13 +20,11 @@ export default function DataGapAlertEmail({
         href: `${emailConfig.baseUrl}/data-gaps`,
       }}
     >
-      <Text>
+      <p>
         There is a new data gap found for one of questions someone asked in{" "}
         {scrapeTitle} collection. Here are the details:
-      </Text>
-      <Text style={{ fontWeight: "bold" }}>
-        {title ?? "Sample data gap title"}
-      </Text>
+      </p>
+      <p style={{ fontWeight: "bold" }}>{title ?? "Sample data gap title"}</p>
     </MailTemplate>
   );
 }
