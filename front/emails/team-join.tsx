@@ -1,6 +1,5 @@
-import { Text, Markdown } from "@react-email/components";
-import { MailTemplate } from "./template";
 import { emailConfig } from "./config";
+import { MailTemplate } from "./template";
 
 export default function TeamJoinEmail({
   scrapeTitle,
@@ -23,10 +22,10 @@ export default function TeamJoinEmail({
         href: url,
       }}
     >
-      <Text>
+      <p>
         Hi there! You have been added to the team of {scrapeTitle} by{" "}
         {invitedBy}. Click the following button to go to the team.
-      </Text>
+      </p>
     </MailTemplate>
   );
 }

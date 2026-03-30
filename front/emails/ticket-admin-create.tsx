@@ -1,6 +1,5 @@
-import { Markdown, Text } from "@react-email/components";
-import { MailTemplate } from "./template";
 import { emailConfig } from "./config";
+import { MailTemplate } from "./template";
 
 export function TicketTags({
   tags,
@@ -60,9 +59,9 @@ export default function TicketAdminCreateEmail({
         href: url,
       }}
     >
-      <Text>You have a new ticket to resolve. Here are the details:</Text>
+      <p>You have a new ticket to resolve. Here are the details:</p>
 
-      <Text>
+      <p>
         <span style={{ opacity: 0.5 }}>Email</span>
         <br />
         {email ?? "user@example.com"}
@@ -77,9 +76,9 @@ export default function TicketAdminCreateEmail({
         <span style={{ opacity: 0.5 }}>Message</span>
         <br />
         {message ?? "Sample message"}
-      </Text>
+      </p>
 
-      <Text style={{ opacity: 0.5 }}>{url}</Text>
+      <p style={{ opacity: 0.5 }}>{url}</p>
     </MailTemplate>
   );
 }

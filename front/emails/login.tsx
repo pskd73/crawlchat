@@ -1,4 +1,3 @@
-import { Text } from "@react-email/components";
 import { MailTemplate } from "./template";
 
 export default function LoginEmail({ url }: { url: string }) {
@@ -15,11 +14,11 @@ export default function LoginEmail({ url }: { url: string }) {
         href: url,
       }}
     >
-      <Text>Hello there 👋</Text>
-      <Text>
+      <p>Hello there 👋</p>
+      <p>
         You have requested to login to CrawlChat using your email. Click the
         following button to login.
-      </Text>
+      </p>
     </MailTemplate>
   );
 }

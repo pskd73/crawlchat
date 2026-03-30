@@ -12,7 +12,7 @@ import {
   Section,
   Text,
 } from "@react-email/components";
-import type { PropsWithChildren } from "react";
+import { Fragment, type PropsWithChildren } from "react";
 import { emailConfig } from "./config";
 
 export function MailTemplate({
@@ -25,6 +25,7 @@ export function MailTemplate({
   icon,
   brand = "CrawlChat",
   noEmailPreferences = false,
+  footerLinks = [],
 }: PropsWithChildren<{
   title: string;
   preview: string;
@@ -37,7 +38,15 @@ export function MailTemplate({
   icon?: string;
   brand?: string;
   noEmailPreferences?: boolean;
+  footerLinks?: { label: string; href: string }[];
 }>) {
+  if (!noEmailPreferences) {
+    footerLinks.push({
+      label: "Email preference",
+      href: `${emailConfig.baseUrl}/profile`,
+    });
+  }
+
   return (
     <Html lang="en">
       <Head>
@@ -57,7 +66,7 @@ export function MailTemplate({
             width: "100%",
             maxWidth: "600px",
             margin: "0 auto",
-            padding: "20px 20px",
+            marginBottom: 10,
           }}
         >
           <Img width={60} src={`${emailConfig.baseUrl}/logo.png`} />
@@ -74,7 +83,7 @@ export function MailTemplate({
           }}
         >
           <Section
-            style={{ background: emailConfig.colors.primary, padding: "30px" }}
+            style={{ background: emailConfig.colors.primary, padding: "20px" }}
           >
             <Row>
               <Column>
@@ -82,14 +91,12 @@ export function MailTemplate({
                   style={{
                     color: "#ffffff",
                     margin: "0px",
-                    fontSize: "24px",
+                    fontSize: "20px",
                     fontWeight: "medium",
                   }}
                 >
-                  <span style={{ fontWeight: "bold" }}>{brand}</span>{" "}
-                  <span style={{ fontWeight: "lighter", opacity: 0.7 }}>
-                    {heading}
-                  </span>
+                  <span>{brand}</span>{" "}
+                  <span style={{ opacity: 0.5, marginLeft: 2 }}>{heading}</span>
                 </Text>
               </Column>
               <Column align="right">
@@ -97,7 +104,7 @@ export function MailTemplate({
                   style={{
                     color: "#ffffff",
                     margin: "0px",
-                    fontSize: "24px",
+                    fontSize: "20px",
                     fontWeight: "medium",
                   }}
                 >
@@ -107,27 +114,30 @@ export function MailTemplate({
             </Row>
           </Section>
 
-          <Section style={{ padding: "20px 30px" }}>
+          <Section style={{ padding: "0px 20px", lineHeight: 1.4 }}>
             {text && <Text style={{ fontSize: "16px" }}>{text}</Text>}
 
             {children}
           </Section>
 
           {cta && (
-            <Section style={{ padding: "0px 20px", paddingBottom: "30px" }}>
+            <Section style={{ padding: "0px 20px", paddingBottom: "20px" }}>
               <Row>
-                <Column align="center">
+                <Column>
                   <Button
                     style={{
-                      color: "#fff",
                       padding: "10px 20px",
-                      background: emailConfig.colors.primary,
+                      borderColor: emailConfig.colors.primary,
+                      color: emailConfig.colors.primary,
+                      borderWidth: 2,
                       borderRadius: "6px",
+                      borderStyle: "solid",
                       fontSize: "16px",
+                      fontWeight: "bold",
                     }}
                     href={cta.href}
                   >
-                    {cta.text} →
+                    {cta.text}
                   </Button>
                 </Column>
               </Row>
@@ -135,7 +145,7 @@ export function MailTemplate({
           )}
         </Container>
 
-        {!noEmailPreferences && (
+        {footerLinks.length > 0 && (
           <Container
             style={{
               width: "100%",
@@ -146,16 +156,29 @@ export function MailTemplate({
           >
             <Row>
               <Column align="center">
-                <Link
-                  style={{
-                    textAlign: "center",
-                    opacity: 0.4,
-                    color: "#000000",
-                  }}
-                  href={`${emailConfig.baseUrl}/profile`}
-                >
-                  Update email preferences
-                </Link>
+                {footerLinks.map((link, i) => (
+                  <Fragment key={i}>
+                    {i > 0 && (
+                      <span
+                        style={{
+                          opacity: 0.4,
+                          color: "#000000",
+                        }}
+                      >
+                        &nbsp;&nbsp;|&nbsp;&nbsp;
+                      </span>
+                    )}
+                    <Link
+                      href={link.href}
+                      style={{
+                        opacity: 0.4,
+                        color: "#000000",
+                      }}
+                    >
+                      {link.label}
+                    </Link>
+                  </Fragment>
+                ))}
               </Column>
             </Row>
           </Container>
