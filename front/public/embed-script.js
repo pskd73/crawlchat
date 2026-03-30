@@ -390,7 +390,7 @@ if (document.readyState === "complete" || window.frameElement) {
 function getDocusaurusMainContainer() {
   let elem = document.querySelector(".breadcrumbs");
 
-  while (elem.parentElement) {
+  while (elem?.parentElement) {
     const classListStr = elem.classList.toString();
     if (elem.classList.contains("col")) {
       return { elem, col: true };
