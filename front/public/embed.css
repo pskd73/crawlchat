@@ -94,17 +94,17 @@
 :root {
 }
 
-[data-theme="dark"] #crawlchat-widget.sidepanel,
-.dark #crawlchat-widget.sidepanel {
-  border-left: 1px solid #222;
-}
-
-#crawlchat-widget.mintlify {
+#crawlchat-embed.mintlify {
   z-index: 25;
 }
 
+[data-theme="dark"] #crawlchat-embed.sidepanel,
+.dark #crawlchat-embed.sidepanel {
+  border-left: 1px solid #222;
+}
+
 @media (max-width: 768px) {
-  #crawlchat-widget.sidepanel {
+  #crawlchat-embed.sidepanel {
     border: none;
   }
 }
