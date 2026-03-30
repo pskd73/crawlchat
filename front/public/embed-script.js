@@ -40,7 +40,7 @@ class CrawlChatEmbed {
       (this.getCustomTags().sidepanel === "true" ||
         this.getScriptElem()?.dataset.sidepanel === "true")
     ) {
-      if (getMintlifyMainContainer() || getDocusaurusMainContainer()) {
+      if (getMintlifyMainContainer() || getDocusaurusMainContainer().elem) {
         return true;
       }
     }
@@ -400,7 +400,7 @@ function getDocusaurusMainContainer() {
     elem = elem.parentElement;
   }
 
-  return { elem: null, elem: null };
+  return { elem: null, col: null };
 }
 
 function isDocusaurus() {
