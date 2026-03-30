@@ -181,7 +181,6 @@ class CrawlChatEmbed {
   async handleOnMessage(event) {
     if (event.data === "close") {
       window.crawlchatEmbed.hide();
-      window.crawlchatEmbed.hideSidePanel();
       return;
     }
     if (event.origin !== this.host) {
@@ -400,6 +399,8 @@ function getDocusaurusMainContainer() {
     }
     elem = elem.parentElement;
   }
+
+  return { elem: null, elem: null };
 }
 
 function isDocusaurus() {
