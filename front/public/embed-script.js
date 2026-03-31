@@ -64,7 +64,6 @@ class CrawlChatEmbed {
 
     const params = new URLSearchParams({
       embed: "true",
-      fullscreen: "true",
     });
     const customTags = this.getCustomTags();
     if (Object.keys(customTags).length > 0) {
@@ -73,6 +72,7 @@ class CrawlChatEmbed {
     if (this.isMobile()) {
       params.set("width", window.innerWidth.toString() + "px");
       params.set("height", window.innerHeight.toString() + "px");
+      params.set("fullscreen", "true");
     }
     if (this.getScriptElem()?.dataset.noPrimaryColor === "true") {
       params.set("noPrimaryColor", "true");
@@ -84,6 +84,12 @@ class CrawlChatEmbed {
     const theme = this.getScriptElem()?.dataset.theme;
     if (theme) {
       params.set("theme", theme);
+    }
+    if (this.isSidePanel()) {
+      params.set("fullscreen", "true");
+    }
+    if (this.getScriptElem()?.dataset.small === "true") {
+      params.set("small", "true");
     }
     const src = `${this.host}/w/${this.scrapeId}?${params.toString()}`;
 
@@ -363,6 +369,7 @@ class CrawlChatEmbed {
           type: "host-navigation",
           url: url ?? window.location.href,
           title: document.title,
+          fullscreen: this.isSidePanel(),
         }),
         "*"
       );

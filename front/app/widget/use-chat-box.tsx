@@ -24,7 +24,7 @@ export function useChatBox({
   embed,
   admin,
   token: initialToken,
-  fullscreen,
+  fullscreen: initialFullscreen,
   readonly: initReadOnly,
   sidePanel,
   small,
@@ -94,6 +94,7 @@ export function useChatBox({
     title: string;
     url: string;
   }>();
+  const [fullscreen, setFullscreen] = useState(initialFullscreen ?? false);
 
   useEffect(() => {
     if (token) {
@@ -257,6 +258,9 @@ export function useChatBox({
               title: data.title,
               url: data.url,
             });
+          }
+          if (data.fullscreen !== undefined && data.fullscreen !== null) {
+            setFullscreen(data.fullscreen);
           }
         }
       } catch {}

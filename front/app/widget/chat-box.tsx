@@ -978,7 +978,7 @@ export function ChatboxContainer({
   children: React.ReactNode;
   noShadow?: boolean;
 }) {
-  const { close, scrape, theme } = useChatBoxContext();
+  const { close, scrape, theme, fullscreen } = useChatBoxContext();
   const containerRef = useRef<HTMLDivElement>(null);
 
   function handleBgClick(event: React.MouseEvent<HTMLDivElement>) {
@@ -998,11 +998,14 @@ export function ChatboxContainer({
       <div
         data-theme={theme}
         className={cn(
-          "flex flex-col bg-base-100 relative md:rounded-xl overflow-hidden",
-          "md:border w-full h-full md:h-auto border-base-300",
-          scrape.widgetConfig?.size !== "large" &&
+          "flex flex-col bg-base-100 relative overflow-hidden",
+          "w-full h-full border-base-300",
+          !fullscreen && "md:h-auto md:rounded-xl md:border",
+          !fullscreen &&
+            scrape.widgetConfig?.size !== "large" &&
             "md:w-[520px] md:max-h-[460px]",
-          scrape.widgetConfig?.size === "large" &&
+          !fullscreen &&
+            scrape.widgetConfig?.size === "large" &&
             "md:w-[700px] md:max-h-[600px]",
           !noShadow && "md:shadow-2xl"
         )}
