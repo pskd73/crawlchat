@@ -828,6 +828,7 @@ function Toolbar() {
   const widgetConfig = scrape.widgetConfig;
   const backgroundColor = widgetConfig?.chatboxBgColor ?? undefined;
   const color = widgetConfig?.chatboxTextColor ?? undefined;
+  const logoWidth = small ? "18px" : "24px";
 
   return (
     <div
@@ -837,15 +838,20 @@ function Toolbar() {
         "w-full justify-between bg-base-200 items-center",
         "items-center",
         backgroundColor && "border-0",
-        small ? "p-2" : "p-4",
-        small ? "h-[44px]" : "h-[60px]"
+        small ? "p-4" : "p-4",
+        small ? "h-[48px]" : "h-[60px]"
       )}
       style={{
         backgroundColor,
         color,
       }}
     >
-      <div className="flex flex-1 min-w-0 gap-2 items-center">
+      <div
+        className={cn(
+          "flex flex-1 min-w-0 items-center",
+          small ? "gap-1" : "gap-2"
+        )}
+      >
         {fullscreen && (
           <ToolbarButton onClick={() => close()}>
             <TbX />
@@ -855,7 +861,7 @@ function Toolbar() {
           <img
             src={scrape.widgetConfig.logoUrl}
             alt="Logo"
-            style={{ maxWidth: "24px", maxHeight: "24px" }}
+            style={{ maxWidth: logoWidth, maxHeight: logoWidth }}
           />
         )}
 
@@ -879,7 +885,7 @@ function Toolbar() {
           )}
       </div>
 
-      <div className="flex gap-2">
+      <div className={cn("flex", small ? "gap-1" : "gap-2")}>
         {screen === "mcp" && (
           <div className="tooltip tooltip-left" data-tip="Switch to chat">
             <ToolbarButton
@@ -1095,7 +1101,7 @@ export default function ScrapeWidget() {
         <div
           className={cn(
             "bg-base-300/80 border-t border-base-300",
-            small ? "px-2 py-1" : "px-4 py-2"
+            small ? "px-4 py-1.5" : "px-4 py-2"
           )}
         >
           <PoweredBy />
