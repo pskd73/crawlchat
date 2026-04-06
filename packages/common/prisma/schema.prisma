@@ -678,18 +678,6 @@ enum ApiActionMethod {
 
 enum ApiActionType {
   custom
-  cal
-  linear_create_issue
-}
-
-type CalActionConfig {
-  apiKey  String?
-  eventTypeId String?
-}
-
-type LinearConfig {
-  apiKey  String?
-  teamId  String?
 }
 
 model ApiAction {
@@ -704,8 +692,6 @@ model ApiAction {
   headers         ApiActionData
   description     String
   type            ApiActionType?
-  calConfig       CalActionConfig?
-  linearConfig    LinearConfig?
 
   requireEmailVerification Boolean?
 

@@ -4,8 +4,7 @@ import type {
   ApiActionMethod,
 } from "@packages/common/prisma";
 import { useContext } from "react";
-import { TbCircleCheck, TbCircleX, TbPlus, TbTrash } from "react-icons/tb";
-import { RadioCard } from "~/components/radio-card";
+import { TbPlus, TbTrash } from "react-icons/tb";
 import { EditActionContext } from "./use-edit-action";
 
 function DataItemForm({
@@ -144,13 +143,16 @@ function CustomForm() {
     removeHeaderItem,
     description,
     setDescription,
-    requireEmailVerification,
-    setRequireEmailVerification,
   } = useContext(EditActionContext);
 
   return (
     <>
-      <div className="flex flex-col bg-base-100 rounded-box p-4 shadow">
+      <div
+        className={cn(
+          "flex flex-col bg-base-100 rounded-box p-4 shadow",
+          "border border-base-300"
+        )}
+      >
         <div className="flex gap-2">
           <fieldset className="fieldset flex-1">
             <legend className="fieldset-legend">Title</legend>
@@ -277,181 +279,7 @@ function CustomForm() {
   );
 }
 
-function CalForm() {
-  const {
-    title,
-    setTitle,
-    description,
-    setDescription,
-    calConfig,
-    setCalConfig,
-    calProfile,
-    calEventTypes,
-  } = useContext(EditActionContext);
-
-  return (
-    <>
-      {calProfile && (
-        <div role="alert" className="alert alert-success">
-          <TbCircleCheck />
-          <span>
-            Valid API key found for{" "}
-            <span className="font-bold">{calProfile?.username}</span>
-          </span>
-        </div>
-      )}
-
-      {!calProfile && (
-        <div role="alert" className="alert alert-error">
-          <TbCircleX />
-          <span>Enter a valid API key from Cal.com</span>
-        </div>
-      )}
-
-      <div className="flex flex-col bg-base-100 rounded-box p-4 shadow">
-        <div className="flex gap-2">
-          <fieldset className="fieldset flex-1">
-            <legend className="fieldset-legend">Title</legend>
-            <input
-              className="input w-full"
-              type="text"
-              placeholder="Ex: Book a meeting"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
-          </fieldset>
-
-          <fieldset className="fieldset flex-1">
-            <legend className="fieldset-legend">Description</legend>
-            <input
-              className="input w-full"
-              placeholder="Explain when to use it"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
-          </fieldset>
-        </div>
-
-        <div className="flex gap-2">
-          <fieldset className="fieldset flex-1">
-            <legend className="fieldset-legend">API Key</legend>
-            <input
-              className="input w-full"
-              type="text"
-              placeholder="Ex: sk-1234567890"
-              value={calConfig.apiKey ?? ""}
-              onChange={(e) =>
-                setCalConfig({ ...calConfig, apiKey: e.target.value })
-              }
-            />
-          </fieldset>
-        </div>
-
-        <div className="flex gap-2">
-          <fieldset className="fieldset flex-1">
-            <legend className="fieldset-legend">Event Type</legend>
-            <select
-              className="select w-full"
-              value={calConfig.eventTypeId ?? ""}
-              onChange={(e) =>
-                setCalConfig({ ...calConfig, eventTypeId: e.target.value })
-              }
-              disabled={!calEventTypes.length}
-            >
-              <option value="">Select an event type</option>
-              {calEventTypes.map((eventType) => (
-                <option key={eventType.id} value={eventType.id}>
-                  {eventType.title}
-                </option>
-              ))}
-            </select>
-          </fieldset>
-        </div>
-      </div>
-    </>
-  );
-}
-
-export function LinearCreateIssueForm() {
-  const {
-    title,
-    setTitle,
-    description,
-    setDescription,
-    linearConfig,
-    setLinearConfig,
-    linearTeams,
-  } = useContext(EditActionContext);
-
-  return (
-    <>
-      <div className="flex flex-col bg-base-100 rounded-box p-4 shadow">
-        <div className="flex gap-2">
-          <fieldset className="fieldset flex-1">
-            <legend className="fieldset-legend">Title</legend>
-            <input
-              className="input w-full"
-              type="text"
-              placeholder="Ex: Book a meeting"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
-          </fieldset>
-
-          <fieldset className="fieldset flex-1">
-            <legend className="fieldset-legend">Description</legend>
-            <input
-              className="input w-full"
-              placeholder="Explain when to use it"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
-          </fieldset>
-        </div>
-        <div className="flex gap-2">
-          <fieldset className="fieldset flex-1">
-            <legend className="fieldset-legend">API Key</legend>
-            <input
-              className="input w-full"
-              type="text"
-              placeholder="Ex: sk-1234567890"
-              value={linearConfig.apiKey ?? ""}
-              onChange={(e) =>
-                setLinearConfig({ ...linearConfig, apiKey: e.target.value })
-              }
-            />
-          </fieldset>
-
-          <fieldset className="fieldset flex-1">
-            <legend className="fieldset-legend">Team</legend>
-            <select
-              defaultValue="Pick a color"
-              className="select w-full"
-              disabled={!linearTeams}
-              value={linearConfig.teamId ?? ""}
-              onChange={(e) =>
-                setLinearConfig({ ...linearConfig, teamId: e.target.value })
-              }
-            >
-              <option>Pick a team</option>
-              {linearTeams?.map((team) => (
-                <option key={team.id} value={team.id}>
-                  {team.name}
-                </option>
-              ))}
-            </select>
-          </fieldset>
-        </div>
-
-        <EmailVerificationField />
-      </div>
-    </>
-  );
-}
-
 export function EditForm() {
-  const { type, setType } = useContext(EditActionContext);
-
   return (
     <div className="flex flex-col gap-4">
       <div className="text-base-content/50">
@@ -460,37 +288,7 @@ export function EditForm() {
         and uses it appropriately.
       </div>
 
-      <div className={cn("p-4 bg-base-100 rounded-box border border-base-300")}>
-        <RadioCard
-          name="type"
-          value={type}
-          onChange={setType}
-          options={[
-            {
-              label: "Custom",
-              value: "custom",
-              description: "Custom API",
-              icon: <TbPlus />,
-            },
-            {
-              label: "Cal.com",
-              value: "cal",
-              description: "Lets the chatbot to book meetings on Cal.com",
-              img: "/cal.png",
-            },
-            {
-              label: "Linear create issue",
-              value: "linear_create_issue",
-              description: "Lets the chatbot to create issues on Linear",
-              img: "/linear.png",
-            },
-          ]}
-        />
-      </div>
-
-      {type === "custom" && <CustomForm />}
-      {type === "cal" && <CalForm />}
-      {type === "linear_create_issue" && <LinearCreateIssueForm />}
+      <CustomForm />
     </div>
   );
 }

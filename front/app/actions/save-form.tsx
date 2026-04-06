@@ -18,10 +18,7 @@ export function SaveForm({
     headers,
     canSubmit,
     description,
-    type,
-    calConfig,
     requireEmailVerification,
-    linearConfig,
   } = useContext(EditActionContext);
 
   return (
@@ -50,10 +47,7 @@ export function SaveForm({
             data,
             headers,
             description,
-            type,
-            calConfig,
             requireEmailVerification,
-            linearConfig,
           })}
         />
         <button

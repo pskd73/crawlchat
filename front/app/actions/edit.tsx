@@ -56,10 +56,8 @@ export async function action({ request, params }: Route.ActionArgs) {
         data: data.data,
         headers: data.headers,
         description: data.description,
-        type: data.type,
-        calConfig: data.calConfig,
+        type: "custom",
         requireEmailVerification: data.requireEmailVerification,
-        linearConfig: data.linearConfig,
       },
     });
 

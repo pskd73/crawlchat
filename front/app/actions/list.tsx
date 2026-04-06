@@ -1,7 +1,6 @@
 import cn from "@meltdownjs/cn";
-import type { ApiActionType } from "@packages/common/prisma";
 import { prisma } from "@packages/common/prisma";
-import { TbCopy, TbPlus, TbPointer, TbWebhook } from "react-icons/tb";
+import { TbCopy, TbPlus, TbPointer } from "react-icons/tb";
 import { Link, redirect, useFetcher } from "react-router";
 import { getAuthUser } from "~/auth/middleware";
 import { authoriseScrapeUser, getSessionScrapeId } from "~/auth/scrape-session";
@@ -74,9 +73,7 @@ export async function action({ request }: Route.ActionArgs) {
         data: action.data,
         headers: action.headers,
         description: action.description,
-        type: action.type,
-        calConfig: action.calConfig,
-        linearConfig: action.linearConfig,
+        type: "custom",
         requireEmailVerification: action.requireEmailVerification,
       },
     });
@@ -99,28 +96,6 @@ function NoActions() {
           </Link>
         }
       />
-    </div>
-  );
-}
-
-function ActionType({ type }: { type: ApiActionType | null }) {
-  if (type === "cal")
-    return (
-      <div className="min-w-22">
-        <img src="/cal.png" alt="Cal" className="w-6 h-6 rounded-box" />
-      </div>
-    );
-
-  if (type === "linear_create_issue")
-    return (
-      <div className="min-w-22">
-        <img src="/linear.png" alt="Linear" className="w-6 h-6 rounded-box" />
-      </div>
-    );
-
-  return (
-    <div className="min-w-22">
-      <TbWebhook />
     </div>
   );
 }
@@ -174,7 +149,6 @@ export default function Actions({ loaderData }: Route.ComponentProps) {
           >
             <table className="table">
               <colgroup>
-                <col className="w-[5%]" />
                 <col />
                 <col className="w-[16%]" />
                 <col className="min-w-24 w-[14%]" />
@@ -182,7 +156,6 @@ export default function Actions({ loaderData }: Route.ComponentProps) {
               </colgroup>
               <thead>
                 <tr>
-                  <th>Type</th>
                   <th>Title</th>
                   <th>Calls</th>
                   <th className="text-end">Created</th>
@@ -192,9 +165,6 @@ export default function Actions({ loaderData }: Route.ComponentProps) {
               <tbody>
                 {loaderData.actions.map((item) => (
                   <tr key={item.id}>
-                    <td>
-                      <ActionType type={item.type} />
-                    </td>
                     <td className="truncate">
                       <Link
                         className="link link-hover"

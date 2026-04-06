@@ -1,14 +1,14 @@
 import cn from "@meltdownjs/cn";
-import { prisma } from "@packages/common/prisma";
-import TicketAdminMessageEmail from "emails/ticket-admin-message";
-import TicketUserMessageEmail from "emails/ticket-user-message";
 import type {
   Prisma,
   Scrape,
   ScrapeUser,
   Thread,
   TicketAuthorRole,
-} from "libs/prisma";
+} from "@packages/common/prisma";
+import { prisma } from "@packages/common/prisma";
+import TicketAdminMessageEmail from "emails/ticket-admin-message";
+import TicketUserMessageEmail from "emails/ticket-user-message";
 import { useEffect, useMemo, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { RiChatVoiceAiFill } from "react-icons/ri";
