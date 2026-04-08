@@ -33,7 +33,7 @@ export async function checkUserRateLimits(
 
   if (
     scrape.fingerprintRateLimitHour !== null &&
-    hourQuestions > scrape.fingerprintRateLimitHour
+    hourQuestions >= scrape.fingerprintRateLimitHour
   ) {
     throw new Error("APP: Hourly question limit exceeded. Try again later.");
   }
@@ -46,7 +46,7 @@ export async function checkUserRateLimits(
 
   if (
     scrape.fingerprintRateLimitDay !== null &&
-    dayQuestions > scrape.fingerprintRateLimitDay
+    dayQuestions >= scrape.fingerprintRateLimitDay
   ) {
     throw new Error("APP: Daily question limit exceeded. Try again later.");
   }

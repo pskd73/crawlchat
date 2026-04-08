@@ -34,7 +34,7 @@ export async function action({ request }: Route.LoaderArgs) {
     authoriseScrapeUser(user!.scrapeUsers, scrape.id);
 
     const HOUR = 60 * 60 * 1000;
-    const fourHoursAgo = new Date(Date.now() - HOUR);
+    const fourHoursAgo = new Date(Date.now() - HOUR * 4);
     if (
       scrape.lowCreditsMailSentAt &&
       scrape.lowCreditsMailSentAt > fourHoursAgo
