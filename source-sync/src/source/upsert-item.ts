@@ -24,7 +24,7 @@ export async function upsertItem(
     chunks.length,
     knowledgeGroup.scrapeId,
     knowledgeGroup.id,
-    knowledgeGroup.userId,
+    scrape.userId,
     userPlan
   );
 
