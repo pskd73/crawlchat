@@ -170,7 +170,7 @@ export default function UsagePage({ loaderData }: Route.ComponentProps) {
                   <tr className="border-b border-base-300">
                     <th className="text-left w-28">Type</th>
                     <th className="text-left w-28">Credits</th>
-                    <th className="text-left w-28">Collection</th>
+                    <th className="text-left w-54">Collection</th>
                     <th className="text-left">Note</th>
                     <th className="text-right w-48">Date</th>
                   </tr>

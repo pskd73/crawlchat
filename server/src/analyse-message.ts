@@ -360,7 +360,7 @@ export async function fillMessageAnalysis(
       "usage",
       "message",
       "Analysis",
-      -1,
+      -0.5,
       -cost,
       questionMessageId,
       message.scrapeId

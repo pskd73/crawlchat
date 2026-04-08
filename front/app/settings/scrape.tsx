@@ -358,7 +358,7 @@ function AnalyseMessageSettings({ scrape }: { scrape: Scrape }) {
     <SettingsSection
       id="post-answer-analysis"
       title="Post answer analysis"
-      description="Enable this to analyze the answer given by the AI and find out if there is any data gap in the knowledge base. It also analyzes more details from the question such as the sentiment, category and more. It uses one message credit per question."
+      description="Enable this to analyze the answer given by the AI and find out if there is any data gap in the knowledge base. It also analyzes more details from the question such as the sentiment, category and more. It 0.5 message credits per question."
       fetcher={fetcher}
       dirty={dirtyForm.isDirty("analyseMessage")}
     >
