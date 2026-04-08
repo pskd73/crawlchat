@@ -4,6 +4,7 @@ import { hasEnoughCredits } from "@packages/common/user-plan";
 import expressWs from "express-ws";
 import type WebSocket from "ws";
 import { baseAnswerer, saveAnswer, type AnswerListener } from "../answer";
+import { checkUserRateLimits } from "../fingerprint-rate-limit";
 import { socketAskRateLimiter } from "../rate-limiter";
 
 function makeMessage(type: string, data: unknown) {
@@ -201,6 +202,20 @@ export const handleWs: expressWs.WebsocketRequestHandler = (ws) => {
       currentItem = await prisma.scrapeItem.findFirst({
         where: { scrapeId: scrape.id, url: message.data.url },
       });
+    }
+
+    try {
+      await checkUserRateLimits(scrape, fingerprint);
+    } catch (error: unknown) {
+      if (error instanceof Error && error.message.startsWith("APP: ")) {
+        console.log(
+          "user rate limit exceeded",
+          scrape.slug ?? scrape.title ?? scrape.id
+        );
+        ws.send(makeMessage("error", { message: error.message.slice(4) }));
+        return;
+      }
+      throw error;
     }
 
     const questionMessage = await prisma.message.create({

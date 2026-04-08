@@ -148,6 +148,17 @@ export async function action({ request }: Route.ActionArgs) {
     );
   }
 
+  if (formData.has("fingerprintRateLimitHour")) {
+    update.fingerprintRateLimitHour = parseInt(
+      formData.get("fingerprintRateLimitHour") as string
+    );
+  }
+  if (formData.has("fingerprintRateLimitDay")) {
+    update.fingerprintRateLimitDay = parseInt(
+      formData.get("fingerprintRateLimitDay") as string
+    );
+  }
+
   const scrape = await prisma.scrape.update({
     where: { id: scrapeId },
     data: update,
@@ -717,6 +728,50 @@ function ApiPlaygroundSettings({ scrape }: { scrape: Scrape }) {
   );
 }
 
+function FingerprintRateLimitSettings({ scrape }: { scrape: Scrape }) {
+  const fetcher = useFetcher();
+  const dirtyForm = useDirtyForm({
+    fingerprintRateLimitHour: String(scrape.fingerprintRateLimitHour ?? ""),
+    fingerprintRateLimitDay: String(scrape.fingerprintRateLimitDay ?? ""),
+  });
+
+  return (
+    <SettingsSection
+      id="fingerprint-rate-limit"
+      title="User rate limits"
+      description="Configure the rate limit for the unique users for asking the questions. You can apply either hourly or daily or both as per your needs. Works on Web widget for now."
+      fetcher={fetcher}
+      dirty={dirtyForm.isAnyDirty}
+    >
+      <div className="flex gap-2 flex-col">
+        <fieldset className="fieldset">
+          <legend className="fieldset-legend">Hourly</legend>
+          <input
+            type="number"
+            className="input"
+            name="fingerprintRateLimitHour"
+            value={dirtyForm.getValue("fingerprintRateLimitHour")}
+            onChange={dirtyForm.handleChange("fingerprintRateLimitHour")}
+            placeholder="Ex: 20"
+          />
+        </fieldset>
+
+        <fieldset className="fieldset">
+          <legend className="fieldset-legend">Daily</legend>
+          <input
+            type="number"
+            className="input"
+            name="fingerprintRateLimitDay"
+            value={dirtyForm.getValue("fingerprintRateLimitDay")}
+            onChange={dirtyForm.handleChange("fingerprintRateLimitDay")}
+            placeholder="Ex: 100"
+          />
+        </fieldset>
+      </div>
+    </SettingsSection>
+  );
+}
+
 export default function ScrapeSettings({ loaderData }: Route.ComponentProps) {
   const nameFetcher = useFetcher();
   const deleteFetcher = useFetcher();
@@ -901,6 +956,8 @@ export default function ScrapeSettings({ loaderData }: Route.ComponentProps) {
           <LowCreditsThresholdSettings scrape={loaderData.scrape} />
 
           <ApiPlaygroundSettings scrape={loaderData.scrape} />
+
+          <FingerprintRateLimitSettings scrape={loaderData.scrape} />
 
           <SettingsSection
             id="delete-collection"

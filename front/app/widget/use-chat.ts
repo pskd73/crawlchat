@@ -197,6 +197,9 @@ export function useScrapeChat({
 
   function handleError(message: string) {
     alert(message);
+    if (message.toLowerCase().includes("limit exceeded")) {
+      setMessages((prev) => prev.slice(0, -1));
+    }
     setContent({ text: "", date: new Date() });
     setAskStage("idle");
   }
@@ -258,6 +261,7 @@ export function useScrapeChat({
         totalTokens: 0,
         llmCost: 0,
         toolCalls: [],
+        showedApiPlayground: false,
       },
     ]);
     setAskStage("asked");

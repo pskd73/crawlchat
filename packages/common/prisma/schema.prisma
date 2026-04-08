@@ -172,63 +172,65 @@ type ScrapeMessageCategory {
 }
 
 model Scrape {
-  id                    String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId                String   @db.ObjectId
+  id                            String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId                        String   @db.ObjectId
 
-  url                   String?
-  status                ScrapeStatus
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
-  title                 String?
-  chatPrompt            String?
-  mcpToolName           String?
-  widgetConfig          WidgetConfig?
-  indexer               String?
-  discordServerId       String?
-  discordDraftConfig    DiscordDraftConfig?
-  discordConfig         DiscordConfig?
-  logoUrl               String?
-  ticketingEnabled      Boolean?
+  url                           String?
+  status                        ScrapeStatus
+  createdAt                     DateTime @default(now())
+  updatedAt                     DateTime @updatedAt
+  title                         String?
+  chatPrompt                    String?
+  mcpToolName                   String?
+  widgetConfig                  WidgetConfig?
+  indexer                       String?
+  discordServerId               String?
+  discordDraftConfig            DiscordDraftConfig?
+  discordConfig                 DiscordConfig?
+  logoUrl                       String?
+  ticketingEnabled              Boolean?
   
-  resolveQuestion       String?
-  resolveDescription    String?
-  resolveYesConfig      ResolveBtnConfig?
-  resolveNoConfig       ResolveBtnConfig?
+  resolveQuestion               String?
+  resolveDescription            String?
+  resolveYesConfig              ResolveBtnConfig?
+  resolveNoConfig               ResolveBtnConfig?
 
-  slackTeamId           String?
-  slackConfig           SlackConfig?
-  githubRepoName        String?
-  githubAutoReply       Boolean?
-  githubPrompt          String?
+  slackTeamId                   String?
+  slackConfig                   SlackConfig?
+  githubRepoName                String?
+  githubAutoReply               Boolean?
+  githubPrompt                  String?
 
-  helpdeskConfig        HelpdeskConfig?
+  helpdeskConfig                HelpdeskConfig?
 
-  private               Boolean?
+  private                       Boolean?
 
-  analytics             ScrapeAnalytics?
-  llmModel              String?
-  richBlocksConfig      RichBlocksConfig?
-  minScore              Float?
-  slug                  String?
-  showSources           Boolean?
-  analyseMessage        Boolean?
-  lowCreditsMailSentAt  DateTime?
-  dataGapMinScore       Float?
-  apiPlayground         Boolean?
-  lowCreditsThreshold   Float?
+  analytics                     ScrapeAnalytics?
+  llmModel                      String?
+  richBlocksConfig              RichBlocksConfig?
+  minScore                      Float?
+  slug                          String?
+  showSources                   Boolean?
+  analyseMessage                Boolean?
+  lowCreditsMailSentAt          DateTime?
+  dataGapMinScore               Float?
+  apiPlayground                 Boolean?
+  lowCreditsThreshold           Float?
+  fingerprintRateLimitHour      Int?
+  fingerprintRateLimitDay       Int?
 
-  messageCategories     ScrapeMessageCategory[]
+  messageCategories             ScrapeMessageCategory[]
 
-  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user                          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  threads               Thread[]
-  items                 ScrapeItem[]
-  messages              Message[]
-  knowoledgeGroups      KnowledgeGroup[]
-  scrapeUsers           ScrapeUser[]
-  apiActions            ApiAction[]
-  articles              Article[]
-  creditTransactions    CreditTransaction[]
+  threads                       Thread[]
+  items                         ScrapeItem[]
+  messages                      Message[]
+  knowoledgeGroups              KnowledgeGroup[]
+  scrapeUsers                   ScrapeUser[]
+  apiActions                    ApiAction[]
+  articles                      Article[]
+  creditTransactions            CreditTransaction[]
 
   @@index([slug])
 }
