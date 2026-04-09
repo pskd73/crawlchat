@@ -13,7 +13,7 @@ export function CountryFlag({ location }: { location: Location }) {
 
   return (
     <div
-      className="tooltip"
+      className="tooltip tooltip-right"
       data-tip={[location.city, country.name].filter(Boolean).join(", ")}
     >
       <img
