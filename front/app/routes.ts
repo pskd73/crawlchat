@@ -98,8 +98,13 @@ export default [
     route("ask-github-repo", "landing/ask-github-repo.tsx"),
     route("blog/:slug", "blog/page.tsx"),
     route("blog", "blog/list.tsx"),
-    route("changelog", "changelog/list.tsx"),
-    route("changelog/:slug", "changelog/page.tsx"),
+    ...prefix("changelog", [
+      layout("changelog/layout.tsx", [
+        index("changelog/list.tsx"),
+        route(":year/:month", "changelog/archive.tsx"),
+        route(":slug", "changelog/page.tsx"),
+      ]),
+    ]),
     route("public-bots", "landing/public-bots.tsx"),
 
     route("discord-bot", "landing/discord-bot.tsx"),

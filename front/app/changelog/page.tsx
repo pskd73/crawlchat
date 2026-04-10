@@ -5,7 +5,6 @@ import Markdown from "react-markdown";
 import { redirect } from "react-router";
 import remarkGfm from "remark-gfm";
 import { readPost } from "~/blog/posts";
-import { Container } from "~/landing/page";
 import { makeMeta } from "~/meta";
 import type { Route } from "./+types/page";
 
@@ -26,34 +25,25 @@ export function meta({ data }: Route.MetaArgs) {
 
 export default function BlogPage({ loaderData }: Route.ComponentProps) {
   return (
-    <>
-      <Container>
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-2 max-w-[760px] mx-auto">
-            <h1
-              className={cn(
-                "text-5xl text-center leading-tight",
-                "font-brand mt-16"
-              )}
-            >
-              {loaderData.post.title}
-            </h1>
-            <p className="opacity-60 text-center text-lg">
-              {loaderData.post.description}
-            </p>
-            <div className="flex items-center justify-center gap-2 text-sm opacity-60 text-center">
-              <TbClock />
-              {moment(loaderData.post.date).format("MMMM D, YYYY")}
-            </div>
-          </div>
-
-          <div className="prose dark:prose-invert mx-auto mt-10 max-w-full">
-            <Markdown remarkPlugins={[remarkGfm]}>
-              {loaderData.post.markdown}
-            </Markdown>
-          </div>
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-2 max-w-[760px] mx-auto">
+        <h1 className={cn("text-5xl text-center leading-tight", "font-brand")}>
+          {loaderData.post.title}
+        </h1>
+        <p className="opacity-60 text-center text-lg">
+          {loaderData.post.description}
+        </p>
+        <div className="flex items-center justify-center gap-2 text-sm opacity-60 text-center">
+          <TbClock />
+          {moment(loaderData.post.date).format("MMMM D, YYYY")}
         </div>
-      </Container>
-    </>
+      </div>
+
+      <div className="prose dark:prose-invert mx-auto mt-10 max-w-full">
+        <Markdown remarkPlugins={[remarkGfm]}>
+          {loaderData.post.markdown}
+        </Markdown>
+      </div>
+    </div>
   );
 }
