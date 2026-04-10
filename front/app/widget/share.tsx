@@ -9,7 +9,7 @@ import { prisma } from "@packages/common/prisma";
 import { useMemo } from "react";
 import { RiChatVoiceAiFill } from "react-icons/ri";
 import { TbAlertCircle } from "react-icons/tb";
-import { makeMeta } from "~/meta";
+import { makeMeta, NO_INDEX_HTTP_HEADERS } from "~/meta";
 import { MessageCopyButton, Sources } from "~/widget/chat-box";
 import type { Route } from "./+types/share";
 import { MarkdownProse } from "./markdown-prose";
@@ -33,6 +33,7 @@ export function meta({ data }: Route.MetaArgs) {
   if (!data.thread) {
     return makeMeta({
       title: "CrawlChat",
+      noIndex: true,
     });
   }
 
@@ -59,7 +60,12 @@ export function meta({ data }: Route.MetaArgs) {
   return makeMeta({
     title: title ?? "CrawlChat",
     description,
+    noIndex: true,
   });
+}
+
+export function headers() {
+  return NO_INDEX_HTTP_HEADERS;
 }
 
 function Nav({ scrape }: { scrape: Scrape }) {

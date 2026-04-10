@@ -24,7 +24,7 @@ import { useFetcher } from "react-router";
 import { getAuthUser } from "~/auth/middleware";
 import { Timestamp } from "~/components/timestamp";
 import { sendReactEmail } from "~/email";
-import { makeMeta } from "~/meta";
+import { makeMeta, NO_INDEX_HTTP_HEADERS } from "~/meta";
 import type { Route } from "./+types/ticket";
 import { MarkdownProse } from "./markdown-prose";
 
@@ -68,7 +68,12 @@ export async function loader({ params, request }: Route.LoaderArgs) {
 export function meta({ data }: Route.MetaArgs) {
   return makeMeta({
     title: data.thread?.title ?? "CrawlChat",
+    noIndex: true,
   });
+}
+
+export function headers() {
+  return NO_INDEX_HTTP_HEADERS;
 }
 
 export async function action({ params, request }: Route.ActionArgs) {

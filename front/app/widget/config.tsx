@@ -1,5 +1,10 @@
 import { prisma } from "@packages/common/prisma";
+import { NO_INDEX_HTTP_HEADERS } from "~/meta";
 import type { Route } from "./+types/config";
+
+export function headers() {
+  return NO_INDEX_HTTP_HEADERS;
+}
 
 export async function loader({ params }: Route.LoaderArgs) {
   const { id } = params;

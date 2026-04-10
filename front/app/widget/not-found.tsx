@@ -1,6 +1,15 @@
 import cn from "@meltdownjs/cn";
 import { useEffect } from "react";
 import { TbMoodSad, TbX } from "react-icons/tb";
+import { makeMeta, NO_INDEX_HTTP_HEADERS } from "~/meta";
+
+export function meta() {
+  return makeMeta({ title: "CrawlChat", noIndex: true });
+}
+
+export function headers() {
+  return NO_INDEX_HTTP_HEADERS;
+}
 
 export default function NotFound() {
   useEffect(() => {

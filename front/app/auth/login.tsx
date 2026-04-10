@@ -55,6 +55,8 @@ export async function loader({ request }: Route.LoaderArgs) {
 export function meta() {
   return makeMeta({
     title: "Login - CrawlChat",
+    description:
+      "Sign in to CrawlChat to manage your documentation assistant and AI for documentation—knowledge sources, analytics, web embed, Slack, and Discord.",
   });
 }
 

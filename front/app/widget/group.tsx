@@ -8,7 +8,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { RiChatVoiceAiFill } from "react-icons/ri";
 import { TbArrowUp, TbShare } from "react-icons/tb";
-import { makeMeta } from "~/meta";
+import { makeMeta, NO_INDEX_HTTP_HEADERS } from "~/meta";
 import type { Route } from "./+types/group";
 import { Sources } from "./chat-box";
 import { MarkdownProse } from "./markdown-prose";
@@ -51,7 +51,12 @@ export async function loader({ params }: Route.LoaderArgs) {
 export function meta({ data }: Route.MetaArgs) {
   return makeMeta({
     title: data.thread?.title ?? data.scrape?.title ?? "Group Chat",
+    noIndex: true,
   });
+}
+
+export function headers() {
+  return NO_INDEX_HTTP_HEADERS;
 }
 
 function Nav({ scrape }: { scrape: Scrape }) {
