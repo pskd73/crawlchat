@@ -223,16 +223,16 @@ function collectRichBlocks(answer: string) {
 }
 
 function getLlmModelKey(scrape: Scrape, channel?: MessageChannel) {
-  if (channel === "discord") {
+  if (channel === "discord" && scrape.llmModelDiscord) {
     return scrape.llmModelDiscord;
   }
-  if (channel === "slack") {
+  if (channel === "slack" && scrape.llmModelSlack) {
     return scrape.llmModelSlack;
   }
-  if (channel === "github_discussion") {
+  if (channel === "github_discussion" && scrape.llmModelGithub) {
     return scrape.llmModelGithub;
   }
-  if (channel === "widget") {
+  if (channel === "widget" && scrape.llmModelWeb) {
     return scrape.llmModelWeb;
   }
 
