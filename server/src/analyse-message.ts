@@ -1,5 +1,4 @@
 import { Agent, Flow } from "@packages/agentic";
-import { addCreditTransaction } from "@packages/common/credit-transaction";
 import { planMap } from "@packages/common/plans";
 import {
   MessageAnalysis,
@@ -363,17 +362,6 @@ export async function fillMessageAnalysis(
         },
       },
     });
-
-    await addCreditTransaction(
-      message.scrape.userId,
-      "usage",
-      "message",
-      "Analysis",
-      -0.5,
-      -cost,
-      questionMessageId,
-      message.scrapeId
-    );
   } catch (e) {
     console.error("Failed to analyse message", e);
   }
