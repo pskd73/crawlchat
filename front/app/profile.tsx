@@ -269,33 +269,33 @@ export default function SettingsPage({ loaderData }: Route.ComponentProps) {
                 </>
               }
             >
-              {loaderData.user.plan.creditsResetAt && (
-                <DataList
-                  data={[
-                    {
-                      label: "Plan",
-                      value: (
-                        <span
-                          className={cn(
-                            "badge badge-soft uppercase",
-                            loaderData.user.plan.subscriptionId &&
-                              "badge-primary"
-                          )}
-                        >
-                          {loaderData.user.plan.subscriptionId && <TbCrown />}
-                          {loaderData.user.plan.planId}
-                        </span>
-                      ),
-                    },
-                    {
-                      label: "Next payment",
-                      value: moment(loaderData.user.plan.creditsResetAt)
-                        .add(1, "month")
-                        .format("DD/MM/YYYY"),
-                    },
-                  ]}
-                />
-              )}
+              <DataList
+                data={[
+                  {
+                    label: "Plan",
+                    value: (
+                      <span
+                        className={cn(
+                          "badge badge-soft uppercase",
+                          loaderData.user.plan.subscriptionId && "badge-primary"
+                        )}
+                      >
+                        {loaderData.user.plan.subscriptionId && <TbCrown />}
+                        {loaderData.user.plan.planId}
+                      </span>
+                    ),
+                  },
+                  {
+                    label: "Next payment",
+                    value: loaderData.user.plan.creditsResetAt
+                      ? moment(loaderData.user.plan.creditsResetAt)
+                          .add(1, "month")
+                          .format("DD/MM/YYYY")
+                      : "-",
+                  },
+                ]}
+              />
+
               <table className="table">
                 <thead>
                   <tr>
