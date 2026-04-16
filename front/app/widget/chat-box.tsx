@@ -589,9 +589,7 @@ export function AssistantMessage({
         </MarkdownProse>
 
         {chat.askStage !== "idle" && last && (
-          <span className="chat-status-text text-sm opacity-70">
-            Making the answer...
-          </span>
+          <span className="chat-status-text text-sm">Making the answer...</span>
         )}
 
         {chat.askStage === "idle" && (

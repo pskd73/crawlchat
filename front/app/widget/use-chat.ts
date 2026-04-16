@@ -13,6 +13,16 @@ function makeMessage(type: string, data: any) {
   return JSON.stringify({ type, data });
 }
 
+export type SnapshotFiles = {
+  [path: string]: {
+    content: string;
+  };
+};
+
+export type EditorSnapshot = {
+  files: SnapshotFiles;
+};
+
 export function useScrapeChat({
   token,
   scrapeId,
@@ -52,7 +62,7 @@ export function useScrapeChat({
     const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
     const snapshot = JSON.parse(new TextDecoder().decode(bytes));
 
-    return snapshot;
+    return snapshot as EditorSnapshot;
   }, [editorPickle]);
 
   useEffect(() => {
