@@ -67,11 +67,12 @@ export function useChatBox({
     defaultMessages: messages,
     threadId: thread?.id,
     secret: secret ?? undefined,
+    editorPickle: thread?.editorPickle ?? null,
   });
 
-  const [screen, setScreen] = useState<"chat" | "mcp" | "ticket-create">(
-    "chat"
-  );
+  const [screen, setScreen] = useState<
+    "chat" | "mcp" | "ticket-create" | "editor"
+  >("chat");
   const overallScore = useMemo(() => getMessagesScore(messages), [messages]);
 
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -353,6 +354,7 @@ export function useChatBox({
       { intent: "erase" },
       { method: "post", action: `/w/${scrape.id}` }
     );
+    setScreen("chat");
     chat.erase();
   }
 

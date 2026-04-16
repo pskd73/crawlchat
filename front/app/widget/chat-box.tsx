@@ -47,6 +47,7 @@ import {
   makeMcpName,
 } from "~/mcp-command";
 import { MarkdownProse } from "~/widget/markdown-prose";
+import { EditorView } from "./editor-view";
 import { useChatBoxContext } from "./use-chat-box";
 
 export function useChatBoxDimensions(
@@ -588,9 +589,9 @@ export function AssistantMessage({
         </MarkdownProse>
 
         {chat.askStage !== "idle" && last && (
-          <div className="font-mono">
-            <span className="chat-status-text">Making the answer...</span>
-          </div>
+          <span className="chat-status-text text-sm opacity-70">
+            Making the answer...
+          </span>
         )}
 
         {chat.askStage === "idle" && (
@@ -915,13 +916,32 @@ function Toolbar() {
       </div>
 
       <div className={cn("flex", small ? "gap-1" : "gap-2")}>
-        {screen === "mcp" && (
-          <div className="tooltip tooltip-left" data-tip="Switch to chat">
+        {(screen === "mcp" || screen === "editor") && (
+          <div className="tooltip tooltip-left" data-tip="View chat">
             <ToolbarButton
               onClick={() => setScreen("chat")}
               className="btn-ghost"
             >
               <TbMessage />
+            </ToolbarButton>
+          </div>
+        )}
+
+        {chat.editor && screen === "chat" && (
+          <div className="tooltip tooltip-left" data-tip={"View files"}>
+            <ToolbarButton
+              onClick={() => setScreen("editor")}
+              className="btn-ghost relative"
+            >
+              <TbFileDescription />
+              <span
+                className={cn(
+                  "badge badge-primary badge-xs absolute top-0 left-0",
+                  "aspect-square w-4 h-4 p-0 -translate-x-1/4 -translate-y-1/4"
+                )}
+              >
+                {Object.keys(chat.editor.files).length}
+              </span>
             </ToolbarButton>
           </div>
         )}
@@ -1123,6 +1143,7 @@ export default function ScrapeWidget() {
         {screen === "mcp" && <MCPSetup />}
       </div>
       {screen === "chat" && <ChatInput />}
+      {screen === "editor" && <EditorView />}
       {!scrape.widgetConfig?.hideBranding && (
         <div
           className={cn(

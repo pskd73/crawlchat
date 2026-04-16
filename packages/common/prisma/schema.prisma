@@ -224,6 +224,8 @@ model Scrape {
   llmModelSlack                 String?
   llmModelGithub                String?
 
+  editorEnabled                 Boolean?
+
   messageCategories             ScrapeMessageCategory[]
 
   user                          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -439,6 +441,7 @@ model Thread {
   clientThreadId  String?
   fingerprint     String?
   grouping        Boolean?
+  editorPickle    String?
 
   scrape          Scrape   @relation(fields: [scrapeId], references: [id], onDelete: Cascade)
   

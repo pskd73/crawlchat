@@ -73,12 +73,18 @@ export type FoundPagesEvent = {
   count: number;
 };
 
+export type EditorUpdateEvent = {
+  type: "editor-update";
+  pickle: string;
+};
+
 export type AnswerEvent =
   | StreamDeltaEvent
   | ToolCallEvent
   | AnswerCompleteEvent
   | InitEvent
-  | FoundPagesEvent;
+  | FoundPagesEvent
+  | EditorUpdateEvent;
 
 export type AnswerListener = (event: AnswerEvent) => void;
 
@@ -326,7 +332,7 @@ Just use this block, don't ask the user to enter the email. Use it only if the t
     }
   }
 
-  const ragAgent = makeRagAgent(
+  const ragAgent = await makeRagAgent(
     thread,
     scrape.id,
     options?.prompt ?? scrape.chatPrompt ?? "",
@@ -356,6 +362,12 @@ Just use this block, don't ask the user to enter the email. Use it only if the t
           count: pagesFound,
         });
       },
+      onEditorUpdate: (pickle) => {
+        options?.listen?.({
+          type: "editor-update",
+          pickle,
+        });
+      },
       llmConfig,
       richBlocks,
       minScore: scrape.minScore ?? undefined,
@@ -365,6 +377,7 @@ Just use this block, don't ask the user to enter the email. Use it only if the t
       secret: options?.secret,
       scrapeItem: options?.scrapeItem,
       githubRepo,
+      editor: channel === "widget" && !!scrape.editorEnabled,
     }
   );
 

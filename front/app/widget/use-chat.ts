@@ -19,12 +19,14 @@ export function useScrapeChat({
   threadId,
   defaultMessages,
   secret,
+  editorPickle: initialEditorPickle,
 }: {
   token?: string;
   scrapeId: string;
   defaultMessages: Message[];
   threadId?: string;
   secret?: string;
+  editorPickle: string | null;
 }) {
   const socket = useRef<WebSocket>(null);
   const [messages, setMessages] = useState<Message[]>(defaultMessages);
@@ -39,6 +41,19 @@ export function useScrapeChat({
   const [followUpQuestions, setFollowUpQuestions] = useState<string[]>([]);
   const [fingerprint, setFingerprint] = useState<string | null>(null);
   const [pagesFound, setPagesFound] = useState<number>(0);
+  const [editorPickle, setEditorPickle] = useState<string | null>(
+    initialEditorPickle
+  );
+
+  const editor = useMemo(() => {
+    if (!editorPickle) return null;
+
+    const binary = atob(editorPickle);
+    const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+    const snapshot = JSON.parse(new TextDecoder().decode(bytes));
+
+    return snapshot;
+  }, [editorPickle]);
 
   useEffect(() => {
     let mounted = true;
@@ -114,6 +129,8 @@ export function useScrapeChat({
         setFollowUpQuestions(message.data.questions);
       } else if (message.type === "found-pages") {
         setPagesFound((c) => c + message.data.count);
+      } else if (message.type === "editor-update") {
+        setEditorPickle(message.data.pickle);
       }
     };
   }
@@ -277,6 +294,7 @@ export function useScrapeChat({
   function erase() {
     setMessages([]);
     setFollowUpQuestions([]);
+    setEditorPickle(null);
   }
 
   function deleteMessage(ids: string[]) {
@@ -310,5 +328,7 @@ export function useScrapeChat({
     setFollowUpQuestions,
     fingerprint,
     pagesFound,
+    editorPickle,
+    editor,
   };
 }

@@ -260,6 +260,13 @@ export const handleWs: expressWs.WebsocketRequestHandler = (ws) => {
             makeMessage("found-pages", { count: event.count })
           );
           break;
+
+        case "editor-update":
+          broadcastToThread(
+            threadId,
+            makeMessage("editor-update", { pickle: event.pickle })
+          );
+          break;
       }
     };
 

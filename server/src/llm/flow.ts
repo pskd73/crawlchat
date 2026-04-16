@@ -1,4 +1,4 @@
-import { Agent, Flow, Message, multiLinePrompt } from "@packages/agentic";
+import { Agent, Flow, Message, multiLinePrompt, Tool } from "@packages/agentic";
 import { MultimodalContent } from "@packages/common/llm-message";
 import {
   ApiAction,
@@ -10,6 +10,8 @@ import {
 import { richMessageBlocks } from "@packages/common/rich-message-block";
 import { CodebaseTool, createCodebaseTools } from "@packages/flash";
 import zodToJsonSchema from "zod-to-json-schema";
+import { savePickle, syncPickle } from "../editor/sync";
+import { makeEditorTools } from "../editor/tools";
 import { makeActionTools } from "./action-tool";
 import { LlmConfig } from "./config";
 import { CustomMessage } from "./custom-message";
@@ -30,7 +32,7 @@ export type State<CustomState, CustomMessage> = CustomState & {
   messages: FlowMessage<CustomMessage>[];
 };
 
-export function makeRagAgent(
+export async function makeRagAgent(
   thread: Thread,
   scrapeId: string,
   systemPrompt: string,
@@ -43,6 +45,7 @@ export function makeRagAgent(
       input: Record<string, unknown>
     ) => void;
     onPostSearch?: (pagesFound: number) => void;
+    onEditorUpdate?: (pickle: string) => void;
     llmConfig: LlmConfig;
     richBlocks?: RichBlockConfig[];
     minScore?: number;
@@ -55,6 +58,7 @@ export function makeRagAgent(
       group: KnowledgeGroup;
       path: string;
     };
+    editor?: boolean;
   }
 ) {
   const queryContext: SearchToolContext & TextSearchToolContext = {
@@ -161,6 +165,28 @@ export function makeRagAgent(
     </current-page>`;
   }
 
+  let editorPrompt = "";
+  let editorTools: Tool<any, any>[] = [];
+
+  if (options?.editor) {
+    editorPrompt = multiLinePrompt([
+      "You have access to **editor** with the following tools:",
+      "- ls: List files and directories in the current working directory.",
+      "- read: Read the contents of a file.",
+      "- patch: Patch the contents of a file.",
+      "Use these tools if you want to create files, edit files as per user request.",
+      "Prefer to use **editor** instead of embedding code in the answer.",
+      "Inform the user that you are using **editor** to answer the question.",
+      "Search the knowledge base to find out the answer and then use the **editor**.",
+      "Don't repeate contents of the **editor** files into answer. Just inform user that file exists in editor.",
+    ]);
+    const editorPath = await syncPickle(thread.id, thread.editorPickle);
+    editorTools = makeEditorTools(editorPath, async (pickle) => {
+      await savePickle(thread.id, pickle);
+      options?.onEditorUpdate?.(pickle);
+    });
+  }
+
   return new Agent<CustomMessage>({
     id: "rag-agent",
     prompt: multiLinePrompt([
@@ -225,11 +251,11 @@ export function makeRagAgent(
 
       "Don't ask more than 3 questions for the entire answering flow.",
       "Be polite when you don't have the answer, explain in a friendly way and inform that it is better to reach out the support team.",
+
       systemPrompt,
-
       currentPagePrompt,
-
       githubRepoPrompt,
+      editorPrompt,
 
       `<client-data>\n${JSON.stringify(options?.clientData)}\n</client-data>`,
     ]),
@@ -239,6 +265,7 @@ export function makeRagAgent(
       dataGapTool,
       ...actionTools,
       ...codebaseTools,
+      ...editorTools,
     ],
     model: options?.llmConfig.model,
     baseURL: options?.llmConfig.baseURL,
