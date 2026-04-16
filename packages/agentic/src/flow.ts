@@ -35,11 +35,16 @@ export class Flow<CustomState, CustomMessage> {
   public flowState: FlowState<CustomState, CustomMessage>;
   private repeatToolAgent: boolean;
   private maxToolCalls?: number;
+  private maxCost?: number;
 
   constructor(
     agents: Agent<CustomMessage>[],
     state: State<CustomState, CustomMessage>,
-    options?: { repeatToolAgent?: boolean; maxToolCalls?: number }
+    options?: {
+      repeatToolAgent?: boolean;
+      maxToolCalls?: number;
+      maxCost?: number;
+    }
   ) {
     this.agents = agents;
     this.flowState = {
@@ -55,6 +60,7 @@ export class Flow<CustomState, CustomMessage> {
     };
     this.repeatToolAgent = options?.repeatToolAgent ?? true;
     this.maxToolCalls = options?.maxToolCalls;
+    this.maxCost = options?.maxCost;
   }
 
   getAgent(id: string) {
@@ -164,9 +170,17 @@ export class Flow<CustomState, CustomMessage> {
       const call = pendingToolCalls[0];
 
       if (
-        this.maxToolCalls &&
-        this.flowState.toolCalls.length >= this.maxToolCalls
+        (this.maxToolCalls &&
+          this.flowState.toolCalls.length >= this.maxToolCalls) ||
+        (this.maxCost !== undefined &&
+          this.flowState.usage.cost >= this.maxCost)
       ) {
+        console.log("Tool call limit reached", {
+          cost: this.flowState.usage.cost,
+          maxCost: this.maxCost,
+          toolCalls: this.flowState.toolCalls.length,
+          maxToolCalls: this.maxToolCalls,
+        });
         const message: FlowMessage<CustomMessage> = {
           llmMessage: {
             role: "tool",

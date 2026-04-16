@@ -74,8 +74,6 @@ const staticPaths = [
   "/use-case/empower-gtm-teams",
   "/use-case/customer-support-automation",
   "/use-case/discord-community-automation",
-  "/use-case/discord-bot",
-  "/use-case/mcp",
   "/compare/crawlchat-vs-kapaai",
   "/compare/crawlchat-vs-docsbot",
   "/compare/crawlchat-vs-chatbase",

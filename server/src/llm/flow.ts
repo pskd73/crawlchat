@@ -265,7 +265,7 @@ export function makeRagFlow(
         },
       ],
     },
-    { maxToolCalls: 100 }
+    { maxToolCalls: 100, maxCost: 0.6 }
   );
 
   flow.addNextAgents(["rag-agent"]);
