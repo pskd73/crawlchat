@@ -1235,6 +1235,11 @@ export function Footer() {
                 </a>
               </li>
               <li>
+                <a href="https://youtube.com/@crawlchat">
+                  <TbBrandYoutube />
+                </a>
+              </li>
+              <li>
                 <a href="mailto:support@crawlchat.app">
                   <TbMail />
                 </a>
