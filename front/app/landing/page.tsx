@@ -1641,12 +1641,12 @@ function Hero() {
 
       <h1
         className={cn(
-          "font-brand text-[36px] md:text-[62px]",
+          "font-brand text-[36px] md:text-[58px]",
           "leading-[1.2] text-center"
         )}
       >
-        Documentation <span className="text-accent">AI assistant</span> for
-        fast, grounded <span className="text-accent">answers</span>
+        Documentation <span className="text-accent">AI assistant</span> for fast
+        and accurate <span className="text-accent">answers</span>
       </h1>
 
       <p
