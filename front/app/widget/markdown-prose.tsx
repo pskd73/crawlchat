@@ -1,7 +1,7 @@
 import cn from "@meltdownjs/cn";
 import type { Scrape, Thread } from "@packages/common/prisma";
 import hljs from "highlight.js";
-import "highlight.js/styles/xt256.min.css";
+import "highlight.js/styles/atom-one-dark.min.css";
 import { jsonrepair } from "jsonrepair";
 import { useState, type PropsWithChildren } from "react";
 import {
@@ -14,6 +14,7 @@ import Markdown from "react-markdown";
 import type { FetcherWithComponents } from "react-router";
 import remarkGfm from "remark-gfm";
 import { RichAPIPlayground } from "./api-playground/rich-block";
+import { extensionLanguageMap } from "./highlight-language";
 import "./markdown-prose.css";
 const linkifyRegex = require("remark-linkify-regex");
 
@@ -298,6 +299,7 @@ export function MarkdownProse({
               }
             }
 
+            language = extensionLanguageMap[language] ?? language;
             if (!hljs.listLanguages().includes(language)) {
               language = "bash";
             }

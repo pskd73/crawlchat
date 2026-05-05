@@ -67,11 +67,12 @@ export function useChatBox({
     defaultMessages: messages,
     threadId: thread?.id,
     secret: secret ?? undefined,
+    editorPickle: thread?.editorPickle ?? null,
   });
 
-  const [screen, setScreen] = useState<"chat" | "mcp" | "ticket-create">(
-    "chat"
-  );
+  const [screen, setScreen] = useState<
+    "chat" | "mcp" | "ticket-create" | "editor"
+  >("chat");
   const overallScore = useMemo(() => getMessagesScore(messages), [messages]);
 
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -291,6 +292,12 @@ export function useChatBox({
     }
   }, [makeGroupFetcher.data]);
 
+  useEffect(() => {
+    if (screen === "chat") {
+      scroll();
+    }
+  }, [screen]);
+
   function rate(id: string, rating: MessageRating) {
     toast.success("Thank you for your feedback!");
     rateFetcher.submit(
@@ -353,6 +360,7 @@ export function useChatBox({
       { intent: "erase" },
       { method: "post", action: `/w/${scrape.id}` }
     );
+    setScreen("chat");
     chat.erase();
   }
 
@@ -377,7 +385,6 @@ export function useChatBox({
 
   function cancelTicketCreate() {
     setScreen("chat");
-    scroll();
   }
 
   function createTicket(email: string, title: string, message: string) {

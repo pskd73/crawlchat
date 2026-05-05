@@ -577,7 +577,18 @@ app.post("/answer/:scrapeId", authenticate, async (req, res) => {
     addSourcesToMessage: channel === "api" ? false : true,
   });
 
-  res.json({ content: citation.content, message: newAnswerMessage });
+  const updatedThread = await prisma.thread.findFirst({
+    where: { id: thread.id },
+    select: {
+      editorPickle: true,
+    },
+  });
+
+  res.json({
+    content: citation.content,
+    message: newAnswerMessage,
+    editorPickle: updatedThread?.editorPickle,
+  });
 });
 
 app.post("/google-chat/answer/:scrapeId", async (req, res) => {

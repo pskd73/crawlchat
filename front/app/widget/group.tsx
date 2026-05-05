@@ -251,6 +251,7 @@ export default function GroupChat({ loaderData }: Route.ComponentProps) {
     scrapeId: scrape.id,
     defaultMessages: initialMessages,
     threadId: thread.id,
+    editorPickle: thread.editorPickle,
   });
 
   useEffect(() => {
