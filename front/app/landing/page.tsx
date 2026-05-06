@@ -11,6 +11,7 @@ import {
   TbArrowRight,
   TbBook,
   TbBook2,
+  TbBrain,
   TbBrandDiscord,
   TbBrandGithub,
   TbBrandLinkedin,
@@ -26,6 +27,7 @@ import {
   TbCircleCheckFilled,
   TbCircleFilled,
   TbCircleXFilled,
+  TbClockHour4,
   TbCode,
   TbColorSwatch,
   TbCrown,
@@ -35,6 +37,7 @@ import {
   TbFolder,
   TbGlobe,
   TbGraph,
+  TbHelpCircle,
   TbInfoCircleFilled,
   TbLanguage,
   TbLock,
@@ -46,13 +49,11 @@ import {
   TbMusicX,
   TbPlayerPauseFilled,
   TbPlayerPlayFilled,
-  TbPlug,
   TbPlus,
+  TbRobot,
   TbRobotFace,
   TbScoreboard,
-  TbThumbUp,
   TbUpload,
-  TbUserHeart,
   TbUsers,
   TbVideo,
   TbWorld,
@@ -577,163 +578,159 @@ function FeaturesWithImage({
       </div>
       <div
         className={cn(
-          "flex-1 bg-ash-strong rounded-box border",
+          "flex-1 bg-base-200 rounded-box border",
           "border-base-300 aspect-square overflow-hidden",
-          "w-full aspect-square h-fit"
+          "w-full aspect-square h-fit",
+          "flex items-center justify-center"
         )}
       >
         <img
           src={features.find((feature) => feature.key === activeTab)?.img}
-          className="w-full"
+          className={cn(
+            "max-w-[90%] max-h-[90%]",
+            "border border-base-300 rounded-box"
+          )}
         />
       </div>
     </div>
   );
 }
 
-function ChannelWidget() {
+function CreateKnowledgeBase() {
   return (
     <div className="mt-32">
       <Heading>
-        Documentation <HeadingHighlight>AI</HeadingHighlight> that answers where
-        users ask
+        Build an <HeadingHighlight>AI-powered knowledge base</HeadingHighlight>
       </Heading>
 
       <HeadingDescription>
-        Stop making users search through hundreds of pages. Instead of sending
-        users to generic ask AI websites, add CrawlChat to your documentation
-        and let them get instant, grounded answers where they need them.
+        CrawlChat turns live docs, PDFs, and wikis into an AI-powered knowledge
+        base in minutes. Unify tech and developer content, including API
+        references, in one place so your AI can answer from a single searchable
+        portal, public or internal.
       </HeadingDescription>
 
       <FeaturesWithImage
-        trackName="channel-widget"
+        trackName="create-knowledge-base"
         features={[
           {
-            title: "Embed on your website",
+            title: "Import",
             description:
-              "Embed the Ask AI widget on your website in minutes. Copy the embed code from CrawlChat and paste it into your site. Instantly deploy an AI assistant that handles most support queries.",
-            img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/channels/4-min.png",
-            key: "embed",
-            icon: <TbPlug />,
+              "Paste a URL and CrawlChat crawls technical documentation and developer documentation pages into your knowledge base, tuned for documentation search and answers from your answering agent.",
+            img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/new-features/kb-create.png",
+            key: "add-documentation",
+            icon: <TbBook2 />,
           },
           {
-            title: "Customise",
+            title: "Multiple sources",
             description:
-              "Customize the widget's appearance and response tone to match your brand. Add your colors, logo, labels, and customize AI behavior using custom prompts.",
-            img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/channels/5-min.png",
-            key: "customise",
+              "Combine documentation portals, FAQs, specifications, help articles, video tutorials, and PDFs in one AI-powered knowledge base—without leaving CrawlChat.",
+            img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/new-features/kb-list.png",
+            key: "multiple-sources",
+            icon: <TbBrain />,
+          },
+          {
+            title: "Auto sync",
+            description:
+              "Keep sources fresh with auto sync for websites, Notion, Confluence, Linear issues, and more so technical documentation and internal knowledge base content stay current.",
+            img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/new-features/kb-sync.png",
+            key: "auto-sync",
+            icon: <TbClockHour4 />,
+          },
+        ]}
+      />
+    </div>
+  );
+}
+
+function Channels() {
+  return (
+    <div className="mt-32">
+      <Heading>
+        Deploy <HeadingHighlight>documentation AI</HeadingHighlight> on every
+        channel
+      </Heading>
+
+      <HeadingDescription>
+        Run the same answering agent everywhere customers look for answers, an
+        AI chatbot for your website, Slack, Discord, GitHub, MCP, and API, one
+        documentation AI stack for self-service support.
+      </HeadingDescription>
+
+      <FeaturesWithImage
+        trackName="channels"
+        features={[
+          {
+            title: "Omni-channel",
+            description:
+              "Ship documentation AI on your site, Discord, Slack workspace, GitHub repositories, MCP server, API, and more from a single CrawlChat workspace.",
+            img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/new-features/channels-omni.png",
+            key: "omni-channel-agent",
+            icon: <TbRobot />,
+          },
+          {
+            title: "Customise behaviour",
+            description:
+              "Tune prompts so your answering agent matches tone, policies, and escalation rules. Match brand colours on the web widget for a documentation portal experience.",
+            img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/new-features/channels-prompt.png",
+            key: "customise-behaviour",
             icon: <TbColorSwatch />,
           },
           {
-            title: "Human support",
+            title: "Multiple AI models",
             description:
-              "CrawlChat recognizes when it doesn't have an answer. Users can seamlessly escalate to human support via tickets. The widget automatically prompts users to create a support ticket with their email directly from the chat interface.",
-            img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/channels/6-min.png",
-            key: "human-support",
-            icon: <TbUserHeart />,
+              "Choose leading models by provider and set defaults globally or per channel so your documentation AI stays fast, accurate, and cost-aware.",
+            img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/new-features/channels-ai-models.png",
+            key: "multiple-ai-models",
+            icon: <TbBrain />,
           },
         ]}
-      />
-    </div>
-  );
-}
-
-function ChannelDiscord() {
-  return (
-    <div className="mt-32">
-      <Heading>
-        Deliver your docs to your{" "}
-        <HeadingHighlight>internal teams</HeadingHighlight>
-      </Heading>
-
-      <HeadingDescription>
-        Tech companies often have extensive internal documentation across
-        multiple teams. Delivering these docs efficiently is challenging. Import
-        from Notion, Confluence, or upload files, then connect them to your
-        Discord or Slack workspaces.
-      </HeadingDescription>
-
-      <FeaturesWithImage
-        trackName="channel-discord"
-        features={[
-          {
-            title: "Tag the bot",
-            description:
-              "Add the CrawlChat bot to your Discord server, and anyone can resolve queries by tagging @crawlchat. It uses the same knowledge base from your collection. All Discord messages are automatically tagged with their channel for admin tracking.",
-            img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/channels/1-min.png",
-            key: "tag",
-            icon: <TbBrandDiscord />,
-          },
-          {
-            title: "Sources",
-            description:
-              "The bot includes source citations with every answer, helping users dive deeper into your documentation. This works across the Web widget and Slack bot. Configure threaded replies to keep channels organized.",
-            img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/channels/2-min.png",
-            key: "sources",
-            icon: <TbBook />,
-          },
-          {
-            title: "Learn & Rate",
-            description:
-              "When moderators provide correct answers, train the bot directly from Discord. React with 🧩 to teach the bot correct responses. Users can rate answers with 👍 or 👎, and you can view all ratings in the dashboard to take action.",
-            img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/channels/3-min.png",
-            key: "learn",
-            icon: <TbThumbUp />,
-          },
-        ]}
-        left={
-          <div className="p-4 text-base-content/50">
-            Learn more about{" "}
-            <a href="/discord-bot" className="link link-primary link-hover">
-              Discord bot
-            </a>
-          </div>
-        }
-      />
-    </div>
-  );
-}
-
-function DashboardFeatures() {
-  return (
-    <div className="mt-32">
-      <Heading>
-        Get <HeadingHighlight>360° visibility</HeadingHighlight> into your docs
-        and community
-      </Heading>
-
-      <HeadingDescription>
-        While users turn to ChatGPT for answers, you're missing valuable
-        insights from your docs and community. CrawlChat provides comprehensive
-        insights on questions asked, categories, data gaps, scores, and more.
-      </HeadingDescription>
-
-      <FeaturesWithImage
         reverse
-        trackName="analytics-dashboard"
+      />
+    </div>
+  );
+}
+
+function Analyse() {
+  return (
+    <div className="mt-32">
+      <Heading>
+        <HeadingHighlight>Analyse</HeadingHighlight> documentation search &
+        improve
+      </Heading>
+
+      <HeadingDescription>
+        Answering questions is only half the job. CrawlChat analytics shows how
+        teams use documentation search and where technical documentation falls
+        short so that product, docs, and customer support automation efforts
+        stay aligned.
+      </HeadingDescription>
+
+      <FeaturesWithImage
+        trackName="analyse"
         features={[
           {
-            title: "Useful analytics",
+            title: "Questions summary",
             description:
-              "CrawlChat delivers comprehensive insights about your documentation and user questions. Track daily messages, score distribution, data gaps, popular knowledge pages, categories, sentiment analysis, and more.",
-            img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/channels/dashboard-analytics.png",
-            key: "useful-analytics",
+              "See volume trends, categories, sentiment, sources cited, and audience signals in one dashboard built for documentation portal and internal knowledge base owners.",
+            img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/new-features/analyse-summary.png",
+            key: "analyse-summary",
             icon: <TbChartBar />,
           },
           {
             title: "View questions",
             description:
-              "Review user questions, identify gaps in your documentation, and improve accordingly. Group questions into categories and view channels for deeper insights.",
-            img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/channels/dashboard-questions.png",
+              "Inspect every query with similarity to your knowledge base, categories, sentiment, sources used, and geo context—ideal for prioritising updates to developer documentation and API documentation.",
+            img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/new-features/analyse-questions.png",
             key: "view-questions",
-            icon: <TbColorSwatch />,
+            icon: <TbHelpCircle />,
           },
           {
-            title: "Teams",
+            title: "Data gaps",
             description:
-              "Collaborate with multiple teams on your documentation. CrawlChat enables team collaboration to improve docs and support users effectively.",
-            img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/channels/dashboard-team.png",
-            key: "teams",
+              "CrawlChat surfaces questions closely related to your content but missing clear coverage—data gaps you can turn into roadmap items for technical documentation and self-service support.",
+            img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/new-features/analyse-data-gaps.png",
+            key: "view-users",
             icon: <TbUsers />,
           },
         ]}
@@ -1590,16 +1587,16 @@ function Hero() {
 
   const features = [
     {
-      text: "8+ knowledge sources",
+      text: "Omni channel agent",
     },
     {
-      text: "Chatbot on 6+ channels",
+      text: "Connect multiple sources",
     },
     {
-      text: "Insigts & Observability",
+      text: "Citations",
     },
     {
-      text: "Customize as per your needs",
+      text: "Analytics",
     },
   ];
 
@@ -1645,8 +1642,8 @@ function Hero() {
           "leading-[1.2] text-center"
         )}
       >
-        Documentation <span className="text-accent">AI assistant</span> for fast
-        and accurate <span className="text-accent">answers</span>
+        <span className="text-accent">AI answering agent</span> for your tech
+        documentation
       </h1>
 
       <p
@@ -2582,15 +2579,15 @@ export default function Landing() {
       </Container>
 
       <Container>
-        <ChannelWidget />
+        <CreateKnowledgeBase />
       </Container>
 
       <Container>
-        <DashboardFeatures />
+        <Channels />
       </Container>
 
       <Container>
-        <ChannelDiscord />
+        <Analyse />
       </Container>
 
       <Container>
