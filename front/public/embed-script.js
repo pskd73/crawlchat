@@ -326,7 +326,8 @@ class CrawlChatEmbed {
           const rect = container.getBoundingClientRect();
           const scroll = this.getScrollbarWidth();
           const pad = col ? 0 : 10;
-          sidepanel.style.width = `${window.innerWidth - rect.right - scroll - pad}px`;
+          const width = window.innerWidth - rect.right - scroll - pad;
+          sidepanel.style.width = `${Math.max(width, 360)}px`;
         }
       } else if (isMintlify()) {
         const navBar = getMintlifyNavBar();
