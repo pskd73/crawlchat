@@ -140,7 +140,7 @@ async function getCustomer(email: string) {
 export const dodoGateway: PaymentGateway = {
   provider: "DODO",
   validateWebhookRequest: async (body, headers) => {
-    if (!validateRequest(headers, body)) {
+    if (!(await validateRequest(headers, body))) {
       throw new Error(
         JSON.stringify({ error: "Invalid request", status: 400 })
       );
@@ -149,7 +149,11 @@ export const dodoGateway: PaymentGateway = {
     const payload = JSON.parse(body);
     console.log("Dodo webhook", headers.get("webhook-id"));
 
-    if (payload.data.product_cart && payload.data.product_cart.length > 0) {
+    if (
+      payload.type === "payment.succeeded" &&
+      payload.data.product_cart &&
+      payload.data.product_cart.length > 0
+    ) {
       const productId = payload.data.product_cart[0].product_id;
       return {
         webhookType: "topup",
