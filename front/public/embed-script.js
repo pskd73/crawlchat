@@ -12,7 +12,95 @@ class CrawlChatEmbed {
     this.originalTocMaxWidth = null;
     this.widgetConfig = {};
     this.tocSelector = "main .container .row .col:first-child";
+    this._sidepanelDragMove = null;
+    this._sidepanelDragUp = null;
+    this._sidepanelDragCaptureHandle = null;
+    this._sidepanelDragPointerId = null;
   }
+
+  getSidepanelWidthStorageKey() {
+    const id = this.getScrapeId() || "default";
+    return `crawlchat-sidepanel-width:${id}`;
+  }
+
+  getStoredSidepanelWidthPx() {
+    const raw = localStorage.getItem(this.getSidepanelWidthStorageKey());
+    if (raw == null) return null;
+    const n = Number(raw);
+    return Number.isFinite(n) ? n : null;
+  }
+
+  getSidepanelMinWidthPx() {
+    return 280;
+  }
+
+  getSidepanelMaxWidthPx() {
+    return Math.max(320, window.innerWidth - 24);
+  }
+
+  clampSidepanelWidthPx(w) {
+    const min = this.getSidepanelMinWidthPx();
+    const max = this.getSidepanelMaxWidthPx();
+    return Math.min(Math.max(w, min), max);
+  }
+
+  cancelSidepanelDrag() {
+    if (this._sidepanelDragMove) {
+      window.removeEventListener("pointermove", this._sidepanelDragMove, true);
+      window.removeEventListener("pointerup", this._sidepanelDragUp, true);
+      window.removeEventListener("pointercancel", this._sidepanelDragUp, true);
+      const h = this._sidepanelDragCaptureHandle;
+      const pid = this._sidepanelDragPointerId;
+      if (h && pid != null && h.releasePointerCapture) {
+        if (h.hasPointerCapture?.(pid)) {
+          h.releasePointerCapture(pid);
+        }
+      }
+      this._sidepanelDragMove = null;
+      this._sidepanelDragUp = null;
+      this._sidepanelDragCaptureHandle = null;
+      this._sidepanelDragPointerId = null;
+    }
+    document.body.style.removeProperty("user-select");
+    document.body.style.removeProperty("cursor");
+  }
+
+  onSidepanelResizeHandleDown = (e) => {
+    const panel = document.getElementById(this.embedDivId);
+    const handle = e.currentTarget;
+    if (
+      !panel?.classList.contains("sidepanel") ||
+      !panel.classList.contains("open")
+    ) {
+      return;
+    }
+    if (e.button !== 0 || !e.isPrimary) return;
+    e.preventDefault();
+    this.cancelSidepanelDrag();
+    const startX = e.clientX;
+    const startW = panel.offsetWidth;
+    document.body.style.userSelect = "none";
+    document.body.style.cursor = "ew-resize";
+    this._sidepanelDragCaptureHandle = handle;
+    this._sidepanelDragPointerId = e.pointerId;
+    if (handle.setPointerCapture) {
+      handle.setPointerCapture(e.pointerId);
+    }
+    this._sidepanelDragMove = (moveE) => {
+      const dx = moveE.clientX - startX;
+      const next = startW - dx;
+      panel.style.width = `${this.clampSidepanelWidthPx(next)}px`;
+    };
+    this._sidepanelDragUp = () => {
+      this.cancelSidepanelDrag();
+      const w = this.clampSidepanelWidthPx(panel.offsetWidth);
+      panel.style.width = `${w}px`;
+      localStorage.setItem(this.getSidepanelWidthStorageKey(), String(w));
+    };
+    window.addEventListener("pointermove", this._sidepanelDragMove, true);
+    window.addEventListener("pointerup", this._sidepanelDragUp, true);
+    window.addEventListener("pointercancel", this._sidepanelDragUp, true);
+  };
 
   getCustomTags() {
     const script = document.getElementById(this.scriptId);
@@ -103,6 +191,15 @@ class CrawlChatEmbed {
     const div = document.createElement("div");
     div.id = this.embedDivId;
 
+    const resizeHandle = document.createElement("div");
+    resizeHandle.className = "crawlchat-sidepanel-resize-handle";
+    resizeHandle.addEventListener(
+      "pointerdown",
+      this.onSidepanelResizeHandleDown
+    );
+    const resizeBubble = document.createElement("div");
+    resizeHandle.appendChild(resizeBubble);
+    div.appendChild(resizeHandle);
     div.appendChild(iframe);
     document.body.appendChild(div);
 
@@ -158,6 +255,7 @@ class CrawlChatEmbed {
 
   async hide() {
     const div = document.getElementById(this.embedDivId);
+    this.cancelSidepanelDrag();
 
     if (!this.isSidePanel()) {
       document.body.style = this.lastBodyStyle;
@@ -306,46 +404,53 @@ class CrawlChatEmbed {
 
   positionSidePanel() {
     const sidepanel = document.getElementById(this.embedDivId);
-    if (sidepanel) {
-      sidepanel.style.position = "fixed";
-      sidepanel.style.right = "0px";
-      sidepanel.style.top = "0px";
-      sidepanel.style.width = "400px";
-      sidepanel.style.height = `${window.innerHeight}px`;
+    if (!sidepanel) return;
 
-      if (isDocusaurus()) {
-        const navBar = getDocusaurusNavBar();
-        if (navBar) {
-          const rect = navBar.getBoundingClientRect();
-          sidepanel.style.top = `${rect.height + 1}px`;
-          sidepanel.style.height = `${window.innerHeight - rect.height}px`;
-        }
+    sidepanel.style.position = "fixed";
+    sidepanel.style.right = "0px";
+    sidepanel.style.top = "0px";
+    sidepanel.style.height = `${window.innerHeight}px`;
 
-        const { elem: container, col } = getDocusaurusMainContainer();
-        if (container) {
-          const rect = container.getBoundingClientRect();
-          const scroll = this.getScrollbarWidth();
-          const pad = col ? 0 : 10;
-          const width = window.innerWidth - rect.right - scroll - pad;
-          sidepanel.style.width = `${Math.max(width, 360)}px`;
-        }
-      } else if (isMintlify()) {
-        const navBar = getMintlifyNavBar();
-        if (navBar) {
-          const rect = navBar.getBoundingClientRect();
-          sidepanel.style.top = `${rect.height}px`;
-          sidepanel.style.height = `${window.innerHeight - rect.height}px`;
-        }
+    let autoWidthPx = 400;
 
-        const container = getMintlifyMainContainer();
-        if (container) {
-          const rect = container.getBoundingClientRect();
-          const scroll = this.getScrollbarWidth();
-          const pad = 30;
-          sidepanel.style.width = `${window.innerWidth - rect.right - scroll - pad}px`;
-        }
+    if (isDocusaurus()) {
+      const navBar = getDocusaurusNavBar();
+      if (navBar) {
+        const rect = navBar.getBoundingClientRect();
+        sidepanel.style.top = `${rect.height + 1}px`;
+        sidepanel.style.height = `${window.innerHeight - rect.height}px`;
+      }
+
+      const { elem: container, col } = getDocusaurusMainContainer();
+      if (container) {
+        const rect = container.getBoundingClientRect();
+        const scroll = this.getScrollbarWidth();
+        const pad = col ? 0 : 10;
+        const width = window.innerWidth - rect.right - scroll - pad;
+        autoWidthPx = Math.max(width, 360);
+      }
+    } else if (isMintlify()) {
+      const navBar = getMintlifyNavBar();
+      if (navBar) {
+        const rect = navBar.getBoundingClientRect();
+        sidepanel.style.top = `${rect.height}px`;
+        sidepanel.style.height = `${window.innerHeight - rect.height}px`;
+      }
+
+      const container = getMintlifyMainContainer();
+      if (container) {
+        const rect = container.getBoundingClientRect();
+        const scroll = this.getScrollbarWidth();
+        const pad = 30;
+        autoWidthPx = window.innerWidth - rect.right - scroll - pad;
       }
     }
+
+    const stored = this.getStoredSidepanelWidthPx();
+    const widthPx = this.clampSidepanelWidthPx(
+      stored != null ? stored : autoWidthPx
+    );
+    sidepanel.style.width = `${widthPx}px`;
   }
 
   open(options = {}) {

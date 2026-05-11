@@ -18,12 +18,57 @@
 
 #crawlchat-embed.sidepanel {
   padding: 8px;
+  box-sizing: border-box;
+  --crawlchat-sidepanel-padding: 8px;
+}
+
+.crawlchat-sidepanel-resize-handle {
+  display: none;
+}
+
+#crawlchat-embed.sidepanel.open .crawlchat-sidepanel-resize-handle {
+  display: block;
+  position: absolute;
+  left: var(--crawlchat-sidepanel-padding);
+  top: var(--crawlchat-sidepanel-padding);
+  bottom: var(--crawlchat-sidepanel-padding);
+  width: 14px;
+  transform: translateX(-50%);
+  cursor: ew-resize;
+  z-index: 2;
+  touch-action: none;
+}
+
+.crawlchat-sidepanel-resize-handle div {
+  width: 10px;
+  height: 40px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #e0e0e0;
+  border-radius: 10px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+[data-theme="dark"] .crawlchat-sidepanel-resize-handle div {
+  background: #444;
+}
+
+.crawlchat-sidepanel-resize-handle:hover div {
+  opacity: 1;
 }
 
 #crawlchat-embed.sidepanel iframe {
   border: 1px solid #e0e0e0;
   overflow: hidden;
   border-radius: 8px;
+}
+
+[data-theme="dark"] #crawlchat-embed.sidepanel iframe,
+.dark #crawlchat-embed.sidepanel iframe {
+  border: 1px solid #444;
 }
 
 #crawlchat-embed.open {
@@ -101,11 +146,6 @@
 
 #crawlchat-embed.mintlify {
   z-index: 25;
-}
-
-[data-theme="dark"] #crawlchat-embed.sidepanel iframe,
-.dark #crawlchat-embed.sidepanel iframe {
-  border: 1px solid #222;
 }
 
 @media (max-width: 768px) {
