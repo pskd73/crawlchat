@@ -35,7 +35,7 @@ class CrawlChatEmbed {
   }
 
   getSidepanelMaxWidthPx() {
-    return Math.max(320, window.innerWidth - 24);
+    return 600;
   }
 
   clampSidepanelWidthPx(w) {

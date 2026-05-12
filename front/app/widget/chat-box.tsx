@@ -584,6 +584,8 @@ export function AssistantMessage({
               requestEmailVerificationFetcher,
               verifyEmailFetcher,
               size: small ? "sm" : undefined,
+              internalLinkHosts,
+              onInternalLinkClick: handleInternalLinkClick,
             }}
           >
             {citation.content}

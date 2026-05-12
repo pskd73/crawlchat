@@ -213,6 +213,43 @@ function CodeCopyButton({ code }: { code: string }) {
   );
 }
 
+function getAProps(
+  href?: string,
+  internalLinkHosts?: string[],
+  onInternalLinkClick?: (url: string) => void
+) {
+  if (!href) {
+    return {
+      href: undefined,
+      onClick: undefined,
+    };
+  }
+
+  if (!internalLinkHosts || !onInternalLinkClick) {
+    return {
+      href,
+      onClick: undefined,
+    };
+  }
+
+  try {
+    const url = new URL(href);
+    const internal = internalLinkHosts.includes(url.hostname);
+    return {
+      href: internal ? undefined : href,
+      onClick:
+        internal && href && onInternalLinkClick
+          ? () => onInternalLinkClick(href)
+          : undefined,
+    };
+  } catch {
+    return {
+      href: undefined,
+      onClick: undefined,
+    };
+  }
+}
+
 export function MarkdownProse({
   thread,
   children,
@@ -237,6 +274,8 @@ export function MarkdownProse({
     requestEmailVerificationFetcher?: FetcherWithComponents<any>;
     verifyEmailFetcher?: FetcherWithComponents<any>;
     size?: "sm";
+    internalLinkHosts?: string[];
+    onInternalLinkClick?: (url: string) => void;
   };
 }>) {
   return (
@@ -342,19 +381,22 @@ export function MarkdownProse({
           a: ({ node, ...props }) => {
             const { children, ...rest } = props;
 
-            if (typeof children !== "string") {
-              return (
-                <a {...rest} target="_blank">
-                  {children}
-                </a>
-              );
-            }
+            const defaultProps = getAProps(
+              rest.href,
+              options?.internalLinkHosts,
+              options?.onInternalLinkClick
+            );
 
             const defaultNode = (
-              <a {...rest} target="_blank">
+              <a {...rest} {...defaultProps} target="_blank">
                 {children}
               </a>
             );
+
+            if (typeof children !== "string") {
+              return defaultNode;
+            }
+
             if (!sources) {
               return children;
             }
@@ -369,6 +411,12 @@ export function MarkdownProse({
             const index = parseInt(match[1]);
             const source = sources[index];
 
+            const sourceProps = getAProps(
+              source?.url,
+              options?.internalLinkHosts,
+              options?.onInternalLinkClick
+            );
+
             return (
               <span
                 className={cn(
@@ -380,10 +428,10 @@ export function MarkdownProse({
               >
                 {source?.url ? (
                   <a
-                    href={source.url}
                     target="_blank"
                     className="no-underline"
                     title={source?.title}
+                    {...sourceProps}
                   >
                     {index + 1}
                   </a>
