@@ -343,10 +343,18 @@ export function MarkdownProse({
             const { children, ...rest } = props;
 
             if (typeof children !== "string") {
-              return <a {...rest}>{children}</a>;
+              return (
+                <a {...rest} target="_blank">
+                  {children}
+                </a>
+              );
             }
 
-            const defaultNode = <a {...rest}>{children}</a>;
+            const defaultNode = (
+              <a {...rest} target="_blank">
+                {children}
+              </a>
+            );
             if (!sources) {
               return children;
             }
