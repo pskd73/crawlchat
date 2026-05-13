@@ -367,7 +367,7 @@ export default function ScrapeWidget({ loaderData }: Route.ComponentProps) {
     >
       <div
         className={cn(
-          "h-screen",
+          "h-dvh",
           loaderData.embed ? "bg-black/50" : "bg-base-300"
         )}
       >
