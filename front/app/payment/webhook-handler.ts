@@ -1,11 +1,39 @@
 import {
   addCreditTransaction,
   clearBalance,
+  getTotal,
 } from "@packages/common/credit-transaction";
 import { PLAN_FREE, planMap } from "@packages/common/plans";
 import { prisma } from "@packages/common/prisma";
 import { activatePlan } from "@packages/common/user-plan";
 import type { PaymentGateway } from "./gateway";
+
+async function getCreditsToClear(userId: string) {
+  const latestSubscriptionTxn = await prisma.creditTransaction.findFirst({
+    where: {
+      userId,
+      purpose: "message",
+      type: "subscription",
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  if (!latestSubscriptionTxn) {
+    return 0;
+  }
+
+  const subscriptionCredits = latestSubscriptionTxn.credits;
+  const usageDebitsSum = await getTotal(
+    userId,
+    "message",
+    -1,
+    latestSubscriptionTxn.createdAt
+  );
+
+  return Math.max(0, subscriptionCredits + usageDebitsSum);
+}
 
 export async function handleWebhook(request: Request, gateway: PaymentGateway) {
   const body = await request.text();
@@ -81,7 +109,18 @@ export async function handleWebhook(request: Request, gateway: PaymentGateway) {
 
   if (webhook.type === "renewed" && webhook.eventCreatedAt) {
     const plan = webhook.plan || planMap[user.plan.planId];
-    await clearBalance(user.id, "message", "Monthly reset");
+
+    const creditsToClear = await getCreditsToClear(user.id);
+
+    if (creditsToClear > 0) {
+      await addCreditTransaction(
+        user.id,
+        "expired",
+        "message",
+        "Monthly reset",
+        -creditsToClear
+      );
+    }
 
     await addCreditTransaction(
       user.id,
