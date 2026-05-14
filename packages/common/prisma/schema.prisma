@@ -223,6 +223,7 @@ model Scrape {
   llmModelDiscord               String?
   llmModelSlack                 String?
   llmModelGithub                String?
+  llmModelApi                   String?
 
   editorEnabled                 Boolean?
 

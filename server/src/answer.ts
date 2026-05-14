@@ -246,6 +246,9 @@ function getLlmModelKey(scrape: Scrape, channel?: MessageChannel) {
   if (channel === "widget" && scrape.llmModelWeb) {
     return scrape.llmModelWeb;
   }
+  if (channel === "api" && scrape.llmModelApi) {
+    return scrape.llmModelApi;
+  }
 
   return scrape.llmModel;
 }

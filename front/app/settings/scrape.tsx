@@ -16,6 +16,7 @@ import {
   TbBrandGithub,
   TbBrandSlack,
   TbCheck,
+  TbCode,
   TbCopy,
   TbExternalLink,
   TbFolder,
@@ -179,6 +180,10 @@ export async function action({ request }: Route.ActionArgs) {
     const value = formData.get("llmModelWeb") as string;
     update.llmModelWeb = value === "" ? null : value;
   }
+  if (formData.has("llmModelApi")) {
+    const value = formData.get("llmModelApi") as string;
+    update.llmModelApi = value === "" ? null : value;
+  }
 
   const scrape = await prisma.scrape.update({
     where: { id: scrapeId },
@@ -326,6 +331,7 @@ function AiModelSettings({ scrape }: { scrape: Scrape }) {
     llmModelSlack: scrape.llmModelSlack === null ? "" : scrape.llmModelSlack,
     llmModelGithub: scrape.llmModelGithub === null ? "" : scrape.llmModelGithub,
     llmModelWeb: scrape.llmModelWeb === null ? "" : scrape.llmModelWeb,
+    llmModelApi: scrape.llmModelApi === null ? "" : scrape.llmModelApi,
   });
 
   function renderSelect(
@@ -386,6 +392,7 @@ function AiModelSettings({ scrape }: { scrape: Scrape }) {
     dirtyForm.setValue("llmModelDiscord", "");
     dirtyForm.setValue("llmModelSlack", "");
     dirtyForm.setValue("llmModelGithub", "");
+    dirtyForm.setValue("llmModelApi", "");
   }
 
   return (
@@ -412,6 +419,7 @@ function AiModelSettings({ scrape }: { scrape: Scrape }) {
       {renderSelect("llmModelDiscord", <TbBrandDiscord />, "Discord bot", true)}
       {renderSelect("llmModelSlack", <TbBrandSlack />, "Slack app", true)}
       {renderSelect("llmModelGithub", <TbBrandGithub />, "GitHub bot", true)}
+      {renderSelect("llmModelApi", <TbCode />, "API", true)}
     </SettingsSection>
   );
 }
