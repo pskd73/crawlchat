@@ -83,10 +83,12 @@ export function useDirtyForm<Key extends string, Value>(
   );
 
   const getValue = useCallback((key: Key) => values[key], [values]);
+  const getOriginalValue = useCallback((key: Key) => defaults[key], [defaults]);
 
   return {
     values,
     getValue,
+    getOriginalValue,
     setValue,
     setValues: setValuesUpdater,
     handleChange,

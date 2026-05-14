@@ -11,11 +11,13 @@ import { prisma } from "@packages/common/prisma";
 import { useContext, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import {
+  TbArrowFork,
   TbBrandDiscord,
   TbBrandGithub,
   TbBrandSlack,
   TbCheck,
   TbCopy,
+  TbExternalLink,
   TbFolder,
   TbListCheck,
   TbLock,
@@ -332,6 +334,14 @@ function AiModelSettings({ scrape }: { scrape: Scrape }) {
     tooltip?: string,
     addDefault?: boolean
   ) {
+    const dirty = dirtyForm.isDirty(name);
+    const originalValue =
+      dirtyForm.getOriginalValue(name) ||
+      (scrape.llmModel
+        ? oldModelToModel(scrape.llmModel)
+        : "openrouter/openai/gpt-4o-mini");
+    const currentValue = dirtyForm.getValue(name);
+
     return (
       <div className="flex items-center gap-2">
         <select
@@ -359,6 +369,14 @@ function AiModelSettings({ scrape }: { scrape: Scrape }) {
             <div className="text-2xl opacity-50">{icon}</div>
           </div>
         )}
+        {dirty && (
+          <Link
+            to={`/tool/compare?models=${originalValue}-vs-${currentValue}`}
+            className="btn btn-soft btn-primary"
+          >
+            Compare <TbArrowFork />
+          </Link>
+        )}
       </div>
     );
   }
@@ -379,8 +397,9 @@ function AiModelSettings({ scrape }: { scrape: Scrape }) {
       dirty={dirtyForm.isAnyDirty}
       actionRight={
         <>
-          <Link to={`/ai-models`} className="btn btn-ghost">
-            Compare
+          <Link to={`/ai-models`} className="btn btn-link">
+            Browse
+            <TbExternalLink />
           </Link>
           <button className="btn" type="button" onClick={defaultAll}>
             Default all

@@ -474,7 +474,8 @@ export const baseAnswerer: Answerer = async (
   return retry(
     async (nTime) => {
       const fallbackLlmConfig = getConfig("openai/gpt-4o-mini");
-      const llmConfig = nTime === times - 1 ? fallbackLlmConfig : undefined;
+      const llmConfig =
+        nTime === times - 1 ? fallbackLlmConfig : options?.llmConfig;
       return baseAnswererInternal(scrape, thread, query, messages, channel, {
         ...options,
         llmConfig,

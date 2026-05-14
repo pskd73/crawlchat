@@ -10,6 +10,7 @@ import {
   type PropsWithChildren,
 } from "react";
 import {
+  TbArrowFork,
   TbBook,
   TbBrandDiscord,
   TbBrandGithub,
@@ -415,6 +416,12 @@ export function SideMenu({
             label: "Fact check",
             to: "/tool/fact-check",
             icon: <TbChecks />,
+            forScrape: true,
+          },
+          {
+            label: "Compare",
+            to: "/tool/compare",
+            icon: <TbArrowFork />,
             forScrape: true,
           },
         ],

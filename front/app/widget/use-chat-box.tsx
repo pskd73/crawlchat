@@ -31,6 +31,10 @@ export function useChatBox({
   secret,
   defaultQuery,
   initialTheme,
+  aiModel,
+  incognito,
+  noToolbar,
+  noInput,
 }: {
   scrape: Scrape;
   thread: Thread | null;
@@ -45,6 +49,10 @@ export function useChatBox({
   secret?: string | null;
   defaultQuery?: string | null;
   initialTheme?: "light" | "dark" | "system" | null;
+  aiModel?: string | null;
+  incognito?: boolean;
+  noToolbar?: boolean;
+  noInput?: boolean;
 }) {
   const pinFetcher = useFetcher();
   const unpinFetcher = useFetcher();
@@ -68,6 +76,10 @@ export function useChatBox({
     threadId: thread?.id,
     secret: secret ?? undefined,
     editorPickle: thread?.editorPickle ?? null,
+    aiModel: aiModel ?? null,
+    onAnswer: (message) => {
+      window.postMessage(JSON.stringify({ type: "answer", message }), "*");
+    },
   });
 
   const [screen, setScreen] = useState<
@@ -310,7 +322,11 @@ export function useChatBox({
     if (!thread?.id) {
       chat.setMakingThreadId();
       createThreadFetcher.submit(
-        { intent: "create-thread", fingerprint: chat.fingerprint },
+        {
+          intent: "create-thread",
+          fingerprint: chat.fingerprint,
+          incognito: incognito ?? false,
+        },
         { method: "post", action: `/w/${scrape.id}` }
       );
       setPendingQuery(query);
@@ -443,6 +459,8 @@ export function useChatBox({
     currentPage,
     makeGroupFetcher,
     small,
+    noToolbar,
+    noInput,
     close,
     erase,
     deleteMessages,
@@ -483,6 +501,10 @@ export function ChatBoxProvider({
   secret,
   defaultQuery,
   initialTheme,
+  aiModel,
+  incognito,
+  noToolbar,
+  noInput,
 }: {
   children: React.ReactNode;
   scrape: Scrape;
@@ -498,6 +520,10 @@ export function ChatBoxProvider({
   secret?: string | null;
   defaultQuery?: string | null;
   initialTheme?: "light" | "dark" | "system" | null;
+  aiModel?: string | null;
+  incognito?: boolean;
+  noToolbar?: boolean;
+  noInput?: boolean;
 }) {
   const chatBox = useChatBox({
     scrape,
@@ -513,6 +539,10 @@ export function ChatBoxProvider({
     secret,
     defaultQuery,
     initialTheme,
+    aiModel,
+    incognito,
+    noToolbar,
+    noInput,
   });
   return (
     <ChatBoxContext.Provider value={chatBox}>

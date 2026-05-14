@@ -85,6 +85,7 @@ export default [
       route("compose", "compose.tsx"),
       route("fact-check", "fact-check/page.tsx"),
       route("fact-check/api", "fact-check/api.ts"),
+      route("compare", "compare/page.tsx"),
     ]),
 
     ...prefix("api", [

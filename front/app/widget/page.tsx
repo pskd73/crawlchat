@@ -126,6 +126,16 @@ export async function loader({ params, request }: Route.LoaderArgs) {
   const secret = searchParams.get("secret");
   const defaultQuery = searchParams.get("q");
   const theme = searchParams.get("theme") as "light" | "dark" | "system" | null;
+  const aiModel = searchParams.get("aiModel");
+  const incognito = searchParams.get("incognito") === "true";
+  const noToolbar = searchParams.get("noToolbar") === "true";
+  const noInput = searchParams.get("noInput") === "true";
+
+  if (incognito) {
+    userToken = null;
+    thread = null;
+    messages = [];
+  }
 
   sanitizeScrape(scrape);
   sanitizeThread(thread);
@@ -145,6 +155,10 @@ export async function loader({ params, request }: Route.LoaderArgs) {
       secret,
       defaultQuery,
       theme,
+      aiModel,
+      incognito,
+      noToolbar,
+      noInput,
     },
     {
       headers,
@@ -190,6 +204,8 @@ export async function action({ request, params }: Route.ActionArgs) {
     const ip = getClientIp(request);
     const ipDetails = ip ? await fetchIpDetails(ip) : null;
     const fingerprint = formData.get("fingerprint") as string | null;
+    const incognito = formData.get("incognito") === "true";
+
     const thread = await prisma.thread.create({
       data: {
         scrapeId: scrape.id,
@@ -204,7 +220,9 @@ export async function action({ request, params }: Route.ActionArgs) {
         fingerprint: fingerprint ?? undefined,
       },
     });
-    await updateSessionThreadId(session, scrapeId, thread.id);
+    if (!incognito) {
+      await updateSessionThreadId(session, scrapeId, thread.id);
+    }
     const userToken = createToken(loggedInUser?.id ?? thread.id, {
       expiresInSeconds: 60 * 60 * 24,
     });
@@ -364,6 +382,10 @@ export default function ScrapeWidget({ loaderData }: Route.ComponentProps) {
       secret={loaderData.secret}
       defaultQuery={loaderData.defaultQuery}
       initialTheme={loaderData.theme}
+      aiModel={loaderData.aiModel}
+      incognito={loaderData.incognito}
+      noToolbar={loaderData.noToolbar}
+      noInput={loaderData.noInput}
     >
       <div
         className={cn(

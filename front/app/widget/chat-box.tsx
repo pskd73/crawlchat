@@ -1076,7 +1076,8 @@ export function ChatboxContainer({
 }
 
 export default function ScrapeWidget() {
-  const { screen, chat, ask, scrape, sidePanel, small } = useChatBoxContext();
+  const { screen, chat, ask, scrape, sidePanel, small, noInput, noToolbar } =
+    useChatBoxContext();
 
   function handleAsk(question: string) {
     ask(question);
@@ -1084,7 +1085,7 @@ export default function ScrapeWidget() {
 
   return (
     <>
-      <Toolbar />
+      {!noToolbar && <Toolbar />}
       <div
         className={cn(
           "flex flex-col flex-1 overflow-auto",
@@ -1133,7 +1134,8 @@ export default function ScrapeWidget() {
                     key={index}
                     className={cn(
                       "border border-base-300 rounded-box p-1",
-                      "w-fit px-2 hover:shadow-sm transition-all cursor-pointer"
+                      "w-fit px-2 hover:shadow-sm transition-all cursor-pointer",
+                      small && "text-sm"
                     )}
                     onClick={() => handleAsk(question)}
                   >
@@ -1147,7 +1149,7 @@ export default function ScrapeWidget() {
         {screen === "mcp" && <MCPSetup />}
         {screen === "editor" && <EditorView />}
       </div>
-      {screen === "chat" && <ChatInput />}
+      {screen === "chat" && !noInput && <ChatInput />}
       {!scrape.widgetConfig?.hideBranding && (
         <div
           className={cn(

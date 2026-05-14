@@ -5,6 +5,7 @@ import expressWs from "express-ws";
 import type WebSocket from "ws";
 import { baseAnswerer, saveAnswer, type AnswerListener } from "../answer";
 import { checkUserRateLimits } from "../fingerprint-rate-limit";
+import { getConfig, LlmConfig } from "../llm/config";
 import { socketAskRateLimiter } from "../rate-limiter";
 
 function makeMessage(type: string, data: unknown) {
@@ -113,23 +114,38 @@ export const handleWs: expressWs.WebsocketRequestHandler = (ws) => {
         messages: true,
       },
     });
+    let loggedInUser: { isMember: boolean } | null = null;
+    let llmConfig: LlmConfig | undefined = undefined;
 
     const scrape = await prisma.scrape.findFirstOrThrow({
       where: { id: thread.scrapeId },
     });
 
-    if (message.data.query.length > 3000) {
-      // repeated code
-      const user = await prisma.user.findFirst({
-        where: { id: userId },
-        include: {
-          scrapeUsers: true,
-        },
-      });
+    async function getLoggedInUser() {
+      if (!loggedInUser) {
+        if (!userId) {
+          loggedInUser = { isMember: false };
+        } else {
+          const user = await prisma.user.findFirst({
+            where: { id: userId },
+            include: {
+              scrapeUsers: true,
+            },
+          });
 
-      const isMember = user?.scrapeUsers.some(
-        (su) => su.scrapeId === scrape.id
-      );
+          const isMember = user?.scrapeUsers.some(
+            (su) => su.scrapeId === scrape.id
+          );
+
+          loggedInUser = { isMember: isMember ?? false };
+        }
+      }
+
+      return loggedInUser;
+    }
+
+    if (message.data.query.length > 3000) {
+      const { isMember } = await getLoggedInUser();
 
       if (!isMember || message.data.query.length > 8000) {
         ws.send(
@@ -148,16 +164,7 @@ export const handleWs: expressWs.WebsocketRequestHandler = (ws) => {
     }
 
     if (scrape.private) {
-      const user = await prisma.user.findFirst({
-        where: { id: userId },
-        include: {
-          scrapeUsers: true,
-        },
-      });
-
-      const isMember = user?.scrapeUsers.some(
-        (su) => su.scrapeId === scrape.id
-      );
+      const { isMember } = await getLoggedInUser();
 
       if (!isMember) {
         throw new Error("Private collection");
@@ -180,6 +187,14 @@ export const handleWs: expressWs.WebsocketRequestHandler = (ws) => {
       );
       ws.close();
       return;
+    }
+
+    if (message.data.aiModel) {
+      const { isMember } = await getLoggedInUser();
+
+      if (isMember) {
+        llmConfig = getConfig(message.data.aiModel);
+      }
     }
 
     const actions = await prisma.apiAction.findMany({
@@ -300,6 +315,7 @@ export const handleWs: expressWs.WebsocketRequestHandler = (ws) => {
         clientData: message.data.clientData,
         secret: message.data.secret,
         scrapeItem: currentItem ?? undefined,
+        llmConfig,
       }
     );
 

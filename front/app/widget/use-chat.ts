@@ -30,6 +30,8 @@ export function useScrapeChat({
   defaultMessages,
   secret,
   editorPickle: initialEditorPickle,
+  aiModel: initialAiModel,
+  onAnswer,
 }: {
   token?: string;
   scrapeId: string;
@@ -37,6 +39,8 @@ export function useScrapeChat({
   threadId?: string;
   secret?: string;
   editorPickle: string | null;
+  aiModel: string | null;
+  onAnswer?: (message: string) => void;
 }) {
   const socket = useRef<WebSocket>(null);
   const [messages, setMessages] = useState<Message[]>(defaultMessages);
@@ -54,6 +58,7 @@ export function useScrapeChat({
   const [editorPickle, setEditorPickle] = useState<string | null>(
     initialEditorPickle
   );
+  const [aiModel, setAiModel] = useState<string | null>(initialAiModel);
 
   const editor = useMemo(() => {
     if (!editorPickle) return null;
@@ -211,6 +216,7 @@ export function useScrapeChat({
       setMessages((prev) => [...prev, { ...message, createdAt: new Date() }]);
       setContent({ text: "", date: new Date() });
       setAskStage("idle");
+      onAnswer?.(content);
       return;
     }
     setAskStage("answering");
@@ -256,6 +262,7 @@ export function useScrapeChat({
         secret: secret,
         fingerprint,
         url: options?.url,
+        aiModel,
       })
     );
     const messagesCount = messages.length;

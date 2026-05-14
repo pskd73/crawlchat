@@ -252,6 +252,7 @@ export default function GroupChat({ loaderData }: Route.ComponentProps) {
     defaultMessages: initialMessages,
     threadId: thread.id,
     editorPickle: thread.editorPickle,
+    aiModel: null,
   });
 
   useEffect(() => {
