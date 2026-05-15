@@ -10,6 +10,7 @@ export type AiModel = {
   speed?: string;
   accuracy?: string;
   addedAt?: Date;
+  plans?: string[];
 };
 
 export const oldModels: Record<string, AiModel> = {
@@ -151,6 +152,7 @@ export const models: Record<string, AiModel> = {
     speed: "Fast",
     accuracy: "Best",
     addedAt: new Date("2026-02-18"),
+    plans: ["pro", "pro-yearly", "accelerate", "accelerate-yearly"],
   },
   "openrouter/moonshotai/kimi-k2.5": {
     model: "moonshotai/kimi-k2.5",
@@ -313,6 +315,7 @@ export const models: Record<string, AiModel> = {
     provider: "Anthropic",
     speed: "Fast",
     accuracy: "Best",
+    plans: ["pro", "pro-yearly", "accelerate", "accelerate-yearly"],
   },
   "openrouter/anthropic/claude-haiku-4.5": {
     model: "anthropic/claude-haiku-4.5",

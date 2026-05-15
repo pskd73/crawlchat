@@ -6,6 +6,7 @@ import type {
   Prisma,
   Scrape,
   ScrapeMessageCategory,
+  User,
 } from "@packages/common/prisma";
 import { prisma } from "@packages/common/prisma";
 import { useContext, useEffect, useRef, useState } from "react";
@@ -72,6 +73,34 @@ export function meta({ data }: Route.MetaArgs) {
   });
 }
 
+function assertModelPlan(model: string, user: User) {
+  if (!model) {
+    return null;
+  }
+
+  const modelData = models[model];
+
+  if (!modelData) {
+    return Response.json(
+      { error: `Model ${model} not found` },
+      { status: 403 }
+    );
+  }
+
+  if (modelData.plans === undefined) {
+    return null;
+  }
+
+  if (modelData.plans.includes(user.plan.planId)) {
+    return null;
+  }
+
+  return Response.json(
+    { error: `Model ${model} is not allowed for your plan` },
+    { status: 403 }
+  );
+}
+
 export async function action({ request }: Route.ActionArgs) {
   const user = await getAuthUser(request);
   const scrapeId = await getSessionScrapeId(request);
@@ -107,7 +136,10 @@ export async function action({ request }: Route.ActionArgs) {
     update.title = title;
   }
   if (formData.has("llmModel")) {
-    update.llmModel = formData.get("llmModel") as string;
+    const model = formData.get("llmModel") as string;
+    const error = assertModelPlan(model, user!);
+    if (error) return error;
+    update.llmModel = model;
   }
   if (formData.has("logoUrl")) {
     update.logoUrl = formData.get("logoUrl") as string;
@@ -166,22 +198,32 @@ export async function action({ request }: Route.ActionArgs) {
   }
   if (formData.has("llmModelDiscord")) {
     const value = formData.get("llmModelDiscord") as string;
+    const error = assertModelPlan(value, user!);
+    if (error) return error;
     update.llmModelDiscord = value === "" ? null : value;
   }
   if (formData.has("llmModelSlack")) {
     const value = formData.get("llmModelSlack") as string;
+    const error = assertModelPlan(value, user!);
+    if (error) return error;
     update.llmModelSlack = value === "" ? null : value;
   }
   if (formData.has("llmModelGithub")) {
     const value = formData.get("llmModelGithub") as string;
+    const error = assertModelPlan(value, user!);
+    if (error) return error;
     update.llmModelGithub = value === "" ? null : value;
   }
   if (formData.has("llmModelWeb")) {
     const value = formData.get("llmModelWeb") as string;
+    const error = assertModelPlan(value, user!);
+    if (error) return error;
     update.llmModelWeb = value === "" ? null : value;
   }
   if (formData.has("llmModelApi")) {
     const value = formData.get("llmModelApi") as string;
+    const error = assertModelPlan(value, user!);
+    if (error) return error;
     update.llmModelApi = value === "" ? null : value;
   }
 
