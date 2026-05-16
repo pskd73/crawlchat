@@ -1582,10 +1582,50 @@ export function Nav({
   );
 }
 
+const testimonialProfiles = [
+  { author: "Anton Lavrenov", authorImage: "/testi-profile/anton.png" },
+  { author: "Maurits Koekoek", authorImage: "/testi-profile/maurits.jpeg" },
+  { author: "Egelhaus", authorImage: "/testi-profile/egelhaus.png" },
+  { author: "Clay Kramp", authorImage: "/testi-profile/clay.png" },
+  { author: "Harsh Mishra", authorImage: "/testi-profile/harsh.jpeg" },
+  { author: "Cristian Tăbăcitu", authorImage: "/testi-profile/cristian.jpg" },
+  { author: "Jonny Burger", authorImage: "/testi-profile/jonny.jpg" },
+];
+
+function TestimonialAvatarStack() {
+  return (
+    <a
+      href="#testimonials"
+      aria-label="View testimonials"
+      className={cn(
+        "flex items-center mt-5 w-fit",
+        "cursor-pointer transition-opacity hover:opacity-80"
+      )}
+    >
+      {testimonialProfiles.map((profile, index) => (
+        <img
+          key={profile.author}
+          src={profile.authorImage}
+          alt={profile.author}
+          className={cn(
+            "size-8 rounded-full object-cover ring-2 ring-base-100",
+            index > 0 && "-ml-2.5"
+          )}
+          style={{ zIndex: index + 1 }}
+        />
+      ))}
+    </a>
+  );
+}
+
 function Hero() {
   const { focusChangelog } = useLoaderData<typeof loader>();
 
-  const features = [
+  const wavyUnderline = cn(
+    "underline decoration-wavy decoration-primary/40 underline-offset-[3px]"
+  );
+
+  const features: { text: ReactNode }[] = [
     {
       text: "Omni channel agent",
     },
@@ -1596,85 +1636,118 @@ function Hero() {
       text: "Citations",
     },
     {
-      text: "Analytics",
+      text: (
+        <>
+          Analytics to <span className={wavyUnderline}>improve your docs</span>
+        </>
+      ),
     },
   ];
 
   return (
     <div
       className={cn(
-        "flex mb-10 flex-col py-2 md:mt-8",
-        "justify-center items-center",
-        "max-w-[800px] mx-auto"
+        "flex mb-10 flex-col md:flex-row gap-8 md:gap-10 lg:gap-12",
+        "py-2 md:mt-6 w-full items-stretch"
       )}
     >
-      {focusChangelog && (
-        <a
-          className="mb-4 cursor-pointer hover:scale-[1.02] transition-all w-fit"
-          href={`/changelog/${focusChangelog.slug}`}
-        >
-          <div
-            className={cn(
-              "bg-base-200 text-sm px-1.5 py-1 rounded-full",
-              "flex items-center gap-2 pr-2 border",
-              "border-base-300"
-            )}
+      <div
+        className={cn(
+          "flex flex-col flex-1 min-w-0",
+          "items-start justify-center"
+        )}
+      >
+        {focusChangelog && (
+          <a
+            className="mb-4 cursor-pointer hover:scale-[1.02] transition-all w-fit"
+            href={`/changelog/${focusChangelog.slug}`}
           >
-            <span
+            <div
               className={cn(
-                "px-2 bg-base-300 rounded-box text-xs",
-                "border border-base-content/10"
+                "bg-base-200 text-sm px-1.5 py-1 rounded-full",
+                "flex items-center gap-2 pr-2 border",
+                "border-base-300"
               )}
             >
-              NEW
-            </span>
-            <span className="leading-none">{focusChangelog.title}</span>
-            <span>
-              <TbChevronRight />
-            </span>
-          </div>
-        </a>
-      )}
-
-      <h1
-        className={cn(
-          "font-brand text-[36px] md:text-[58px]",
-          "leading-[1.2] text-center"
+              <span
+                className={cn(
+                  "px-2 bg-base-300 rounded-box text-xs",
+                  "border border-base-content/10"
+                )}
+              >
+                NEW
+              </span>
+              <span className="leading-none">{focusChangelog.title}</span>
+              <span>
+                <TbChevronRight />
+              </span>
+            </div>
+          </a>
         )}
-      >
-        <span className="text-accent">AI answering agent</span> for your tech
-        documentation
-      </h1>
 
-      <p
-        className={cn(
-          "md:text-xl mt-6 font-brand",
-          "italic text-base-content/80",
-          "text-center"
-        )}
-      >
-        CrawlChat is an AI documentation assistant that connects your knowledge
-        sources into one chatbot across multiple channels. Give users instant,
-        source-linked answers while helping product, support, and docs teams
-        reduce hallucination in AI responses.
-      </p>
+        <h1
+          className={cn(
+            "font-brand text-[36px] md:text-[48px] lg:text-[58px]",
+            "text-left leading-[1.1]"
+          )}
+        >
+          <span className="text-accent">AI answering agent</span> for your tech
+          documentation
+        </h1>
 
-      <ul className="mt-6 flex gap-x-4 gap-y-2 flex-wrap justify-center">
-        {features.map((feature, index) => (
-          <li key={index} className="flex gap-2 items-center opacity-50">
-            <TbCircleCheck size={20} />
-            <span className="md:text-lg">{feature.text}</span>
-          </li>
-        ))}
-      </ul>
+        <p
+          className={cn(
+            "md:text-lg mt-6 font-brand",
+            "italic text-base-content/80",
+            "text-left leading-relaxed"
+          )}
+        >
+          CrawlChat is a documentation assistant for software products and{" "}
+          <span className={wavyUnderline}>SaaS teams</span>. Turn your{" "}
+          <span className={wavyUnderline}>tech documentation</span> and
+          knowledge base into one AI agent that delivers accurate,
+          citation-backed, source-linked answers on web, Discord, Slack, and
+          multiple channels.
+        </p>
+
+        <ul className="mt-6 flex gap-x-4 gap-y-2 flex-wrap justify-start">
+          {features.map((feature, index) => (
+            <li key={index} className="flex gap-2 items-center">
+              <TbCircleCheck size={20} className="text-primary" />
+              <span className="md:text-lg text-base-content/80">
+                {feature.text}
+              </span>
+            </li>
+          ))}
+        </ul>
+
+        <div
+          className={cn("flex gap-4 mt-8 flex-wrap", "flex-col sm:flex-row")}
+        >
+          <Link to="/pricing" className="btn btn-primary btn-xl">
+            Start free trial
+            <TbArrowRight />
+          </Link>
+        </div>
+        <TestimonialAvatarStack />
+      </div>
 
       <div
-        className={cn("flex gap-4 mt-8 mb-4 flex-wrap", "flex-col sm:flex-row")}
+        className={cn(
+          "flex-1 min-w-0 w-full md:max-w-[min(100%,420px)]",
+          "md:ml-auto min-h-[420px] md:min-h-[520px]",
+          "border border-accent rounded-box overflow-hidden"
+        )}
       >
-        <Link to="/pricing" className="btn btn-primary btn-xl">
-          Start free trial
-          <TbArrowRight />
-        </Link>
+        <iframe
+          src="https://crawlchat.app/w/crawlchat"
+          title="CrawlChat documentation assistant"
+          allow="clipboard-write"
+          className={cn(
+            "w-full h-full min-h-[420px] md:min-h-[520px]",
+            "rounded-box border border-base-300 bg-base-100"
+          )}
+        />
       </div>
     </div>
   );
@@ -1896,7 +1969,7 @@ export function CustomTestimonials() {
     ,
   ];
   return (
-    <div className="mt-32 flex flex-col gap-10">
+    <div id="testimonials" className="mt-32 flex flex-col gap-10 scroll-mt-24">
       <div className="flex flex-col md:flex-row gap-4">
         {columns.map((testimonial, index) => (
           <div key={index} className="flex-1 flex flex-col gap-4">
