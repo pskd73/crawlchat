@@ -28,14 +28,14 @@ export async function loader({ request }: Route.LoaderArgs) {
     authoriseScrapeUser(user!.scrapeUsers, scrapeId);
   }
 
-  const scrape = await prisma.scrape.findFirstOrThrow({
-    where: { id: scrapeId },
-  });
-
   const url = new URL(request.url);
   const page = parseInt(url.searchParams.get("page") ?? "1");
-  const view = url.searchParams.get("view") ?? "collection";
   const limit = 50;
+  let view = url.searchParams.get("view") ?? "collection";
+
+  if (!scrapeId) {
+    view = "mine";
+  }
 
   const { transactions, total } = await getCreditTransactions(
     view === "collection" ? undefined : user!.id,
@@ -48,10 +48,15 @@ export async function loader({ request }: Route.LoaderArgs) {
   const hasNext = page < totalPages;
   const hasPrevious = page > 1;
 
-  const balance = await getBalance(
-    view === "collection" ? scrape.userId : user!.id,
-    "message"
-  );
+  let ownerUserId = null;
+  if (scrapeId && view === "collection") {
+    const scrape = await prisma.scrape.findFirstOrThrow({
+      where: { id: scrapeId },
+    });
+    ownerUserId = scrape.userId;
+  }
+
+  const balance = await getBalance(ownerUserId ?? user!.id, "message");
 
   return {
     transactions,
