@@ -104,6 +104,9 @@ class CrawlChatEmbed {
 
   getCustomTags() {
     const script = document.getElementById(this.scriptId);
+    if (!script) {
+      return {};
+    }
     const allTags = script
       .getAttributeNames()
       .filter((name) => name.startsWith("data-tag-"))
@@ -135,6 +138,10 @@ class CrawlChatEmbed {
   }
 
   async mount() {
+    if (!this.getScriptElem() || !this.getScrapeId()) {
+      return;
+    }
+
     const style = document.createElement("link");
     style.rel = "stylesheet";
     style.href = `${this.host}/embed.css`;
@@ -144,6 +151,10 @@ class CrawlChatEmbed {
       style.onerror = reject;
       document.head.appendChild(style);
     });
+
+    if (!this.getScriptElem()) {
+      return;
+    }
 
     window.addEventListener("message", (e) => this.handleOnMessage(e));
 
