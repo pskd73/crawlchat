@@ -29,6 +29,7 @@ const blogPostPaths = [
   "/blog/how-product-managers-can-use-chat-analytics",
   "/blog/how-remotion-uses-crawlchat",
   "/blog/how-to-add-ask-ai-chatbot-to-docusaurus-site",
+  "/blog/how-to-analyze-ai-chatbot-queries-for-your-documentation",
   "/blog/how-to-do-basic-rag",
   "/blog/how-to-embed-ai-chatbot",
   "/blog/how-to-leverage-analytics-from-your-documentation-chatbot",
