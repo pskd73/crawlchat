@@ -1,6 +1,7 @@
+import { Turnstile } from "@marsidev/react-turnstile";
 import cn from "@meltdownjs/cn";
 import { RateLimiter } from "@packages/common/rate-limiter";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { TbArrowRight, TbCircleCheck, TbCircleX } from "react-icons/tb";
 import { redirect, useFetcher, useLoaderData } from "react-router";
 import "~/app.css";
@@ -20,7 +21,6 @@ import { commitSession, getSession } from "~/session";
 import { authenticator } from ".";
 import type { Route } from "./+types/login";
 import { getAuthUser } from "./middleware";
-import { mountTurnstile } from "./turnstile";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://challenges.cloudflare.com" },
@@ -139,8 +139,6 @@ export default function LoginPage() {
   const { mailSent, error, selfHosted, turnstileSiteKey, testiIndex } =
     useLoaderData<typeof loader>();
   const emailRef = useRef<HTMLInputElement>(null);
-  const turnstileContainerRef = useRef<HTMLDivElement>(null);
-  const turnstileCleanupRef = useRef<(() => void) | null>(null);
   const [clientValidated, setClientValidated] = useState(!turnstileSiteKey);
 
   useEffect(() => {
@@ -148,35 +146,6 @@ export default function LoginPage() {
       emailRef.current.value = "";
     }
   }, [mailSent]);
-
-  useLayoutEffect(() => {
-    const container = turnstileContainerRef.current;
-    if (!turnstileSiteKey || !container) {
-      return;
-    }
-
-    let cancelled = false;
-
-    mountTurnstile(container, turnstileSiteKey, (token) => {
-      if (token) {
-        setClientValidated(true);
-      }
-    })
-      .then((cleanup) => {
-        if (cancelled) {
-          cleanup();
-          return;
-        }
-        turnstileCleanupRef.current = cleanup;
-      })
-      .catch(() => {});
-
-    return () => {
-      cancelled = true;
-      turnstileCleanupRef.current?.();
-      turnstileCleanupRef.current = null;
-    };
-  }, [turnstileSiteKey]);
 
   return (
     <div
@@ -255,9 +224,17 @@ export default function LoginPage() {
                 </div>
               )}
 
-              <div className="flex justify-center">
-                <div ref={turnstileContainerRef} />
-              </div>
+              {turnstileSiteKey && (
+                <div className="flex justify-center">
+                  <Turnstile
+                    siteKey={turnstileSiteKey}
+                    options={{ theme: "light" }}
+                    onSuccess={() => setClientValidated(true)}
+                    onExpire={() => setClientValidated(false)}
+                    onError={() => setClientValidated(false)}
+                  />
+                </div>
+              )}
 
               <button
                 className="btn btn-primary w-full"
